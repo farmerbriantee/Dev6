@@ -656,7 +656,7 @@ namespace AgOpenGPS
             if (recPath.isDrivingRecordedPath) recPath.UpdatePosition();
 
             // If Drive button off - normal autosteer 
-            if (!vehicle.ast.isInFreeDriveMode)
+            if (!vehicle.isInFreeDriveMode)
             {
                 //fill up0 the appropriate arrays with new values
                 p_254.pgn[p_254.speedHi] = unchecked((byte)((int)(Math.Abs(pn.speed) * 10.0) >> 8));
@@ -722,11 +722,11 @@ namespace AgOpenGPS
                 p_254.pgn[p_254.status] = 1;
 
                 //send the steer angle
-                guidanceLineSteerAngle = (Int16)(vehicle.ast.driveFreeSteerAngle * 100);
+                guidanceLineSteerAngle = (Int16)(vehicle.driveFreeSteerAngle * 100);
 
                 if (isAngVelGuidance)
                 {
-                    setAngVel = 0.277777 * avgSpeed * (Math.Tan(glm.toRadians(vehicle.ast.driveFreeSteerAngle))) / vehicle.wheelbase;
+                    setAngVel = 0.277777 * avgSpeed * (Math.Tan(glm.toRadians(vehicle.driveFreeSteerAngle))) / vehicle.wheelbase;
                     setAngVel = glm.toDegrees(setAngVel) * 100;
 
                     errorAngVel = (short)(((int)(setAngVel) - ahrs.angVel));
