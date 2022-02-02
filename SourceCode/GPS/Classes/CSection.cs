@@ -109,10 +109,9 @@ namespace AgOpenGPS
 
                 if (!mf.tool.isMultiColoredSections)
                 {
-                    vec3 colur = new vec3(mf.sectionColorDay.R, mf.sectionColorDay.G, mf.sectionColorDay.B);
+                    vec3 colur = new vec3(mf.sectionColor.R, mf.sectionColor.G, mf.sectionColor.B);
                     triangleList.Add(colur);
                 }
-
                 else
                 {
                     vec3 collor = new vec3(mf.tool.secColors[j].R, mf.tool.secColors[j].G, mf.tool.secColors[j].B);
@@ -210,7 +209,7 @@ namespace AgOpenGPS
 
                 //Add Patch colour
                 if (!mf.tool.isMultiColoredSections)
-                    triangleList.Add(new vec3(mf.sectionColorDay.R, mf.sectionColorDay.G, mf.sectionColorDay.B));
+                    triangleList.Add(new vec3(mf.sectionColor.R, mf.sectionColor.G, mf.sectionColor.B));
                 else
                     triangleList.Add(new vec3(mf.tool.secColors[j].R, mf.tool.secColors[j].G, mf.tool.secColors[j].B));
 

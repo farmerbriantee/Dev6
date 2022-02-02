@@ -251,8 +251,7 @@ namespace AgOpenGPS
 
                     if (autoBtnState != btnStates.Off)
                     {
-                        if (isDay) GL.Color4(sectionColorDay.R, sectionColorDay.G, sectionColorDay.B, (byte)152);
-                        else GL.Color4(sectionColorDay.R, sectionColorDay.G, sectionColorDay.B, (byte)(152 * 0.5));
+                        GL.Color4(sectionColor.R, sectionColor.G, sectionColor.B, (byte)(isDay? 152 : 76));
 
                         if (section[tool.numOfSections].isMappingOn && section[tool.numOfSections].patchList.Count > 0)
                         {
@@ -1466,8 +1465,7 @@ namespace AgOpenGPS
                     //translate to that spot in the world 
                     GL.Translate(-fieldCenterX, -fieldCenterY, 0);
 
-                    if (isDay) GL.Color3(sectionColorDay.R, sectionColorDay.G, sectionColorDay.B);
-                    else GL.Color3(sectionColorDay.R, sectionColorDay.G, sectionColorDay.B);
+                    GL.Color3(sectionColor.R, sectionColor.G, sectionColor.B);
 
                     int cnt, step, patchCount;
                     int mipmap = 8;

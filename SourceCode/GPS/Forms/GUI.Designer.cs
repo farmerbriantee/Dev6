@@ -26,7 +26,7 @@ namespace AgOpenGPS
 
         public CFeatureSettings featureSettings = new CFeatureSettings();
 
-        public Color sectionColorDay;
+        public Color sectionColor;
         public Color fieldColorDay;
         public Color fieldColorNight;
         public Color vehicleColor;
@@ -36,7 +36,7 @@ namespace AgOpenGPS
         public bool isVehicleImage;
 
         //Is it in 2D or 3D, metric or imperial, display lightbar, display grid etc
-        public bool isMetric = true, isLightbarOn = true, isGridOn, isFullScreen;
+        public bool isMetric = true, isLightbarOn = true, isGridOn;
         public bool isUTurnAlwaysOn, isCompassOn, isSpeedoOn, isAutoDayNight, isSideGuideLines = true;
         public bool isPureDisplayOn = true, isSkyOn = true, isRollMeterOn = false, isTextureOn = true;
         public bool isDay = true, isDayTime = true;
@@ -399,31 +399,32 @@ namespace AgOpenGPS
                 unitsFtM = " ft";
             }
 
-            //timeToShowMenus = Properties.Settings.Default.setDisplay_showMenusTime;
-
             udpWatchLimit = Properties.Settings.Default.SetGPS_udpWatchMsec;
-
             startSpeed = Vehicle.Default.setVehicle_startSpeed;
 
-            sectionColorDay = Properties.Settings.Default.setDisplay_colorSectionsDay.CheckColorFor255();
-            fieldColorDay = Properties.Settings.Default.setDisplay_colorFieldDay.CheckColorFor255();
-            fieldColorNight = Properties.Settings.Default.setDisplay_colorFieldNight.CheckColorFor255();
+            sectionColor = Settings.Default.setDisplay_colorSectionsDay;
+            fieldColorDay = Properties.Settings.Default.setDisplay_colorFieldDay;
+            fieldColorNight = Settings.Default.setDisplay_colorFieldNight;
 
-            Properties.Settings.Default.setDisplay_colorSectionsDay = sectionColorDay;
-            Properties.Settings.Default.setDisplay_colorFieldDay = fieldColorDay;
-            Properties.Settings.Default.setDisplay_colorFieldNight = fieldColorNight;
-            Properties.Settings.Default.Save();
+            vehicleColor = Settings.Default.setDisplay_colorVehicle;
+
+            //load the string of custom colors
+            string[] words = Properties.Settings.Default.setDisplay_customColors.Split(',');
+            for (int i = 0; i < 16; i++)
+            {
+                customColorsList[i] = int.Parse(words[i], CultureInfo.InvariantCulture);
+            }
 
             isSkyOn = Settings.Default.setMenu_isSkyOn;
             isTextureOn = Settings.Default.setDisplay_isTextureOn;
-
             isGridOn = Settings.Default.setMenu_isGridOn;
             isCompassOn = Settings.Default.setMenu_isCompassOn;
             isSpeedoOn = Settings.Default.setMenu_isSpeedoOn;
             isAutoDayNight = Settings.Default.setDisplay_isAutoDayNight;
             isSideGuideLines = Settings.Default.setMenu_isSideGuideLines;
-            //isLogNMEA = Settings.Default.setMenu_isLogNMEA;
             isPureDisplayOn = Settings.Default.setMenu_isPureOn;
+            isLightbarOn = Settings.Default.setMenu_isLightbarOn;
+            isKeyboardOn = Settings.Default.setDisplay_isKeyboardOn;
 
             panelNavigation.Location = new System.Drawing.Point(90, 100);
             panelDrag.Location = new System.Drawing.Point(87, 268);
@@ -449,43 +450,11 @@ namespace AgOpenGPS
                 timerSim.Enabled = false;
             }
 
-            if (timerSim.Enabled) fixUpdateHz = 10;
             fixUpdateTime = 1 / (double)fixUpdateHz;
 
             //set the flag mark button to red dot
             btnFlag.Image = Properties.Resources.FlagRed;
 
-            //load the string of custom colors
-            string[] words = Properties.Settings.Default.setDisplay_customColors.Split(',');
-            for (int i = 0; i < 16; i++)
-            {
-                Color test;
-                customColorsList[i] = int.Parse(words[i], CultureInfo.InvariantCulture);
-                test = Color.FromArgb(customColorsList[i]).CheckColorFor255();
-                int iCol = (test.A << 24) | (test.R << 16) | (test.G << 8) | test.B;
-                customColorsList[i] = iCol;
-            }
-
-            Properties.Settings.Default.setDisplay_customColors = "";
-            for (int i = 0; i < 15; i++)
-                Properties.Settings.Default.setDisplay_customColors += customColorsList[i].ToString() + ",";
-            Properties.Settings.Default.setDisplay_customColors += customColorsList[15].ToString();
-
-            Properties.Settings.Default.Save();
-
-
-            //load up colors
-            fieldColorDay = (Settings.Default.setDisplay_colorFieldDay.CheckColorFor255());
-            sectionColorDay = (Settings.Default.setDisplay_colorSectionsDay.CheckColorFor255());
-            fieldColorNight = (Settings.Default.setDisplay_colorFieldNight.CheckColorFor255());
-
-            vehicleColor = Settings.Default.setDisplay_colorVehicle.CheckColorFor255();
-
-            isLightbarOn = Settings.Default.setMenu_isLightbarOn;
-
-            //set up grid and lightbar
-
-            isKeyboardOn = Settings.Default.setDisplay_isKeyboardOn;
 
             if (Properties.Settings.Default.setAS_isAutoSteerAutoOn) btnAutoSteer.Text = "R";
             else btnAutoSteer.Text = "M";
@@ -493,18 +462,8 @@ namespace AgOpenGPS
             if (bnd.isHeadlandOn) btnHeadlandOnOff.Image = Properties.Resources.HeadlandOn;
             else btnHeadlandOnOff.Image = Properties.Resources.HeadlandOff;
 
-            btnChangeMappingColor.BackColor = sectionColorDay;
+            btnChangeMappingColor.BackColor = sectionColor;
             btnChangeMappingColor.Text = Application.ProductVersion.ToString(CultureInfo.InvariantCulture);
-
-            if (Properties.Settings.Default.setDisplay_isStartFullScreen)
-            {
-                this.WindowState = FormWindowState.Maximized;
-                isFullScreen = true;
-            }
-            else
-            {
-                isFullScreen = false;
-            }
 
             //is rtk on?
             isRTK = Properties.Settings.Default.setGPS_isRTK;
@@ -571,30 +530,16 @@ namespace AgOpenGPS
                 btnStanleyPure.Image = Resources.ModePurePursuit;
             }
 
-            //main window first
-            if (Settings.Default.setWindow_Maximized)
-            {
-                WindowState = FormWindowState.Normal;
-                Location = Settings.Default.setWindow_Location;
-                Size = Settings.Default.setWindow_Size;
-            }
-            else if (Settings.Default.setWindow_Minimized)
-            {
-                //WindowState = FormWindowState.Minimized;
-                Location = Settings.Default.setWindow_Location;
-                Size = Settings.Default.setWindow_Size;
-            }
-            else
-            {
-                Location = Settings.Default.setWindow_Location;
-                Size = Settings.Default.setWindow_Size;
-            }
+            Location = Settings.Default.setWindow_Location;
+            Size = Settings.Default.setWindow_Size;
+
+            if (Properties.Settings.Default.setDisplay_isStartFullScreen)
+                this.WindowState = FormWindowState.Maximized;
 
             isTramOnBackBuffer = Properties.Settings.Default.setTram_isTramOnBackBuffer;
 
             //night mode
-            isDay = Properties.Settings.Default.setDisplay_isDayMode;
-            isDay = !isDay;
+            isDay = !Properties.Settings.Default.setDisplay_isDayMode;
             SwapDayNightMode();
 
             if (!Properties.Settings.Default.setDisplay_isTermsAccepted)
@@ -775,26 +720,15 @@ namespace AgOpenGPS
         public void SaveFormGPSWindowSettings()
         {
             //save window settings
-            if (WindowState == FormWindowState.Maximized)
-            {
-                Settings.Default.setWindow_Location = RestoreBounds.Location;
-                Settings.Default.setWindow_Size = RestoreBounds.Size;
-                Settings.Default.setWindow_Maximized = false;
-                Settings.Default.setWindow_Minimized = false;
-            }
-            else if (WindowState == FormWindowState.Normal)
+            if (WindowState == FormWindowState.Normal)
             {
                 Settings.Default.setWindow_Location = Location;
                 Settings.Default.setWindow_Size = Size;
-                Settings.Default.setWindow_Maximized = false;
-                Settings.Default.setWindow_Minimized = false;
             }
             else
             {
                 Settings.Default.setWindow_Location = RestoreBounds.Location;
                 Settings.Default.setWindow_Size = RestoreBounds.Size;
-                Settings.Default.setWindow_Maximized = false;
-                Settings.Default.setWindow_Minimized = true;
             }
 
             Settings.Default.setDisplay_camPitch = camera.camPitch;

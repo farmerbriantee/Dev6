@@ -29,8 +29,8 @@ namespace AgOpenGPS
         public vec2 guidanceLookPos = new vec2(0, 0);
 
         //how many fix updates per sec
-        public int fixUpdateHz = 5;
-        public double fixUpdateTime = 0.2;
+        public int fixUpdateHz = 10;
+        public double fixUpdateTime = 0.1;
 
         //for heading or Atan2 as camera
         public string headingFromSource, headingFromSourceBak;

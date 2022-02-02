@@ -1356,18 +1356,18 @@ namespace AgOpenGPS
                 return;
             }
 
-            using (var form = new FormColorPicker(this, sectionColorDay))
+            using (var form = new FormColorPicker(this, sectionColor))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    sectionColorDay = form.useThisColor;
+                    sectionColor = form.useThisColor;
                 }
             }
 
-            Settings.Default.setDisplay_colorSectionsDay = sectionColorDay;
+            Settings.Default.setDisplay_colorSectionsDay = sectionColor;
             Settings.Default.Save();
 
-            btnChangeMappingColor.BackColor = sectionColorDay;
+            btnChangeMappingColor.BackColor = sectionColor;
 
         }
 
