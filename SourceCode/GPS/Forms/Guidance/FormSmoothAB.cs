@@ -85,7 +85,6 @@ namespace AgOpenGPS
                 mf.FileSaveCurveLines();
                 mf.curve.moveDistance = 0;
 
-                //mf.layoutPanelRight.Enabled = true;
                 //Close();
             }
 

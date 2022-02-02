@@ -64,7 +64,7 @@ namespace AgOpenGPS
                 if (mf.autoBtnState == FormGPS.btnStates.Auto)
                     mf.btnSectionOffAutoOn.PerformClick();
 
-                if (mf.manualBtnState == FormGPS.btnStates.On)
+                if (mf.autoBtnState == FormGPS.btnStates.On)
                     mf.btnManualOffOn.PerformClick();
             }
 
@@ -72,22 +72,16 @@ namespace AgOpenGPS
             for (int j = 0; j < FormGPS.MAXSECTIONS; j++)
             {
                 mf.section[j].isAllowedOn = false;
-                mf.section[j].manBtnState = FormGPS.manBtn.On;
+                mf.section[j].manBtnState = FormGPS.btnStates.On;
             }
-
-            //fix ManualOffOnAuto buttons
-            mf.manualBtnState = FormGPS.btnStates.Off;
-            mf.btnManualOffOn.Image = Properties.Resources.ManualOff;
 
             //fix auto button
             mf.autoBtnState = FormGPS.btnStates.Off;
+            mf.btnManualOffOn.Image = Properties.Resources.ManualOff;
             mf.btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
 
             //Update the button colors and text
             mf.ManualAllBtnsUpdate();
-
-            //enable disable manual buttons
-            mf.LineUpManualBtns();
 
             ShowSubMenu(panelToolSubMenu, btnTool);
             //tab1.SelectedTab = tabSummary;

@@ -372,8 +372,6 @@ namespace AgOpenGPS
             //boundaryToolStripBtn.Enabled = false;
             FieldMenuButtonEnableDisable(false);
 
-            panelRight.Enabled = false;
-
             oglMain.Left = 75;
             oglMain.Width = this.Width - statusStripLeft.Width - 84;
 
@@ -413,7 +411,6 @@ namespace AgOpenGPS
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
 
             //get the abLines directory, if not exist, create
-            ablinesDirectory = baseDirectory + "ABLines\\";
             dir = Path.GetDirectoryName(fieldsDirectory);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
 
@@ -500,20 +497,12 @@ namespace AgOpenGPS
         {
             if (isJobStarted)
             {
-                if (autoBtnState == btnStates.Auto)
+                if (autoBtnState != btnStates.Off)
                 {
                     TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
                     e.Cancel = true;
                     return;
                 }
-
-                if (manualBtnState == btnStates.On)
-                {
-                    TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
-                    e.Cancel = true;
-                    return;
-                }
-
 
                 bool closing = true;
                 int choice = SaveOrNot(closing);
@@ -573,7 +562,7 @@ namespace AgOpenGPS
         //called everytime window is resized, clean up button positions
         private void FormGPS_Resize(object sender, EventArgs e)
         {
-            FixPanelsAndMenus(true);
+            FixPanelsAndMenus();
             if (isGPSPositionInitialized) SetZoom();
         }
 
@@ -746,7 +735,6 @@ namespace AgOpenGPS
                     set <<= 1;
                 }
             }
-
             else
             {
                 for (int j = 0; j < MAXSECTIONS; j++)
@@ -886,6 +874,9 @@ namespace AgOpenGPS
 
             section[15].positionLeft = (double)Vehicle.Default.setSection_position16 + Vehicle.Default.setVehicle_toolOffset;
             section[15].positionRight = (double)Vehicle.Default.setSection_position17 + Vehicle.Default.setVehicle_toolOffset;
+
+            //Calculate total width and each section width
+            SectionCalcWidths();
         }
 
         //function to calculate the width of each section and update
@@ -929,12 +920,8 @@ namespace AgOpenGPS
             isJobStarted = true;
             startCounter = 0;
 
-            btnManualOffOn.Enabled = true;
-            manualBtnState = btnStates.Off;
-            btnManualOffOn.Image = Properties.Resources.ManualOff;
-
-            btnSectionOffAutoOn.Enabled = true;
             autoBtnState = btnStates.Off;
+            btnManualOffOn.Image = Properties.Resources.ManualOff;
             btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
 
             btnSection1Man.BackColor = Color.Red;
@@ -975,7 +962,6 @@ namespace AgOpenGPS
             btnABLine.Enabled = true;
             btnContour.Enabled = true;
             btnCurve.Enabled = true;
-            btnABDraw.Enabled = true;
             btnCycleLines.Image = Properties.Resources.ABLineCycle;
             btnCycleLines.Enabled = true;
 
@@ -985,15 +971,8 @@ namespace AgOpenGPS
             DisableYouTurnButtons();
             btnFlag.Enabled = true;
 
-            LineUpManualBtns();
-
-            //update the menu
-            this.menustripLanguage.Enabled = false;
-            panelRight.Enabled = true;
-            //boundaryToolStripBtn.Enabled = true;
-
             FieldMenuButtonEnableDisable(true);
-            FixPanelsAndMenus(true);
+            FixPanelsAndMenus();
             SetZoom();
         }
 
@@ -1011,6 +990,8 @@ namespace AgOpenGPS
 
             panelRight.Visible = isOn;
             panelAB.Visible = isOn;
+
+            menustripLanguage.Enabled = isOn;
 
             lblFieldStatus.Visible = isOn;
             //lblFieldDataTopField.Visible = isOn;
@@ -1049,32 +1030,24 @@ namespace AgOpenGPS
             //clean all the lines
             bnd.bndList.Clear();
 
-            panelRight.Enabled = false;
             FieldMenuButtonEnableDisable(false);
 
-            menustripLanguage.Enabled = true;
             isJobStarted = false;
 
             //turn section buttons all OFF
             for (int j = 0; j < MAXSECTIONS; j++)
             {
                 section[j].isAllowedOn = false;
-                section[j].manBtnState = manBtn.On;
+                section[j].manBtnState = btnStates.On;
             }
-
-            //fix ManualOffOnAuto buttons
-            manualBtnState = btnStates.Off;
-            btnManualOffOn.Image = Properties.Resources.ManualOff;
 
             //fix auto button
             autoBtnState = btnStates.Off;
+            btnManualOffOn.Image = Properties.Resources.ManualOff;
             btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
 
             //Update the button colors and text
             ManualAllBtnsUpdate();
-
-            //enable disable manual buttons
-            LineUpManualBtns();
 
             btnSection1Man.Enabled = false;
             btnSection2Man.Enabled = false;
@@ -1153,7 +1126,6 @@ namespace AgOpenGPS
             btnContour.Image = Properties.Resources.ContourOff;
             ct.isContourOn = false;
 
-            btnABDraw.Enabled = false;
             btnCycleLines.Image = Properties.Resources.ABLineCycle;
             btnCycleLines.Enabled = false;
 
@@ -1185,7 +1157,7 @@ namespace AgOpenGPS
             recPath.shortestDubinsList?.Clear();
             recPath.shuttleDubinsList?.Clear();
 
-            FixPanelsAndMenus(false);
+            FixPanelsAndMenus();
             SetZoom();
         }
 

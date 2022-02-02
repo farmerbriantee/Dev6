@@ -39,6 +39,8 @@ namespace AgOpenGPS
             lblHalfSnapFtM.Text = mf.unitsFtM;
             lblHalfWidth.Text = (mf.tool.toolWidth * 0.5 * mf.m2FtOrM).ToString("N2");
             tboxHeading.Text = Math.Round(glm.toDegrees(mf.ABLine.abHeading), 5).ToString();
+
+            mf.panelRight.Enabled = false;
         }
 
         private void tboxHeading_Click(object sender, EventArgs e)
@@ -98,7 +100,6 @@ namespace AgOpenGPS
             mf.FileSaveABLines();
             mf.ABLine.moveDistance = 0;
 
-            mf.panelRight.Enabled = true;
             mf.ABLine.isABValid = false;
             Close();
         }
@@ -117,7 +118,6 @@ namespace AgOpenGPS
             mf.ABLine.isABLineLoaded = true;
             mf.ABLine.moveDistance = 0;
 
-            mf.panelRight.Enabled = true;
             mf.ABLine.isABValid = false;
             Close();
         }
@@ -181,6 +181,7 @@ namespace AgOpenGPS
                 e.Cancel = true;
                 return;
             }
+            mf.panelRight.Enabled = true;
         }
 
         private void btnCancel_HelpRequested(object sender, HelpEventArgs hlpevent)

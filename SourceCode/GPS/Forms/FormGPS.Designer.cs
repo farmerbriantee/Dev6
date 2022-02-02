@@ -1923,7 +1923,6 @@
             this.btnSectionOffAutoOn.BackColor = System.Drawing.Color.Transparent;
             this.btnSectionOffAutoOn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.btnSectionOffAutoOn.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnSectionOffAutoOn.Enabled = false;
             this.btnSectionOffAutoOn.FlatAppearance.BorderColor = System.Drawing.SystemColors.HotTrack;
             this.btnSectionOffAutoOn.FlatAppearance.BorderSize = 0;
             this.btnSectionOffAutoOn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -1945,7 +1944,6 @@
             this.btnManualOffOn.BackColor = System.Drawing.Color.Transparent;
             this.btnManualOffOn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.btnManualOffOn.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnManualOffOn.Enabled = false;
             this.btnManualOffOn.FlatAppearance.BorderColor = System.Drawing.SystemColors.HotTrack;
             this.btnManualOffOn.FlatAppearance.BorderSize = 0;
             this.btnManualOffOn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

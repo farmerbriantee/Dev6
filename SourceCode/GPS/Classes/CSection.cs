@@ -81,7 +81,7 @@ namespace AgOpenGPS
         public int numTriangles = 0;
 
         //used to determine state of Manual section button - Off Auto On
-        public FormGPS.manBtn manBtnState = FormGPS.manBtn.Off;
+        public FormGPS.btnStates manBtnState = FormGPS.btnStates.Off;
 
         //simple constructor, position is set in GPSWinForm_Load in FormGPS when creating new object
         public CSection(FormGPS _f)

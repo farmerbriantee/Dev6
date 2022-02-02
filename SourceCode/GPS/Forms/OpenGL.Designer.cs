@@ -255,7 +255,7 @@ namespace AgOpenGPS
                     // the follow up to sections patches
                     int patchCount = 0;
 
-                    if (autoBtnState == btnStates.Auto || manualBtnState == btnStates.On)
+                    if (autoBtnState != btnStates.Off)
                     {
                         if (isDay) GL.Color4(sectionColorDay.R, sectionColorDay.G, sectionColorDay.B, (byte)152);
                         else GL.Color4(sectionColorDay.R, sectionColorDay.G, sectionColorDay.B, (byte)(152 * 0.5));
@@ -676,7 +676,7 @@ namespace AgOpenGPS
             //find any off buttons, any outside of boundary, going backwards, and the farthest lookahead
             for (int j = 0; j < tool.numOfSections; j++)
             {
-                if (section[j].manBtnState == manBtn.Off) tool.isSuperSectionAllowedOn = false;
+                if (section[j].manBtnState == btnStates.Off) tool.isSuperSectionAllowedOn = false;
                 if (!section[j].isInBoundary) tool.isSuperSectionAllowedOn = false;
 
                 //check if any sections going backwards, section turned off waaay below
@@ -803,12 +803,12 @@ namespace AgOpenGPS
                     }
                 }
                 //if all manual and all on go supersection
-                if (manualBtnState == btnStates.On)
+                if (autoBtnState == btnStates.On)
                 {
                     tool.isSuperSectionAllowedOn = true;
                     for (int j = 0; j < tool.numOfSections; j++)
                     {
-                        if (section[j].manBtnState == manBtn.Off) tool.isSuperSectionAllowedOn = false;
+                        if (section[j].manBtnState == btnStates.Off) tool.isSuperSectionAllowedOn = false;
                     }
                 }
 
@@ -1192,14 +1192,14 @@ namespace AgOpenGPS
                     }
 
                     // Manual on, force the section On and exit loop so digital is also overidden
-                    if (section[j].manBtnState == manBtn.On)
+                    if (section[j].manBtnState == btnStates.On)
                     {
                         section[j].sectionOnRequest = true;
                         section[j].sectionOffRequest = false;
                         continue;
                     }
 
-                    if (section[j].manBtnState == manBtn.Off)
+                    if (section[j].manBtnState == btnStates.Off)
                     {
                         section[j].sectionOnRequest = false;
                         section[j].sectionOffRequest = true;
@@ -1231,14 +1231,14 @@ namespace AgOpenGPS
                     }
 
                     // Manual on, force the section On and exit loop so digital is also overidden
-                    if (section[j].manBtnState == manBtn.On)
+                    if (section[j].manBtnState == btnStates.On)
                     {
                         section[j].mappingOnRequest = true;
                         section[j].mappingOffRequest = false;
                         continue;
                     }
 
-                    if (section[j].manBtnState == manBtn.Off)
+                    if (section[j].manBtnState == btnStates.Off)
                     {
                         section[j].mappingOnRequest = false;
                         section[j].mappingOffRequest = true;

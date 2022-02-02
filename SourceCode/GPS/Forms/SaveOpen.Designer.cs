@@ -280,51 +280,9 @@ namespace AgOpenGPS
         }
 
         //function to open a previously saved field, resume, open exisiting, open named field
-        public void FileOpenField(string _openType)
+        public void FileOpenField(string fileAndDirectory)
         {
-            string fileAndDirectory = "";
-            if (_openType.Contains("Field.txt"))
-            {
-                fileAndDirectory = _openType;
-                _openType = "Load";
-            }
-
-            else fileAndDirectory = "Cancel";
-
-            //get the directory where the fields are stored
-            //string directoryName = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)+ "\\fields\\";
-            switch (_openType)
-            {
-                case "Resume":
-                    {
-                        //Either exit or update running save
-                        fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Field.txt";
-                        if (!File.Exists(fileAndDirectory)) fileAndDirectory = "Cancel";
-                        break;
-                    }
-
-                case "Open":
-                    {
-                        //create the dialog instance
-                        OpenFileDialog ofd = new OpenFileDialog();
-
-                        //the initial directory, fields, for the open dialog
-                        ofd.InitialDirectory = fieldsDirectory;
-
-                        //When leaving dialog put windows back where it was
-                        ofd.RestoreDirectory = true;
-
-                        //set the filter to text files only
-                        ofd.Filter = "Field files (Field.txt)|Field.txt";
-
-                        //was a file selected
-                        if (ofd.ShowDialog(this) == DialogResult.Cancel) fileAndDirectory = "Cancel";
-                        else fileAndDirectory = ofd.FileName;
-                        break;
-                    }
-            }
-
-            if (fileAndDirectory == "Cancel") return;
+            if (!File.Exists(fileAndDirectory)) return;
 
             //close the existing job and reset everything
             this.JobClose();
@@ -921,10 +879,6 @@ namespace AgOpenGPS
                     }
                 }
             }
-
-
-            FixPanelsAndMenus(true);
-            SetZoom();
 
             //Recorded Path
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\RecPath.txt";

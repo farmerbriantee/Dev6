@@ -226,7 +226,6 @@ namespace AgOpenGPS
             for (int j = 0; j < bndList.Count; j++)
             {
                 bndList[j].turnLine.Clear();
-                if (bndList[j].isDriveThru) continue;
 
                 int ptCount = bndList[j].fenceLine.Count;
 

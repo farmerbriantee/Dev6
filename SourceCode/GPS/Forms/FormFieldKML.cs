@@ -322,7 +322,6 @@ namespace AgOpenGPS
             //get the directory and make sure it exists, create if not
             string dirNewField = mf.fieldsDirectory + mf.currentFieldDirectory + "\\";
 
-            mf.menustripLanguage.Enabled = false;
             //if no template set just make a new file.
             try
             {

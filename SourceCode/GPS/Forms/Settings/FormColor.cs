@@ -67,16 +67,14 @@ namespace AgOpenGPS
         {
             if (!mf.isDay) mf.SwapDayNightMode();
 
-            using (FormColorPicker form = new FormColorPicker(mf, mf.frameDayColor))
+            using (FormColorPicker form = new FormColorPicker(mf, Settings.Default.setDisplay_colorDayFrame))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    mf.frameDayColor = form.useThisColor;
+                    Settings.Default.setDisplay_colorDayFrame = form.useThisColor;
+                    Settings.Default.Save();
                 }
             }
-
-            Properties.Settings.Default.setDisplay_colorDayFrame = mf.frameDayColor;
-            Settings.Default.Save();
 
             mf.SwapDayNightMode();
             mf.SwapDayNightMode();
@@ -86,16 +84,14 @@ namespace AgOpenGPS
         {
             if (mf.isDay) mf.SwapDayNightMode();
 
-            using (FormColorPicker form = new FormColorPicker(mf, mf.frameNightColor))
+            using (FormColorPicker form = new FormColorPicker(mf, Settings.Default.setDisplay_colorNightFrame))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    mf.frameNightColor = form.useThisColor;
+                    Settings.Default.setDisplay_colorNightFrame = form.useThisColor;
+                    Settings.Default.Save();
                 }
             }
-
-            Properties.Settings.Default.setDisplay_colorNightFrame = mf.frameNightColor;
-            Settings.Default.Save();
 
             mf.SwapDayNightMode();
             mf.SwapDayNightMode();
@@ -149,16 +145,14 @@ namespace AgOpenGPS
         {
             if (mf.isDay) mf.SwapDayNightMode();
 
-            using (FormColorPicker form = new FormColorPicker(mf, mf.textColorNight))
+            using (FormColorPicker form = new FormColorPicker(mf, Settings.Default.setDisplay_colorTextNight))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    mf.textColorNight = form.useThisColor;
+                    Settings.Default.setDisplay_colorTextNight = form.useThisColor;
+                    Settings.Default.Save();
                 }
             }
-
-            Settings.Default.setDisplay_colorTextNight = mf.textColorNight;
-            Settings.Default.Save();
 
             mf.SwapDayNightMode();
             mf.SwapDayNightMode();
@@ -168,16 +162,14 @@ namespace AgOpenGPS
         {
             if (!mf.isDay) mf.SwapDayNightMode();
 
-            using (FormColorPicker form = new FormColorPicker(mf, mf.textColorDay))
+            using (FormColorPicker form = new FormColorPicker(mf, Settings.Default.setDisplay_colorTextDay))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    mf.textColorDay = form.useThisColor;
+                    Settings.Default.setDisplay_colorTextDay = form.useThisColor;
+                    Settings.Default.Save();
                 }
             }
-
-            Settings.Default.setDisplay_colorTextDay = mf.textColorDay;
-            Settings.Default.Save();
 
             mf.SwapDayNightMode();
             mf.SwapDayNightMode();

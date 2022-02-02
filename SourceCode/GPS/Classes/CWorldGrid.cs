@@ -30,8 +30,7 @@ namespace AgOpenGPS
 
         public void DrawFieldSurface()
         {
-            Color field = mf.fieldColorDay;
-            if (!mf.isDay) field = mf.fieldColorNight;
+            Color field = mf.isDay ? mf.fieldColorDay : mf.fieldColorNight;
 
             if (mf.isTextureOn)
             {

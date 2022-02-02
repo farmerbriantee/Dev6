@@ -176,7 +176,6 @@ namespace AgOpenGPS
             {
                 mf.bnd.bndList[Convert.ToInt32(b.Name)].isDriveThru = !mf.bnd.bndList[Convert.ToInt32(b.Name)].isDriveThru;
                 UpdateChart();
-                mf.bnd.BuildTurnLines();
             }
         }
 
@@ -225,7 +224,6 @@ namespace AgOpenGPS
 
                 mf.FileSaveBoundary();
                 mf.fd.UpdateFieldBoundaryGUIAreas();
-                mf.bnd.BuildTurnLines();
                 UpdateChart();
             }
             else
@@ -243,7 +241,6 @@ namespace AgOpenGPS
             tableLayoutPanel1.RowStyles.Clear();
 
             UpdateChart();
-            mf.bnd.BuildTurnLines();
             btnDelete.Enabled = false;
         }
 

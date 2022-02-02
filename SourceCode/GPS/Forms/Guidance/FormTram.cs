@@ -134,7 +134,6 @@ namespace AgOpenGPS
             }
 
             mf.panelRight.Enabled = true;
-            mf.panelDrag.Visible = false;
 
             mf.FileSaveTram();
             mf.FixTramModeButton();

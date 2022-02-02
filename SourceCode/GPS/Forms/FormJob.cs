@@ -33,8 +33,7 @@ namespace AgOpenGPS
 
         private void btnJobResume_Click(object sender, EventArgs e)
         {
-            //open the Resume.txt and continue from last exit
-            mf.FileOpenField("Resume");
+            mf.FileOpenField(mf.fieldsDirectory + mf.currentFieldDirectory + "\\Field.txt");
 
             //back to FormGPS
             DialogResult = DialogResult.OK;
@@ -65,25 +64,6 @@ namespace AgOpenGPS
             }
 
             mf.CloseTopMosts();
-        }
-
-        private void btnJobTouch_Click(object sender, EventArgs e)
-        {
-            mf.filePickerFileAndDirectory = "";
-
-            using (FormTouchPick form = new FormTouchPick(mf))
-            {
-                //returns full field.txt file dir name
-                if (form.ShowDialog(this) == DialogResult.Yes)
-                {
-                    mf.FileOpenField(mf.filePickerFileAndDirectory);
-                    Close();
-                }
-                else
-                {
-                    return;
-                }
-            }
         }
 
         private void btnJobOpen_Click(object sender, EventArgs e)
@@ -161,9 +141,6 @@ namespace AgOpenGPS
                             FormTimedMessage form = new FormTimedMessage(2000, gStr.gsFieldFileIsCorrupt, gStr.gsChooseADifferentField);
                         }
                     }
-
-
-
                 }
             }
 
@@ -199,7 +176,6 @@ namespace AgOpenGPS
                 FormTimedMessage form2 = new FormTimedMessage(2000, gStr.gsNoFieldsFound, gStr.gsFieldNotOpen);
                 form2.Show(this);
             }
-
         }
 
         public double GetDistance(double longitude, double latitude, double otherLongitude, double otherLatitude)

@@ -221,19 +221,12 @@ namespace AgOpenGPS
 
         private void tabTSettings_Leave(object sender, EventArgs e)
         {
-
             Properties.Vehicle.Default.setVehicle_toolLookAheadOn = mf.tool.lookAheadOnSetting;
             Properties.Vehicle.Default.setVehicle_toolLookAheadOff = mf.tool.lookAheadOffSetting;
             Properties.Vehicle.Default.setVehicle_toolOffDelay = mf.tool.turnOffDelay;
 
-            //line up manual buttons based on # of sections
-            mf.LineUpManualBtns();
-
             //update the sections to newly configured widths and positions in main
             mf.SectionSetPosition();
-
-            //update the widths of sections and tool width in main
-            mf.SectionCalcWidths();
 
             Properties.Vehicle.Default.Save();
         }
@@ -318,24 +311,18 @@ namespace AgOpenGPS
             for (int j = 0; j < FormGPS.MAXSECTIONS; j++)
             {
                 mf.section[j].isAllowedOn = false;
-                mf.section[j].manBtnState = FormGPS.manBtn.On;
+                mf.section[j].manBtnState = FormGPS.btnStates.On;
             }
 
             cboxSectionResponse.Checked = Properties.Vehicle.Default.setSection_isFast;
 
-            //fix ManualOffOnAuto buttons
-            mf.manualBtnState = FormGPS.btnStates.Off;
-            mf.btnManualOffOn.Image = Properties.Resources.ManualOff;
-
             //fix auto button
             mf.autoBtnState = FormGPS.btnStates.Off;
+            mf.btnManualOffOn.Image = Properties.Resources.ManualOff;
             mf.btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
 
             //Update the button colors and text
             mf.ManualAllBtnsUpdate();
-
-            //enable disable manual buttons
-            mf.LineUpManualBtns();
 
             nudCutoffSpeed.Value = (decimal)Properties.Vehicle.Default.setVehicle_slowSpeedCutoff;
 
@@ -394,27 +381,26 @@ namespace AgOpenGPS
             Properties.Vehicle.Default.setSection_position16 = sectionPosition16;
             Properties.Vehicle.Default.setSection_position17 = sectionPosition17;
 
-            mf.tool.numOfSections = numberOfSections;
-            mf.tool.numSuperSection = numberOfSections + 1;
+            if (mf.tool.numOfSections != numberOfSections)
+            {
+                mf.tool.numOfSections = numberOfSections;
+                mf.tool.numSuperSection = numberOfSections + 1;
 
+                Properties.Vehicle.Default.setVehicle_numSections = mf.tool.numOfSections;
 
-            Properties.Vehicle.Default.setVehicle_numSections = mf.tool.numOfSections;
-
-            //line up manual buttons based on # of sections
-            mf.LineUpManualBtns();
+                //line up manual buttons based on # of sections
+                mf.LineUpManualBtns();
+            }
 
             //update the sections to newly configured widths and positions in main
             mf.SectionSetPosition();
 
-            //update the widths of sections and tool width in main
-            mf.SectionCalcWidths();
 
             Properties.Vehicle.Default.setVehicle_toolWidth = mf.tool.toolWidth;
             Properties.Vehicle.Default.setSection_isFast = cboxSectionResponse.Checked;
 
             Properties.Vehicle.Default.Save();
         }
-
 
         private void nudDefaultSectionWidth_Click(object sender, EventArgs e)
         {
@@ -478,14 +464,9 @@ namespace AgOpenGPS
 
             //take the section widths and convert to meters and positions along tool.
             CalculateSectionPositions();
-            //line up manual buttons based on # of sections
-            mf.LineUpManualBtns();
 
             //update the sections to newly configured widths and positions in main
             mf.SectionSetPosition();
-
-            //update the widths of sections and tool width in main
-            mf.SectionCalcWidths();
         }
 
         private void NudSection1_Click(object sender, EventArgs e)

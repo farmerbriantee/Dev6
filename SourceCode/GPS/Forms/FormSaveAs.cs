@@ -79,8 +79,6 @@ namespace AgOpenGPS
             //get the directory and make sure it exists, create if not
             string dirNewField = mf.fieldsDirectory + mf.currentFieldDirectory + "\\";
 
-            mf.menustripLanguage.Enabled = false;
-
             mf.displayFieldName = mf.currentFieldDirectory;
 
             // create from template

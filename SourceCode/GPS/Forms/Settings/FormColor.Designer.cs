@@ -106,7 +106,7 @@
             this.btnFrameNight.TabIndex = 5;
             this.btnFrameNight.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.btnFrameNight.UseVisualStyleBackColor = false;
-            this.btnFrameNight.Click += new System.EventHandler(this.btnFrameNight_Click);
+            this.btnFrameNight.Click += new System.EventHandler(this.BtnFrameNight_Click);
             // 
             // btnFieldNight
             // 

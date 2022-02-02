@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using AgOpenGPS.Properties;
 using System.Globalization;
 using System.IO;
-using System.Media;
 
 //C:\Program Files(x86)\Arduino\hardware\tools\avr / bin / avrdude - CC:\Program Files(x86)\Arduino\hardware\tools\avr / etc / avrdude.conf 
 //- v - patmega328p - carduino - PCOM3 - b57600 - D - Uflash:w: C: \Users\FarmPC\AppData\Local\Temp\arduino_build_448484 / Autosteer_UDP_20.ino.hex:i
@@ -16,9 +15,6 @@ namespace AgOpenGPS
 {
     public partial class FormGPS
     {
-        //ABLines directory
-        public string ablinesDirectory;
-
         //colors for sections and field background
         public byte flagColor = 0;
 
@@ -30,16 +26,11 @@ namespace AgOpenGPS
 
         public CFeatureSettings featureSettings = new CFeatureSettings();
 
-        public Color frameDayColor;
-        public Color frameNightColor;
         public Color sectionColorDay;
         public Color fieldColorDay;
         public Color fieldColorNight;
-
-        public Color textColorDay;
-        public Color textColorNight;
-
         public Color vehicleColor;
+
         public double vehicleOpacity;
         public byte vehicleOpacityByte;
         public bool isVehicleImage;
@@ -55,13 +46,11 @@ namespace AgOpenGPS
 
         //master Manual and Auto, 3 states possible
         public enum btnStates { Off, Auto, On }
-        public btnStates manualBtnState = btnStates.Off;
         public btnStates autoBtnState = btnStates.Off;
 
         public int[] customColorsList = new int[16];
 
         //sunrise sunset
-        public DateTime dateToday = DateTime.Today;
         public DateTime sunrise = DateTime.Now;
         public DateTime sunset = DateTime.Now;
 
@@ -71,9 +60,6 @@ namespace AgOpenGPS
         private int navPanelCounter = 0;
 
         public uint sentenceCounter = 0;
-
-        //section button states
-        public enum manBtn { Off, Auto, On }
 
         //Timer triggers at 125 msec
         private void tmrWatchdog_tick(object sender, EventArgs e)
@@ -347,7 +333,7 @@ namespace AgOpenGPS
 
         private void IsBetweenSunriseSunset(double lat, double lon)
         {
-            CSunTimes.Instance.CalculateSunRiseSetTimes(pn.latitude, pn.longitude, dateToday, ref sunrise, ref sunset);
+            CSunTimes.Instance.CalculateSunRiseSetTimes(pn.latitude, pn.longitude, DateTime.Today, ref sunrise, ref sunset);
             //isDay = (DateTime.Now.Ticks < sunset.Ticks && DateTime.Now.Ticks > sunrise.Ticks);
         }
 
@@ -419,14 +405,10 @@ namespace AgOpenGPS
 
             startSpeed = Vehicle.Default.setVehicle_startSpeed;
 
-            frameDayColor = Properties.Settings.Default.setDisplay_colorDayFrame.CheckColorFor255();
-            frameNightColor = Properties.Settings.Default.setDisplay_colorNightFrame.CheckColorFor255();
             sectionColorDay = Properties.Settings.Default.setDisplay_colorSectionsDay.CheckColorFor255();
             fieldColorDay = Properties.Settings.Default.setDisplay_colorFieldDay.CheckColorFor255();
             fieldColorNight = Properties.Settings.Default.setDisplay_colorFieldNight.CheckColorFor255();
 
-            Properties.Settings.Default.setDisplay_colorDayFrame = frameDayColor;
-            Properties.Settings.Default.setDisplay_colorNightFrame = frameNightColor;
             Properties.Settings.Default.setDisplay_colorSectionsDay = sectionColorDay;
             Properties.Settings.Default.setDisplay_colorFieldDay = fieldColorDay;
             Properties.Settings.Default.setDisplay_colorFieldNight = fieldColorNight;
@@ -497,9 +479,6 @@ namespace AgOpenGPS
             sectionColorDay = (Settings.Default.setDisplay_colorSectionsDay.CheckColorFor255());
             fieldColorNight = (Settings.Default.setDisplay_colorFieldNight.CheckColorFor255());
 
-            textColorDay = Settings.Default.setDisplay_colorTextDay.CheckColorFor255();
-            textColorNight = Settings.Default.setDisplay_colorTextNight.CheckColorFor255();
-
             vehicleColor = Settings.Default.setDisplay_colorVehicle.CheckColorFor255();
 
             isLightbarOn = Settings.Default.setMenu_isLightbarOn;
@@ -550,8 +529,6 @@ namespace AgOpenGPS
             //Set width of section and positions for each section
             SectionSetPosition();
 
-            //Calculate total width and each section width
-            SectionCalcWidths();
             LineUpManualBtns();
 
             //fast or slow section update
@@ -631,7 +608,7 @@ namespace AgOpenGPS
                 }
             }
 
-            FixPanelsAndMenus(false);
+            FixPanelsAndMenus();
             camera.camSetDistance = camera.zoomValue * camera.zoomValue * -1;
             SetZoom();
         }
@@ -664,28 +641,21 @@ namespace AgOpenGPS
             {
                 btnDayNightMode.Image = Properties.Resources.WindowNightMode;
 
-                this.BackColor = frameDayColor;
+                this.BackColor = Settings.Default.setDisplay_colorDayFrame;
                 foreach (Control c in this.Controls)
                 {
-                    //if (c is Label || c is Button)
-                    {
-                        c.ForeColor = textColorDay;
-                    }
+                    c.ForeColor = Settings.Default.setDisplay_colorTextDay;
                 }
-                LineUpManualBtns();
             }
             else //nightmode
             {
                 btnDayNightMode.Image = Properties.Resources.WindowDayMode;
-                this.BackColor = frameNightColor;
+                this.BackColor = Properties.Settings.Default.setDisplay_colorNightFrame;
 
                 foreach (Control c in this.Controls)
                 {
-                    {
-                        c.ForeColor = textColorNight;
-                    }
+                    c.ForeColor = Settings.Default.setDisplay_colorTextNight;
                 }
-                LineUpManualBtns();
             }
             btnAutoSteerConfig.ForeColor = Color.Black;
             btnEditAB.ForeColor = Color.Black;
@@ -694,44 +664,19 @@ namespace AgOpenGPS
             Properties.Settings.Default.Save();
         }
 
-        private void FixPanelsAndMenus(bool isButtonsVisible)
+        private void FixPanelsAndMenus()
         {
             panelAB.Size = new System.Drawing.Size(780 + ((Width - 900) / 2), 64);
             panelAB.Location = new Point((Width - 900) / 3 + 64, this.Height - 66);
 
-            //if (isButtonsVisible)
-            //{
-            //    oglMain.Left = 75;
-            //    oglMain.Width = this.Width - statusStripLeft.Width - 84;
-            //    oglMain.Height = this.Height - panelAB.Height - 58;
-            //    panelAB.Visible = true;
-            //    panelRight.Visible = true;
-            //}
-            //else
-            //{
-            //    if (!isJobStarted)
-            //    {
-            //        panelAB.Visible = false;
-            //        panelRight.Visible = false;
-            //    }
-            //    oglMain.Left = 75;
-            //    oglMain.Width = this.Width - statusStripLeft.Width - 22; //22
-            //    oglMain.Height = this.Height - 62;
-            //}
-
             if (!isJobStarted)
             {
-                panelAB.Visible = false;
-                panelRight.Visible = false;
-
                 oglMain.Left = 75;
                 oglMain.Width = this.Width - statusStripLeft.Width - 22; //22
                 oglMain.Height = this.Height - 62;
             }
             else
             {
-                panelAB.Visible = true;
-                panelRight.Visible = true;
                 oglMain.Left = 75;
                 oglMain.Width = this.Width - statusStripLeft.Width - 84; //22
                 oglMain.Height = this.Height - 120;
@@ -757,17 +702,16 @@ namespace AgOpenGPS
                 top = Height - 70;
                 if (panelSim.Visible == true)
                 {
-                    top = Height - 100;
+                    top -= 30;
                     panelSim.Top = Height - 60;
                 }
-
             }
             else //buttons exposed
             {
                 top = Height - 130;
                 if (panelSim.Visible == true)
                 {
-                    top = Height - 160;
+                    top -= 30;
                     panelSim.Top = Height - 120;
                 }
             }
@@ -932,8 +876,8 @@ namespace AgOpenGPS
         {
             switch (section[sectNumber].manBtnState)
             {
-                case manBtn.Off:
-                    section[sectNumber].manBtnState = manBtn.Auto;
+                case btnStates.Off:
+                    section[sectNumber].manBtnState = btnStates.Auto;
                     if (isDay)
                     {
                         btn.BackColor = Color.Lime;
@@ -947,8 +891,8 @@ namespace AgOpenGPS
                     break;
             
 
-                case manBtn.Auto:
-                    section[sectNumber].manBtnState = manBtn.On;
+                case btnStates.Auto:
+                    section[sectNumber].manBtnState = btnStates.On;
                     if (isDay)
                     {
                         btn.BackColor = Color.Yellow;
@@ -961,8 +905,8 @@ namespace AgOpenGPS
                     }
                     break;
 
-                case manBtn.On:
-                    section[sectNumber].manBtnState = manBtn.Off;
+                case btnStates.On:
+                    section[sectNumber].manBtnState = btnStates.Off;
                     if (isDay)
                     {
                         btn.ForeColor = Color.Black;
