@@ -11,7 +11,6 @@ namespace AgOpenGPS
         //extracted Near, Far, Right, Left clipping planes of frustum
         public double[] frustum = new double[24];
 
-        private bool isInit = false;
         private double fovy = 0.7;
         private double camDistanceFactor = -4;
 
@@ -145,14 +144,9 @@ namespace AgOpenGPS
                 if (isGPSPositionInitialized)
                 {
                     oglMain.MakeCurrent();
-                    if (!isInit)
-                    {
-                        oglMain_Resize(oglMain, EventArgs.Empty);
-                    }
-                    isInit = true;
 
                     //  Clear the color and depth buffer.
-                    GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
+                    GL.Clear(ClearBufferMask.StencilBufferBit | ClearBufferMask.ColorBufferBit);
 
                     if (isDay) GL.ClearColor(0.27f, 0.4f, 0.7f, 1.0f);
                     else GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1747,19 +1741,19 @@ namespace AgOpenGPS
         private void MakeFlagMark()
         {
             leftMouseDownOnOpenGL = false;
-            byte[] data1 = new byte[768];
+            byte[] data1 = new byte[256];
 
             //scan the center of click and a set of square points around
-            GL.ReadPixels(mouseX - 8, mouseY - 8, 16, 16, PixelFormat.Rgb, PixelType.UnsignedByte, data1);
+            GL.ReadPixels(mouseX - 8, mouseY - 8, 16, 16, PixelFormat.StencilIndex, PixelType.UnsignedByte, data1);
 
             //made it here so no flag found
             flagNumberPicked = 0;
 
-            for (int ctr = 0; ctr < 768; ctr += 3)
+            for (int ctr = 0; ctr < 256; ctr++)
             {
-                if (data1[ctr] == 255 | data1[ctr + 1] == 255)
+                if (data1[ctr] != 0)
                 {
-                    flagNumberPicked = data1[ctr + 2];
+                    flagNumberPicked = data1[ctr];
                     break;
                 }
             }
@@ -1784,21 +1778,30 @@ namespace AgOpenGPS
 
         private void DrawFlags()
         {
+            GL.Enable(EnableCap.StencilTest);
+            GL.PointSize(8.0f);
+
             int flagCnt = flagPts.Count;
             for (int f = 0; f < flagCnt; f++)
             {
-                GL.PointSize(8.0f);
+                GL.StencilFunc(StencilFunction.Always, (flagPts[f].ID), 0xFF);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+
                 GL.Begin(PrimitiveType.Points);
-                if (flagPts[f].color == 0) GL.Color3((byte)255, (byte)0, (byte)flagPts[f].ID);
-                if (flagPts[f].color == 1) GL.Color3((byte)0, (byte)255, (byte)flagPts[f].ID);
-                if (flagPts[f].color == 2) GL.Color3((byte)255, (byte)255, (byte)flagPts[f].ID);
+                if (flagPts[f].color == 0) GL.Color3((byte)255, (byte)0, (byte)0);
+                if (flagPts[f].color == 1) GL.Color3((byte)0, (byte)255, (byte)0);
+                if (flagPts[f].color == 2) GL.Color3((byte)255, (byte)255, (byte)0);
+
                 GL.Vertex3(flagPts[f].easting, flagPts[f].northing, 0);
                 GL.End();
 
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
                 font.DrawText3D(flagPts[f].easting, flagPts[f].northing, "&" + flagPts[f].notes);
                 //else
                 //    font.DrawText3D(flagPts[f].easting, flagPts[f].northing, "&");
             }
+
+            GL.Disable(EnableCap.StencilTest);
 
             if (flagNumberPicked != 0)
             {
