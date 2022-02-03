@@ -234,6 +234,7 @@
             this.tboxHeading.Location = new System.Drawing.Point(105, 280);
             this.tboxHeading.MaxLength = 10;
             this.tboxHeading.Name = "tboxHeading";
+            this.tboxHeading.ReadOnly = true;
             this.tboxHeading.Size = new System.Drawing.Size(140, 36);
             this.tboxHeading.TabIndex = 453;
             this.tboxHeading.Text = "359.123456";

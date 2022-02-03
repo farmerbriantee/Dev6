@@ -1264,12 +1264,12 @@ namespace AgOpenGPS
 
             if (ABLine.numABLineSelected > 0 && ABLine.isBtnABLineOn)
             {
-                Form form = new FormEditAB(this);
+                Form form = new FormEditAB(this, false);
                 form.Show(this);
             }
             else if (curve.numCurveLineSelected > 0 && curve.isBtnCurveOn)
             {
-                Form form = new FormEditCurve(this);
+                Form form = new FormEditAB(this, true);
                 form.Show(this);
             }
             else
@@ -1886,7 +1886,7 @@ namespace AgOpenGPS
                     if (result == DialogResult.Yes)
                     {
                         //ask for a directory name
-                        using (var form2 = new FormFieldDir(this))
+                        using (var form2 = new FormFieldKML(this, false))
                         { form2.ShowDialog(this); }
                     }
 
@@ -1894,7 +1894,7 @@ namespace AgOpenGPS
                     else if (result == DialogResult.No)
                     {
                         //ask for a directory name
-                        using (var form2 = new FormFieldKML(this))
+                        using (var form2 = new FormFieldKML(this, true))
                         { form2.ShowDialog(this); }
                     }
                 }

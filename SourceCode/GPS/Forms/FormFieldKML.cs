@@ -11,13 +11,16 @@ namespace AgOpenGPS
         //class variables
         private readonly FormGPS mf = null;
         private double easting, northing, latK, lonK;
+        private bool basedOnKML = false;
 
-        public FormFieldKML(Form _callingForm)
+        public FormFieldKML(Form _callingForm, bool Basedon)
         {
             //get copy of the calling main form
             mf = _callingForm as FormGPS;
 
             InitializeComponent();
+
+            basedOnKML = Basedon;
 
             label1.Text = gStr.gsEnterFieldName;
             this.Text = gStr.gsCreateNewField;
@@ -26,6 +29,9 @@ namespace AgOpenGPS
         private void FormFieldDir_Load(object sender, EventArgs e)
         {
             btnSave.Enabled = false;
+
+            btnLoadKML.Visible = basedOnKML;
+
             lblFilename.Text = "";
         }
 
@@ -38,11 +44,17 @@ namespace AgOpenGPS
 
             if (String.IsNullOrEmpty(tboxFieldName.Text.Trim()))
             {
-                btnLoadKML.Enabled = false;
+                if (basedOnKML)
+                    btnLoadKML.Enabled = false;
+                else
+                    btnSave.Enabled = false;
             }
             else
             {
-                btnLoadKML.Enabled = true;
+                if (basedOnKML)
+                    btnLoadKML.Enabled = true;
+                else
+                    btnSave.Enabled = true;
             }
 
             lblFilename.Text = tboxFieldName.Text.Trim();
@@ -57,29 +69,83 @@ namespace AgOpenGPS
 
         private void btnSave_Click(object sender, EventArgs e)
         {
+            if (basedOnKML)
+            {
+                //fill something in
+                if (string.IsNullOrEmpty(tboxFieldName.Text.Trim()))
+                {
+                    Close();
+                    return;
+                }
+
+                //append date time to name
+
+                mf.currentFieldDirectory = tboxFieldName.Text.Trim() + " ";
+
+                //date
+                if (cboxAddDate.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("MMM.dd", CultureInfo.InvariantCulture);
+                if (cboxAddTime.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("HH_mm", CultureInfo.InvariantCulture);
+
+                //get the directory and make sure it exists, create if not
+                string dirNewField = mf.fieldsDirectory + mf.currentFieldDirectory + "\\";
+
+                //if no template set just make a new file.
+                try
+                {
+                    //start a new job
+                    mf.JobNew();
+
+                    //create it for first save
+                    string directoryName = Path.GetDirectoryName(dirNewField);
+
+                    if ((!string.IsNullOrEmpty(directoryName)) && (Directory.Exists(directoryName)))
+                    {
+                        MessageBox.Show(gStr.gsChooseADifferentName, gStr.gsDirectoryExists, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        return;
+                    }
+                    else
+                    {
+                        mf.pn.latStart = mf.pn.latitude; mf.pn.lonStart = mf.pn.longitude;
+
+                        mf.pn.SetLocalMetersPerDegree();
+
+
+                        //make sure directory exists, or create it
+                        if ((!string.IsNullOrEmpty(directoryName)) && (!Directory.Exists(directoryName)))
+                        { Directory.CreateDirectory(directoryName); }
+
+                        mf.displayFieldName = mf.currentFieldDirectory;
+
+                        //create the field file header info
+                        mf.FileCreateField();
+                        mf.FileCreateSections();
+                        mf.FileCreateRecPath();
+                        mf.FileCreateContour();
+                        mf.FileCreateElevation();
+                        mf.FileSaveFlags();
+                        //mf.FileSaveABLine();
+                        //mf.FileSaveCurveLine();
+                        //mf.FileSaveHeadland();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    mf.WriteErrorLog("Creating new field " + ex);
+
+                    MessageBox.Show(gStr.gsError, ex.ToString());
+                    mf.currentFieldDirectory = "";
+                }
+
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+
+
             DialogResult = DialogResult.OK;
             Close();
         }
 
         private void tboxFieldName_Click(object sender, EventArgs e)
-        {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-                btnSerialCancel.Focus();
-            }
-        }
-
-        private void tboxTask_Click(object sender, EventArgs e)
-        {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-                btnSerialCancel.Focus();
-            }
-        }
-
-        private void tboxVehicle_Click(object sender, EventArgs e)
         {
             if (mf.isKeyboardOn)
             {
