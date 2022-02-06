@@ -256,7 +256,6 @@ namespace AgOpenGPS
                             {
                                 GL.Color4((byte)section[j].triangleList[0].easting, (byte)section[j].triangleList[0].northing, (byte)section[j].triangleList[0].heading, (byte)(isDay ? 152 : 76));
 
-
                                 //draw the triangle in each triangle strip
                                 GL.Begin(PrimitiveType.TriangleStrip);
 
@@ -267,15 +266,13 @@ namespace AgOpenGPS
                                 vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
                                         (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
 
-                                GL.Vertex3(section[j].leftPoint.easting, section[j].leftPoint.northing, 0);
+                                GL.Vertex3(pt.easting, pt.northing, 0);
 
                                 //Right side of triangle
                                 pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
                                    (sinSectionHeading * section[j].positionRight) + toolPos.northing);
 
                                 GL.Vertex3(pt.easting, pt.northing, 0);
-
-                                //antenna
                                 GL.End();
                             }
                         }
@@ -313,7 +310,7 @@ namespace AgOpenGPS
                             GL.Color3(0.3555f, 0.6232f, 0.20f);
                             for (int i = 0; i < bnd.bndList.Count; i++)
                             {
-                                bnd.bndList[i].turnLine.DrawPolyLine(DrawType.Triangles);
+                                bnd.bndList[i].turnLine.DrawPolyLine(DrawType.LineLoop);
                             }
                         }
 
@@ -321,7 +318,7 @@ namespace AgOpenGPS
                         if (bnd.isHeadlandOn)
                         {
                             GL.Color3(0.960f, 0.96232f, 0.30f);
-                                bnd.bndList[0].hdLine.DrawPolyLine(DrawType.Triangles);
+                                bnd.bndList[0].hdLine.DrawPolyLine(DrawType.LineLoop);
                         }
 
                         //There is only 1 headland for now. 
