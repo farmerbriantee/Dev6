@@ -379,10 +379,10 @@ namespace AgOpenGPS
                                         mf.pn.ConvertWGS84ToLocal(latK, lonK, out norting, out easting);
 
                                         //add the point to boundary
-                                        New.fenceLine.Add(new vec3(easting, norting, 0));
+                                        New.fenceLine.points.Add(new vec2(easting, norting));
                                     }
 
-                                    New.CalculateFenceArea(mf.bnd.bndList.Count);
+                                    New.CalculateFenceArea();
 
                                     mf.bnd.bndList.Add(New);
                                 }

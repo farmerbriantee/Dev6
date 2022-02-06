@@ -924,45 +924,34 @@ namespace AgOpenGPS
                 return;
             }
 
-            vec3 point = new vec3();
-            double totalHeadWidth;
-            int signPass;
+            double totalWidth;
 
             if (pass == 1)
             {
-                signPass = -1;
                 //determine how wide a headland space
-                totalHeadWidth = ((mf.tool.toolWidth - mf.tool.toolOverlap) * 0.5) - spacingInt;
+                totalWidth = (((mf.tool.toolWidth - mf.tool.toolOverlap) * 0.5) - spacingInt) * -1;
             }
-
             else
             {
-                signPass = 1;
-                totalHeadWidth = ((mf.tool.toolWidth - mf.tool.toolOverlap) * pass) + spacingInt +
+                totalWidth = ((mf.tool.toolWidth - mf.tool.toolOverlap) * pass) + spacingInt +
                     ((mf.tool.toolWidth - mf.tool.toolOverlap) * 0.5);
             }
-
-            //totalHeadWidth = (mf.tool.toolWidth - mf.tool.toolOverlap) * 0.5 + 0.2 + (mf.tool.toolWidth - mf.tool.toolOverlap);
 
             for (int j = 0; j < mf.bnd.bndList.Count; j++)
             {
                 //count the points from the boundary
-                int ptCount = mf.bnd.bndList[j].fenceLine.Count;
+                int ptCount = mf.bnd.bndList[j].fenceLine.points.Count;
 
                 ptList = new List<vec3>(128);
                 stripList.Add(ptList);
 
+                Polyline New = mf.bnd.bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? totalWidth : -totalWidth, true, -1,-1, true);
+
                 for (int i = ptCount - 1; i >= 0; i--)
                 {
-                    //calculate the point inside the boundary
-                    point.easting = mf.bnd.bndList[j].fenceLine[i].easting - (signPass * Math.Sin(glm.PIBy2 + mf.bnd.bndList[j].fenceLine[i].heading) * totalHeadWidth);
-                    point.northing = mf.bnd.bndList[j].fenceLine[i].northing - (signPass * Math.Cos(glm.PIBy2 + mf.bnd.bndList[j].fenceLine[i].heading) * totalHeadWidth);
-                    point.heading = mf.bnd.bndList[j].fenceLine[i].heading - Math.PI;
-                    if (point.heading < -glm.twoPI) point.heading += glm.twoPI;
-
-                    //only add if inside actual field boundary
-                    ptList.Add(point);
+                    ptList.Add(new vec3(New.points[i].easting, New.points[i].northing, 0));
                 }
+                ptList.CalculateHeadings();
             }
 
             mf.TimedMessageBox(1500, "Boundary Contour", "Contour Path Created");

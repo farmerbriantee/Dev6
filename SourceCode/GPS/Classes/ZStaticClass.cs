@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
-    public enum DrawType { LineStrip, Points, Tram, Triangles };
+    public enum DrawType { LineStrip, LineLoop, Points, Tram, Triangles };
 
     public class Polyline
     {
@@ -19,7 +19,7 @@ namespace AgOpenGPS
                 if (type == DrawType.Triangles)
                 {
                     GL.Begin(PrimitiveType.Triangles);
-                    if (indexer.Count == 0)
+                    if (indexer.Count != (points.Count -2) * 3)
                         indexer = points.TriangulatePolygon();
 
                     for (int i = 0; i < indexer.Count; i++)
@@ -33,7 +33,7 @@ namespace AgOpenGPS
                 {
                     if (type == DrawType.Points)
                         GL.Begin(PrimitiveType.Points);
-                    else if (loop)
+                    else if (type == DrawType.LineLoop)
                         GL.Begin(PrimitiveType.LineLoop);
                     else
                         GL.Begin(PrimitiveType.LineStrip);
@@ -55,6 +55,37 @@ namespace AgOpenGPS
 
     public static class StaticClass
     {
+        public static void CalculateHeadings(this List<vec3> points)
+        {
+            //to calc heading based on next and previous points to give an average heading.
+            int cnt = points.Count;
+            vec3[] arr = new vec3[cnt];
+            cnt--;
+            points.CopyTo(arr);
+            points.Clear();
+
+            //first point needs last, first, second points
+            vec3 pt3 = arr[0];
+            pt3.heading = Math.Atan2(arr[1].easting - arr[cnt].easting, arr[1].northing - arr[cnt].northing);
+            if (pt3.heading < 0) pt3.heading += glm.twoPI;
+            points.Add(pt3);
+
+            //middle points
+            for (int i = 1; i < cnt; i++)
+            {
+                pt3 = arr[i];
+                pt3.heading = Math.Atan2(arr[i + 1].easting - arr[i - 1].easting, arr[i + 1].northing - arr[i - 1].northing);
+                if (pt3.heading < 0) pt3.heading += glm.twoPI;
+                points.Add(pt3);
+            }
+
+            //last and first point
+            pt3 = arr[cnt];
+            pt3.heading = Math.Atan2(arr[0].easting - arr[cnt - 1].easting, arr[0].northing - arr[cnt - 1].northing);
+            if (pt3.heading < 0) pt3.heading += glm.twoPI;
+            points.Add(pt3);
+        }
+
         public static bool GetLineIntersection(vec2 PointAA, vec2 PointAB, vec2 PointBA, vec2 PointBB, out vec2 Crossing, out double TimeA, out double TimeB, bool Limit = false)
         {
             TimeA = -1;
@@ -81,11 +112,11 @@ namespace AgOpenGPS
             return false;
         }
 
-        public static Polyline OffsetAndDissolvePolyline(this Polyline Poly, double width, int start = -1, int end = -1, bool add = true)
+        public static Polyline OffsetAndDissolvePolyline(this Polyline Poly, double width, bool loop, int start = -1, int end = -1, bool add = true)
         {
-            List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, true, 0, start, end, add);
+            List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, loop, 0, start, end, add);
 
-            List<Polyline> Output = OffsetPoints.DissolvePolyLine();
+            List<Polyline> Output = OffsetPoints.DissolvePolyLine(loop);
 
             if (Output.Count > 0)
                 return Output[0];
@@ -93,11 +124,11 @@ namespace AgOpenGPS
                 return new Polyline();
         }
 
-        public static List<Polyline> OffsetAndDissolvePolyline(this Polyline Poly, bool _, double width, int start = -1, int end = -1, bool add = true)
+        public static List<Polyline> OffsetAndDissolvePolyline(this Polyline Poly, bool _, double width, bool loop, int start = -1, int end = -1, bool add = true)
         {
-            List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, true, 0, start, end, add);
+            List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, loop, 0, start, end, add);
 
-            List<Polyline> Output = OffsetPoints.DissolvePolyLine();
+            List<Polyline> Output = OffsetPoints.DissolvePolyLine(loop);
 
             return Output;
         }
@@ -201,7 +232,7 @@ namespace AgOpenGPS
             }
         }
 
-        public static List<Polyline> DissolvePolyLine(this List<vec2> Points)
+        public static List<Polyline> DissolvePolyLine(this List<vec2> Points, bool loop = true)
         {
             if (Points.Count < 2) return new List<Polyline>();
 
@@ -239,6 +270,9 @@ namespace AgOpenGPS
 
                     if (GetLineIntersection(CurrentVertex.Coords, CurrentVertex.Next.Coords, SecondVertex.Coords, SecondVertex.Next.Coords, out vec2 intersectionPoint2D, out double Time, out _))
                     {
+                        if (!loop && (CurrentVertex == StopVertex || SecondVertex.Next == StopVertex))
+                            break;
+
                         VertexPoint aa = new VertexPoint(intersectionPoint2D)
                         {
                             Crossing = CurrentVertex,
@@ -299,7 +333,8 @@ namespace AgOpenGPS
 
                         if (CurrentVertex.Crossing != null)
                         {
-                            Crossings.Add(CurrentVertex.Crossing);
+                            if (loop)
+                                Crossings.Add(CurrentVertex.Crossing);
 
                             VertexPoint CC = CurrentVertex.Crossing.Next;
                             CurrentVertex.Crossing.Next = CurrentVertex.Next;
@@ -315,70 +350,69 @@ namespace AgOpenGPS
             }
             else Polygons.Add(new VertexData(First));
 
-
-            for (int i = 0; i < Polygons.Count; i++)
+            if (loop)
             {
-                Polygons[i].Area = VertexArea(Polygons[i].Point, TotalCount);
-
-                if (Polygons[i].Area < 0)
-                    Polygons[i].Area = -Polygons[i].Area;
-
-                if (Polygons[i].Area >= 25)
+                for (int i = 0; i < Polygons.Count; i++)
                 {
-                    Polygons[i].winding = IsVertexOrientedClockwise(Polygons[i].Point, TotalCount, Points);
+                    Polygons[i].Area = VertexArea(Polygons[i].Point, TotalCount);
 
-                    if (Polygons[i].winding != 1)
+                    if (Polygons[i].Area < 0)
+                        Polygons[i].Area = -Polygons[i].Area;
+
+                    if (Polygons[i].Area >= 25)
+                    {
+                        Polygons[i].winding = IsVertexOrientedClockwise(Polygons[i].Point, TotalCount, Points);
+
+                        if (Polygons[i].winding != 1)
+                        {
+                            if (Polygons[i].Point.Crossing != null)
+                                Polygons[i].Point.Crossing.Crossing = null;
+
+                            Polygons.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
+                    }
+                    else
                     {
                         if (Polygons[i].Point.Crossing != null)
+                        {
                             Polygons[i].Point.Crossing.Crossing = null;
-
+                        }
                         Polygons.RemoveAt(i);
                         i--;
                         continue;
                     }
                 }
-                else
+
+                Polygons.Sort((x, y) => y.CompareTo(x));
+
+                for (int i = Polygons.Count - 1; i >= 0; i--)
                 {
-                    if (Polygons[i].Point.Crossing != null)
-                    {
-                        Polygons[i].Point.Crossing.Crossing = null;
-                    }
-                    Polygons.RemoveAt(i);
-                    i--;
-                    continue;
+                    if (Polygons[i] == null)
+                        Polygons.RemoveAt(i);
                 }
-            }
-
-            Polygons.Sort((x, y) => y.CompareTo(x));
-
-            for (int i = Polygons.Count - 1; i >= 0; i--)
-            {
-                if (Polygons[i] == null)
-                    Polygons.RemoveAt(i);
             }
 
             List<Polyline> FinalPolyLine = new List<Polyline>();
 
             for (int I = 0; I < Polygons.Count; I++)
             {
-                if (Polygons[I].winding == 1 && Polygons[I].Area > 0)
+                FinalPolyLine.Add(new Polyline());
+                FinalPolyLine[FinalPolyLine.Count - 1].loop = loop;
+                start = true;
+                StopVertex = CurrentVertex = Polygons[I].Point;
+
+                safety = 0;
+                while (true)
                 {
-                    FinalPolyLine.Add(new Polyline());
-                    FinalPolyLine[FinalPolyLine.Count - 1].loop = true;
-                    start = true;
-                    StopVertex = CurrentVertex = Polygons[I].Point;
+                    if (!start && CurrentVertex == StopVertex)
+                        break;
+                    start = false;
 
-                    safety = 0;
-                    while (true)
-                    {
-                        if (!start && CurrentVertex == StopVertex)
-                            break;
-                        start = false;
-
-                        FinalPolyLine[FinalPolyLine.Count - 1].points.Add(CurrentVertex.Coords);
-                        CurrentVertex = CurrentVertex.Next;
-                        if (safety++ > TotalCount) break;
-                    }
+                    FinalPolyLine[FinalPolyLine.Count - 1].points.Add(CurrentVertex.Coords);
+                    CurrentVertex = CurrentVertex.Next;
+                    if (safety++ > TotalCount) break;
                 }
             }
 

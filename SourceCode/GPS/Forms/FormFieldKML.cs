@@ -242,11 +242,11 @@ namespace AgOpenGPS
                                     mf.pn.ConvertWGS84ToLocal(latK, lonK, out northing, out easting);
 
                                     //add the point to boundary
-                                    New.fenceLine.Add(new vec3(easting, northing, 0));
+                                    New.fenceLine.points.Add(new vec2(easting, northing));
                                 }
 
                                 //build the boundary, make sure is clockwise for outer counter clockwise for inner
-                                New.CalculateFenceArea(mf.bnd.bndList.Count);
+                                New.CalculateFenceArea();
 
                                 mf.bnd.bndList.Add(New);
 

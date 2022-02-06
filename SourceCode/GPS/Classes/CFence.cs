@@ -6,48 +6,23 @@ namespace AgOpenGPS
 {
     public partial class CBoundary
     {
-        public List<vec3> bndBeingMadePts = new List<vec3>(128);
+        public List<vec2> bndBeingMadePts = new List<vec2>(128);
 
         public double createBndOffset;
         public bool isBndBeingMade;
 
         public bool isDrawRightSide = true, isOkToAddPoints = false;
 
-        public int closestFenceNum;
-
-        //point at the farthest boundary segment from pivotAxle
-        public vec3 closestFencePt = new vec3(-10000, -10000, 9);
-
         public bool IsPointInsideFenceArea(vec3 testPoint)
         {
             //first where are we, must be inside outer and outside of inner geofence non drive thru turn borders
-            if (bndList[0].fenceLineEar.IsPointInPolygon(testPoint))
+            if (bndList[0].fenceLine.points.IsPointInPolygon(testPoint))
             {
                 for (int i = 1; i < bndList.Count; i++)
                 {
                     //make sure not inside a non drivethru boundary
                     if (bndList[i].isDriveThru) continue;
-                    if (bndList[i].fenceLineEar.IsPointInPolygon(testPoint))
-                    {
-                        return false;
-                    }
-                }
-                //we are safely inside outer, outside inner boundaries
-                return true;
-            }
-            return false;
-        }
-
-        public bool IsPointInsideFenceArea(vec2 testPoint)
-        {
-            //first where are we, must be inside outer and outside of inner geofence non drive thru turn borders
-            if (bndList[0].fenceLineEar.IsPointInPolygon(testPoint))
-            {
-                for (int i = 1; i < bndList.Count; i++)
-                {
-                    //make sure not inside a non drivethru boundary
-                    if (bndList[i].isDriveThru) continue;
-                    if (bndList[i].fenceLineEar.IsPointInPolygon(testPoint))
+                    if (bndList[i].fenceLine.points.IsPointInPolygon(testPoint))
                     {
                         return false;
                     }
@@ -73,7 +48,7 @@ namespace AgOpenGPS
 
             for (int i = 0; i < bndList.Count; i++)
             {
-                bndList[i].fenceLine.DrawPolygon();
+                bndList[i].fenceLine.DrawPolyLine(DrawType.Triangles);
             }
 
             if (bndBeingMadePts.Count > 0)
@@ -93,22 +68,12 @@ namespace AgOpenGPS
                 GL.Enable(EnableCap.LineStipple);
                 GL.LineStipple(1, 0x0700);
                 GL.Begin(PrimitiveType.LineStrip);
-                if (isDrawRightSide)
-                {
-                    GL.Vertex3(bndBeingMadePts[0].easting, bndBeingMadePts[0].northing, 0);
 
-                    GL.Vertex3(pivot.easting + (Math.Sin(pivot.heading - glm.PIBy2) * -createBndOffset),
-                            pivot.northing + (Math.Cos(pivot.heading - glm.PIBy2) * -createBndOffset), 0);
-                    GL.Vertex3(bndBeingMadePts[bndBeingMadePts.Count - 1].easting, bndBeingMadePts[bndBeingMadePts.Count - 1].northing, 0);
-                }
-                else
-                {
-                    GL.Vertex3(bndBeingMadePts[0].easting, bndBeingMadePts[0].northing, 0);
+                GL.Vertex3(bndBeingMadePts[0].easting, bndBeingMadePts[0].northing, 0);
+                GL.Vertex3(pivot.easting + (Math.Sin(pivot.heading - glm.PIBy2) * (isDrawRightSide ? -createBndOffset : createBndOffset)),
+                          pivot.northing + (Math.Cos(pivot.heading - glm.PIBy2) * (isDrawRightSide ? -createBndOffset : createBndOffset)), 0);
+                GL.Vertex3(bndBeingMadePts[bndBeingMadePts.Count - 1].easting, bndBeingMadePts[bndBeingMadePts.Count - 1].northing, 0);
 
-                    GL.Vertex3(pivot.easting + (Math.Sin(pivot.heading - glm.PIBy2) * createBndOffset),
-                            pivot.northing + (Math.Cos(pivot.heading - glm.PIBy2) * createBndOffset), 0);
-                    GL.Vertex3(bndBeingMadePts[bndBeingMadePts.Count - 1].easting, bndBeingMadePts[bndBeingMadePts.Count - 1].northing, 0);
-                }
                 GL.End();
                 GL.Disable(EnableCap.LineStipple);
 
@@ -120,6 +85,5 @@ namespace AgOpenGPS
                 GL.End();
             }
         }
-        
     }
 }

@@ -1543,7 +1543,7 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.Count > 0)
+            if (bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.points.Count > 0)
             {
                 bnd.isHeadlandOn = !bnd.isHeadlandOn;
                 if (bnd.isHeadlandOn)
@@ -2002,7 +2002,7 @@ namespace AgOpenGPS
                 form.ShowDialog(this);
             }
 
-            if (bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.Count > 0)
+            if (bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.points.Count > 0)
             {
                 bnd.isHeadlandOn = true;
                 btnHeadlandOnOff.Image = Properties.Resources.HeadlandOn;

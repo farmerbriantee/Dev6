@@ -1,10 +1,8 @@
 ﻿using OpenTK.Graphics.OpenGL;
-using System;
 using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
-
     public class CTram
     {
         private readonly FormGPS mf;
@@ -72,10 +70,10 @@ namespace AgOpenGPS
             {
                 if (tramBndOuterArr.Count > 0)
                 {
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(PrimitiveType.LineLoop);
                     for (int h = 0; h < tramBndOuterArr.Count; h++) GL.Vertex3(tramBndOuterArr[h].easting, tramBndOuterArr[h].northing, 0);
                     GL.End();
-                    GL.Begin(PrimitiveType.LineStrip);
+                    GL.Begin(PrimitiveType.LineLoop);
                     for (int h = 0; h < tramBndInnerArr.Count; h++) GL.Vertex3(tramBndInnerArr[h].easting, tramBndInnerArr[h].northing, 0);
                     GL.End();
                 }
@@ -84,113 +82,20 @@ namespace AgOpenGPS
 
         public void BuildTramBnd()
         {
-            bool isBndExist = mf.bnd.bndList.Count != 0;
-
-            if (isBndExist)
-            {
-                CreateBndOuterTramTrack();
-                CreateBndInnerTramTrack();
-            }
-            else
-            {
-                tramBndOuterArr?.Clear();
-                tramBndInnerArr?.Clear();
-            }
-        }
-
-        private void CreateBndInnerTramTrack()
-        {
-            //count the points from the boundary
-            int ptCount = mf.bnd.bndList[0].fenceLine.Count;
             tramBndInnerArr?.Clear();
-
-            //outside point
-            vec2 pt3 = new vec2();
-
-            double distSq = ((tramWidth * 0.5) + halfWheelTrack) * ((tramWidth * 0.5) + halfWheelTrack) * 0.999;
-
-            //make the boundary tram outer array
-            for (int i = 0; i < ptCount; i++)
-            {
-                //calculate the point inside the boundary
-                pt3.easting = mf.bnd.bndList[0].fenceLine[i].easting -
-                    (Math.Sin(glm.PIBy2 + mf.bnd.bndList[0].fenceLine[i].heading) * (tramWidth * 0.5 + halfWheelTrack));
-
-                pt3.northing = mf.bnd.bndList[0].fenceLine[i].northing -
-                    (Math.Cos(glm.PIBy2 + mf.bnd.bndList[0].fenceLine[i].heading) * (tramWidth * 0.5 + halfWheelTrack));
-
-                bool Add = true;
-
-                for (int j = 0; j < ptCount; j++)
-                {
-                    double check = glm.DistanceSquared(pt3.northing, pt3.easting,
-                                        mf.bnd.bndList[0].fenceLine[j].northing, mf.bnd.bndList[0].fenceLine[j].easting);
-                    if (check < distSq)
-                    {
-                        Add = false;
-                        break;
-                    }
-                }
-
-                if (Add)
-                {
-                    if (tramBndInnerArr.Count > 0)
-                    {
-                        double dist = ((pt3.easting - tramBndInnerArr[tramBndInnerArr.Count - 1].easting) * (pt3.easting - tramBndInnerArr[tramBndInnerArr.Count - 1].easting))
-                            + ((pt3.northing - tramBndInnerArr[tramBndInnerArr.Count - 1].northing) * (pt3.northing - tramBndInnerArr[tramBndInnerArr.Count - 1].northing));
-                        if (dist > 1)
-                            tramBndInnerArr.Add(pt3);
-                    }
-                    else tramBndInnerArr.Add(pt3);
-                }
-            }
-        }
-
-        public void CreateBndOuterTramTrack()
-        {
-            //count the points from the boundary
-            int ptCount = mf.bnd.bndList[0].fenceLine.Count;
             tramBndOuterArr?.Clear();
 
-            //outside point
-            vec2 pt3 = new vec2();
-
-            double distSq = ((tramWidth * 0.5) - halfWheelTrack) * ((tramWidth * 0.5) - halfWheelTrack) * 0.999;
-
-            //make the boundary tram outer array
-            for (int i = 0; i < ptCount; i++)
+            if (mf.bnd.bndList.Count > 0)
             {
-                //calculate the point inside the boundary
-                pt3.easting = mf.bnd.bndList[0].fenceLine[i].easting -
-                    (Math.Sin(glm.PIBy2 + mf.bnd.bndList[0].fenceLine[i].heading) * (tramWidth * 0.5 - halfWheelTrack));
+                double distOut = (tramWidth * 0.5) - halfWheelTrack;
 
-                pt3.northing = mf.bnd.bndList[0].fenceLine[i].northing -
-                    (Math.Cos(glm.PIBy2 + mf.bnd.bndList[0].fenceLine[i].heading) * (tramWidth * 0.5 - halfWheelTrack));
+                Polyline NewOut = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(distOut, true, -1, -1, true);
+                tramBndOuterArr.AddRange(NewOut.points);
 
-                bool Add = true;
+                double distIn = (tramWidth * 0.5) + halfWheelTrack;
 
-                for (int j = 0; j < ptCount; j++)
-                {
-                    double check = glm.DistanceSquared(pt3.northing, pt3.easting,
-                                        mf.bnd.bndList[0].fenceLine[j].northing, mf.bnd.bndList[0].fenceLine[j].easting);
-                    if (check < distSq)
-                    {
-                        Add = false;
-                        break;
-                    }
-                }
-
-                if (Add)
-                {
-                    if (tramBndOuterArr.Count > 0)
-                    {
-                        double dist = ((pt3.easting - tramBndOuterArr[tramBndOuterArr.Count - 1].easting) * (pt3.easting - tramBndOuterArr[tramBndOuterArr.Count - 1].easting))
-                            + ((pt3.northing - tramBndOuterArr[tramBndOuterArr.Count - 1].northing) * (pt3.northing - tramBndOuterArr[tramBndOuterArr.Count - 1].northing));
-                        if (dist > 1)
-                            tramBndOuterArr.Add(pt3);
-                    }
-                    else tramBndOuterArr.Add(pt3);
-                }
+                Polyline NewIn = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(distIn, true, -1, -1, true);
+                tramBndInnerArr.AddRange(NewIn.points);
             }
         }
     }

@@ -1,7 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -12,12 +11,11 @@ namespace AgOpenGPS
         //access to the main GPS form and all its variables
         private readonly FormGPS mf = null;
 
-        private bool isA, isSet, isClosing;
+        private bool isA, isSet, isSaving;
         private int start = -1, end = -1;
         private double totalHeadlandWidth = 0;
 
-        //list of coordinates of boundary line
-        public List<vec3> headLineTemplate = new List<vec3>();
+        public Polyline headLineTemplate = new Polyline();
 
         public FormHeadland(Form callingForm)
         {
@@ -46,165 +44,63 @@ namespace AgOpenGPS
             nudDistance.Value = 0;
             nudSetDistance.Value = 0;
 
-            BuildHeadLineTemplateFromBoundary(mf.bnd.bndList[0].hdLine.Count > 0 ? mf.bnd.bndList[0].hdLine : mf.bnd.bndList[0].fenceLine);
+            BuildHeadLineTemplateFromBoundary(mf.bnd.bndList[0].hdLine.points.Count > 0);
 
             mf.CloseTopMosts();
         }
 
         private void FormHeadland_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!isClosing)
+            mf.bnd.bndList[0].hdLine.points?.Clear();
+
+            if (isSaving)
             {
-                e.Cancel = true;
-                return;
+                //does headland control sections
+                mf.bnd.isSectionControlledByHeadland = cboxIsSectionControlled.Checked;
+                Properties.Settings.Default.setHeadland_isSectionControlled = cboxIsSectionControlled.Checked;
+                Properties.Settings.Default.Save();
+
+                for (int i = 0; i < headLineTemplate.points.Count; i++)
+                {
+                    mf.bnd.bndList[0].hdLine.points.Add(new vec2(headLineTemplate.points[i].easting, headLineTemplate.points[i].northing));
+                }
             }
+
+            mf.FileSaveHeadland();
         }
 
-        public void BuildHeadLineTemplateFromBoundary(List<vec3> list)
+        private void BuildHeadLineTemplateFromBoundary(bool fromHd = false)
         {
-            //to fill the list of line points
-            vec3 point = new vec3();
+            headLineTemplate.points.Clear();
+            if (fromHd)
+                for (int i = 0; i < mf.bnd.bndList[0].hdLine.points.Count; i++)
+                    headLineTemplate.points.Add(new vec2(mf.bnd.bndList[0].hdLine.points[i].easting, mf.bnd.bndList[0].hdLine.points[i].northing));
+            else
+                for (int i = 0; i < mf.bnd.bndList[0].fenceLine.points.Count; i++)
+                    headLineTemplate.points.Add(new vec2(mf.bnd.bndList[0].fenceLine.points[i].easting, mf.bnd.bndList[0].fenceLine.points[i].northing));
 
             totalHeadlandWidth = 0;
             lblHeadlandWidth.Text = "0";
             nudDistance.Value = 0;
-            //nudSetDistance.Value = 0;
-
-            //outside boundary - count the points from the boundary
-            headLineTemplate.Clear();
-
-            int ptCount = mf.bnd.bndList[0].fenceLine.Count;
-            for (int i = ptCount - 1; i >= 0; i--)
-            {
-                //calculate the point inside the boundary
-                point.easting = mf.bnd.bndList[0].fenceLine[i].easting;
-                point.northing = mf.bnd.bndList[0].fenceLine[i].northing;
-                point.heading = mf.bnd.bndList[0].fenceLine[i].heading;
-                headLineTemplate.Add(point);
-            }
-
             start = end = -1;
             isSet = false;
-        }
-
-        private void FixTurnLine(double totalHeadWidth, List<vec3> curBnd, double spacing)
-        {
-            //count the points from the boundary
-
-            int lineCount = headLineTemplate.Count;
-            double distance;
-
-            //int headCount = mf.bndArr[inTurnNum].bndLine.Count;
-            int bndCount = curBnd.Count;
-            //remove the points too close to boundary
-            for (int i = 0; i < bndCount; i++)
-            {
-                for (int j = 0; j < lineCount; j++)
-                {
-                    //make sure distance between headland and boundary is not less then width
-                    distance = glm.Distance(curBnd[i], headLineTemplate[j]);
-                    if (distance < (totalHeadWidth * 0.96))
-                    {
-                        if (j > -1 && j < headLineTemplate.Count)
-                        {
-                            headLineTemplate.RemoveAt(j);
-                            lineCount = headLineTemplate.Count;
-                        }
-                        j = -1;
-                    }
-                }
-            }
-
-            //make sure distance isn't too small between points on turnLine
-            bndCount = headLineTemplate.Count;
-
-            //double spacing = mf.tool.toolWidth * 0.25;
-            for (int i = 0; i < bndCount - 1; i++)
-            {
-                distance = glm.Distance(headLineTemplate[i], headLineTemplate[i + 1]);
-                if (distance < spacing)
-                {
-                    if (i > -1 && (i + 1) < headLineTemplate.Count)
-                    {
-                        headLineTemplate.RemoveAt(i + 1);
-                        bndCount = headLineTemplate.Count;
-                    }
-                    i--;
-                }
-            }
-            if (headLineTemplate.Count > 1)
-            {
-                double headinga = Math.Atan2(headLineTemplate[headLineTemplate.Count - 1].easting - headLineTemplate[0].easting, headLineTemplate[headLineTemplate.Count - 1].northing - headLineTemplate[0].northing);
-                if (headinga < 0) headinga += glm.twoPI;
-                headLineTemplate[0] = new vec3(headLineTemplate[0].easting, headLineTemplate[0].northing, headinga);
-
-                //middle points
-                for (int i = 1; i < headLineTemplate.Count; i++)
-                {
-                    double heading = Math.Atan2(headLineTemplate[i - 1].easting - headLineTemplate[i].easting, headLineTemplate[i - 1].northing - headLineTemplate[i].northing);
-                    if (heading < 0) heading += glm.twoPI;
-                    headLineTemplate[i] = new vec3(headLineTemplate[i].easting, headLineTemplate[i].northing, heading);
-                }
-            }
         }
 
         private void btnSetDistance_Click(object sender, EventArgs e)
         {
             double width = (double)nudSetDistance.Value * mf.ftOrMtoM;
 
-            if (start > end)
-            {
-                for (int i = start; i < headLineTemplate.Count; i++)
-                {
-                    double easting = headLineTemplate[i].easting + (-Math.Sin(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                    double northing = headLineTemplate[i].northing + (-Math.Cos(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                    double heading = headLineTemplate[i].heading;
-
-                    headLineTemplate[i] = new vec3(easting, northing, heading);
-                }
-
-                for (int i = 0; i < end; i++)
-                {
-                    double easting = headLineTemplate[i].easting + (-Math.Sin(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                    double northing = headLineTemplate[i].northing + (-Math.Cos(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                    double heading = headLineTemplate[i].heading;
-
-                    headLineTemplate[i] = new vec3(easting, northing, heading);
-                }
-            }
-            else
-            {
-                for (int i = start; i < end; i++)
-                {
-                    double easting = headLineTemplate[i].easting + (-Math.Sin(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                    double northing = headLineTemplate[i].northing + (-Math.Cos(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                    double heading = headLineTemplate[i].heading;
-
-                    headLineTemplate[i] = new vec3(easting, northing, heading);
-                }
-            }
-
-            isSet = false;
-            start = end = -1;
+            headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, start, end, true);
         }
 
         private void btnMakeFixedHeadland_Click(object sender, EventArgs e)
         {
             double width = (double)nudDistance.Value * mf.ftOrMtoM;
 
-            for (int i = 0; i < headLineTemplate.Count; i++)
-            {
-                //calculate the point inside the boundary
-                double easting = headLineTemplate[i].easting + (-Math.Sin(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                double northing = headLineTemplate[i].northing + (-Math.Cos(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                double heading = headLineTemplate[i].heading;
-                headLineTemplate[i] = new vec3(easting, northing, heading);
-            }
+            headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, -1, -1, true);
 
             totalHeadlandWidth += width;
             lblHeadlandWidth.Text = (totalHeadlandWidth * mf.m2FtOrM).ToString("N2");
-
-            FixTurnLine(totalHeadlandWidth, mf.bnd.bndList[0].fenceLine, 2);
 
             isSet = false;
             start = end = -1;
@@ -212,26 +108,14 @@ namespace AgOpenGPS
 
         private void cboxToolWidths_SelectedIndexChanged(object sender, EventArgs e)
         {
-            BuildHeadLineTemplateFromBoundary(mf.bnd.bndList[0].fenceLine);
+            BuildHeadLineTemplateFromBoundary();
 
-            double width = (Math.Round(mf.tool.toolWidth * cboxToolWidths.SelectedIndex, 1));
+            double width = mf.tool.toolWidth * cboxToolWidths.SelectedIndex;
 
-            for (int i = 0; i < headLineTemplate.Count; i++)
-            {
-                //calculate the point inside the boundary
-                double easting = headLineTemplate[i].easting + (-Math.Sin(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                double northing = headLineTemplate[i].northing + (-Math.Cos(glm.PIBy2 + headLineTemplate[i].heading) * width);
-                double heading = headLineTemplate[i].heading;
-                headLineTemplate[i] = new vec3(easting, northing, heading);
-            }
+            headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, -1, -1, true);
 
             lblHeadlandWidth.Text = (width * mf.m2FtOrM).ToString("N2");
             totalHeadlandWidth = width;
-
-            FixTurnLine(width, mf.bnd.bndList[0].fenceLine, 2);
-
-            isSet = false;
-            start = end = -1;
         }
 
         private void oglSelf_Paint(object sender, PaintEventArgs e)
@@ -252,14 +136,14 @@ namespace AgOpenGPS
             //draw all the boundaries
             mf.bnd.DrawFenceLines();
 
-            if (headLineTemplate.Count > 1)
+            if (headLineTemplate.points.Count > 1)
             {
                 GL.LineWidth(1);
                 GL.Color3(0.20f, 0.96232f, 0.30f);
                 GL.PointSize(2);
 
                 GL.Begin(PrimitiveType.LineLoop);
-                for (int h = 0; h < headLineTemplate.Count; h++) GL.Vertex3(headLineTemplate[h].easting, headLineTemplate[h].northing, 0);
+                for (int h = 0; h < headLineTemplate.points.Count; h++) GL.Vertex3(headLineTemplate.points[h].easting, headLineTemplate.points[h].northing, 0);
                 GL.End();
             }
 
@@ -301,10 +185,10 @@ namespace AgOpenGPS
             int A = -1;
 
             //find the closest 2 points to current fix
-            for (int t = 0; t < headLineTemplate.Count; t++)
+            for (int t = 0; t < headLineTemplate.points.Count; t++)
             {
-                double dist = ((plotPt.easting - headLineTemplate[t].easting) * (plotPt.easting - headLineTemplate[t].easting))
-                                + ((plotPt.northing - headLineTemplate[t].northing) * (plotPt.northing - headLineTemplate[t].northing));
+                double dist = ((plotPt.easting - headLineTemplate.points[t].easting) * (plotPt.easting - headLineTemplate.points[t].easting))
+                                + ((plotPt.northing - headLineTemplate.points[t].northing) * (plotPt.northing - headLineTemplate.points[t].northing));
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -323,7 +207,7 @@ namespace AgOpenGPS
                 end = A;
                 isA = true;
                 isSet = true;
-                if (((headLineTemplate.Count - end + start) % headLineTemplate.Count) < ((headLineTemplate.Count - start + end) % headLineTemplate.Count)) { int index = start; start = end; end = index; }
+                if (((headLineTemplate.points.Count - end + start) % headLineTemplate.points.Count) < ((headLineTemplate.points.Count - start + end) % headLineTemplate.points.Count)) { int index = start; start = end; end = index; }
             }
         }
 
@@ -333,10 +217,10 @@ namespace AgOpenGPS
             GL.Begin(PrimitiveType.Points);
 
             GL.Color3(0.990, 0.00, 0.250);
-            if (start != -1) GL.Vertex3(headLineTemplate[start].easting, headLineTemplate[start].northing, 0);
+            if (start != -1) GL.Vertex3(headLineTemplate.points[start].easting, headLineTemplate.points[start].northing, 0);
 
             GL.Color3(0.990, 0.960, 0.250);
-            if (end != -1) GL.Vertex3(headLineTemplate[end].easting, headLineTemplate[end].northing, 0);
+            if (end != -1) GL.Vertex3(headLineTemplate.points[end].easting, headLineTemplate.points[end].northing, 0);
             GL.End();
 
             if (start != -1 && end != -1)
@@ -345,19 +229,19 @@ namespace AgOpenGPS
                 //draw the turn line oject
                 GL.LineWidth(2.0f);
                 GL.Begin(PrimitiveType.LineStrip);
-                if (headLineTemplate.Count < 1) return;
+                if (headLineTemplate.points.Count < 1) return;
 
                 if (start > end)
                 {
-                    for (int c = start; c < headLineTemplate.Count; c++)
-                        GL.Vertex3(headLineTemplate[c].easting, headLineTemplate[c].northing, 0);
+                    for (int c = start; c < headLineTemplate.points.Count; c++)
+                        GL.Vertex3(headLineTemplate.points[c].easting, headLineTemplate.points[c].northing, 0);
                     for (int c = 0; c < end; c++)
-                        GL.Vertex3(headLineTemplate[c].easting, headLineTemplate[c].northing, 0);
+                        GL.Vertex3(headLineTemplate.points[c].easting, headLineTemplate.points[c].northing, 0);
                 }
                 else
                 {
                     for (int c = start; c < end; c++)
-                        GL.Vertex3(headLineTemplate[c].easting, headLineTemplate[c].northing, 0);
+                        GL.Vertex3(headLineTemplate.points[c].easting, headLineTemplate.points[c].northing, 0);
                 }
                 GL.End();
             }
@@ -365,7 +249,7 @@ namespace AgOpenGPS
 
         private void btnReset_Click(object sender, EventArgs e)
         {
-            BuildHeadLineTemplateFromBoundary(mf.bnd.bndList[0].fenceLine);
+            BuildHeadLineTemplateFromBoundary();
         }
 
         private void nudDistance_Click(object sender, EventArgs e)
@@ -383,40 +267,21 @@ namespace AgOpenGPS
         private void timer1_Tick(object sender, EventArgs e)
         {
             oglSelf.Refresh();
+
             if (isSet)
             {
                 btnExit.Enabled = false;
                 btnMakeFixedHeadland.Enabled = false;
                 nudDistance.Enabled = false;
-
                 nudSetDistance.Enabled = true;
                 btnSetDistance.Enabled = true;
-                //btnMoveLeft.Enabled = true;
-                //btnMoveRight.Enabled = true;
-                //btnMoveUp.Enabled = true;
-                //btnMoveDown.Enabled = true;
-                //btnDoneManualMove.Enabled = true;
                 btnDeletePoints.Enabled = true;
-                //btnStartUp.Enabled = true;
-                //btnStartDown.Enabled = true;
-                //btnEndDown.Enabled = true;
-                //btnEndUp.Enabled = true;
             }
             else
             {
                 nudSetDistance.Enabled = false;
                 btnSetDistance.Enabled = false;
-                //btnMoveLeft.Enabled = false;
-                //btnMoveRight.Enabled = false;
-                //btnMoveUp.Enabled = false;
-                //btnMoveDown.Enabled = false;
-                //btnDoneManualMove.Enabled = false;
                 btnDeletePoints.Enabled = false;
-                //btnStartUp.Enabled = false;
-                //btnStartDown.Enabled = false;
-                //btnEndDown.Enabled = false;
-                //btnEndUp.Enabled = false;
-
                 btnExit.Enabled = true;
                 btnMakeFixedHeadland.Enabled = true;
                 nudDistance.Enabled = true;
@@ -425,43 +290,12 @@ namespace AgOpenGPS
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-            mf.bnd.bndList[0].hdLine?.Clear();
-
-            //does headland control sections
-            mf.bnd.isSectionControlledByHeadland = cboxIsSectionControlled.Checked;
-            Properties.Settings.Default.setHeadland_isSectionControlled = cboxIsSectionControlled.Checked;
-            Properties.Settings.Default.Save();
-
-            double delta = 0;
-            for (int i = 0; i < headLineTemplate.Count; i++)
-            {
-                if (i == 0)
-                {
-                    mf.bnd.bndList[0].hdLine.Add(new vec3(headLineTemplate[i].easting, headLineTemplate[i].northing, headLineTemplate[i].heading));
-                    continue;
-                }
-                delta += (headLineTemplate[i - 1].heading - headLineTemplate[i].heading);
-
-                if (Math.Abs(delta) > 0.01)
-                {
-                    vec3 pt = new vec3(headLineTemplate[i].easting, headLineTemplate[i].northing, headLineTemplate[i].heading);
-
-                    mf.bnd.bndList[0].hdLine.Add(pt);
-                    delta = 0;
-                }
-            }
-            mf.FileSaveHeadland();
-            isClosing = true;
+            isSaving = true;
             Close();
         }
 
         private void btnTurnOffHeadland_Click(object sender, EventArgs e)
         {
-            mf.bnd.bndList[0].hdLine?.Clear();
-
-            mf.FileSaveHeadland();
-
-            isClosing = true;
             Close();
         }
 
@@ -469,11 +303,11 @@ namespace AgOpenGPS
         {
             if (start > end)
             {
-                headLineTemplate.RemoveRange(start, headLineTemplate.Count - start);
-                headLineTemplate.RemoveRange(0, end);
+                headLineTemplate.points.RemoveRange(start, headLineTemplate.points.Count - start);
+                headLineTemplate.points.RemoveRange(0, end);
             }
             else
-                headLineTemplate.RemoveRange(start, end - start);
+                headLineTemplate.points.RemoveRange(start, end - start);
         }
 
         private void oglSelf_Load(object sender, EventArgs e)

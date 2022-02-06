@@ -18,16 +18,16 @@ namespace AgOpenGPS
         private readonly double boxLength;
 
         //point at the farthest turn segment from pivotAxle
-        public vec3 closestTurnPt = new vec3(-10000, -10000, 9);
+        public vec2 closestTurnPt = new vec2(-10000, -10000);
 
         public int IsPointInsideTurnArea(vec3 pt)
         {
-            if (bndList.Count > 0 && bndList[0].turnLine.IsPointInPolygon(pt))
+            if (bndList.Count > 0 && bndList[0].turnLine.points.IsPointInPolygon(pt))
             {
                 for (int i = 1; i < bndList.Count; i++)
                 {
                     if (bndList[i].isDriveThru) continue;
-                    if (bndList[i].turnLine.IsPointInPolygon(pt))
+                    if (bndList[i].turnLine.points.IsPointInPolygon(pt))
                     {
                         return i;
                     }
@@ -95,27 +95,26 @@ namespace AgOpenGPS
 
             vec4 inBox;
 
-            int ptCount = bndList[closestTurnNum].turnLine.Count;
+            int ptCount = bndList[closestTurnNum].turnLine.points.Count;
             for (int p = 0; p < ptCount; p++)
             {
-                if ((((boxB.easting - boxA.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxA.northing))
-                        - ((boxB.northing - boxA.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxA.easting))) < 0) { continue; }
+                if ((((boxB.easting - boxA.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxA.northing))
+                        - ((boxB.northing - boxA.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxA.easting))) < 0) { continue; }
 
-                if ((((boxD.easting - boxC.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxC.northing))
-                        - ((boxD.northing - boxC.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxC.easting))) < 0) { continue; }
+                if ((((boxD.easting - boxC.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxC.northing))
+                        - ((boxD.northing - boxC.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxC.easting))) < 0) { continue; }
 
-                if ((((boxC.easting - boxB.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxB.northing))
-                        - ((boxC.northing - boxB.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxB.easting))) < 0) { continue; }
+                if ((((boxC.easting - boxB.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxB.northing))
+                        - ((boxC.northing - boxB.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxB.easting))) < 0) { continue; }
 
-                if ((((boxA.easting - boxD.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxD.northing))
-                        - ((boxA.northing - boxD.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxD.easting))) < 0) { continue; }
+                if ((((boxA.easting - boxD.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxD.northing))
+                        - ((boxA.northing - boxD.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxD.easting))) < 0) { continue; }
 
                 //it's in the box, so add to list
-                inBox.easting = bndList[closestTurnNum].turnLine[p].easting;
-                inBox.northing = bndList[closestTurnNum].turnLine[p].northing;
-                inBox.heading = bndList[closestTurnNum].turnLine[p].heading;
+                inBox.easting = bndList[closestTurnNum].turnLine.points[p].easting;
+                inBox.northing = bndList[closestTurnNum].turnLine.points[p].northing;
                 inBox.index = closestTurnNum;
-
+                inBox.heading = 0;
                 //which turn/headland is it from
                 turnClosestList.Add(inBox);
             }
@@ -124,13 +123,13 @@ namespace AgOpenGPS
             {
                 if (isYouTurnRight) //its actually left
                 {
-                    scanWidthL = -(mf.tool.toolWidth * 0.5);
+                    scanWidthL = -80;
                     scanWidthR = 0;
                 }
                 else
                 {
                     scanWidthL = 0;
-                    scanWidthR = (mf.tool.toolWidth * 0.5);
+                    scanWidthR = 80;
                 }
 
                 //isYouTurnRight actuall means turning left - Painful, but it switches later
@@ -149,27 +148,27 @@ namespace AgOpenGPS
                 //determine if point is inside bounding box of the 1 turn chosen above
                 turnClosestList.Clear();
 
-                ptCount = bndList[closestTurnNum].turnLine.Count;
+                ptCount = bndList[closestTurnNum].turnLine.points.Count;
 
                 for (int p = 0; p < ptCount; p++)
                 {
-                    if ((((boxB.easting - boxA.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxA.northing))
-                            - ((boxB.northing - boxA.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxA.easting))) < 0) { continue; }
+                    if ((((boxB.easting - boxA.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxA.northing))
+                            - ((boxB.northing - boxA.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxA.easting))) < 0) { continue; }
 
-                    if ((((boxD.easting - boxC.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxC.northing))
-                            - ((boxD.northing - boxC.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxC.easting))) < 0) { continue; }
+                    if ((((boxD.easting - boxC.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxC.northing))
+                            - ((boxD.northing - boxC.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxC.easting))) < 0) { continue; }
 
-                    if ((((boxC.easting - boxB.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxB.northing))
-                            - ((boxC.northing - boxB.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxB.easting))) < 0) { continue; }
+                    if ((((boxC.easting - boxB.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxB.northing))
+                            - ((boxC.northing - boxB.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxB.easting))) < 0) { continue; }
 
-                    if ((((boxA.easting - boxD.easting) * (bndList[closestTurnNum].turnLine[p].northing - boxD.northing))
-                            - ((boxA.northing - boxD.northing) * (bndList[closestTurnNum].turnLine[p].easting - boxD.easting))) < 0) { continue; }
+                    if ((((boxA.easting - boxD.easting) * (bndList[closestTurnNum].turnLine.points[p].northing - boxD.northing))
+                            - ((boxA.northing - boxD.northing) * (bndList[closestTurnNum].turnLine.points[p].easting - boxD.easting))) < 0) { continue; }
 
                     //it's in the box, so add to list
-                    inBox.easting = bndList[closestTurnNum].turnLine[p].easting;
-                    inBox.northing = bndList[closestTurnNum].turnLine[p].northing;
-                    inBox.heading = bndList[closestTurnNum].turnLine[p].heading;
+                    inBox.easting = bndList[closestTurnNum].turnLine.points[p].easting;
+                    inBox.northing = bndList[closestTurnNum].turnLine.points[p].northing;
                     inBox.index = closestTurnNum;
+                    inBox.heading = 0;
 
                     //which turn/headland is it from
                     turnClosestList.Add(inBox);
@@ -198,50 +197,17 @@ namespace AgOpenGPS
                         minDistance = dist;
                         closestTurnPt.easting = turnClosestList[i].easting;
                         closestTurnPt.northing = turnClosestList[i].northing;
-                        closestTurnPt.heading = turnClosestList[i].heading;
                     }
                 }
-                if (closestTurnPt.heading < 0) closestTurnPt.heading += glm.twoPI;
             }
         }
 
         public void BuildTurnLines()
         {
-            if (bndList.Count == 0)
-            {
-                //mf.TimedMessageBox(1500, " No Boundaries", "No Turn Lines Made");
-                return;
-            }
-
-            //to fill the list of line points
-            vec3 point = new vec3();
-
-            //determine how wide a headland space
-            double totalHeadWidth = mf.yt.uturnDistanceFromBoundary;
-
-            //inside boundaries
             for (int j = 0; j < bndList.Count; j++)
             {
-                bndList[j].turnLine.Clear();
-
-                int ptCount = bndList[j].fenceLine.Count;
-
-                for (int i = ptCount - 1; i >= 0; i--)
-                {
-                    //calculate the point outside the boundary
-                    point.easting = bndList[j].fenceLine[i].easting + (-Math.Sin(glm.PIBy2 + bndList[j].fenceLine[i].heading) * totalHeadWidth);
-                    point.northing = bndList[j].fenceLine[i].northing + (-Math.Cos(glm.PIBy2 + bndList[j].fenceLine[i].heading) * totalHeadWidth);
-                    point.heading = bndList[j].fenceLine[i].heading;
-                    if (point.heading < -glm.twoPI) point.heading += glm.twoPI;
-
-                    //only add if outside actual field boundary
-                    if (j == 0 == bndList[j].fenceLineEar.IsPointInPolygon(point))
-                    {
-                        vec3 tPnt = new vec3(point.easting, point.northing, point.heading);
-                        bndList[j].turnLine.Add(tPnt);
-                    }
-                }
-                bndList[j].FixTurnLine(totalHeadWidth, mf.tool.toolWidth * 0.33);
+                bndList[j].turnLine.points.Clear();
+                bndList[j].turnLine = bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? mf.yt.uturnDistanceFromBoundary : -mf.yt.uturnDistanceFromBoundary, true, -1, -1, true);
             }
         }
     }

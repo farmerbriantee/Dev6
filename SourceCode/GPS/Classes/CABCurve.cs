@@ -687,7 +687,7 @@ namespace AgOpenGPS
                         if (dist > 2)
                         {
                             //if inside the boundary, add
-                            if (!isBndExist || mf.bnd.bndList[0].fenceLineEar.IsPointInPolygon(point))
+                            if (!isBndExist || mf.bnd.bndList[0].fenceLine.points.IsPointInPolygon(point))
                             {
                                 mf.tram.tramArr.Add(point);
                             }
@@ -735,7 +735,7 @@ namespace AgOpenGPS
                         if (dist > 2)
                         {
                             //if inside the boundary, add
-                            if (!isBndExist || mf.bnd.bndList[0].fenceLineEar.IsPointInPolygon(point))
+                            if (!isBndExist || mf.bnd.bndList[0].fenceLine.points.IsPointInPolygon(point))
                             {
                                 mf.tram.tramArr.Add(point);
                             }

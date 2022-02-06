@@ -12,24 +12,16 @@ namespace AgOpenGPS
         //access to the main GPS form and all its variables
         private readonly FormGPS mf = null;
 
-        private Point fixPt;
-
-        private bool isA = true, isMakingAB = false, isMakingCurve = false;
-        public double low = 0, high = 1;
-        private int A, B, C, D, E, start = 99999, end = 99999;
+        private int start = -1, end = -1;
 
         private bool isDrawSections = false;
-
-        private vec3[] arr;
+        
         public FormABDraw(Form callingForm)
         {
             //get copy of the calling main form
             mf = callingForm as FormGPS;
 
             InitializeComponent();
-            //lblPick.Text = gStr.gsSelectALine;
-            //label5.Text = gStr.gsToolWidth;
-            //this.Text = gStr.gsClick2Pointsontheboundary;
 
             lblCmInch.Text = mf.unitsInCm;
 
@@ -44,31 +36,13 @@ namespace AgOpenGPS
 
         private void FormABDraw_Load(object sender, EventArgs e)
         {
-            int cnt = mf.bnd.bndList[0].fenceLine.Count;
-            arr = new vec3[cnt * 2];
-
-            for (int i = 0; i < cnt; i++)
-            {
-                arr[i].easting = mf.bnd.bndList[0].fenceLine[i].easting;
-                arr[i].northing = mf.bnd.bndList[0].fenceLine[i].northing;
-                arr[i].heading = mf.bnd.bndList[0].fenceLine[i].heading;
-            }
-
-            for (int i = cnt; i < cnt * 2; i++)
-            {
-                arr[i].easting = mf.bnd.bndList[0].fenceLine[i - cnt].easting;
-                arr[i].northing = mf.bnd.bndList[0].fenceLine[i - cnt].northing;
-                arr[i].heading = mf.bnd.bndList[0].fenceLine[i - cnt].heading;
-            }
-
-            nudDistance.Value = (decimal)Math.Round(((mf.tool.toolWidth * mf.m2InchOrCm) * 0.5), 0); // 
-            label6.Text = Math.Round((mf.tool.toolWidth * mf.m2InchOrCm), 0).ToString();
+            nudDistance.Value = (decimal)Math.Round(mf.tool.toolWidth * mf.m2InchOrCm * 0.5, 0);
+            label6.Text = Math.Round(mf.tool.toolWidth * mf.m2InchOrCm, 0).ToString();
             FixLabelsABLine();
             FixLabelsCurve();
 
             if (isDrawSections) btnDrawSections.Image = Properties.Resources.MappingOn;
             else btnDrawSections.Image = Properties.Resources.MappingOff;
-
         }
 
         private void FormABDraw_FormClosing(object sender, FormClosingEventArgs e)
@@ -212,9 +186,7 @@ namespace AgOpenGPS
             btnMakeABLine.Enabled = false;
             btnMakeCurve.Enabled = false;
 
-            isMakingAB = isMakingCurve = false;
-            isA = true;
-            start = 99999; end = 99999;
+            start = end = -1;
 
             btnCancelTouch.Enabled = false;
             btnExit.Focus();
@@ -264,8 +236,6 @@ namespace AgOpenGPS
             else btnDrawSections.Image = Properties.Resources.MappingOff;
         }
 
-        public vec3 pint = new vec3(0.0, 1.0, 0.0);
-
         private void tboxNameCurve_Leave(object sender, EventArgs e)
         {
             if (mf.curve.numCurveLineSelected > 0)
@@ -313,111 +283,53 @@ namespace AgOpenGPS
 
         private void oglSelf_MouseDown(object sender, MouseEventArgs e)
         {
-            btnCancelTouch.Enabled = true;
 
+            btnCancelTouch.Enabled = true;
             btnMakeABLine.Enabled = false;
             btnMakeCurve.Enabled = false;
-            isMakingAB = isMakingCurve = false;
+
 
             Point pt = oglSelf.PointToClient(Cursor.Position);
 
             //Convert to Origin in the center of window, 800 pixels
-            fixPt.X = pt.X - 350;
-            fixPt.Y = (700 - pt.Y - 350);
             vec3 plotPt = new vec3
             {
                 //convert screen coordinates to field coordinates
-                easting = fixPt.X * mf.maxFieldDistance / 632.0,
-                northing = fixPt.Y * mf.maxFieldDistance / 632.0,
+                easting = (pt.X - 350) * mf.maxFieldDistance / 632.0,
+                northing = (700 - pt.Y - 350) * mf.maxFieldDistance / 632.0,
                 heading = 0
             };
 
             plotPt.easting += mf.fieldCenterX;
             plotPt.northing += mf.fieldCenterY;
 
-            pint.easting = plotPt.easting;
-            pint.northing = plotPt.northing;
 
-            if (isA)
+
+            double minDistA = double.MaxValue;
+            int A = -1;
+            //find the closest 2 points to current fix
+            for (int t = 0; t < mf.bnd.bndList[0].fenceLine.points.Count; t++)
             {
-                double minDistA = 1000000, minDistB = 1000000;
-                start = 99999; end = 99999;
+                double dist = ((plotPt.easting - mf.bnd.bndList[0].fenceLine.points[t].easting) * (plotPt.easting - mf.bnd.bndList[0].fenceLine.points[t].easting))
+                                + ((plotPt.northing - mf.bnd.bndList[0].fenceLine.points[t].northing) * (plotPt.northing - mf.bnd.bndList[0].fenceLine.points[t].northing));
 
-                int ptCount = arr.Length;
-
-                if (ptCount > 0)
+                if (dist < minDistA)
                 {
-                    //find the closest 2 points to current fix
-                    for (int t = 0; t < ptCount; t++)
-                    {
-                        double dist = ((pint.easting - arr[t].easting) * (pint.easting - arr[t].easting))
-                                        + ((pint.northing - arr[t].northing) * (pint.northing - arr[t].northing));
-                        if (dist < minDistA)
-                        {
-                            minDistB = minDistA;
-                            B = A;
-                            minDistA = dist;
-                            A = t;
-                        }
-                        else if (dist < minDistB)
-                        {
-                            minDistB = dist;
-                            B = t;
-                        }
-                    }
-
-                    //just need to make sure the points continue ascending or heading switches all over the place
-                    if (A > B) { E = A; A = B; B = E; }
-
-                    start = A;
+                    minDistA = dist;
+                    A = t;
                 }
+            }
 
-                isA = false;
+            if (start == -1)
+            {
+                start = A;
+                end = -1;
             }
             else
             {
-                double minDistA = 1000000, minDistB = 1000000;
+                end = A;
 
-                int ptCount = arr.Length;
-
-                if (ptCount > 0)
-                {
-                    //find the closest 2 points to current point
-                    for (int t = 0; t < ptCount; t++)
-                    {
-                        double dist = ((pint.easting - arr[t].easting) * (pint.easting - arr[t].easting))
-                                        + ((pint.northing - arr[t].northing) * (pint.northing - arr[t].northing));
-                        if (dist < minDistA)
-                        {
-                            minDistB = minDistA;
-                            D = C;
-                            minDistA = dist;
-                            C = t;
-                        }
-                        else if (dist < minDistB)
-                        {
-                            minDistB = dist;
-                            D = t;
-                        }
-                    }
-
-                    //just need to make sure the points continue ascending or heading switches all over the place
-                    if (C > D) { E = C; C = D; D = E; }
-                }
-
-                isA = true;
-
-                int A1 = Math.Abs(A - C);
-                int B1 = Math.Abs(A - D);
-                int C1 = Math.Abs(B - C);
-                int D1 = Math.Abs(B - D);
-
-                if (A1 <= B1 && A1 <= C1 && A1 <= D1) { start = A; end = C; }
-                else if (B1 <= A1 && B1 <= C1 && B1 <= D1) { start = A; end = D; }
-                else if (C1 <= B1 && C1 <= A1 && C1 <= D1) { start = B; end = C; }
-                else if (D1 <= B1 && D1 <= C1 && D1 <= A1) { start = B; end = D; }
-
-                if (start > end) { E = start; start = end; end = E; }
+                if (((mf.bnd.bndList[0].fenceLine.points.Count - end + start) % mf.bnd.bndList[0].fenceLine.points.Count) < ((mf.bnd.bndList[0].fenceLine.points.Count - start + end) % mf.bnd.bndList[0].fenceLine.points.Count)) { int index = start; start = end; end = index; }
 
                 btnMakeABLine.Enabled = true;
                 btnMakeCurve.Enabled = true;
@@ -425,52 +337,19 @@ namespace AgOpenGPS
         }
 
         private void btnMakeBoundaryCurve_Click(object sender, EventArgs e)
-        {            //count the points from the boundary
-            int ptCount = mf.bnd.bndList[0].fenceLine.Count;
+        {
+            //count the points from the boundary
             mf.curve.refList?.Clear();
 
             //outside point
-            vec3 pt3 = new vec3();
-
             double moveDist = (double)nudDistance.Value * mf.inchOrCm2m;
-            double distSq = (moveDist) * (moveDist) * 0.999;
+
+            Polyline New = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, true, -1, -1, true);
 
             //make the boundary tram outer array
-            for (int i = 0; i < ptCount; i++)
+            for (int i = 0; i < New.points.Count; i++)
             {
-                //calculate the point inside the boundary
-                pt3.easting = mf.bnd.bndList[0].fenceLine[i].easting -
-                    (Math.Sin(glm.PIBy2 + mf.bnd.bndList[0].fenceLine[i].heading) * (moveDist));
-
-                pt3.northing = mf.bnd.bndList[0].fenceLine[i].northing -
-                    (Math.Cos(glm.PIBy2 + mf.bnd.bndList[0].fenceLine[i].heading) * (moveDist));
-
-                pt3.heading = mf.bnd.bndList[0].fenceLine[i].heading;
-
-                bool Add = true;
-
-                for (int j = 0; j < ptCount; j++)
-                {
-                    double check = glm.DistanceSquared(pt3.northing, pt3.easting,
-                                        mf.bnd.bndList[0].fenceLine[j].northing, mf.bnd.bndList[0].fenceLine[j].easting);
-                    if (check < distSq)
-                    {
-                        Add = false;
-                        break;
-                    }
-                }
-
-                if (Add)
-                {
-                    if (mf.curve.refList.Count > 0)
-                    {
-                        double dist = ((pt3.easting - mf.curve.refList[mf.curve.refList.Count - 1].easting) * (pt3.easting - mf.curve.refList[mf.curve.refList.Count - 1].easting))
-                            + ((pt3.northing - mf.curve.refList[mf.curve.refList.Count - 1].northing) * (pt3.northing - mf.curve.refList[mf.curve.refList.Count - 1].northing));
-                        if (dist > 1)
-                            mf.curve.refList.Add(pt3);
-                    }
-                    else mf.curve.refList.Add(pt3);
-                }
+                mf.curve.refList.Add(new vec3(New.points[i].easting, New.points[i].northing, 0));
             }
 
             btnCancelTouch.Enabled = false;
@@ -532,9 +411,7 @@ namespace AgOpenGPS
                 //update the arrays
                 btnMakeABLine.Enabled = false;
                 btnMakeCurve.Enabled = false;
-                isMakingCurve = false;
-                isMakingAB = false;
-                start = 99999; end = 99999;
+                start = end = -1;
 
                 FixLabelsCurve();
             }
@@ -551,46 +428,14 @@ namespace AgOpenGPS
             btnCancelTouch.Enabled = false;
 
             double moveDist = (double)nudDistance.Value * mf.inchOrCm2m;
-            double distSq = (moveDist) * (moveDist) * 0.999;
 
             mf.curve.refList?.Clear();
-            vec3 pt3 = new vec3(arr[start]);
 
-            for (int i = start; i < end; i++)
+            Polyline New = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, false, start, end, false);
+
+            for (int i = 0; i < New.points.Count; i++)
             {
-                //calculate the point inside the boundary
-                pt3.easting = arr[i].easting -
-                    (Math.Sin(glm.PIBy2 + arr[i].heading) * (moveDist));
-
-                pt3.northing = arr[i].northing -
-                    (Math.Cos(glm.PIBy2 + arr[i].heading) * (moveDist));
-
-                pt3.heading = arr[i].heading;
-
-                bool Add = true;
-
-                for (int j = start; j < end; j++)
-                {
-                    double check = glm.DistanceSquared(pt3.northing, pt3.easting,
-                                        arr[j].northing, arr[j].easting);
-                    if (check < distSq)
-                    {
-                        Add = false;
-                        break;
-                    }
-                }
-
-                if (Add)
-                {
-                    if (mf.curve.refList.Count > 0)
-                    {
-                        double dist = ((pt3.easting - mf.curve.refList[mf.curve.refList.Count - 1].easting) * (pt3.easting - mf.curve.refList[mf.curve.refList.Count - 1].easting))
-                            + ((pt3.northing - mf.curve.refList[mf.curve.refList.Count - 1].northing) * (pt3.northing - mf.curve.refList[mf.curve.refList.Count - 1].northing));
-                        if (dist > 1)
-                            mf.curve.refList.Add(pt3);
-                    }
-                    else mf.curve.refList.Add(pt3);
-                }
+                mf.curve.refList.Add(new vec3(New.points[i].easting, New.points[i].northing, 0));
             }
 
             int cnt = mf.curve.refList.Count;
@@ -610,7 +455,7 @@ namespace AgOpenGPS
 
                         mf.curve.refList.Insert(j, pointB);
                         cnt = mf.curve.refList.Count;
-                        i = -1;
+                        i--;
                     }
                 }
 
@@ -662,9 +507,7 @@ namespace AgOpenGPS
                 //update the arrays
                 btnMakeABLine.Enabled = false;
                 btnMakeCurve.Enabled = false;
-                isMakingCurve = false;
-                isMakingAB = false;
-                start = 99999; end = 99999;
+                start = end = -1;
 
                 FixLabelsCurve();
             }
@@ -682,9 +525,9 @@ namespace AgOpenGPS
             btnCancelTouch.Enabled = false;
 
             //calculate the AB Heading
-            if (A < C) { B = A; A = C; C = B; }
-            double abHead = Math.Atan2(arr[C].easting - arr[A].easting,
-                arr[C].northing - arr[A].northing);
+
+            double abHead = Math.Atan2(mf.bnd.bndList[0].fenceLine.points[end].easting - mf.bnd.bndList[0].fenceLine.points[start].easting,
+                mf.bnd.bndList[0].fenceLine.points[end].northing - mf.bnd.bndList[0].fenceLine.points[start].northing);
             if (abHead < 0) abHead += glm.twoPI;
 
             double offset = ((double)nudDistance.Value * mf.inchOrCm2m);
@@ -699,15 +542,8 @@ namespace AgOpenGPS
 
             mf.ABLine.lineArr[idx].heading = abHead;
             //calculate the new points for the reference line and points
-            mf.ABLine.lineArr[idx].origin.easting = (Math.Sin(headingCalc) * (offset)) + arr[A].easting;
-            mf.ABLine.lineArr[idx].origin.northing = (Math.Cos(headingCalc) * (offset)) + arr[A].northing;
-
-            //if (!mf.bnd.bndArr[0].IsPointInsideBoundaryEar(mf.ABLine.lineArr[idx].origin))
-            //{
-            //    headingCalc = abHead - glm.PIBy2;
-            //    mf.ABLine.lineArr[idx].origin.easting = (Math.Sin(headingCalc) * Math.Abs(offset)) + arr[A].easting;
-            //    mf.ABLine.lineArr[idx].origin.northing = (Math.Cos(headingCalc) * Math.Abs(offset)) + arr[A].northing;
-            //}
+            mf.ABLine.lineArr[idx].origin.easting = (Math.Sin(headingCalc) * (offset)) + mf.bnd.bndList[0].fenceLine.points[start].easting;
+            mf.ABLine.lineArr[idx].origin.northing = (Math.Cos(headingCalc) * (offset)) + mf.bnd.bndList[0].fenceLine.points[start].northing;
 
             //create a name
             mf.ABLine.lineArr[idx].Name = (Math.Round(glm.toDegrees(mf.ABLine.lineArr[idx].heading), 1)).ToString(CultureInfo.InvariantCulture)
@@ -717,9 +553,7 @@ namespace AgOpenGPS
             btnMakeABLine.Enabled = false;
             btnMakeCurve.Enabled = false;
 
-            isMakingCurve = false;
-            isMakingAB = false;
-            start = 99999; end = 99999;
+            start = end = -1;
 
             FixLabelsABLine();
         }
@@ -752,13 +586,21 @@ namespace AgOpenGPS
             if (isDrawSections) DrawSections();
 
             //draw the line building graphics
-            if (start != 99999 || end != 99999) DrawABTouchLine();
-
-            //draw the actual built lines
-            if (start == 99999 && end == 99999)
+            if (start != -1)
             {
-                DrawBuiltLines();
+                GL.Color3(0.65, 0.650, 0.0);
+                GL.PointSize(8);
+                GL.Begin(PrimitiveType.Points);
+
+                GL.Color3(0.95, 0.950, 0.0);
+                if (start != -1) GL.Vertex3(mf.bnd.bndList[0].fenceLine.points[start].easting, mf.bnd.bndList[0].fenceLine.points[start].northing, 0);
+
+                GL.Color3(0.950, 096.0, 0.0);
+                if (end != -1) GL.Vertex3(mf.bnd.bndList[0].fenceLine.points[end].easting, mf.bnd.bndList[0].fenceLine.points[end].northing, 0);
+                GL.End();
             }
+            else //draw the actual built lines
+                DrawBuiltLines();
 
             GL.Flush();
             oglSelf.SwapBuffers();
@@ -841,42 +683,6 @@ namespace AgOpenGPS
             }
         }
 
-        private void DrawABTouchLine()
-        {
-            GL.Color3(0.65, 0.650, 0.0);
-            GL.PointSize(8);
-            GL.Begin(PrimitiveType.Points);
-
-            GL.Color3(0.95, 0.950, 0.0);
-            if (start != 99999) GL.Vertex3(arr[start].easting, arr[start].northing, 0);
-
-            GL.Color3(0.950, 096.0, 0.0);
-            if (end != 99999) GL.Vertex3(arr[end].easting, arr[end].northing, 0);
-            GL.End();
-
-            if (isMakingCurve)
-            {
-                //draw the turn line oject
-                GL.LineWidth(4.0f);
-                GL.Begin(PrimitiveType.LineStrip);
-                int ptCount = arr.Length;
-                if (ptCount < 1) return;
-                for (int c = start; c < end; c++) GL.Vertex3(arr[c].easting, arr[c].northing, 0);
-
-                GL.End();
-            }
-
-            if (isMakingAB)
-            {
-                GL.LineWidth(4.0f);
-                GL.Color3(0.95, 0.0, 0.0);
-                GL.Begin(PrimitiveType.Lines);
-                GL.Vertex3(arr[A].easting, arr[A].northing, 0);
-                GL.Vertex3(arr[C].easting, arr[C].northing, 0);
-                GL.End();
-            }
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             oglSelf.Refresh();
@@ -893,8 +699,6 @@ namespace AgOpenGPS
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-
-
             Close();
         }
 

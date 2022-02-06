@@ -1043,27 +1043,9 @@ namespace AgOpenGPS
             prevBoundaryPos.northing = pn.fix.northing;
 
             //build the boundary line
-
-            if (bnd.isDrawRightSide)
-            {
-                //Right side
-                vec3 point = new vec3(
-                    pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * -bnd.createBndOffset),
-                    pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * -bnd.createBndOffset),
-                    pivotAxlePos.heading);
-                bnd.bndBeingMadePts.Add(point);
-            }
-
-            //draw on left side
-            else
-            {
-                //Right side
-                vec3 point = new vec3(
-                    pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * bnd.createBndOffset),
-                    pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * bnd.createBndOffset),
-                    pivotAxlePos.heading);
-                bnd.bndBeingMadePts.Add(point);
-            }
+            bnd.bndBeingMadePts.Add(new vec2(
+                pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)),
+                pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset))));
         }
 
         //add the points for section, contour line points, Area Calc feature
@@ -1155,7 +1137,7 @@ namespace AgOpenGPS
                     section[j].lastLeftPoint = section[j].leftPoint;
 
                     //get the speed for left side only once
-                    
+
                     leftSpeed = left.GetLength() / fixUpdateTime * 10;
                     if (leftSpeed > meterPerSecPerPixel) leftSpeed = meterPerSecPerPixel;
                 }
@@ -1167,9 +1149,9 @@ namespace AgOpenGPS
 
                     //save a copy for next time
                     section[j].lastLeftPoint = section[j].leftPoint;
-                    
+
                     //Save the slower of the 2
-                    if (leftSpeed > rightSpeed) leftSpeed = rightSpeed;                    
+                    if (leftSpeed > rightSpeed) leftSpeed = rightSpeed;
                 }
 
                 section[j].rightPoint = new vec2(cosHeading * (section[j].positionRight) + easting,
@@ -1200,7 +1182,7 @@ namespace AgOpenGPS
 
                 double sped = 0;
                 //save the far left and right speed in m/sec averaged over 20%
-                if (j==0)
+                if (j == 0)
                 {
                     sped = (leftSpeed * 0.1);
                     if (sped < 0.1) sped = 0.1;
@@ -1225,7 +1207,7 @@ namespace AgOpenGPS
 
             //fill in tool positions
             section[tool.numOfSections].leftPoint = section[0].leftPoint;
-            section[tool.numOfSections].rightPoint = section[tool.numOfSections-1].rightPoint;
+            section[tool.numOfSections].rightPoint = section[tool.numOfSections - 1].rightPoint;
 
             //set the look ahead for hyd Lift in pixels per second
             vehicle.hydLiftLookAheadDistanceLeft = tool.toolFarLeftSpeed * vehicle.hydLiftLookAheadTime * 10;
@@ -1246,35 +1228,31 @@ namespace AgOpenGPS
             if (tool.lookAheadDistanceOffPixelsLeft > 160) tool.lookAheadDistanceOffPixelsLeft = 160;
             if (tool.lookAheadDistanceOffPixelsRight > 160) tool.lookAheadDistanceOffPixelsRight = 160;
 
-            //determine where the tool is wrt to headland
-            if (bnd.isHeadlandOn) bnd.WhereAreToolCorners();
+
+
+            //THIS WILL ALL BE DELETED 
+            //RETURNS TRUE FOR EVERYTHING
+
+            tool.isLeftSideInHeadland = false;
+            tool.isRightSideInHeadland = false;
+
+            for (int j = 0; j < tool.numOfSections; j++)
+            {
+                section[j].isInHeadlandArea = false;
+            }
+
+
+            //is the tool in or out based on endpoints
+            bnd.isToolOuterPointsInHeadland = false;
 
             //set up the super for youturn
             section[tool.numOfSections].isInBoundary = true;
 
-            //determine if section is in boundary and headland using the section left/right positions
-            bool isLeftIn = true, isRightIn = true;
-
             for (int j = 0; j < tool.numOfSections; j++)
             {
-                if (bnd.bndList.Count > 0)
-                {
-                    //only one first left point, the rest are all rights moved over to left
-                    isLeftIn = j == 0 ? bnd.IsPointInsideFenceArea(section[j].leftPoint) : isRightIn;
-                    isRightIn = bnd.IsPointInsideFenceArea(section[j].rightPoint);
-
-                    //merge the two sides into in or out
-                    if (isLeftIn && isRightIn) section[j].isInBoundary = true;
-                    else section[j].isInBoundary = false;
-
-                    section[tool.numOfSections].isInBoundary &= section[j].isInBoundary;
-                }
-                else//no boundary created so always inside
-                {
-                    section[j].isInBoundary = true;
-                    section[tool.numOfSections].isInBoundary = false;
-                }
+                section[j].isInBoundary = true;
             }
+            section[tool.numOfSections].isInBoundary = true;
         }
 
         private void DoRemoteSwitches()

@@ -342,7 +342,7 @@ namespace AgOpenGPS
                             GL.Color3(0.3555f, 0.6232f, 0.20f);
                             for (int i = 0; i < bnd.bndList.Count; i++)
                             {
-                                bnd.bndList[i].turnLine.DrawPolygon();
+                                bnd.bndList[i].turnLine.DrawPolyLine(DrawType.Triangles);
                             }
                         }
 
@@ -350,7 +350,7 @@ namespace AgOpenGPS
                         if (bnd.isHeadlandOn)
                         {
                             GL.Color3(0.960f, 0.96232f, 0.30f);
-                                bnd.bndList[0].hdLine.DrawPolygon();
+                                bnd.bndList[0].hdLine.DrawPolyLine(DrawType.Triangles);
                         }
 
                         //There is only 1 headland for now. 
@@ -629,11 +629,11 @@ namespace AgOpenGPS
             if (bnd.bndList.Count > 0)
             {
                 ////draw the bnd line 
-                if (bnd.bndList[0].fenceLine.Count > 3)
+                if (bnd.bndList[0].fenceLine.points.Count > 3)
                 {
                     GL.LineWidth(3);
-                    GL.Color3((byte)0, (byte)240, (byte)0);
-                    bnd.bndList[0].fenceLine.DrawPolygon();
+                    GL.Color3((byte)250, (byte)240, (byte)0);
+                    bnd.bndList[0].fenceLine.DrawPolyLine(DrawType.Triangles);
                 }
 
 
@@ -642,7 +642,7 @@ namespace AgOpenGPS
                 {
                     GL.LineWidth(3);
                     GL.Color3((byte)0, (byte)250, (byte)0);
-                        bnd.bndList[0].hdLine.DrawPolygon();
+                    bnd.bndList[0].hdLine.DrawPolyLine(DrawType.Triangles);
                 }
             }
 
@@ -700,8 +700,8 @@ namespace AgOpenGPS
             GL.ReadPixels(tool.rpXPosition, 0, tool.rpWidth, (int)rpHeight, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
 
             //Paint to context for troubleshooting
-            //oglBack.MakeCurrent();
-            //oglBack.SwapBuffers();
+            oglBack.BringToFront();
+            oglBack.SwapBuffers();
 
             //is applied area coming up?
             int totalPixs = 0;
@@ -996,8 +996,10 @@ namespace AgOpenGPS
 
                 ///////////////////////////////////////////   Section control        ssssssssssssssssssssss
                 ///
-
-                if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland) bnd.WhereAreToolLookOnPoints();
+                for (int j = 0; j < tool.numOfSections; j++)
+                {
+                    section[j].isLookOnInHeadland = false;
+                }
 
                 for (int j = 0; j < tool.numOfSections; j++)
                 {
@@ -2443,11 +2445,11 @@ namespace AgOpenGPS
             //min max of the boundary
             if (bnd.bndList.Count > 0)
             {
-                int bndCnt = bnd.bndList[0].fenceLine.Count;
+                int bndCnt = bnd.bndList[0].fenceLine.points.Count;
                 for (int i = 0; i < bndCnt; i++)
                 {
-                    double x = bnd.bndList[0].fenceLine[i].easting;
-                    double y = bnd.bndList[0].fenceLine[i].northing;
+                    double x = bnd.bndList[0].fenceLine.points[i].easting;
+                    double y = bnd.bndList[0].fenceLine.points[i].northing;
 
                     //also tally the max/min of field x and z
                     if (minFieldX > x) minFieldX = x;

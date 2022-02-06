@@ -59,7 +59,6 @@ namespace AgOpenGPS
         public int youTurnPhase;
 
         public vec4 crossingCurvePoint = new vec4();
-        public double crossingheading = 0;
 
         //constructor
         public CYouTurn(FormGPS _f)
@@ -108,17 +107,17 @@ namespace AgOpenGPS
                 return false;
             }
 
-            int curTurnLineCount = mf.bnd.bndList[turnNum].turnLine.Count;
+            int curTurnLineCount = mf.bnd.bndList[turnNum].turnLine.points.Count;
 
             //possible points close to AB Curve point
             List<int> turnLineCloseList = new List<int>();
 
             for (int j = 0; j < curTurnLineCount; j++)
             {
-                if ((mf.bnd.bndList[turnNum].turnLine[j].easting - crossingCurvePoint.easting) < 15
-                    && (mf.bnd.bndList[turnNum].turnLine[j].easting - crossingCurvePoint.easting) > -15
-                    && (mf.bnd.bndList[turnNum].turnLine[j].northing - crossingCurvePoint.northing) < 15
-                    && (mf.bnd.bndList[turnNum].turnLine[j].northing - crossingCurvePoint.northing) > -15)
+                if ((mf.bnd.bndList[turnNum].turnLine.points[j].easting - crossingCurvePoint.easting) < 15
+                    && (mf.bnd.bndList[turnNum].turnLine.points[j].easting - crossingCurvePoint.easting) > -15
+                    && (mf.bnd.bndList[turnNum].turnLine.points[j].northing - crossingCurvePoint.northing) < 15
+                    && (mf.bnd.bndList[turnNum].turnLine.points[j].northing - crossingCurvePoint.northing) > -15)
                 {
                     turnLineCloseList.Add(j);
                 }
@@ -126,24 +125,18 @@ namespace AgOpenGPS
 
             double dist1, dist2 = 99;
             curTurnLineCount = turnLineCloseList.Count;
-            int index = -1;
             for (int i = 0; i < curTurnLineCount; i++)
             {
-                dist1 = glm.Distance(mf.bnd.bndList[turnNum].turnLine[turnLineCloseList[i]].easting,
-                                        mf.bnd.bndList[turnNum].turnLine[turnLineCloseList[i]].northing,
+                dist1 = glm.Distance(mf.bnd.bndList[turnNum].turnLine.points[turnLineCloseList[i]].easting,
+                                        mf.bnd.bndList[turnNum].turnLine.points[turnLineCloseList[i]].northing,
                                             crossingCurvePoint.easting, crossingCurvePoint.northing);
                 if (dist1 < dist2)
                 {
-                    index = turnLineCloseList[i];
                     dist2 = dist1;
                 }
             }
 
-            crossingheading = -20000;
-            if (index >= 0)
-                crossingheading = mf.bnd.bndList[turnNum].turnLine[index].heading;
-
-            return crossingheading != -20000 && crossingCurvePoint.easting != -20000;
+            return crossingCurvePoint.easting != -20000;
         }
 
         public void AddSequenceLines(double head)
@@ -318,7 +311,7 @@ namespace AgOpenGPS
                 }
 
                 //delta between AB heading and boundary closest point heading
-                boundaryAngleOffPerpendicular = Math.PI - Math.Abs(Math.Abs(mf.bnd.closestTurnPt.heading - headAB) - Math.PI);
+                boundaryAngleOffPerpendicular = 0;
                 boundaryAngleOffPerpendicular -= glm.PIBy2;
                 boundaryAngleOffPerpendicular *= -1;
                 if (boundaryAngleOffPerpendicular > 1.25) boundaryAngleOffPerpendicular = 1.25;
@@ -593,7 +586,7 @@ namespace AgOpenGPS
                 if (!isHeadingSameWay) head += Math.PI;
 
                 //delta between AB heading and boundary closest point heading
-                boundaryAngleOffPerpendicular = Math.PI - Math.Abs(Math.Abs(crossingheading - head) - Math.PI);
+                boundaryAngleOffPerpendicular = 0;
                 boundaryAngleOffPerpendicular -= glm.PIBy2;
                 boundaryAngleOffPerpendicular *= -1;
                 if (boundaryAngleOffPerpendicular > 1.25) boundaryAngleOffPerpendicular = 1.25;
