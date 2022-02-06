@@ -1,53 +1,10 @@
-﻿using OpenTK.Graphics.OpenGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
     public static class glm
     {
-        public static bool IsPointInPolygon(this List<vec3> polygon, vec3 testPoint)
-        {
-            bool result = false;
-            int j = polygon.Count - 1;
-            for (int i = 0; i < polygon.Count; i++)
-            {
-                if ((polygon[i].easting < testPoint.easting && polygon[j].easting >= testPoint.easting)
-                    || (polygon[j].easting < testPoint.easting && polygon[i].easting >= testPoint.easting))
-                {
-                    if (polygon[i].northing + (testPoint.easting - polygon[i].easting)
-                        / (polygon[j].easting - polygon[i].easting) * (polygon[j].northing - polygon[i].northing)
-                        < testPoint.northing)
-                    {
-                        result = !result;
-                    }
-                }
-                j = i;
-            }
-            return result;
-        }
-
-        public static bool IsPointInPolygon(this List<vec3> polygon, vec2 testPoint)
-        {
-            bool result = false;
-            int j = polygon.Count - 1;
-            for (int i = 0; i < polygon.Count; i++)
-            {
-                if ((polygon[i].easting < testPoint.easting && polygon[j].easting >= testPoint.easting)
-                    || (polygon[j].easting < testPoint.easting && polygon[i].easting >= testPoint.easting))
-                {
-                    if (polygon[i].northing + (testPoint.easting - polygon[i].easting)
-                        / (polygon[j].easting - polygon[i].easting) * (polygon[j].northing - polygon[i].northing)
-                        < testPoint.northing)
-                    {
-                        result = !result;
-                    }
-                }
-                j = i;
-            }
-            return result;
-        }
-
         public static bool IsPointInPolygon(this List<vec2> polygon, vec2 testPoint)
         {
             bool result = false;
@@ -88,19 +45,6 @@ namespace AgOpenGPS
                 j = i;
             }
             return result;
-        }
-
-        public static void DrawPolygon(this List<vec3> polygon)
-        {
-            if (polygon.Count > 1)
-            {
-                GL.Begin(PrimitiveType.LineLoop);
-                for (int i = 0; i < polygon.Count; i++)
-                {
-                    GL.Vertex3(polygon[i].easting, polygon[i].northing, 0);
-                }
-                GL.End();
-            }
         }
 
         // Catmull Rom interpoint spline calculation

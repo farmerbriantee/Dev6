@@ -3,6 +3,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Windows.Forms;
 using System.Text;
+using System.Diagnostics;
 
 namespace AgOpenGPS
 {
@@ -22,6 +23,9 @@ namespace AgOpenGPS
 
         //data buffer for pixels read from off screen buffer
         byte[] grnPixels = new byte[150001];
+
+        private bool isFastSections = false;
+        private int bbCounter = 0;
 
         // When oglMain is created
         private void oglMain_Load(object sender, EventArgs e)
@@ -218,14 +222,12 @@ namespace AgOpenGPS
 
                                 if (isDraw)
                                 {
-
                                     count2 = triList.Count;
-                                    //GL.Color4((byte)(count2), (byte)(count2*2), (byte)(count2*4), (byte)152);
+
+                                    GL.Color4((byte)triList[0].easting, (byte)triList[0].northing, (byte)triList[0].heading, (byte)(isDay ? 152 : 76));
+
                                     //draw the triangle in each triangle strip
                                     GL.Begin(PrimitiveType.TriangleStrip);
-
-                                    if (isDay) GL.Color4((byte)triList[0].easting, (byte)triList[0].northing, (byte)triList[0].heading, (byte)152);
-                                    else GL.Color4((byte)triList[0].easting, (byte)triList[0].northing, (byte)triList[0].heading, (byte)(152 * 0.5));
 
                                     //if large enough patch and camera zoomed out, fake mipmap the patches, skip triangles
                                     if (count2 >= (mipmap + 2))
@@ -245,67 +247,36 @@ namespace AgOpenGPS
                         }
                     }
 
-
                     // the follow up to sections patches
-                    int patchCount = 0;
-
                     if (autoBtnState != btnStates.Off)
                     {
-                        GL.Color4(sectionColor.R, sectionColor.G, sectionColor.B, (byte)(isDay? 152 : 76));
-
-                        if (section[tool.numOfSections].isMappingOn && section[tool.numOfSections].patchList.Count > 0)
+                        for (int j = 0; j < tool.numSuperSection; j++)
                         {
-                            patchCount = section[tool.numOfSections].patchList.Count;
-                            //draw the triangle in each triangle strip
-                            GL.Begin(PrimitiveType.TriangleStrip);
-
-                            //left side of triangle
-                            vec2 pt = new vec2((cosSectionHeading * section[tool.numOfSections].positionLeft) + toolPos.easting,
-                                    (sinSectionHeading * section[tool.numOfSections].positionLeft) + toolPos.northing);
-
-                            GL.Vertex3(pt.easting, pt.northing, 0);
-
-                            //Right side of triangle
-                            pt = new vec2((cosSectionHeading * section[tool.numOfSections].positionRight) + toolPos.easting,
-                               (sinSectionHeading * section[tool.numOfSections].positionRight) + toolPos.northing);
-
-                            GL.Vertex3(pt.easting, pt.northing, 0);
-
-                            int last = section[tool.numOfSections].patchList[patchCount - 1].Count;
-                            //antenna
-                            GL.Vertex3(section[tool.numOfSections].patchList[patchCount - 1][last - 2].easting, section[tool.numOfSections].patchList[patchCount - 1][last - 2].northing, 0);
-                            GL.Vertex3(section[tool.numOfSections].patchList[patchCount - 1][last - 1].easting, section[tool.numOfSections].patchList[patchCount - 1][last - 1].northing, 0);
-                            GL.End();
-                        }
-                        else
-                        {
-                            for (int j = 0; j < tool.numSuperSection; j++)
+                            if (section[j].isMappingOn && section[j].triangleList.Count > 0)
                             {
-                                if (section[j].isMappingOn && section[j].patchList.Count > 0)
-                                {
-                                    patchCount = section[j].patchList.Count;
+                                GL.Color4((byte)section[j].triangleList[0].easting, (byte)section[j].triangleList[0].northing, (byte)section[j].triangleList[0].heading, (byte)(isDay ? 152 : 76));
 
-                                    //draw the triangle in each triangle strip
-                                    GL.Begin(PrimitiveType.TriangleStrip);
 
-                                    //left side of triangle
-                                    vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
-                                            (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
+                                //draw the triangle in each triangle strip
+                                GL.Begin(PrimitiveType.TriangleStrip);
 
-                                    GL.Vertex3(pt.easting, pt.northing, 0);
 
-                                    //Right side of triangle
-                                    pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
-                                       (sinSectionHeading * section[j].positionRight) + toolPos.northing);
+                                for (int i = 1; i < section[j].triangleList.Count; i++) GL.Vertex3(section[j].triangleList[i].easting, section[j].triangleList[i].northing, 0);
 
-                                    GL.Vertex3(pt.easting, pt.northing, 0);
+                                //left side of triangle
+                                vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
+                                        (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
 
-                                    int last = section[j].patchList[patchCount - 1].Count;
-                                    //antenna
-                                    GL.Vertex3(section[j].patchList[patchCount - 1][last - 2].easting, section[j].patchList[patchCount - 1][last - 2].northing, 0);
-                                    GL.Vertex3(section[j].patchList[patchCount - 1][last - 1].easting, section[j].patchList[patchCount - 1][last - 1].northing, 0);
-                                    GL.End();
-                                }
+                                GL.Vertex3(section[j].leftPoint.easting, section[j].leftPoint.northing, 0);
+
+                                //Right side of triangle
+                                pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
+                                   (sinSectionHeading * section[j].positionRight) + toolPos.northing);
+
+                                GL.Vertex3(pt.easting, pt.northing, 0);
+
+                                //antenna
+                                GL.End();
                             }
                         }
                     }
@@ -469,24 +440,13 @@ namespace AgOpenGPS
 
                     if (leftMouseDownOnOpenGL) MakeFlagMark();
                     
-                    if (bbCounter++ > 1) bbCounter = 0;
+                    if (bbCounter++ > 0) bbCounter = 0;
 
                     //draw the section control window off screen buffer
-                    if (isJobStarted )
+                    if (isJobStarted && (isFastSections || bbCounter == 0))
                     {
-                        if (isFastSections)
-                        {
-                            oglBack.Refresh();
-                            SendPgnToLoop(p_239.pgn);
-                        }
-                        else
-                        {
-                            if (bbCounter == 0)
-                            {
-                                oglBack.Refresh();
-                                SendPgnToLoop(p_239.pgn);
-                            }
-                        }
+                        oglBack.Refresh();
+                        SendPgnToLoop(p_239.pgn);
                     }
 
                     //draw the zoom window
@@ -502,752 +462,265 @@ namespace AgOpenGPS
             }
         }
 
-        private int bbCounter = 0;
-        public bool isFastSections = false;
-
         private void oglBack_Load(object sender, EventArgs e)
         {
             oglBack.MakeCurrent();
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
+            GL.Disable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
             GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+            GL.ClearColor((byte)0, (byte)0, (byte)0, (byte)255);
         }
 
         private void oglBack_Resize(object sender, EventArgs e)
         {
             oglBack.MakeCurrent();
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
             GL.Viewport(0, 0, 500, 300);
-            Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView(0.06f, 1.6666666666f, 50.0f, 520.0f);
-            GL.LoadMatrix(ref mat);
-            GL.MatrixMode(MatrixMode.Modelview);
-        }
+            Matrix4 projection = Matrix4.CreateOrthographicOffCenter(-25.0f, 25.0f, -1.0f, 29.0f, -1000.0f, 1000.0f);
 
-        private bool isHeadlandClose = false, isBoundaryClose = false, isMapping = true;
+            GL.MatrixMode(MatrixMode.Projection);//set state to load the projection matrix
+            GL.LoadMatrix(ref projection);
+            GL.MatrixMode(MatrixMode.Modelview);//set state to draw global coordinates into clip space;
+        }
 
         private void oglBack_Paint(object sender, PaintEventArgs e)
         {
-            oglBack.MakeCurrent();
+            bool isToolInHeadland = vehicle.isHydLiftOn && bnd.isSectionControlledByHeadland;
+            int taggedHead = 0;
+            int totalHead = 0;
+            bool isSuperSectionAllowedOn = !tool.isMultiColoredSections;
+            bool Needsupdate = true;
 
-            GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
-            GL.LoadIdentity();					// Reset The View
+            //determine farthest lookahead - is the height of the readpixel line
+            int rpHeight = (int)Math.Max(Math.Max((vehicle.isHydLiftOn ? Math.Max(vehicle.hydLiftLookAheadDistanceRight, vehicle.hydLiftLookAheadDistanceLeft) : 0), Math.Max(tool.lookAheadDistanceOnPixelsRight, tool.lookAheadDistanceOnPixelsLeft) + 1) + 0.5, 1);
+            int rpHeight2 = (int)Math.Max(vehicle.isHydLiftOn ? -1 : Math.Min(tool.lookAheadDistanceOffPixelsRight, tool.lookAheadDistanceOffPixelsLeft) - 1.5, -1);
 
-            //back the camera up
-            GL.Translate(0, 0, -500);
+            int grnPixelsLength = tool.rpWidth * (rpHeight - rpHeight2);
 
-            //rotate camera so heading matched fix heading in the world
-            GL.Rotate(glm.toDegrees(toolPos.heading), 0, 0, 1);
-
-            GL.Translate(-toolPos.easting - Math.Sin(toolPos.heading) * 15,
-                -toolPos.northing - Math.Cos(toolPos.heading) * 15,
-                0);
-
-            //patch color
-            GL.Color3(0.0f, 0.5f, 0.0f);
-
-            //calculate the frustum for the section control window
-            //CalcFrustum();
-
-            //to draw or not the triangle patch
-            bool isDraw;
-
-            //draw patches j= # of sections
-            for (int j = 0; j < tool.numSuperSection; j++)
-            {
-                //every time the section turns off and on is a new patch
-                int patchCount = section[j].patchList.Count;
-
-                if (patchCount > 0)
-                {
-                    //for every new chunk of patch
-                    foreach (var triList in section[j].patchList)
-                    {
-                        isDraw = false;
-                        int count2 = triList.Count;
-                        for (int i = 1; i < count2; i += 3)
-                        {
-                            //determine if point is in frustum or not
-                            if (triList[i].easting > pivotAxlePos.easting + 50)
-                                continue;
-                            if (triList[i].easting < pivotAxlePos.easting - 50)
-                                continue;
-                            if (triList[i].northing > pivotAxlePos.northing + 50)
-                                continue;
-                            if (triList[i].northing < pivotAxlePos.northing - 50)
-                                continue;
-
-                            //point is in frustum so draw the entire patch
-                            isDraw = true;
-                            break;
-                        }
-
-                        if (isDraw)
-                        {
-                            //draw the triangles in each triangle strip
-                            GL.Begin(PrimitiveType.TriangleStrip);
-                            for (int i = 1; i < count2; i++) GL.Vertex3(triList[i].easting, triList[i].northing, 0);
-                            GL.End();
-                        }
-                    }
-                }
-            }
-
-            //draw 245 green for the tram tracks
-            if (isTramOnBackBuffer)
-            {
-                if (tram.displayMode != 0 && (curve.isBtnCurveOn || ABLine.isBtnABLineOn))
-                {
-                    GL.Color3((byte)0, (byte)245, (byte)0);
-                    GL.LineWidth(8);
-
-                    if ((tram.displayMode == 1 || tram.displayMode == 2))
-                    {
-                        for (int i = 0; i < tram.tramList.Count; i++)
-                        {
-                            GL.Begin(PrimitiveType.LineStrip);
-                            for (int h = 0; h < tram.tramList[i].Count; h++)
-                                GL.Vertex3(tram.tramList[i][h].easting, tram.tramList[i][h].northing, 0);
-                            GL.End();
-                        }
-                    }
-
-                    if (tram.displayMode == 1 || tram.displayMode == 3)
-                    {
-                        //boundary tram list
-                        GL.Begin(PrimitiveType.LineStrip);
-                        for (int h = 0; h < tram.tramBndOuterArr.Count; h++)
-                            GL.Vertex3(tram.tramBndOuterArr[h].easting, tram.tramBndOuterArr[h].northing, 0);
-                        for (int h = 0; h < tram.tramBndInnerArr.Count; h++)
-                            GL.Vertex3(tram.tramBndInnerArr[h].easting, tram.tramBndInnerArr[h].northing, 0);
-                        GL.End();
-                    }
-                }
-            }
-
-            //draw 240 green for boundary
-            if (bnd.bndList.Count > 0)
-            {
-                ////draw the bnd line 
-                if (bnd.bndList[0].fenceLine.points.Count > 3)
-                {
-                    GL.LineWidth(3);
-                    GL.Color3((byte)250, (byte)240, (byte)0);
-                    bnd.bndList[0].fenceLine.DrawPolyLine(DrawType.Triangles);
-                }
-
-
-                //draw 250 green for the headland
-                if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland)
-                {
-                    GL.LineWidth(3);
-                    GL.Color3((byte)0, (byte)250, (byte)0);
-                    bnd.bndList[0].hdLine.DrawPolyLine(DrawType.Triangles);
-                }
-            }
-
-            //finish it up - we need to read the ram of video card
-            GL.Flush();
-
-            //determine farthest ahead lookahead - is the height of the readpixel line
-            double rpHeight = 0;
-            double rpOnHeight = 0;
-            double rpToolHeight = 0;
-
-            //pick the larger side
-            if (vehicle.hydLiftLookAheadDistanceLeft > vehicle.hydLiftLookAheadDistanceRight) rpToolHeight = vehicle.hydLiftLookAheadDistanceLeft;
-            else rpToolHeight = vehicle.hydLiftLookAheadDistanceRight;
-
-            if (tool.lookAheadDistanceOnPixelsLeft > tool.lookAheadDistanceOnPixelsRight) rpOnHeight = tool.lookAheadDistanceOnPixelsLeft;
-            else rpOnHeight = tool.lookAheadDistanceOnPixelsRight;
-
-            //assume all sections are on and super can be on, if not set false to turn off.
-            tool.isSuperSectionAllowedOn = true;
-            isHeadlandClose = false;
-            isBoundaryClose = false;
-
-            //find any off buttons, any outside of boundary, going backwards, and the farthest lookahead
             for (int j = 0; j < tool.numOfSections; j++)
             {
-                if (section[j].manBtnState == btnStates.Off) tool.isSuperSectionAllowedOn = false;
-                if (!section[j].isInBoundary) tool.isSuperSectionAllowedOn = false;
-
-                //check if any sections going backwards, section turned off waaay below
-                if (section[j].speedPixels < 0) tool.isSuperSectionAllowedOn = false;
-            }
-
-            //if only one section, or going slow no need for super section 
-            if (tool.numOfSections == 1 || pn.speed < vehicle.slowSpeedCutoff)
-                tool.isSuperSectionAllowedOn = false;
-
-            if ((tool.isRightSideInHeadland || tool.isLeftSideInHeadland) && bnd.isHeadlandOn && bnd.isSectionControlledByHeadland)
-                tool.isSuperSectionAllowedOn = false;
-
-            //clamp the height after looking way ahead, this is for switching off super section only
-            rpOnHeight = Math.Abs(rpOnHeight);
-            rpToolHeight = Math.Abs(rpToolHeight);
-
-            //10 % min is required for overlap, otherwise it never would be on.
-            int pixLimit = (int)((double)(section[0].rpSectionWidth * rpOnHeight) / (double)(5.0));
-
-            if ((rpOnHeight < rpToolHeight && bnd.isHeadlandOn && bnd.isSectionControlledByHeadland)) rpHeight = rpToolHeight + 2;
-            else rpHeight = rpOnHeight + 2;
-
-            if (rpHeight > 290) rpHeight = 290;
-            if (rpHeight < 8) rpHeight = 8;
-
-            //read the whole block of pixels up to max lookahead, one read only
-            GL.ReadPixels(tool.rpXPosition, 0, tool.rpWidth, (int)rpHeight, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
-
-            //Paint to context for troubleshooting
-            oglBack.BringToFront();
-            oglBack.SwapBuffers();
-
-            //is applied area coming up?
-            int totalPixs = 0;
-
-            //determine if headland is in read pixel buffer left middle and right. 
-            int start = 0, end = 0, tagged = 0, totalPixel = 0;
-            ;
-
-            //slope of the look ahead line
-            double mOn = 0, mOff = 0;
-
-            if (!tool.isMultiColoredSections)
-            {
-                if (bnd.bndList.Count > 0)
+                if (section[j].manBtnState == btnStates.On)
                 {
-                    //are there enough pixels in buffer array to warrant turning off supersection
-                    for (int a = 0; a < (tool.rpWidth * rpOnHeight); a++)
-                    {
-                        if (grnPixels[a] != 0 && grnPixels[a] != 250)
-                        {
-                            if (tool.isSuperSectionAllowedOn & totalPixs++ > pixLimit)
-                            {
-                                tool.isSuperSectionAllowedOn = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    //5 pixels in is there a boundary line?
-                    for (int a = 0; a < (tool.rpWidth * 5); a++)
-                    {
-                        if (grnPixels[a] == 240)
-                        {
-                            tool.isSuperSectionAllowedOn = false;
-                            isBoundaryClose = true;
-                            break;
-                        }
-                    }
-
-                    if (tool.toolWidth > vehicle.trackWidth)
-                    {
-                        tram.controlByte = 0;
-                        //1 pixels in is there a tram line?
-                        if (grnPixels[(int)(tram.halfWheelTrack * 10)] == 245) tram.controlByte += 4;
-                        if ((grnPixels[tool.rpWidth / 2 - (int)(tram.halfWheelTrack * 10)] == 245) &&
-                           (grnPixels[tool.rpWidth / 2 + (int)(tram.halfWheelTrack * 10)] == 245)) tram.controlByte += 2;
-                        if (grnPixels[tool.rpWidth - (int)(tram.halfWheelTrack * 10)] == 245) tram.controlByte += 1;
-                    }
-
-                    //determine if in or out of headland, do hydraulics if on
-                    if (bnd.isHeadlandOn)
-                    {
-                        //calculate the slope
-                        double m = (vehicle.hydLiftLookAheadDistanceRight - vehicle.hydLiftLookAheadDistanceLeft) / tool.rpWidth;
-                        int height = 1;
-
-                        for (int pos = 0; pos < tool.rpWidth; pos++)
-                        {
-                            height = (int)(vehicle.hydLiftLookAheadDistanceLeft + (m * pos)) - 1;
-                            for (int a = pos; a < height * tool.rpWidth; a += tool.rpWidth)
-                            {
-                                if (grnPixels[a] == 250)
-                                {
-                                    isHeadlandClose = true;
-                                    goto GetOutTool;
-                                }
-                            }
-                        }
-                        GetOutTool:
-
-                        //is the tool completely in the headland or not
-                        bnd.isToolInHeadland = bnd.isToolOuterPointsInHeadland && !isHeadlandClose;
-
-                        if (isHeadlandClose || bnd.isToolInHeadland) tool.isSuperSectionAllowedOn = false;
-
-                        //set hydraulics based on tool in headland or not
-                        bnd.SetHydPosition();
-                    }
+                    section[j].sectionOnRequest = true;
                 }
-                else  //supersection check by applied only
+                else if (section[j].manBtnState == btnStates.Off)
                 {
-                    for (int a = 0; a < (tool.rpWidth * rpOnHeight); a++)
-                    {
-                        if (grnPixels[a] != 0)
-                        {
-                            if (tool.isSuperSectionAllowedOn & totalPixs++ > pixLimit)
-                            {
-                                tool.isSuperSectionAllowedOn = false;
-                                break;
-                            }
-                        }
-                    }
+                    section[j].sectionOnRequest = false;
+                    if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
+                    isSuperSectionAllowedOn = section[j].mappingOffTimer > 1;
                 }
-                //if all manual and all on go supersection
-                if (autoBtnState == btnStates.On)
+                else if (section[j].manBtnState == btnStates.Auto)
                 {
-                    tool.isSuperSectionAllowedOn = true;
-                    for (int j = 0; j < tool.numOfSections; j++)
+                    double speeddif = (tool.toolFarRightSpeed - tool.toolFarLeftSpeed) / tool.rpWidth;
+
+                    int start = section[j].rpSectionPosition - section[0].rpSectionPosition;
+                    int end = start + section[j].rpSectionWidth;
+
+                    double Centersp = tool.toolFarLeftSpeed + speeddif * (start + section[j].rpSectionWidth / 2.0);
+
+                    if (Centersp * 3.6 <= vehicle.slowSpeedCutoff)
                     {
-                        if (section[j].manBtnState == btnStates.Off) tool.isSuperSectionAllowedOn = false;
-                    }
-                }
-
-            }
-            else
-            {
-                if (bnd.bndList.Count > 0)
-                { 
-                    if (tool.toolWidth > vehicle.trackWidth)
-                    {
-                        tram.controlByte = 0;
-                        //1 pixels in is there a tram line?
-                        if (grnPixels[(int)(tram.halfWheelTrack * 10)] == 245) tram.controlByte += 4;
-                        if ((grnPixels[tool.rpWidth / 2 - (int)(tram.halfWheelTrack * 10)] == 245) &&
-                           (grnPixels[tool.rpWidth / 2 + (int)(tram.halfWheelTrack * 10)] == 245)) tram.controlByte += 2;
-                        if (grnPixels[tool.rpWidth - (int)(tram.halfWheelTrack * 10)] == 245) tram.controlByte += 1;
-                    }
-
-                    //determine if in or out of headland, do hydraulics if on
-                    if (bnd.isHeadlandOn)
-                    {
-                        //calculate the slope
-                        double m = (vehicle.hydLiftLookAheadDistanceRight - vehicle.hydLiftLookAheadDistanceLeft) / tool.rpWidth;
-                        int height = 1;
-
-                        for (int pos = 0; pos < tool.rpWidth; pos++)
-                        {
-                            height = (int)(vehicle.hydLiftLookAheadDistanceLeft + (m * pos)) - 1;
-                            for (int a = pos; a < height * tool.rpWidth; a += tool.rpWidth)
-                            {
-                                if (grnPixels[a] == 250)
-                                {
-                                    isHeadlandClose = true;
-                                    goto GetOutTool;
-                                }
-                            }
-                        }
-                        GetOutTool:
-
-                        //is the tool completely in the headland or not
-                        bnd.isToolInHeadland = bnd.isToolOuterPointsInHeadland && !isHeadlandClose;
-
-                        //set hydraulics based on tool in headland or not
-                        bnd.SetHydPosition();
-                    }
-                }
-
-                tool.isSuperSectionAllowedOn = false;
-            }
-
-            // If ALL sections are required on, No buttons are off, within boundary, turn super section on, normal sections off
-            if (tool.isSuperSectionAllowedOn)
-            {
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    if (section[j].isMappingOn)
-                    {
-                        section[j].mappingOffRequest = true;
-                        section[j].mappingOnRequest = false;
-                        section[j].mappingOffTimer = 0;
-                        section[j].mappingOnTimer = 0;
-                    }
-                    if (section[j].isSectionOn)
-                    {
-                        section[j].sectionOffRequest = true;
                         section[j].sectionOnRequest = false;
-                        section[j].sectionOffTimer = 0;
-                        section[j].sectionOnTimer = 0;
+                        if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
+                        isSuperSectionAllowedOn = false;
                     }
-                }
-
-                //turn on super section
-                section[tool.numOfSections].mappingOnRequest = true;
-                section[tool.numOfSections].mappingOffRequest = false;
-
-                section[tool.numOfSections].sectionOnRequest = true;
-                section[tool.numOfSections].sectionOffRequest = false;
-            }
-
-            /* Below is priority based. The last if statement is the one that is
-                * applied and takes the highest priority. Digital input controls
-                * have the highest priority and overide all buttons except
-                * the manual button which exits the loop and just turns sections on....
-                * Because isn't that what manual means! */
-
-            //turn on indivdual sections as super section turn off
-            else
-            {
-                //if the superSection is on, turn it off
-                if (section[tool.numOfSections].isSectionOn)
-                {
-                    section[tool.numOfSections].sectionOffRequest = true;
-                    section[tool.numOfSections].sectionOnRequest = false;
-                    section[tool.numOfSections].sectionOffTimer = 0;
-                    section[tool.numOfSections].sectionOnTimer = 0;
-                }
-
-                //if the superSection is on, turn it off
-                if (section[tool.numOfSections].isMappingOn)
-                {
-                    section[tool.numOfSections].mappingOffRequest = true;
-                    section[tool.numOfSections].mappingOnRequest = false;
-                    section[tool.numOfSections].mappingOffTimer = 0;
-                    section[tool.numOfSections].mappingOnTimer = 0;
-                }
-
-                //Mapping   ---------------------------------------------------------------------------------------------------
-                int endHeight = 1, startHeight = 1;
-
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    section[j].isMappingRequiredOn = false;
-
-                    //calculate slope
-                    mOn = (tool.lookAheadDistanceOnPixelsRight - tool.lookAheadDistanceOnPixelsLeft) / tool.rpWidth;
-                    mOff = (tool.lookAheadDistanceOffPixelsRight - tool.lookAheadDistanceOffPixelsLeft) / tool.rpWidth;
-
-                    //start and end point to scan across buffer
-                    start = section[j].rpSectionPosition - section[0].rpSectionPosition;
-                    end = section[j].rpSectionWidth - 1 + start;
-
-                    if (end >= tool.rpWidth)
-                        end = tool.rpWidth - 1;
-
-                    startHeight = (int)(tool.lookAheadDistanceOnPixelsLeft + (mOn * start));
-                    endHeight = (int)(tool.lookAheadDistanceOnPixelsLeft + (mOn * end));
-                    int height = (startHeight + endHeight) / 2;
-
-                    tagged = 0;
-                    totalPixel = 1;
-
-                    for (int pos = start; pos <= end; pos++)
+                    else
                     {
-                        endHeight = (int)(height * tool.rpWidth) + pos;
-
-                        for (int a = pos; a <= endHeight; a += tool.rpWidth)
+                        if (Needsupdate)
                         {
-                            totalPixel++;
-                            if (grnPixels[a] == 0) tagged++;
+                            UpdateBackBuffer(rpHeight, rpHeight2, false);
+                            Needsupdate = false;
                         }
-                    }
+                        //calculate the slope
+                        double mOn = (tool.lookAheadDistanceOnPixelsRight - tool.lookAheadDistanceOnPixelsLeft) / tool.rpWidth;
+                        double mOff = (tool.lookAheadDistanceOffPixelsRight - tool.lookAheadDistanceOffPixelsLeft) / tool.rpWidth;
+                        double mHyd = (vehicle.hydLiftLookAheadDistanceRight - vehicle.hydLiftLookAheadDistanceLeft) / tool.rpWidth;
 
-                    if ((tagged * 100) / totalPixel > (100 - tool.minCoverage))
-                    {
-                        section[j].isMappingRequiredOn = true;
-                    }
+                        if (end > tool.rpWidth) end = tool.rpWidth;
 
-                    //don't turn on if all applied
-                    if (section[j].isMappingRequiredOn == true)
-                    {
-                        startHeight = (int)(tool.lookAheadDistanceOffPixelsLeft + (mOff * start));
-                        endHeight = (int)(tool.lookAheadDistanceOffPixelsLeft + (mOff * end));
-                        height = (startHeight + endHeight) / 2;
+                        int tagged = 0;
+                        int tagged2 = 0;
+                        int totalPixs = 0;
 
-                        tagged = 0;
-                        for (int pos = start; pos <= end; pos++)
+
+                        for (int pos = start; pos < end; pos++)
                         {
-                            endHeight = (int)(height * tool.rpWidth) + pos;
+                            int StartHeight = (int)Math.Round((tool.lookAheadDistanceOffPixelsLeft - (rpHeight2 + 1)) + (mOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int StopHeight = (int)Math.Round((tool.lookAheadDistanceOnPixelsLeft - rpHeight2) + (mOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int StopHydHeight = (int)Math.Round((vehicle.hydLiftLookAheadDistanceLeft - rpHeight2) + (mHyd * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
 
-                            for (int a = pos; a <= endHeight; a += tool.rpWidth)
+                            for (int a = isToolInHeadland ? pos : StartHeight; a <= StopHeight || (isToolInHeadland && a <= StopHydHeight); a += tool.rpWidth)
                             {
-                                if (grnPixels[a] == 0) tagged++;
-                            }
-                        }
-
-                        if (tagged == 0) section[j].isMappingRequiredOn = false;
-                    }
-
-                    if (bnd.bndList.Count > 0)
-                    {
-                        //if out of boundary, turn it off
-                        if (!section[j].isInBoundary)
-                        {
-                            section[j].isMappingRequiredOn = false;
-                            section[j].mappingOffRequest = true;
-                            section[j].mappingOnRequest = false;
-                            section[j].mappingOffTimer = 0;
-                            section[j].mappingOnTimer = 0;
-                        }
-
-                        else if (section[j].isInHeadlandArea & bnd.isHeadlandOn & bnd.isSectionControlledByHeadland)
-                        {
-                            // if headland is on and out, turn off                             
-                            section[j].isMappingRequiredOn = false;
-                            section[j].mappingOffRequest = true;
-                            section[j].mappingOnRequest = false;
-                            section[j].mappingOffTimer = 0;
-                            section[j].mappingOnTimer = 0;
-                        }
-                    }
-                }
-
-                ///////////////////////////////////////////   Section control        ssssssssssssssssssssss
-                ///
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    section[j].isLookOnInHeadland = false;
-                }
-
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    //If any nowhere applied, send OnRequest, if its all green send an offRequest
-                    //ensure it starts off
-                    section[j].isSectionRequiredOn = false;
-
-                    if (bnd.bndList.Count > 0)
-                    {
-                        //if out of boundary, turn it off
-                        if (!section[j].isInBoundary)
-                        {
-                            section[j].isSectionRequiredOn = false;
-                            section[j].sectionOffRequest = true;
-                            section[j].sectionOnRequest = false;
-                            section[j].sectionOffTimer = 0;
-                            section[j].sectionOnTimer = 0;
-                        }
-                        else
-                        {
-                            //calculate the slopes of the lines
-                            mOn = (tool.lookAheadDistanceOnPixelsRight - tool.lookAheadDistanceOnPixelsLeft) / tool.rpWidth;
-                            mOff = (tool.lookAheadDistanceOffPixelsRight - tool.lookAheadDistanceOffPixelsLeft) / tool.rpWidth;
-
-                            start = section[j].rpSectionPosition - section[0].rpSectionPosition;
-                            end = section[j].rpSectionWidth - 1 + start;
-
-                            if (end >= tool.rpWidth)
-                                end = tool.rpWidth - 1;
-
-                            totalPixel = 1;
-                            tagged = 0;
-
-                            for (int pos = start; pos <= end; pos++)
-                            {
-                                if (isBoundaryClose)
+                                if (a >= 0 && a < grnPixelsLength)
                                 {
-                                    endHeight = tool.rpWidth + pos;
-                                    startHeight = pos;
-                                }
-                                else
-                                {
-                                    startHeight = (int)(tool.lookAheadDistanceOffPixelsLeft + (mOff * pos)) * tool.rpWidth + pos;
-                                    endHeight = (int)(tool.lookAheadDistanceOnPixelsLeft + (mOn * pos)) * tool.rpWidth + pos;
-                                }
-
-                                for (int a = startHeight; a <= endHeight; a += tool.rpWidth)
-                                {
-                                    totalPixel++;
-                                    if (grnPixels[a] == 0) tagged++;
-                                }
-                            }
-                            if ((tagged * 100) / totalPixel > (100 - tool.minCoverage))
-                            {
-                                section[j].isSectionRequiredOn = true;
-                            }
-                            else
-                            {
-                                section[j].isSectionRequiredOn = false;
-                            }
-
-                            //is headland coming up
-                            if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland)
-                            {
-                                bool isHeadlandInLookOn = false;
-
-                                //is headline in off to on area
-                                mOn = (tool.lookAheadDistanceOnPixelsRight - tool.lookAheadDistanceOnPixelsLeft) / tool.rpWidth;
-                                mOff = (tool.lookAheadDistanceOffPixelsRight - tool.lookAheadDistanceOffPixelsLeft) / tool.rpWidth;
-
-                                start = section[j].rpSectionPosition - section[0].rpSectionPosition;
-
-                                end = section[j].rpSectionWidth - 1 + start;
-
-                                if (end >= tool.rpWidth)
-                                    end = tool.rpWidth - 1;
-
-                                tagged = 0;
-
-                                for (int pos = start; pos <= end; pos++)
-                                {
-                                    startHeight = (int)(tool.lookAheadDistanceOffPixelsLeft + (mOff * pos)) * tool.rpWidth + pos;
-                                    endHeight = (int)(tool.lookAheadDistanceOnPixelsLeft + (mOn * pos)) * tool.rpWidth + pos;
-
-                                    for (int a = startHeight; a <= endHeight; a += tool.rpWidth)
+                                    int Procent5 = grnPixels[a] % 5;
+                                    if (a >= StartHeight && a <= StopHeight)
                                     {
-                                        if (a < 0)
-                                            mOn = 0;
-                                        if (grnPixels[a] == 250)
-                                        {
-                                            isHeadlandInLookOn = true;
-                                            goto GetOutHdOn;
-                                        }
+                                        totalPixs++;
+                                        if (bnd.bndList.Count == 0 ? grnPixels[a] == 252 : (grnPixels[a] == 250 || grnPixels[a] == 245 || grnPixels[a] == 240 || grnPixels[a] == 235))
+                                            ++tagged;
+                                        else if (Procent5 == 2 || Procent5 == 1)//when outside fence dont wait for sectionOverlapTimer
+                                            ++tagged2;
+                                    }
+                                    if (isToolInHeadland)
+                                    {
+                                        totalHead++;
+                                        if (Procent5 != 0)//when inner should also lift if (grnPixels[a] % 5 == 2 || grnPixels[a] % 5 == 4) outside only
+                                            ++taggedHead;
                                     }
                                 }
-                                GetOutHdOn:
-
-                                //determine if look ahead points are completely in headland
-                                if (section[j].isSectionRequiredOn && section[j].isLookOnInHeadland && !isHeadlandInLookOn)
-                                {
-                                    section[j].isSectionRequiredOn = false;
-                                    section[j].sectionOffRequest = true;
-                                    section[j].sectionOnRequest = false;
-                                }
-
-                                if (section[j].isSectionRequiredOn && !section[j].isLookOnInHeadland && isHeadlandInLookOn)
-                                {
-                                    section[j].isSectionRequiredOn = true;
-                                    section[j].sectionOffRequest = false;
-                                    section[j].sectionOnRequest = true;
-                                }
                             }
                         }
-                    }
-
-                    else  //Section Control in no boundary field
-                    {
-                        //calculate the slopes of the lines
-                        mOn = (tool.lookAheadDistanceOnPixelsRight - tool.lookAheadDistanceOnPixelsLeft) / tool.rpWidth;
-                        mOff = (tool.lookAheadDistanceOffPixelsRight - tool.lookAheadDistanceOffPixelsLeft) / tool.rpWidth;
-
-                        start = section[j].rpSectionPosition - section[0].rpSectionPosition;
-                        end = section[j].rpSectionWidth - 1 + start;
-
-                        if (end >= tool.rpWidth)
-                            end = tool.rpWidth - 1;
-
-                        totalPixel = 1;
-                        tagged = 0;
-
-                        for (int pos = start; pos <= end; pos++)
+                        if (tagged2 > totalPixs * 0.1)
                         {
-                            if (isBoundaryClose)
-                            {
-                                endHeight = tool.rpWidth + pos;
-                                startHeight = pos;
-                            }
-                            else
-                            {
-                                startHeight = (int)(tool.lookAheadDistanceOffPixelsLeft + (mOff * pos)) * tool.rpWidth + pos;
-                                endHeight = (int)(tool.lookAheadDistanceOnPixelsLeft + (mOn * pos)) * tool.rpWidth + pos;
-                            }
-
-                            for (int a = startHeight; a <= endHeight; a += tool.rpWidth)
-                            {
-                                totalPixel++;
-                                if (grnPixels[a] == 0) tagged++;
-                            }
+                            section[j].sectionOnRequest = false;
+                            if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
                         }
-                        if ((tagged * 100) / totalPixel > (100 - tool.minCoverage))
-                        {
-                            section[j].isSectionRequiredOn = true;
-                        }
+                        else if (section[j].sectionOnRequest)
+                            section[j].sectionOnRequest = tagged > 0 && (tagged * 100.0) / totalPixs >= 100.0 - tool.minCoverage;
                         else
+                            section[j].sectionOnRequest = tagged > 1 && (tagged * 100.0) / totalPixs >= 100.0 - tool.minCoverage;
+
+                        isSuperSectionAllowedOn &= (section[j].mappingOnTimer < 2 && (section[j].mappingOffTimer > 1 || section[j].sectionOverlapTimer + section[j].mappingOffTimer > (section[j].sectionOnRequest ? 1 : 2))) || (section[j].sectionOnRequest && (section[j].isMappingOn || section[j].mappingOnTimer == 1 || HzTime * tool.lookAheadOnSetting < 1));
+                    }
+                }
+            }
+            section[tool.numOfSections].sectionOnRequest = isSuperSectionAllowedOn;
+            /*
+            if (!Needsupdate && DrawBackBuffer)
+            {
+                total = grnPixelsLength;
+                outside = 0;
+                ininner = 0;
+                infield = 0;
+                inhead0 = 0;
+                inhead1 = 0;
+                tramcnt = 0;
+                section0x = 0;
+                section1x = 0;
+                section2x = 0;
+                section3x = 0;
+                section4x = 0;
+                section5x = 0;
+                section6x = 0;
+                section7x = 0;
+                section8x = 0;
+                section9x = 0;
+                section10x = 0;
+                section11x = 0;
+                unknown = 0;
+
+                for (int a = 0; a < grnPixelsLength; a++)
+                {
+                    int dfdf = grnPixels[a];
+                    int tt4 = grnPixels[a] % 5;
+                    if (grnPixels[a] < 13 || grnPixels[a] > 252)
+                    {
+                        unknown++;
+                    }
+                    else
+                    {
+                        if ((grnPixels[a] % 20 >= 0 && grnPixels[a] % 20 < 8) || (grnPixels[a] % 20 > 12 && grnPixels[a] % 20 < 20))
+                            tramcnt++;
+
+                        if (tt4 == 0)
+                            infield++;
+                        else if (tt4 == 1)
+                            ininner++;
+                        else if (tt4 == 2)
+                            outside++;
+                        else if (tt4 == 3)
+                            inhead1++;
+                        else if (tt4 == 4)
+                            inhead0++;
+
+                        if (grnPixels[a] > 232)
+                            section0x++;
+                        else if (grnPixels[a] > 212)
+                            section1x++;
+                        else if (grnPixels[a] > 192)
+                            section2x++;
+                        else if (grnPixels[a] > 172)
+                            section3x++;
+                        else if (grnPixels[a] > 152)
+                            section4x++;
+                        else if (grnPixels[a] > 132)
+                            section5x++;
+                        else if (grnPixels[a] > 112)
+                            section6x++;
+                        else if (grnPixels[a] > 92)
+                            section7x++;
+                        else if (grnPixels[a] > 72)
+                            section8x++;
+                        else if (grnPixels[a] > 52)
+                            section9x++;
+                        else if (grnPixels[a] > 32)
+                            section10x++;
+                        else if (grnPixels[a] > 12)
+                            section11x++;
+                    }
+                }
+            }
+            */
+
+            tram.controlByte = 0;
+            if (tram.displayMode != 0 && isTramOnBackBuffer)
+            {
+                int offset = 0;
+                if (Needsupdate)
+                    UpdateBackBuffer(1, 0, true);
+
+                else if (rpHeight2 > 0 || rpHeight + rpHeight2 < 1)
+                    GL.ReadPixels(tool.rpXPosition, 10, tool.rpWidth, 1, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
+                else if (rpHeight2 < 0)
+                    offset = -rpHeight2 * tool.rpWidth;
+
+                if (tool.toolWidth > vehicle.trackWidth)
+                {
+                    int int1 = grnPixels[offset + (int)(tram.halfWheelTrack * 10)];
+                    int int2 = grnPixels[offset + (int)(tool.rpWidth / 2 - tram.halfWheelTrack * 10)];
+                    int int3 = grnPixels[offset + (int)(tool.rpWidth / 2 + tram.halfWheelTrack * 10)];
+                    int int4 = grnPixels[offset + (int)(tool.rpWidth - tram.halfWheelTrack * 10)];
+
+                    //%20
+                    //13-19
+                    //00-07
+                    int pos1 = int1 % 20;
+                    int pos2 = int2 % 20;
+                    int pos3 = int3 % 20;
+                    int pos4 = int4 % 20;
+
+                    //1 pixels in is there a tram line?
+                    if (int1 > 0 && (((pos1 > 12) && (pos1 < 20)) || ((pos1 >= 0) && (pos1 < 8)))) tram.controlByte += 4;
+                    if (int2 > 0 && int3 > 0 && (((pos2 > 12) && (pos2 < 20)) || ((pos2 >= 0) && (pos2 < 8))) &&
+                       (((pos3 > 12) && (pos3 < 20)) || ((pos3 >= 0) && (pos3 < 8)))) tram.controlByte += 2;
+                    if (int4 > 0 && (((pos4 > 12) && (pos4 < 20)) || ((pos4 >= 0) && (pos4 < 8)))) tram.controlByte += 1;
+                }
+            }
+
+            if (!Needsupdate)//set hydraulics based on tool in headland or not
+            {
+                if (vehicle.isHydLiftOn && pn.speed > 0.2 && autoBtnState == btnStates.Auto)
+                {
+                    if (totalHead > 0 && taggedHead >= totalHead)
+                    {
+                        p_239.pgn[p_239.hydLift] = 2;
+                        if (!sounds.isHydLiftChange)
                         {
-                            section[j].isSectionRequiredOn = false;
+                            if (sounds.isHydLiftSoundOn) CSound.sndHydLiftUp.Play();
+                            sounds.isHydLiftChange = true;
                         }
                     }
-
-                    if (section[j].speedPixels < 0)
+                    else
                     {
-                        section[j].isSectionRequiredOn = false;
-
-                        section[j].isMappingRequiredOn = false;
-                        section[j].mappingOffRequest = true;
-                        section[j].mappingOnRequest = false;
-                    }
-                }  // end of go thru all sections "for"
-
-                //if Master Auto is on
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    if (section[j].isSectionRequiredOn && section[j].isAllowedOn)
-                    {
-                        //global request to turn on section
-                        section[j].sectionOnRequest = true;
-                        section[j].sectionOffRequest = false;
-                    }
-
-                    else if (!section[j].isSectionRequiredOn)
-                    {
-                        //global request to turn off section
-                        section[j].sectionOffRequest = true;
-                        section[j].sectionOnRequest = false;
-                    }
-
-                    // Manual on, force the section On and exit loop so digital is also overidden
-                    if (section[j].manBtnState == btnStates.On)
-                    {
-                        section[j].sectionOnRequest = true;
-                        section[j].sectionOffRequest = false;
-                        continue;
-                    }
-
-                    if (section[j].manBtnState == btnStates.Off)
-                    {
-                        section[j].sectionOnRequest = false;
-                        section[j].sectionOffRequest = true;
-                    }
-
-                    //if going too slow turn off sections
-                    if (pn.speed < vehicle.slowSpeedCutoff)
-                    {
-                        section[j].sectionOnRequest = false;
-                        section[j].sectionOffRequest = true;
+                        p_239.pgn[p_239.hydLift] = 1;
+                        if (sounds.isHydLiftChange)
+                        {
+                            if (sounds.isHydLiftSoundOn) CSound.sndHydLiftDn.Play();
+                            sounds.isHydLiftChange = false;
+                        }
                     }
                 }
-
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    //now for  mapping
-                    if (section[j].isMappingRequiredOn && section[j].isAllowedOn)
-                    {
-                        //global request to turn on section
-                        section[j].mappingOnRequest = true;
-                        section[j].mappingOffRequest = false;
-                    }
-
-                    else if (!section[j].isMappingRequiredOn)
-                    {
-                        //global request to turn off section
-                        section[j].mappingOffRequest = true;
-                        section[j].mappingOnRequest = false;
-                    }
-
-                    // Manual on, force the section On and exit loop so digital is also overidden
-                    if (section[j].manBtnState == btnStates.On)
-                    {
-                        section[j].mappingOnRequest = true;
-                        section[j].mappingOffRequest = false;
-                        continue;
-                    }
-
-                    if (section[j].manBtnState == btnStates.Off)
-                    {
-                        section[j].mappingOnRequest = false;
-                        section[j].mappingOffRequest = true;
-                    }
-
-                    //if going too slow turn off sections
-                    if (pn.speed < vehicle.slowSpeedCutoff)
-                    {
-                        section[j].mappingOnRequest = false;
-                        section[j].mappingOffRequest = true;
-                    }
-
-                }
-            } // end of supersection is off
+            }
 
             //Checks the workswitch if required
             mc.CheckWorkAndSteerSwitch();
@@ -1257,14 +730,6 @@ namespace AgOpenGPS
 
             //send the byte out to section machines
             BuildMachineByte();
-
-            ////send the machine out to port
-            //SendOutUSBMachinePort(mc.machineData, CModuleComm.pgnSentenceLength);
-
-            //////send machine data to autosteer if checked
-            //if (mc.isMachineDataSentToAutoSteer)
-            //    SendOutUSBAutoSteerPort(mc.machineData, CModuleComm.pgnSentenceLength);
-
 
             //if a minute has elapsed save the field in case of crash and to be able to resume            
             if (minuteCounter > 30 && sentenceCounter < 20)
@@ -1314,6 +779,157 @@ namespace AgOpenGPS
                 tmrWatchdog.Enabled = true;
             }
             //this is the end of the "frame". Now we wait for next NMEA sentence with a valid fix. 
+        }
+
+        private void UpdateBackBuffer(int rpHeight, int rpHeight2, bool tramOnly)
+        {
+            oglBack.MakeCurrent();
+
+            GL.Disable(EnableCap.Blend);
+            GL.BlendEquation(BlendEquationMode.FuncAdd);
+            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
+
+            GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
+            GL.LoadIdentity();// Reset The View
+
+            //rotate camera so heading matched fix heading in the world
+            GL.Rotate(glm.toDegrees(toolPos.heading), 0, 0, 1);
+
+            //translate to that spot in the world
+            GL.Translate(-toolPos.easting, -toolPos.northing, 0);
+
+            GL.Color3((byte)0, (byte)252, (byte)0);
+            GL.Begin(PrimitiveType.TriangleStrip);
+
+            GL.Vertex3(toolPos.easting - 200, toolPos.northing - 200, 0);
+            GL.Vertex3(toolPos.easting + 200, toolPos.northing - 200, 0);
+            GL.Vertex3(toolPos.easting - 200, toolPos.northing + 200, 0);
+            GL.Vertex3(toolPos.easting + 200, toolPos.northing + 200, 0);
+
+            GL.End();
+
+
+            if (!tramOnly)
+            {
+                if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland && bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.points.Count > 0)
+                {
+                    GL.Color3((byte)0, (byte)249, (byte)0);
+                    bnd.bndList[0].fenceLine.DrawPolyLine(DrawType.Triangles);
+
+                    GL.Color3((byte)0, (byte)250, (byte)0);
+                    bnd.bndList[0].hdLine.DrawPolyLine(DrawType.Triangles);
+                }
+                else if (bnd.bndList.Count > 0)
+                {
+                    GL.Color3((byte)0, (byte)250, (byte)0);
+                    bnd.bndList[0].fenceLine.DrawPolyLine(DrawType.Triangles);
+                }
+
+                for (int k = 1; k < bnd.bndList.Count; k++)
+                {
+                    if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland && bnd.bndList[k].hdLine.points.Count > 0)
+                    {
+                        GL.Color3((byte)0, (byte)248, (byte)0);
+                        bnd.bndList[k].hdLine.DrawPolyLine(DrawType.Triangles);
+                    }
+
+                    GL.Color3((byte)0, (byte)251, (byte)0);
+                    bnd.bndList[k].fenceLine.DrawPolyLine(DrawType.Triangles);
+                }
+            }
+
+            GL.Enable(EnableCap.Blend);
+            GL.BlendEquation(BlendEquationMode.FuncReverseSubtract);
+
+            //draw 245 green for the tram tracks
+            if (isTramOnBackBuffer && tram.displayMode != 0)
+            {
+                GL.Color4((byte)0, (byte)5, (byte)0, (byte)0);
+                GL.LineWidth(8);
+
+                tram.DrawTram();
+            }
+
+            if (!tramOnly)
+            {
+                GL.Color4((byte)0, (byte)20, (byte)0, (byte)0);
+
+
+                for (int j = 0; j < tool.numSuperSection; j++)
+                {
+
+                    //for every new chunk of patch
+                    foreach (var triList in section[j].patchList)
+                    {
+                        bool isDraw = false;
+                        int count2 = triList.Count;
+                        for (int i = 1; i < count2; i += 3)
+                        {
+                            //determine if point is in frustum or not
+                            if (triList[i].easting > pivotAxlePos.easting + 50)
+                                continue;
+                            if (triList[i].easting < pivotAxlePos.easting - 50)
+                                continue;
+                            if (triList[i].northing > pivotAxlePos.northing + 50)
+                                continue;
+                            if (triList[i].northing < pivotAxlePos.northing - 50)
+                                continue;
+
+                            //point is in frustum so draw the entire patch
+                            isDraw = true;
+                            break;
+                        }
+
+                        if (isDraw)
+                        {
+                            //draw the triangles in each triangle strip
+                            GL.Begin(PrimitiveType.TriangleStrip);
+                            for (int i = 1; i < count2; i++) GL.Vertex3(triList[i].easting, triList[i].northing, 0);
+                            GL.End();
+                        }
+                    }
+
+                    int patchCount;
+                    // the follow up to sections patches
+                    if (section[j].isMappingOn && (patchCount = section[j].triangleList.Count) > 2)
+                    {
+                        //draw the triangle in each triangle strip
+                        GL.Begin(PrimitiveType.TriangleStrip);
+
+                        for (int k = 1; k < patchCount; k++)
+                        {
+                            GL.Vertex3(section[j].triangleList[k].easting, section[j].triangleList[k].northing, 0);
+                        }
+                        GL.Vertex3(section[j].leftPoint.easting, section[j].leftPoint.northing, 0);
+                        GL.Vertex3(section[j].rightPoint.easting, section[j].rightPoint.northing, 0);
+
+                        GL.End();
+                    }
+                }
+            }
+
+            //finish it up - we need to read the ram of video card
+            GL.Flush();
+
+            //read the whole block of pixels up to max lookahead, one read only
+            GL.ReadPixels(tool.rpXPosition, 10 + rpHeight2, tool.rpWidth, rpHeight - rpHeight2, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
+
+            //Outside        = 252
+            //inside inner   = 251
+            //inside field   = 250
+            //headland       = 249
+            //headland inner = 248
+
+            //tram           = -5 max 3x overlap
+            //section        = -20 max 11x overlap
+
+            if (Debugger.IsAttached)
+            {
+                //Paint to context for troubleshooting
+                oglBack.BringToFront();
+                oglBack.SwapBuffers();
+            }
+            else oglBack.SendToBack();
         }
 
         private void oglZoom_Load(object sender, EventArgs e)

@@ -48,7 +48,7 @@ namespace AgOpenGPS
 
             for (int i = 0; i < bndList.Count; i++)
             {
-                bndList[i].fenceLine.DrawPolyLine(DrawType.Triangles);
+                bndList[i].fenceLine.DrawPolyLine(DrawType.LineLoop);
             }
 
             if (bndBeingMadePts.Count > 0)

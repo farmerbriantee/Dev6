@@ -9,6 +9,8 @@ namespace AgOpenGPS
 
         public List<CBoundaryList> bndList = new List<CBoundaryList>();
 
+        public bool isHeadlandOn, isSectionControlledByHeadland;
+
         //constructor
         public CBoundary(FormGPS _f)
         {

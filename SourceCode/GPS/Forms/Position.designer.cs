@@ -1127,132 +1127,109 @@ namespace AgOpenGPS
             {
                 if (j == 0)
                 {
+                    vec2 lastLeftPoint = section[j].leftPoint;
                     //only one first left point, the rest are all rights moved over to left
                     section[j].leftPoint = new vec2(cosHeading * (section[j].positionLeft) + easting,
                                        sinHeading * (section[j].positionLeft) + northing);
 
-                    left = section[j].leftPoint - section[j].lastLeftPoint;
-
-                    //save a copy for next time
-                    section[j].lastLeftPoint = section[j].leftPoint;
+                    left = section[j].leftPoint - lastLeftPoint;
 
                     //get the speed for left side only once
+                    leftSpeed = left.GetLength() / fixUpdateTime;
+                    if (leftSpeed > 27.7778) leftSpeed = 27.7778;
 
-                    leftSpeed = left.GetLength() / fixUpdateTime * 10;
-                    if (leftSpeed > meterPerSecPerPixel) leftSpeed = meterPerSecPerPixel;
+                    //Is section outer going forward or backward
+                    if (Math.PI - Math.Abs(Math.Abs(left.HeadingXZ() - toolPos.heading) - Math.PI) > glm.PIBy2)
+                    {
+                        if (leftSpeed > 0) leftSpeed *= -1;
+                    }
+                    tool.toolFarLeftSpeed = tool.toolFarLeftSpeed * 0.9 + leftSpeed * 0.1;
                 }
                 else
                 {
-                    //right point from last section becomes this left one
                     section[j].leftPoint = section[j - 1].rightPoint;
-                    left = section[j].leftPoint - section[j].lastLeftPoint;
-
-                    //save a copy for next time
-                    section[j].lastLeftPoint = section[j].leftPoint;
-
-                    //Save the slower of the 2
-                    if (leftSpeed > rightSpeed) leftSpeed = rightSpeed;
+                    leftSpeed = rightSpeed;
                 }
+
+                vec2 lastRightPoint = section[j].rightPoint;
 
                 section[j].rightPoint = new vec2(cosHeading * (section[j].positionRight) + easting,
                                     sinHeading * (section[j].positionRight) + northing);
 
                 //now we have left and right for this section
-                right = section[j].rightPoint - section[j].lastRightPoint;
-
-                //save a copy for next time
-                section[j].lastRightPoint = section[j].rightPoint;
+                right = section[j].rightPoint - lastRightPoint;
 
                 //grab vector length and convert to meters/sec/10 pixels per meter                
-                rightSpeed = right.GetLength() / fixUpdateTime * 10;
-                if (rightSpeed > meterPerSecPerPixel) rightSpeed = meterPerSecPerPixel;
+                rightSpeed = right.GetLength() / fixUpdateTime;
+                if (rightSpeed > 27.7778) rightSpeed = 27.7778;
 
-                //Is section outer going forward or backward
-                double head = left.HeadingXZ();
-                if (Math.PI - Math.Abs(Math.Abs(head - toolPos.heading) - Math.PI) > glm.PIBy2)
-                {
-                    if (leftSpeed > 0) leftSpeed *= -1;
-                }
-
-                head = right.HeadingXZ();
-                if (Math.PI - Math.Abs(Math.Abs(head - toolPos.heading) - Math.PI) > glm.PIBy2)
-                {
+                if (Math.PI - Math.Abs(Math.Abs(right.HeadingXZ() - toolPos.heading) - Math.PI) > glm.PIBy2)
                     if (rightSpeed > 0) rightSpeed *= -1;
-                }
 
-                double sped = 0;
                 //save the far left and right speed in m/sec averaged over 20%
-                if (j == 0)
-                {
-                    sped = (leftSpeed * 0.1);
-                    if (sped < 0.1) sped = 0.1;
-                    tool.toolFarLeftSpeed = tool.toolFarLeftSpeed * 0.9 + sped * 0.1;
-                }
                 if (j == tool.numOfSections - 1)
-                {
-                    sped = (rightSpeed * 0.1);
-                    if (sped < 0.1) sped = 0.1;
-                    tool.toolFarRightSpeed = tool.toolFarRightSpeed * 0.9 + sped * 0.1;
-                }
+                    tool.toolFarRightSpeed = tool.toolFarRightSpeed * 0.9 + rightSpeed * 0.1;
 
-                //choose fastest speed
-                if (leftSpeed > rightSpeed)
-                {
-                    sped = leftSpeed;
-                    leftSpeed = rightSpeed;
-                }
-                else sped = rightSpeed;
-                section[j].speedPixels = section[j].speedPixels * 0.9 + sped * 0.1;
+                double sped = (leftSpeed > rightSpeed) ? leftSpeed : rightSpeed; //choose fastest speed
+                section[j].speedPixels = section[j].speedPixels * 0.9 + sped;
             }
 
             //fill in tool positions
             section[tool.numOfSections].leftPoint = section[0].leftPoint;
             section[tool.numOfSections].rightPoint = section[tool.numOfSections - 1].rightPoint;
 
+            double oneFrameLeft = tool.toolFarLeftSpeed * fixUpdateTime * 10;
+            double oneFrameRight = tool.toolFarRightSpeed * fixUpdateTime * 10;
+
+            if (!isFastSections)
+            {
+                oneFrameLeft *= 2;
+                oneFrameRight *= 2;
+            }
+
             //set the look ahead for hyd Lift in pixels per second
-            vehicle.hydLiftLookAheadDistanceLeft = tool.toolFarLeftSpeed * vehicle.hydLiftLookAheadTime * 10;
-            vehicle.hydLiftLookAheadDistanceRight = tool.toolFarRightSpeed * vehicle.hydLiftLookAheadTime * 10;
+            vehicle.hydLiftLookAheadDistanceLeft = oneFrameLeft + tool.toolFarLeftSpeed * vehicle.hydLiftLookAheadTime * 10;
+            vehicle.hydLiftLookAheadDistanceRight = oneFrameRight + tool.toolFarRightSpeed * vehicle.hydLiftLookAheadTime * 10;
 
-            if (vehicle.hydLiftLookAheadDistanceLeft > 200) vehicle.hydLiftLookAheadDistanceLeft = 200;
-            if (vehicle.hydLiftLookAheadDistanceRight > 200) vehicle.hydLiftLookAheadDistanceRight = 200;
+            if (vehicle.hydLiftLookAheadDistanceLeft > 250) vehicle.hydLiftLookAheadDistanceLeft = 250;
+            else if (vehicle.hydLiftLookAheadDistanceLeft < -250) vehicle.hydLiftLookAheadDistanceLeft = -250;
+            if (vehicle.hydLiftLookAheadDistanceRight > 250) vehicle.hydLiftLookAheadDistanceRight = 250;
+            else if (vehicle.hydLiftLookAheadDistanceRight < -250) vehicle.hydLiftLookAheadDistanceRight = -250;
 
-            tool.lookAheadDistanceOnPixelsLeft = tool.toolFarLeftSpeed * tool.lookAheadOnSetting * 10;
-            tool.lookAheadDistanceOnPixelsRight = tool.toolFarRightSpeed * tool.lookAheadOnSetting * 10;
+            tool.lookAheadDistanceOnPixelsLeft = oneFrameLeft + tool.toolFarLeftSpeed * tool.lookAheadOnSetting * 10;
+            tool.lookAheadDistanceOnPixelsRight = oneFrameRight + tool.toolFarRightSpeed * tool.lookAheadOnSetting * 10;
 
-            if (tool.lookAheadDistanceOnPixelsLeft > 200) tool.lookAheadDistanceOnPixelsLeft = 200;
-            if (tool.lookAheadDistanceOnPixelsRight > 200) tool.lookAheadDistanceOnPixelsRight = 200;
+            tool.lookAheadDistanceOffPixelsLeft = -oneFrameLeft + tool.toolFarLeftSpeed * tool.lookAheadOffSetting * 10;
+            tool.lookAheadDistanceOffPixelsRight = -oneFrameLeft + tool.toolFarRightSpeed * tool.lookAheadOffSetting * 10;
 
-            tool.lookAheadDistanceOffPixelsLeft = tool.toolFarLeftSpeed * tool.lookAheadOffSetting * 10;
-            tool.lookAheadDistanceOffPixelsRight = tool.toolFarRightSpeed * tool.lookAheadOffSetting * 10;
-
-            if (tool.lookAheadDistanceOffPixelsLeft > 160) tool.lookAheadDistanceOffPixelsLeft = 160;
-            if (tool.lookAheadDistanceOffPixelsRight > 160) tool.lookAheadDistanceOffPixelsRight = 160;
-
-
-
-            //THIS WILL ALL BE DELETED 
-            //RETURNS TRUE FOR EVERYTHING
-
-            tool.isLeftSideInHeadland = false;
-            tool.isRightSideInHeadland = false;
-
-            for (int j = 0; j < tool.numOfSections; j++)
+            if (tool.lookAheadDistanceOnPixelsLeft > 250)
             {
-                section[j].isInHeadlandArea = false;
+                tool.lookAheadDistanceOnPixelsLeft = 250;
+                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
+                if (tool.lookAheadDistanceOffPixelsLeft > 250 * ss)
+                    tool.lookAheadDistanceOffPixelsLeft = 250 * ss;
             }
-
-
-            //is the tool in or out based on endpoints
-            bnd.isToolOuterPointsInHeadland = false;
-
-            //set up the super for youturn
-            section[tool.numOfSections].isInBoundary = true;
-
-            for (int j = 0; j < tool.numOfSections; j++)
+            else if (tool.lookAheadDistanceOnPixelsLeft < -250)
             {
-                section[j].isInBoundary = true;
+                tool.lookAheadDistanceOnPixelsLeft = -250;
+                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
+                if (tool.lookAheadDistanceOffPixelsLeft < -250 * ss)
+                    tool.lookAheadDistanceOffPixelsLeft = -250 * ss;
             }
-            section[tool.numOfSections].isInBoundary = true;
+            if (tool.lookAheadDistanceOnPixelsRight > 250)
+            {
+                tool.lookAheadDistanceOnPixelsRight = 250;
+                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
+                if (tool.lookAheadDistanceOffPixelsRight > 250 * ss)
+                    tool.lookAheadDistanceOffPixelsRight = 250 * ss;
+            }
+            else if (tool.lookAheadDistanceOnPixelsRight < -250)
+            {
+                tool.lookAheadDistanceOnPixelsRight = -250;
+                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
+                if (tool.lookAheadDistanceOffPixelsRight < -250 * ss)
+                    tool.lookAheadDistanceOffPixelsRight = -250 * ss;
+            }
         }
 
         private void DoRemoteSwitches()

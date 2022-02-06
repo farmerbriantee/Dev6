@@ -15,7 +15,6 @@ namespace AgOpenGPS
         public double toolFarLeftSpeed = 0;
         public double toolFarRightPosition = 0;
         public double toolFarRightSpeed = 0;
-        //public double toolFarLeftContourSpeed = 0, toolFarRightContourSpeed = 0;
 
         public double toolOverlap;
         public double toolTrailingHitchLength, toolTankTrailingHitchLength;
@@ -35,19 +34,12 @@ namespace AgOpenGPS
 
         public double hitchLength;
 
-
         //how many individual sections
         public int numOfSections;
-
         public int numSuperSection;
 
         //used for super section off on
         public int minCoverage;
-
-        public bool isSuperSectionAllowedOn;
-        public bool areAllSectionBtnsOn = true;
-
-        public bool isLeftSideInHeadland = true, isRightSideInHeadland = true;
 
         //read pixel values
         public int rpXPosition;
