@@ -39,10 +39,8 @@ namespace AgOpenGPS
                 }
 
                 New.CalculateFenceArea(mf.bnd.bndList.Count);
-                New.FixFenceLine(mf.bnd.bndList.Count);
 
                 mf.bnd.bndList.Add(New);
-                mf.fd.UpdateFieldBoundaryGUIAreas();
 
                 //turn lines made from boundaries
                 mf.CalculateMinMax();
@@ -123,10 +121,7 @@ namespace AgOpenGPS
 
         private void btnAddPoint_Click(object sender, EventArgs e)
         {
-
-            mf.bnd.isOkToAddPoints = true;
             mf.AddBoundaryPoint();
-            mf.bnd.isOkToAddPoints = false;
             lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
 
             mf.Focus();

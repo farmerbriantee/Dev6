@@ -247,7 +247,6 @@ namespace AgOpenGPS
 
                                 //build the boundary, make sure is clockwise for outer counter clockwise for inner
                                 New.CalculateFenceArea(mf.bnd.bndList.Count);
-                                New.FixFenceLine(mf.bnd.bndList.Count);
 
                                 mf.bnd.bndList.Add(New);
 
@@ -264,7 +263,6 @@ namespace AgOpenGPS
                     }
                     mf.FileSaveBoundary();
                     mf.bnd.BuildTurnLines();
-                    mf.fd.UpdateFieldBoundaryGUIAreas();
                     mf.CalculateMinMax();
 
                     btnSave.Enabled = true;
@@ -277,8 +275,6 @@ namespace AgOpenGPS
                     return;
                 }
             }
-
-            mf.bnd.isOkToAddPoints = false;
         }
 
         private void FindLatLon(string filename)
@@ -363,9 +359,6 @@ namespace AgOpenGPS
                     return;
                 }
             }
-
-            mf.bnd.isOkToAddPoints = false;
-
         }
 
         private void CreateNewField()

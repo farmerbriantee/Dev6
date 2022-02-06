@@ -1044,28 +1044,25 @@ namespace AgOpenGPS
 
             //build the boundary line
 
-            if (bnd.isOkToAddPoints)
+            if (bnd.isDrawRightSide)
             {
-                if (bnd.isDrawRightSide)
-                {
-                    //Right side
-                    vec3 point = new vec3(
-                        pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * -bnd.createBndOffset),
-                        pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * -bnd.createBndOffset), 
-                        pivotAxlePos.heading);
-                    bnd.bndBeingMadePts.Add(point);
-                }
+                //Right side
+                vec3 point = new vec3(
+                    pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * -bnd.createBndOffset),
+                    pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * -bnd.createBndOffset),
+                    pivotAxlePos.heading);
+                bnd.bndBeingMadePts.Add(point);
+            }
 
-                //draw on left side
-                else
-                {
-                    //Right side
-                    vec3 point = new vec3(
-                        pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * bnd.createBndOffset),
-                        pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * bnd.createBndOffset), 
-                        pivotAxlePos.heading);
-                    bnd.bndBeingMadePts.Add(point);
-                }
+            //draw on left side
+            else
+            {
+                //Right side
+                vec3 point = new vec3(
+                    pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * bnd.createBndOffset),
+                    pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * bnd.createBndOffset),
+                    pivotAxlePos.heading);
+                bnd.bndBeingMadePts.Add(point);
             }
         }
 

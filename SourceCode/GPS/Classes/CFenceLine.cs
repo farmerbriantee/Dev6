@@ -169,6 +169,8 @@ namespace AgOpenGPS
                 ReverseWinding();
             }
 
+            FixFenceLine(idx);
+
             return isClockwise;
         }
     }

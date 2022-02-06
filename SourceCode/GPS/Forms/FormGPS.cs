@@ -1148,7 +1148,7 @@ namespace AgOpenGPS
             fd.workedAreaTotal = 0;
 
             //reset GUI areas
-            fd.UpdateFieldBoundaryGUIAreas();
+            CalculateMinMax();
 
             displayFieldName = gStr.gsNone;
             FixTramModeButton();

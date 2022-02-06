@@ -483,8 +483,6 @@ namespace AgOpenGPS
 
             ahrs = new CAHRS();
 
-            fd.UpdateFieldBoundaryGUIAreas();
-
             //Set width of section and positions for each section
             SectionSetPosition();
 

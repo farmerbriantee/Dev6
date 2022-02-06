@@ -2511,7 +2511,8 @@ namespace AgOpenGPS
                 fieldCenterY = (maxFieldY + minFieldY) / 2.0;
             }
 
-            
+            fd.UpdateFieldBoundaryGUIAreas();
+
 
             //minFieldX -= 8;
             //minFieldY -= 8;

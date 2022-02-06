@@ -633,7 +633,6 @@ namespace AgOpenGPS
                 {
                     try
                     {
-
                         //read header
                         line = reader.ReadLine();//Boundary
 
@@ -678,33 +677,10 @@ namespace AgOpenGPS
 
                                 New.CalculateFenceArea(k);
 
-                                double delta = 0;
-                                New.fenceLineEar?.Clear();
-
-                                for (int i = 0; i < New.fenceLine.Count; i++)
-                                {
-                                    if (i == 0)
-                                    {
-                                        New.fenceLineEar.Add(new vec2(New.fenceLine[i].easting, New.fenceLine[i].northing));
-                                        continue;
-                                    }
-                                    delta += (New.fenceLine[i - 1].heading - New.fenceLine[i].heading);
-                                    if (Math.Abs(delta) > 0.04)
-                                    {
-                                        New.fenceLineEar.Add(new vec2(New.fenceLine[i].easting, New.fenceLine[i].northing));
-                                        delta = 0;
-                                    }
-                                }
-
                                 bnd.bndList.Add(New);
                             }
                         }
-
-                        CalculateMinMax();
-                        bnd.BuildTurnLines();
-                        if (bnd.bndList.Count > 0) btnABDraw.Visible = true;
                     }
-
                     catch (Exception e)
                     {
                         var form = new FormTimedMessage(2000, gStr.gsBoundaryLineFilesAreCorrupt, gStr.gsButFieldIsLoaded);
@@ -713,6 +689,10 @@ namespace AgOpenGPS
                     }
                 }
             }
+
+            CalculateMinMax();
+            bnd.BuildTurnLines();
+            if (bnd.bndList.Count > 0) btnABDraw.Visible = true;
 
             // Headland  -------------------------------------------------------------------------------------------------
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Headland.txt";

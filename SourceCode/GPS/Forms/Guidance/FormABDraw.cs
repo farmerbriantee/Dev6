@@ -40,8 +40,6 @@ namespace AgOpenGPS
                 nudDistance.Maximum = (int)(nudDistance.Maximum / 2.54M);
                 nudDistance.Minimum = (int)(nudDistance.Minimum / 2.54M);
             }
-
-            mf.CalculateMinMax();
         }
 
         private void FormABDraw_Load(object sender, EventArgs e)

@@ -198,11 +198,6 @@ namespace AgOpenGPS
             UpdateChart();
         }
 
-        private void btnSerialCancel_Click(object sender, EventArgs e)
-        {
-            mf.bnd.isOkToAddPoints = false;
-        }
-
         private void btnDelete_Click(object sender, EventArgs e)
         {
             DialogResult result3 = MessageBox.Show(gStr.gsCompletelyDeleteBoundary,
@@ -223,7 +218,7 @@ namespace AgOpenGPS
                 fenceSelected = -1;
 
                 mf.FileSaveBoundary();
-                mf.fd.UpdateFieldBoundaryGUIAreas();
+                mf.CalculateMinMax();
                 UpdateChart();
             }
             else
@@ -242,6 +237,8 @@ namespace AgOpenGPS
 
             UpdateChart();
             btnDelete.Enabled = false;
+
+            mf.CalculateMinMax();
         }
 
         private void btnOpenGoogleEarth_Click(object sender, EventArgs e)
@@ -264,23 +261,16 @@ namespace AgOpenGPS
 
             if (result3 == DialogResult.Yes)
             {
-
                 ResetAllBoundary();
-
-                mf.bnd.isOkToAddPoints = false;
-                mf.fd.UpdateFieldBoundaryGUIAreas();
             }
             else
             {
                 mf.TimedMessageBox(1500, gStr.gsNothingDeleted, gStr.gsActionHasBeenCancelled);
             }
-
         }
 
         private void btnReturn_Click(object sender, EventArgs e)
         {
-            mf.bnd.isOkToAddPoints = false;
-
             panelMain.Visible = true;
             panelChoose.Visible = false;
             panelKML.Visible = false;
@@ -332,9 +322,6 @@ namespace AgOpenGPS
                     else fileAndDirectory = ofd.FileName;
                 }
 
-                string coordinates = null;
-                int startIndex;
-
                 using (StreamReader reader = new StreamReader(fileAndDirectory))
                 {
 
@@ -344,10 +331,12 @@ namespace AgOpenGPS
                     {
                         while (!reader.EndOfStream)
                         {
+                            string coordinates = "";
+
                             //start to read the file
                             string line = reader.ReadLine();
 
-                            startIndex = line.IndexOf("<coordinates>");
+                            int startIndex = line.IndexOf("<coordinates>");
 
                             if (startIndex != -1)
                             {
@@ -394,13 +383,8 @@ namespace AgOpenGPS
                                     }
 
                                     New.CalculateFenceArea(mf.bnd.bndList.Count);
-                                    New.FixFenceLine(mf.bnd.bndList.Count);
 
                                     mf.bnd.bndList.Add(New);
-
-                                    mf.btnABDraw.Visible = true;
-
-                                    coordinates = "";
                                 }
                                 else
                                 {
@@ -413,6 +397,7 @@ namespace AgOpenGPS
                             }
                         }
                         mf.FileSaveBoundary();
+                        mf.CalculateMinMax();
                         mf.bnd.BuildTurnLines();
                         mf.btnABDraw.Visible = true;
                         UpdateChart();
@@ -423,7 +408,6 @@ namespace AgOpenGPS
                     }
                 }
             }
-            mf.bnd.isOkToAddPoints = false;
 
             panelMain.Visible = true;
             panelChoose.Visible = false;
@@ -432,7 +416,6 @@ namespace AgOpenGPS
             this.Size = new Size(566, 377);
 
             UpdateChart();
-
         }
 
         private void btnDriveOrExt_Click(object sender, EventArgs e)

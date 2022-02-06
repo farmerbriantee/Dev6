@@ -167,11 +167,14 @@ namespace AgOpenGPS
         {
             double length = GetLength();
             if (Math.Abs(length) < 0.000000000001)
-            {
-                throw new DivideByZeroException("Trying to normalize a vector with length of zero.");
-            }
+                return new vec2();
+            else
+                return new vec2(easting /= length, northing /= length);
+        }
 
-            return new vec2(easting /= length, northing /= length);
+        public double Cross(vec2 v2)
+        {
+            return northing * v2.easting - easting * v2.northing;
         }
 
         //Returns the length of the vector
