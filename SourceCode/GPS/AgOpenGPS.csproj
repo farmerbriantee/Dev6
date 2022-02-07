@@ -121,7 +121,9 @@
     <Compile Include="Classes\CBoundary.cs" />
     <Compile Include="Classes\CGuidance.cs" />
     <Compile Include="Classes\ZStaticClass.cs" />
-    <Compile Include="Classes\CRecordedPath.cs" />
+	<Compile Include="Classes\CRecordedPath.cs">
+      <DependentUpon>CGuidance.cs</DependentUpon>
+	</Compile>
     <Compile Include="Classes\CSettings.cs" />
     <Compile Include="Classes\CSound.cs" />
     <Compile Include="Classes\CSunTimes.cs" />
@@ -129,15 +131,23 @@
     <Compile Include="Classes\CBoundaryList.cs" />
     <Compile Include="Classes\CDubins.cs" />
     <Compile Include="Classes\CAHRS.cs" />
-    <Compile Include="Classes\CABCurve.cs" />
+    <Compile Include="Classes\CABCurve.cs">
+      <DependentUpon>CGuidance.cs</DependentUpon>
+    </Compile>
     <Compile Include="Classes\CFont.cs" />
     <Compile Include="Classes\CSim.cs" />
     <Compile Include="Classes\CTram.cs" />
-    <Compile Include="Classes\CYouTurn.cs" />
+	<Compile Include="Classes\CYouTurn.cs">
+      <DependentUpon>CGuidance.cs</DependentUpon>
+	</Compile>
     <Compile Include="Classes\CFlag.cs" />
-    <Compile Include="Classes\CABLine.cs" />
+    <Compile Include="Classes\CABLine.cs">
+      <DependentUpon>CGuidance.cs</DependentUpon>
+    </Compile>
     <Compile Include="Classes\CCamera.cs" />
-    <Compile Include="Classes\CContour.cs" />
+    <Compile Include="Classes\CContour.cs">
+      <DependentUpon>CGuidance.cs</DependentUpon>
+    </Compile>
     <Compile Include="Classes\CModuleComm.cs" />
     <Compile Include="Classes\CNMEA.cs" />
     <Compile Include="Classes\CSection.cs" />
