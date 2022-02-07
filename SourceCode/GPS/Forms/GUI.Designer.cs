@@ -145,14 +145,14 @@ namespace AgOpenGPS
                 {
                     lblCurrentField.Text = "Field: " + displayFieldName;
 
-                    if (curve.numCurveLineSelected > 0 && curve.isBtnCurveOn)
+                    if (gyd.numCurveLineSelected > 0 && gyd.isBtnCurveOn)
                     {
-                        lblCurveLineName.Text = "Cur-" + curve.curveArr[curve.numCurveLineSelected - 1].Name;
+                        lblCurveLineName.Text = "Cur-" + gyd.curveArr[gyd.numCurveLineSelected - 1].Name;
                     }
 
-                    else if (ABLine.numABLineSelected > 0 && ABLine.isBtnABLineOn)
+                    else if (gyd.numABLineSelected > 0 && gyd.isBtnABLineOn)
                     {
-                        lblCurveLineName.Text = "AB-" + ABLine.lineArr[ABLine.numABLineSelected - 1].Name;
+                        lblCurveLineName.Text = "AB-" + gyd.lineArr[gyd.numABLineSelected - 1].Name;
                     }
                     else lblCurveLineName.Text = string.Empty;
                 }
@@ -163,7 +163,7 @@ namespace AgOpenGPS
 
                 if (isJobStarted)
                 {
-                    if (ABLine.isBtnABLineOn || curve.isBtnCurveOn)
+                    if (gyd.isBtnABLineOn || gyd.isBtnCurveOn)
                     {
                         if (!btnEditAB.Visible)
                         {
@@ -204,35 +204,12 @@ namespace AgOpenGPS
                 minuteCounter++;
                 tenMinuteCounter++;
 
-                if (isStanleyUsed)
+                if (gyd.isBtnCurveOn || gyd.isBtnABLineOn || gyd.isContourBtnOn)
                 {
-                    if (curve.isBtnCurveOn || ABLine.isBtnABLineOn)
-                    {
-                        lblInty.Text = gyd.inty.ToString("N3");
-                    }
-                }
-                else
-                {
-                    if (curve.isBtnCurveOn)
-                    {
-                        lblInty.Text = curve.inty.ToString("N3");
-                    }
+                    lblInty.Text = gyd.inty.ToString("N3");
 
-                    else if (ABLine.isBtnABLineOn && !ct.isContourBtnOn)
-                    {
-                        lblInty.Text = ABLine.inty.ToString("N3");
-                    }
-
-                    else if (ct.isContourBtnOn) lblInty.Text = ct.inty.ToString("N3");
-                }
-
-                if (ABLine.isBtnABLineOn && !ct.isContourBtnOn)
-                {
-                    btnEditAB.Text = ((int)(ABLine.moveDistance * 100)).ToString();
-                }
-                if (curve.isBtnCurveOn && !ct.isContourBtnOn)
-                {
-                    btnEditAB.Text = ((int)(curve.moveDistance * 100)).ToString();
+                    if (!gyd.isContourBtnOn)
+                        btnEditAB.Text = ((int)(gyd.moveDistance * 100)).ToString();
                 }
 
                 //the main formgps window
@@ -296,7 +273,7 @@ namespace AgOpenGPS
                 //}
 
                 //Make sure it is off when it should
-                if ((!ABLine.isBtnABLineOn && !ct.isContourBtnOn && !curve.isBtnCurveOn && isAutoSteerBtnOn)
+                if ((!gyd.isBtnABLineOn && !gyd.isContourBtnOn && !gyd.isBtnCurveOn && isAutoSteerBtnOn)
                     ) btnAutoSteer.PerformClick();
 
                 //the main formgps window
@@ -491,9 +468,9 @@ namespace AgOpenGPS
             //fast or slow section update
             isFastSections = Properties.Vehicle.Default.setSection_isFast;
 
-            yt.rowSkipsWidth = Properties.Vehicle.Default.set_youSkipWidth;
-            cboxpRowWidth.SelectedIndex = yt.rowSkipsWidth - 1;
-            yt.Set_Alternate_skips();
+            gyd.rowSkipsWidth = Properties.Vehicle.Default.set_youSkipWidth;
+            cboxpRowWidth.SelectedIndex = gyd.rowSkipsWidth - 1;
+            gyd.Set_Alternate_skips();
 
             DisableYouTurnButtons();
 
@@ -510,7 +487,7 @@ namespace AgOpenGPS
 
             fd.workedAreaTotalUser = Settings.Default.setF_UserTotalArea;
 
-            yt.uTurnSmoothing = Settings.Default.setAS_uTurnSmoothing;
+            gyd.uTurnSmoothing = Settings.Default.setAS_uTurnSmoothing;
 
             tool.halfToolWidth = (tool.toolWidth - tool.toolOverlap) / 2.0;
 
@@ -861,7 +838,7 @@ namespace AgOpenGPS
                 //0 at bottom for opengl, 0 at top for windows, so invert Y value
                 Point point = oglMain.PointToClient(Cursor.Position);
 
-                if (point.Y < 90 && point.Y > 30 && (ABLine.isBtnABLineOn || curve.isBtnCurveOn))
+                if (point.Y < 90 && point.Y > 30 && (gyd.isBtnABLineOn || gyd.isBtnCurveOn))
                 {
 
                     int middle = oglMain.Width / 2 + oglMain.Width / 5;
@@ -888,14 +865,14 @@ namespace AgOpenGPS
                             return;
                         }
 
-                        if (yt.isYouTurnTriggered)
+                        if (gyd.isYouTurnTriggered)
                         {
-                            yt.ResetYouTurn();
+                            gyd.ResetYouTurn();
                         }
                         else
                         {
-                            yt.isYouTurnTriggered = true;
-                            yt.BuildManualYouTurn(false, true);
+                            gyd.isYouTurnTriggered = true;
+                            gyd.BuildManualYouTurn(false, true);
                             return;
                         }
                     }
@@ -909,20 +886,20 @@ namespace AgOpenGPS
                             return;
                         }
 
-                        if (yt.isYouTurnTriggered)
+                        if (gyd.isYouTurnTriggered)
                         {
-                            yt.ResetYouTurn();
+                            gyd.ResetYouTurn();
                         }
                         else
                         {
-                            yt.isYouTurnTriggered = true;
-                            yt.BuildManualYouTurn(true, true);
+                            gyd.isYouTurnTriggered = true;
+                            gyd.BuildManualYouTurn(true, true);
                             return;
                         }
                     }
                 }
 
-                if (point.Y < 150 && point.Y > 90 && (ABLine.isBtnABLineOn || curve.isBtnCurveOn))
+                if (point.Y < 150 && point.Y > 90 && (gyd.isBtnABLineOn || gyd.isBtnCurveOn))
                 {
                     int middle = oglMain.Width / 2 - oglMain.Width / 4;
                     if (point.X > middle - 140 && point.X < middle && isLateralOn)
@@ -934,7 +911,7 @@ namespace AgOpenGPS
                             return;
                         }
 
-                        yt.BuildManualYouLateral(false);
+                        gyd.BuildManualYouLateral(false);
                         return;
                     }
 
@@ -947,7 +924,7 @@ namespace AgOpenGPS
                             return;
                         }
 
-                        yt.BuildManualYouLateral(true);
+                        gyd.BuildManualYouLateral(true);
                         return;
                     }
                 }
@@ -1059,9 +1036,9 @@ namespace AgOpenGPS
         }
         public void EnableYouTurnButtons()
         {
-            yt.ResetYouTurn();
+            gyd.ResetYouTurn();
 
-            yt.isYouTurnBtnOn = false;
+            gyd.isYouTurnBtnOn = false;
             btnAutoYouTurn.Enabled = true;
 
             btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
@@ -1071,9 +1048,9 @@ namespace AgOpenGPS
 
             //btnAutoYouTurn.Enabled = false;
 
-            yt.isYouTurnBtnOn = false;
+            gyd.isYouTurnBtnOn = false;
             btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
-            yt.ResetYouTurn();
+            gyd.ResetYouTurn();
         }
 
         private void ShowNoGPSWarning()

@@ -24,17 +24,8 @@ namespace AgOpenGPS
         }
     }
 
-    public class CRecordedPath
+    public partial class CGuidance
     {
-        //constructor
-        public CRecordedPath(FormGPS _f)
-        {
-            mf = _f;
-        }
-
-        //pointers to mainform controls
-        private readonly FormGPS mf;
-
         //the recorded path from driving around
         public List<CRecPathPt> recList = new List<CRecPathPt>();
 
@@ -47,12 +38,6 @@ namespace AgOpenGPS
 
         //list of vec3 points of Dubins shortest path between 2 points - To be converted to RecPt
         public List<vec3> shortestDubinsList = new List<vec3>();
-
-        //generated reference line
-        public vec2 refPoint1 = new vec2(1, 1), refPoint2 = new vec2(2, 2);
-
-        public double distanceFromRefLine, distanceFromCurrentLinePivot;
-        private int A, B, C;
 
         public int currentPositonIndex;
 
@@ -67,14 +52,8 @@ namespace AgOpenGPS
         public bool isBtnFollowOn, isEndOfTheRecLine, isRecordOn;
         public bool isDrivingRecordedPath, isFollowingDubinsToPath, isFollowingRecPath, isFollowingDubinsHome;
 
-        public double pivotDistanceError, pivotDistanceErrorLast, pivotDerivative, pivotDerivativeSmoothed;
-        //derivative counters
-        private int counter2;
-        public double inty;
-        public double steerAngleSmoothed, pivotErrorTotal;
-        public double distSteerError, lastDistSteerError, derivativeDistError;
-
         int starPathIndx = 0;
+
         public bool StartDrivingRecordedPath()
         {
             //create the dubins path based on start and goal to start of recorded path
@@ -357,7 +336,7 @@ namespace AgOpenGPS
                 if (mf.isAutoSteerBtnOn
                     && Math.Abs(pivotDerivative) < (0.1)
                     && mf.avgSpeed > 2.5
-                    && !mf.yt.isYouTurnTriggered)
+                    && !isYouTurnTriggered)
                 //&& Math.Abs(pivotDistanceError) < 0.2)
 
                 {
@@ -522,7 +501,7 @@ namespace AgOpenGPS
                 if (mf.isAutoSteerBtnOn
                     && Math.Abs(pivotDerivative) < (0.1)
                     && mf.avgSpeed > 2.5
-                    && !mf.yt.isYouTurnTriggered)
+                    && !isYouTurnTriggered)
 
                 {
                     //if over the line heading wrong way, rapidly decrease integral

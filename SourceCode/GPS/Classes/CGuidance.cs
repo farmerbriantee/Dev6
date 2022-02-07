@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
-    public class CGuidance
+    public partial class CGuidance
     {
         private readonly FormGPS mf;
 
@@ -25,7 +25,7 @@ namespace AgOpenGPS
         public double sideHillCompFactor;
 
         //derivative counter
-        private int counter;
+        private int counter2;
 
         public CGuidance(FormGPS _f)
         {
@@ -33,6 +33,24 @@ namespace AgOpenGPS
             mf = _f;
             sideHillCompFactor = Properties.Settings.Default.setAS_sideHillComp;
 
+            refList.Capacity = 1024;
+            curList.Capacity = 1024;
+
+            lineWidth = Properties.Settings.Default.setDisplay_lineWidth;
+            abLength = Properties.Settings.Default.setAB_lineLength;
+
+            ctList.Capacity = 128;
+            ptList.Capacity = 128;
+
+            uturnDistanceFromBoundary = Properties.Vehicle.Default.set_youTurnDistanceFromBoundary;
+
+            //how far before or after boundary line should turn happen
+            youTurnStartOffset = Properties.Vehicle.Default.set_youTurnExtensionLength;
+
+            rowSkipsWidth = Properties.Vehicle.Default.set_youSkipWidth;
+            Set_Alternate_skips();
+
+            ytList.Capacity = 128;
         }
 
         #region Stanley
@@ -52,11 +70,11 @@ namespace AgOpenGPS
 
             //derivative of steer distance error
             distSteerError = (distSteerError * 0.95) + ((xTrackSteerCorrection * 60) * 0.05);
-            if (counter++ > 5)
+            if (counter2++ > 5)
             {
                 derivativeDistError = distSteerError - lastDistSteerError;
                 lastDistSteerError = distSteerError;
-                counter = 0;
+                counter2 = 0;
             }
 
             steerAngleGu = glm.toDegrees((xTrackSteerCorrection + steerHeadingError) * -1.0);
@@ -118,18 +136,14 @@ namespace AgOpenGPS
             double dy = curPtB.northing - curPtA.northing;
             if (Math.Abs(dx) < Double.Epsilon && Math.Abs(dy) < Double.Epsilon) return;
 
-            //save a copy of dx,dy in youTurn
-            mf.yt.dxAB = dx; mf.yt.dyAB = dy;
-
             //how far from current AB Line is fix
             distanceFromCurrentLinePivot = ((dy * pivot.easting) - (dx * pivot.northing) + (curPtB.easting
                         * curPtA.northing) - (curPtB.northing * curPtA.easting))
                             / Math.Sqrt((dy * dy) + (dx * dx));
 
-            if (!mf.ABLine.isHeadingSameWay)
+            if (!isHeadingSameWay)
                 distanceFromCurrentLinePivot *= -1.0;
 
-            mf.ABLine.distanceFromCurrentLinePivot = distanceFromCurrentLinePivot;
             double U = (((pivot.easting - curPtA.easting) * dx)
                             + ((pivot.northing - curPtA.northing) * dy))
                             / ((dx * dx) + (dy * dy));
@@ -137,8 +151,8 @@ namespace AgOpenGPS
             rEastPivot = curPtA.easting + (U * dx);
             rNorthPivot = curPtA.northing + (U * dy);
 
-            mf.ABLine.rEastAB = rEastPivot;
-            mf.ABLine.rNorthAB = rNorthPivot;
+            rEastAB = rEastPivot;
+            rNorthAB = rNorthPivot;
 
             //get the distance from currently active AB segment of steer axle //////// steer /////////////
             vec3 steerA = new vec3(curPtA);
@@ -162,7 +176,7 @@ namespace AgOpenGPS
                         * steerA.northing) - (steerB.northing * steerA.easting))
                             / Math.Sqrt((dy * dy) + (dx * dx));
 
-            if (!mf.ABLine.isHeadingSameWay)
+            if (!isHeadingSameWay)
                 distanceFromCurrentLineSteer *= -1.0;
 
             // calc point on ABLine closest to current position - for display only
@@ -261,7 +275,7 @@ namespace AgOpenGPS
 
                 minDistA = minDistB = 1000000;
 
-                if (mf.curve.isHeadingSameWay)
+                if (isHeadingSameWay)
                 {
                     dd = sB; cc = dd - 12; if (cc < 0) cc = 0;
                 }
@@ -301,7 +315,7 @@ namespace AgOpenGPS
                 vec3 pivA = new vec3(curList[pA]);
                 vec3 pivB = new vec3(curList[pB]);
 
-                if (!mf.curve.isHeadingSameWay)
+                if (!isHeadingSameWay)
                 {
                     pivA = curList[pB];
                     pivB = curList[pA];
@@ -310,7 +324,7 @@ namespace AgOpenGPS
                     if (pivA.heading > glm.twoPI) pivA.heading -= glm.twoPI;
                 }
 
-                mf.curve.manualUturnHeading = pivA.heading;
+                manualUturnHeading = pivA.heading;
 
                 //get the pivot distance from currently active AB segment   ///////////  Pivot  ////////////
                 double dx = pivB.easting - pivA.easting;
@@ -323,7 +337,6 @@ namespace AgOpenGPS
                             * pivA.northing) - (pivB.northing * pivA.easting))
                                 / Math.Sqrt((dz * dz) + (dx * dx));
 
-                mf.curve.distanceFromCurrentLinePivot = distanceFromCurrentLinePivot;
                 double U = (((pivot.easting - pivA.easting) * dx)
                                 + ((pivot.northing - pivA.northing) * dz))
                                 / ((dx * dx) + (dz * dz));
@@ -331,16 +344,16 @@ namespace AgOpenGPS
                 rEastPivot = pivA.easting + (U * dx);
                 rNorthPivot = pivA.northing + (U * dz);
 
-                mf.curve.rEastCu = rEastPivot;
-                mf.curve.rNorthCu = rNorthPivot;
+                rEastCu = rEastPivot;
+                rNorthCu = rNorthPivot;
 
-                mf.curve.currentLocationIndex = pA;
+                currentLocationIndex = pA;
 
                 //get the distance from currently active AB segment of steer axle //////// steer /////////////
                 vec3 steerA = new vec3(curList[sA]);
                 vec3 steerB = new vec3(curList[sB]);
 
-                if (!mf.curve.isHeadingSameWay)
+                if (!isHeadingSameWay)
                 {
                     steerA = curList[sB];
                     steerA.heading += Math.PI;

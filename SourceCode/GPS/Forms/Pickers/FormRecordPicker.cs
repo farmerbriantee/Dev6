@@ -86,7 +86,7 @@ namespace AgOpenGPS.Forms.Pickers
                             line = reader.ReadLine();
                             line = reader.ReadLine();
                             int numPoints = int.Parse(line);
-                            mf.recPath.recList.Clear();
+                            mf.gyd.recList.Clear();
 
                             while (!reader.EndOfStream)
                             {
@@ -102,7 +102,7 @@ namespace AgOpenGPS.Forms.Pickers
                                         bool.Parse(words[4]));
 
                                     //add the point
-                                    mf.recPath.recList.Add(point);
+                                    mf.gyd.recList.Add(point);
                                 }
                             }
                         }

@@ -113,32 +113,32 @@ namespace AgOpenGPS
             {
                 mf.pn.ConvertWGS84ToLocal((double)nudLatitude.Value, (double)nudLongitude.Value, out nort, out east);
 
-                mf.ABLine.desPoint1.easting = east;
-                mf.ABLine.desPoint1.northing = nort;
+                mf.gyd.desPoint1.easting = east;
+                mf.gyd.desPoint1.northing = nort;
 
                 mf.pn.ConvertWGS84ToLocal((double)nudLatitudeB.Value, (double)nudLongitudeB.Value, out nort, out east);
-                mf.ABLine.desPoint2.easting = east;
-                mf.ABLine.desPoint2.northing = nort;
+                mf.gyd.desPoint2.easting = east;
+                mf.gyd.desPoint2.northing = nort;
 
                 // heading based on AB points
-                mf.ABLine.desHeading = Math.Atan2(mf.ABLine.desPoint2.easting - mf.ABLine.desPoint1.easting,
-                    mf.ABLine.desPoint2.northing - mf.ABLine.desPoint1.northing);
-                if (mf.ABLine.desHeading < 0) mf.ABLine.desHeading += glm.twoPI;
+                mf.gyd.desHeading = Math.Atan2(mf.gyd.desPoint2.easting - mf.gyd.desPoint1.easting,
+                    mf.gyd.desPoint2.northing - mf.gyd.desPoint1.northing);
+                if (mf.gyd.desHeading < 0) mf.gyd.desHeading += glm.twoPI;
 
-                nudHeading.Value = (decimal)(glm.toDegrees(mf.ABLine.desHeading));
+                nudHeading.Value = (decimal)(glm.toDegrees(mf.gyd.desHeading));
             }
             else
             {
                 mf.pn.ConvertWGS84ToLocal((double)nudLatitude.Value, (double)nudLongitude.Value, out nort, out east);
 
-                mf.ABLine.desHeading = glm.toRadians((double)nudHeading.Value);
-                mf.ABLine.desPoint1.easting = east;
-                mf.ABLine.desPoint1.northing = nort;
+                mf.gyd.desHeading = glm.toRadians((double)nudHeading.Value);
+                mf.gyd.desPoint1.easting = east;
+                mf.gyd.desPoint1.northing = nort;
             }
 
             textBox1.Text = "Manual AB " +
-                (Math.Round(glm.toDegrees(mf.ABLine.desHeading), 1)).ToString(CultureInfo.InvariantCulture) +
-                "\u00B0 " + mf.FindDirection(mf.ABLine.desHeading);
+                (Math.Round(glm.toDegrees(mf.gyd.desHeading), 1)).ToString(CultureInfo.InvariantCulture) +
+                "\u00B0 " + mf.FindDirection(mf.gyd.desHeading);
             if (textBox1.Text != "Create A New Line") btnEnterManual.Enabled = true;
         }
 

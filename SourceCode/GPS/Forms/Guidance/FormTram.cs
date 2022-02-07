@@ -68,14 +68,14 @@ namespace AgOpenGPS
             if (isCurve)
             {
                 if (Dist != 0)
-                    mf.curve.MoveABCurve(Dist);
-                mf.curve.BuildTram();
+                    mf.gyd.MoveABCurve(Dist);
+                mf.gyd.BuildTram(true);
             }
             else
             {
                 if (Dist != 0)
-                    mf.ABLine.MoveABLine(Dist);
-                mf.ABLine.BuildTram();
+                    mf.gyd.MoveABLine(Dist);
+                mf.gyd.BuildTram();
             }
         }
 
@@ -85,42 +85,42 @@ namespace AgOpenGPS
             {
                 if (isCurve)
                 {
-                    if (mf.curve.refList.Count > 0)
+                    if (mf.gyd.refList.Count > 0)
                     {
                         //array number is 1 less since it starts at zero
-                        int idx = mf.curve.numCurveLineSelected - 1;
+                        int idx = mf.gyd.numCurveLineSelected - 1;
 
                         //mf.curve.curveArr[idx].Name = textBox1.Text.Trim();
                         if (idx >= 0)
                         {
-                            mf.curve.curveArr[idx].aveHeading = mf.curve.aveLineHeading;
-                            mf.curve.curveArr[idx].curvePts.Clear();
+                            mf.gyd.curveArr[idx].aveHeading = mf.gyd.aveLineHeading;
+                            mf.gyd.curveArr[idx].curvePts.Clear();
                             //write out the Curve Points
-                            foreach (vec3 item in mf.curve.refList)
+                            foreach (vec3 item in mf.gyd.refList)
                             {
-                                mf.curve.curveArr[idx].curvePts.Add(item);
+                                mf.gyd.curveArr[idx].curvePts.Add(item);
                             }
                         }
 
                         //save entire list
                         mf.FileSaveCurveLines();
-                        mf.curve.moveDistance = 0;
+                        mf.gyd.moveDistance = 0;
                     }
                 }
                 else
                 {
-                    int idx = mf.ABLine.numABLineSelected - 1;
+                    int idx = mf.gyd.numABLineSelected - 1;
 
                     if (idx >= 0)
                     {
-                        mf.ABLine.lineArr[idx].heading = mf.ABLine.abHeading;
+                        mf.gyd.lineArr[idx].heading = mf.gyd.abHeading;
                         //calculate the new points for the reference line and points
-                        mf.ABLine.lineArr[idx].origin.easting = mf.ABLine.refPoint1.easting;
-                        mf.ABLine.lineArr[idx].origin.northing = mf.ABLine.refPoint1.northing;
+                        mf.gyd.lineArr[idx].origin.easting = mf.gyd.refPoint1.easting;
+                        mf.gyd.lineArr[idx].origin.northing = mf.gyd.refPoint1.northing;
                     }
 
                     mf.FileSaveABLines();
-                    mf.ABLine.moveDistance = 0;
+                    mf.gyd.moveDistance = 0;
                 }
             }
             else
@@ -182,19 +182,19 @@ namespace AgOpenGPS
         {
             if (isCurve)
             {
-                int cnt = mf.curve.refList.Count;
+                int cnt = mf.gyd.refList.Count;
                 if (cnt > 0)
                 {
-                    mf.curve.refList.Reverse();
+                    mf.gyd.refList.Reverse();
 
                     vec3[] arr = new vec3[cnt];
                     cnt--;
-                    mf.curve.refList.CopyTo(arr);
-                    mf.curve.refList.Clear();
+                    mf.gyd.refList.CopyTo(arr);
+                    mf.gyd.refList.Clear();
 
-                    mf.curve.aveLineHeading += Math.PI;
-                    if (mf.curve.aveLineHeading < 0) mf.curve.aveLineHeading += glm.twoPI;
-                    if (mf.curve.aveLineHeading > glm.twoPI) mf.curve.aveLineHeading -= glm.twoPI;
+                    mf.gyd.aveLineHeading += Math.PI;
+                    if (mf.gyd.aveLineHeading < 0) mf.gyd.aveLineHeading += glm.twoPI;
+                    if (mf.gyd.aveLineHeading > glm.twoPI) mf.gyd.aveLineHeading -= glm.twoPI;
 
                     for (int i = 1; i < cnt; i++)
                     {
@@ -202,23 +202,23 @@ namespace AgOpenGPS
                         pt3.heading += Math.PI;
                         if (pt3.heading > glm.twoPI) pt3.heading -= glm.twoPI;
                         if (pt3.heading < 0) pt3.heading += glm.twoPI;
-                        mf.curve.refList.Add(pt3);
+                        mf.gyd.refList.Add(pt3);
                     }
                 }
             }
             else
             {
-                mf.ABLine.abHeading += Math.PI;
-                if (mf.ABLine.abHeading > glm.twoPI) mf.ABLine.abHeading -= glm.twoPI;
+                mf.gyd.abHeading += Math.PI;
+                if (mf.gyd.abHeading > glm.twoPI) mf.gyd.abHeading -= glm.twoPI;
 
-                mf.ABLine.refABLineP1.easting = mf.ABLine.refPoint1.easting - (Math.Sin(mf.ABLine.abHeading) * mf.ABLine.abLength);
-                mf.ABLine.refABLineP1.northing = mf.ABLine.refPoint1.northing - (Math.Cos(mf.ABLine.abHeading) * mf.ABLine.abLength);
+                mf.gyd.refABLineP1.easting = mf.gyd.refPoint1.easting - (Math.Sin(mf.gyd.abHeading) * mf.gyd.abLength);
+                mf.gyd.refABLineP1.northing = mf.gyd.refPoint1.northing - (Math.Cos(mf.gyd.abHeading) * mf.gyd.abLength);
 
-                mf.ABLine.refABLineP2.easting = mf.ABLine.refPoint1.easting + (Math.Sin(mf.ABLine.abHeading) * mf.ABLine.abLength);
-                mf.ABLine.refABLineP2.northing = mf.ABLine.refPoint1.northing + (Math.Cos(mf.ABLine.abHeading) * mf.ABLine.abLength);
+                mf.gyd.refABLineP2.easting = mf.gyd.refPoint1.easting + (Math.Sin(mf.gyd.abHeading) * mf.gyd.abLength);
+                mf.gyd.refABLineP2.northing = mf.gyd.refPoint1.northing + (Math.Cos(mf.gyd.abHeading) * mf.gyd.abLength);
 
-                mf.ABLine.refPoint2.easting = mf.ABLine.refABLineP2.easting;
-                mf.ABLine.refPoint2.northing = mf.ABLine.refABLineP2.northing;
+                mf.gyd.refPoint2.easting = mf.gyd.refABLineP2.easting;
+                mf.gyd.refPoint2.northing = mf.gyd.refABLineP2.northing;
             }
             MoveBuildTramLine(0);
         }

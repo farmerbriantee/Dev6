@@ -4,20 +4,18 @@ using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
-    public class CABLine
+    public partial class CGuidance
     {
         public double abFixHeadingDelta;
         public double abHeading, abLength;
         public double angVel;
 
-        public bool isABValid, isLateralTriggered;
+        public bool isABValid;
 
         //the current AB guidance line
         public vec3 currentABLineP1 = new vec3(0.0, 0.0, 0.0);
         public vec3 currentABLineP2 = new vec3(0.0, 1.0, 0.0);
 
-        public double distanceFromCurrentLinePivot;
-        public double distanceFromRefLine;
         //pure pursuit values
         public vec2 goalPointAB = new vec2(0, 0);
 
@@ -26,10 +24,8 @@ namespace AgOpenGPS
 
         public int numABLines, numABLineSelected;
 
-        public double howManyPathsAway, moveDistance;
         public bool isABLineBeingSet;
         public bool isABLineSet, isABLineLoaded;
-        public bool isHeadingSameWay = true;
         public bool isBtnABLineOn;
 
         //public bool isOnTramLine;
@@ -41,11 +37,7 @@ namespace AgOpenGPS
         public vec2 refABLineP1 = new vec2(0.0, 0.0);
         public vec2 refABLineP2 = new vec2(0.0, 1.0);
 
-        //the two inital A and B points
-        public vec2 refPoint1 = new vec2(0.2, 0.15);
-        public vec2 refPoint2 = new vec2(0.3, 0.3);
-
-        public double snapDistance, lastSecond = 0;
+        public double snapDistance;
         public double steerAngleAB;
         public int lineWidth;
 
@@ -55,29 +47,12 @@ namespace AgOpenGPS
         public double desHeading = 0;
         public vec2 desP1 = new vec2(0.0, 0.0);
         public vec2 desP2 = new vec2(999997, 1.0);
-        public string desName = "";
 
-        public double pivotDistanceError, pivotDistanceErrorLast, pivotDerivative, pivotDerivativeSmoothed;
         //derivative counters
-        private int counter2;
-        public double inty;
-        public double steerAngleSmoothed, pivotErrorTotal;
-        public double distSteerError, lastDistSteerError, derivativeDistError;
-
+        public double steerAngleSmoothed;
 
         //Color tramColor = Color.YellowGreen;
         public int tramPassEvery;
-        //pointers to mainform controls
-        private readonly FormGPS mf;
-
-        public CABLine(FormGPS _f)
-        {
-            //constructor
-            mf = _f;
-            //isOnTramLine = true;
-            lineWidth = Properties.Settings.Default.setDisplay_lineWidth;
-            abLength = Properties.Settings.Default.setAB_lineLength;
-        }
 
         public void BuildCurrentABLineList(vec3 pivot)
         {
@@ -101,7 +76,7 @@ namespace AgOpenGPS
 
             isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(pivot.heading - abHeading) - Math.PI) < glm.PIBy2;
 
-            if (mf.yt.isYouTurnTriggered) isHeadingSameWay = !isHeadingSameWay;
+            if (isYouTurnTriggered) isHeadingSameWay = !isHeadingSameWay;
 
             //Which ABLine is the vehicle on, negative is left and positive is right side
             double RefDist = (distanceFromRefLine + (isHeadingSameWay ? mf.tool.toolOffset : -mf.tool.toolOffset)) / widthMinusOverlap;
@@ -134,21 +109,21 @@ namespace AgOpenGPS
                 BuildCurrentABLineList(pivot);
 
             //Check uturn first
-            if (mf.yt.isYouTurnTriggered && mf.yt.DistanceFromYouTurnLine())//do the pure pursuit from youTurn
+            if (isYouTurnTriggered && DistanceFromYouTurnLine())//do the pure pursuit from youTurn
             {
                 //now substitute what it thinks are AB line values with auto turn values
-                steerAngleAB = mf.yt.steerAngleYT;
-                distanceFromCurrentLinePivot = mf.yt.distanceFromCurrentLine;
+                steerAngleAB = steerAngleYT;
+                distanceFromCurrentLinePivot = distanceFromCurrentLine;
 
-                goalPointAB = mf.yt.goalPointYT;
-                radiusPointAB.easting = mf.yt.radiusPointYT.easting;
-                radiusPointAB.northing = mf.yt.radiusPointYT.northing;
-                ppRadiusAB = mf.yt.ppRadiusYT;
+                goalPointAB = goalPointYT;
+                radiusPointAB.easting = radiusPointYT.easting;
+                radiusPointAB.northing = radiusPointYT.northing;
+                ppRadiusAB = ppRadiusYT;
             }
             
             //Stanley
             else if (mf.isStanleyUsed)
-                mf.gyd.StanleyGuidanceABLine(currentABLineP1, currentABLineP2, pivot, steer);
+                StanleyGuidanceABLine(currentABLineP1, currentABLineP2, pivot, steer);
 
             //Pure Pursuit
             else
@@ -158,9 +133,6 @@ namespace AgOpenGPS
                 dx = currentABLineP2.easting - currentABLineP1.easting;
                 //z2-z1
                 dy = currentABLineP2.northing - currentABLineP1.northing;
-
-                //save a copy of dx,dy in youTurn
-                mf.yt.dxAB = dx; mf.yt.dyAB = dy;
 
                 //how far from current AB Line is fix
                 distanceFromCurrentLinePivot = ((dy * pivot.easting) - (dx * pivot.northing) + (currentABLineP2.easting
@@ -190,7 +162,7 @@ namespace AgOpenGPS
                     if (mf.isAutoSteerBtnOn
                         && Math.Abs(pivotDerivative) < (0.1)
                         && mf.avgSpeed > 2.5
-                        && !mf.yt.isYouTurnTriggered)
+                        && !isYouTurnTriggered)
                     //&& Math.Abs(pivotDistanceError) < 0.2)
 
                     {
@@ -258,7 +230,7 @@ namespace AgOpenGPS
                     / goalPointDistanceDSquared));
 
                 if (mf.ahrs.imuRoll != 88888)
-                    steerAngleAB += mf.ahrs.imuRoll * -mf.gyd.sideHillCompFactor;
+                    steerAngleAB += mf.ahrs.imuRoll * -sideHillCompFactor;
 
                 if (steerAngleAB < -mf.vehicle.maxSteerAngle) steerAngleAB = -mf.vehicle.maxSteerAngle;
                 if (steerAngleAB > mf.vehicle.maxSteerAngle) steerAngleAB = mf.vehicle.maxSteerAngle;
@@ -409,8 +381,8 @@ namespace AgOpenGPS
                 GL.Begin(PrimitiveType.Points);
                 GL.Color3(1.0f, 1.0f, 0.0f);
                 GL.Vertex3(goalPointAB.easting, goalPointAB.northing, 0.0);
-                //GL.Vertex3(mf.gyd.rEastSteer, mf.gyd.rNorthSteer, 0.0);
-                //GL.Vertex3(mf.gyd.rEastPivot, mf.gyd.rNorthPivot, 0.0);
+                //GL.Vertex3(rEastSteer, rNorthSteer, 0.0);
+                //GL.Vertex3(rEastPivot, rNorthPivot, 0.0);
                 GL.End();
                 GL.PointSize(1.0f);
 
@@ -438,7 +410,7 @@ namespace AgOpenGPS
                 }
             }
 
-            mf.yt.DrawYouTurn();
+            DrawYouTurn();
 
             GL.PointSize(1.0f);
             GL.LineWidth(1);

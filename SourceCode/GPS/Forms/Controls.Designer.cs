@@ -25,10 +25,10 @@ namespace AgOpenGPS
                 return;
             }
 
-            ct.isContourBtnOn = !ct.isContourBtnOn;
-            btnContour.Image = ct.isContourBtnOn ? Properties.Resources.ContourOn : Properties.Resources.ContourOff;
+            gyd.isContourBtnOn = !gyd.isContourBtnOn;
+            btnContour.Image = gyd.isContourBtnOn ? Properties.Resources.ContourOn : Properties.Resources.ContourOff;
 
-            if (ct.isContourBtnOn)
+            if (gyd.isContourBtnOn)
             {
                 btnCycleLines.Image = Properties.Resources.ColorLocked;
                 //turn off youturn...
@@ -38,11 +38,11 @@ namespace AgOpenGPS
 
             else
             {
-                if (ABLine.isBtnABLineOn | curve.isBtnCurveOn)
+                if (gyd.isBtnABLineOn || gyd.isBtnCurveOn)
                 {
                     EnableYouTurnButtons();
-                    ABLine.isABValid = false;
-                    curve.isCurveValid = false;
+                    gyd.isABValid = false;
+                    gyd.isCurveValid = false;
                 }
 
                 btnCycleLines.Image = Properties.Resources.ABLineCycle;
@@ -78,29 +78,29 @@ namespace AgOpenGPS
 
 
             //if contour is on, turn it off
-            if (ct.isContourBtnOn) { if (ct.isContourBtnOn) btnContour.PerformClick(); }
+            if (gyd.isContourBtnOn) { if (gyd.isContourBtnOn) btnContour.PerformClick(); }
 
             //turn off ABLine 
-            ABLine.isABLineBeingSet = false;
-            ABLine.isABLineSet = false;
+            gyd.isABLineBeingSet = false;
+            gyd.isABLineSet = false;
             //lblDistanceOffLine.Visible = false;
 
             //change image to reflect on off
             btnABLine.Image = Properties.Resources.ABLineOff;
-            ABLine.isBtnABLineOn = false;
+            gyd.isBtnABLineOn = false;
 
             //new direction so reset where to put turn diagnostic
             //yt.ResetCreatedYouTurn();
 
-            curve.isCurveValid = false;
+            gyd.isCurveValid = false;
 
-            if (curve.isBtnCurveOn == false && curve.isCurveSet)
+            if (gyd.isBtnCurveOn == false && gyd.isCurveSet)
             {
                 //display the curve
-                curve.isCurveSet = true;
+                gyd.isCurveSet = true;
                 EnableYouTurnButtons();
                 btnCurve.Image = Properties.Resources.CurveOn;
-                curve.isBtnCurveOn = true;
+                gyd.isBtnCurveOn = true;
                 return;
             }
 
@@ -114,7 +114,7 @@ namespace AgOpenGPS
                 return;
             }
 
-            curve.isBtnCurveOn = true;
+            gyd.isBtnCurveOn = true;
             btnCurve.Image = Properties.Resources.CurveOn;
 
             EnableYouTurnButtons();
@@ -133,7 +133,7 @@ namespace AgOpenGPS
             }
 
             //invalidate line
-            ABLine.isABValid = false;
+            gyd.isABValid = false;
 
             //check if window already exists
             Form f = Application.OpenForms["FormABCurve"];
@@ -154,19 +154,19 @@ namespace AgOpenGPS
 
 
             //if contour is on, turn it off
-            if (ct.isContourBtnOn) { if (ct.isContourBtnOn) btnContour.PerformClick(); }
+            if (gyd.isContourBtnOn) { if (gyd.isContourBtnOn) btnContour.PerformClick(); }
             //btnContourPriority.Enabled = true;
                 
-            curve.isBtnCurveOn = false;
+            gyd.isBtnCurveOn = false;
             btnCurve.Image = Properties.Resources.CurveOff;
 
             //if there is a line in memory, just use it.
-            if (ABLine.isBtnABLineOn == false && ABLine.isABLineLoaded)
+            if (gyd.isBtnABLineOn == false && gyd.isABLineLoaded)
             {                
-                ABLine.isABLineSet = true;
+                gyd.isABLineSet = true;
                 EnableYouTurnButtons();
                 btnABLine.Image = Properties.Resources.ABLineOn;
-                ABLine.isBtnABLineOn = true;
+                gyd.isBtnABLineOn = true;
                 return;
             }
             
@@ -180,7 +180,7 @@ namespace AgOpenGPS
             }
 
             //Bring up the form
-            ABLine.isBtnABLineOn = true;
+            gyd.isBtnABLineOn = true;
             btnABLine.Image = Properties.Resources.ABLineOn;
 
             //turn off youturn...
@@ -196,7 +196,7 @@ namespace AgOpenGPS
         {
             if (isTT)
             {
-                if (!ct.isContourBtnOn)
+                if (!gyd.isContourBtnOn)
                     MessageBox.Show(gStr.h_btnCycleLines, gStr.gsHelp);
                 else
                     MessageBox.Show(gStr.h_btnLockToContour, gStr.gsHelp);
@@ -205,74 +205,74 @@ namespace AgOpenGPS
                 return;
             }
             
-            if (ct.isContourBtnOn)
+            if (gyd.isContourBtnOn)
             {
-                ct.SetLockToLine();
+                gyd.SetLockToLine();
                 return;
             }
 
-            if (ABLine.numABLines == 0 && curve.numCurveLines == 0) return; 
+            if (gyd.numABLines == 0 && gyd.numCurveLines == 0) return; 
 
                 //reset to generate new reference
-            ABLine.isABValid = false;
-            curve.isCurveValid = false;
+            gyd.isABValid = false;
+            gyd.isCurveValid = false;
 
-            if (ABLine.isBtnABLineOn && ABLine.numABLines > 0)
+            if (gyd.isBtnABLineOn && gyd.numABLines > 0)
             {
-                ABLine.moveDistance = 0;
+                gyd.moveDistance = 0;
 
-                ABLine.numABLineSelected++;
-                if (ABLine.numABLineSelected > ABLine.numABLines) ABLine.numABLineSelected = 1;
-                ABLine.refPoint1 = ABLine.lineArr[ABLine.numABLineSelected - 1].origin;
+                gyd.numABLineSelected++;
+                if (gyd.numABLineSelected > gyd.numABLines) gyd.numABLineSelected = 1;
+                gyd.refPoint1 = gyd.lineArr[gyd.numABLineSelected - 1].origin;
                 //ABLine.refPoint2 = ABLine.lineArr[ABLine.numABLineSelected - 1].ref2;
-                ABLine.abHeading = ABLine.lineArr[ABLine.numABLineSelected - 1].heading;
-                ABLine.SetABLineByHeading();
-                ABLine.isABLineSet = true;
-                ABLine.isABLineLoaded = true;
-                yt.ResetYouTurn();
-                lblCurveLineName.Text = ABLine.lineArr[ABLine.numABLineSelected - 1].Name;
+                gyd.abHeading = gyd.lineArr[gyd.numABLineSelected - 1].heading;
+                gyd.SetABLineByHeading();
+                gyd.isABLineSet = true;
+                gyd.isABLineLoaded = true;
+                gyd.ResetYouTurn();
+                lblCurveLineName.Text = gyd.lineArr[gyd.numABLineSelected - 1].Name;
             }
-            else if (curve.isBtnCurveOn && curve.numCurveLines > 0)
+            else if (gyd.isBtnCurveOn && gyd.numCurveLines > 0)
             {
-                curve.moveDistance = 0;
+                gyd.moveDistance = 0;
 
-                curve.numCurveLineSelected++;
-                if (curve.numCurveLineSelected > curve.numCurveLines) curve.numCurveLineSelected = 1;
+                gyd.numCurveLineSelected++;
+                if (gyd.numCurveLineSelected > gyd.numCurveLines) gyd.numCurveLineSelected = 1;
 
-                int idx = curve.numCurveLineSelected - 1;
-                curve.aveLineHeading = curve.curveArr[idx].aveHeading;
-                curve.refList?.Clear();
-                for (int i = 0; i < curve.curveArr[idx].curvePts.Count; i++)
+                int idx = gyd.numCurveLineSelected - 1;
+                gyd.aveLineHeading = gyd.curveArr[idx].aveHeading;
+                gyd.refList?.Clear();
+                for (int i = 0; i < gyd.curveArr[idx].curvePts.Count; i++)
                 {
-                    curve.refList.Add(curve.curveArr[idx].curvePts[i]);
+                    gyd.refList.Add(gyd.curveArr[idx].curvePts[i]);
                 }
-                curve.isCurveSet = true;
-                yt.ResetYouTurn();
-                lblCurveLineName.Text = curve.curveArr[idx].Name;
+                gyd.isCurveSet = true;
+                gyd.ResetYouTurn();
+                lblCurveLineName.Text = gyd.curveArr[idx].Name;
             }
         }
 
         private void SetABLine(int num)
         {
-                ABLine.refPoint1 = ABLine.lineArr[ABLine.numABLineSelected - 1].origin;
+                gyd.refPoint1 = gyd.lineArr[gyd.numABLineSelected - 1].origin;
                 //ABLine.refPoint2 = ABLine.lineArr[ABLine.numABLineSelected - 1].ref2;
-                ABLine.abHeading = ABLine.lineArr[ABLine.numABLineSelected - 1].heading;
-                ABLine.SetABLineByHeading();
-                ABLine.isABLineSet = true;
-                ABLine.isABLineLoaded = true;
-                yt.ResetYouTurn();
+                gyd.abHeading = gyd.lineArr[gyd.numABLineSelected - 1].heading;
+                gyd.SetABLineByHeading();
+                gyd.isABLineSet = true;
+                gyd.isABLineLoaded = true;
+                gyd.ResetYouTurn();
         }
         private void SetCurveLine(int num)
         {
-                int idx = curve.numCurveLineSelected - 1;
-                curve.aveLineHeading = curve.curveArr[idx].aveHeading;
-                curve.refList?.Clear();
-                for (int i = 0; i < curve.curveArr[idx].curvePts.Count; i++)
+                int idx = gyd.numCurveLineSelected - 1;
+                gyd.aveLineHeading = gyd.curveArr[idx].aveHeading;
+                gyd.refList?.Clear();
+                for (int i = 0; i < gyd.curveArr[idx].curvePts.Count; i++)
                 {
-                    curve.refList.Add(curve.curveArr[idx].curvePts[i]);
+                    gyd.refList.Add(gyd.curveArr[idx].curvePts[i]);
                 }
-                curve.isCurveSet = true;
-                yt.ResetYouTurn();
+                gyd.isCurveSet = true;
+                gyd.ResetYouTurn();
         }
 
         //Section Manual and Auto
@@ -363,18 +363,18 @@ namespace AgOpenGPS
             }
 
             //new direction so reset where to put turn diagnostic
-            yt.ResetCreatedYouTurn();
+            gyd.ResetCreatedYouTurn();
 
             if (isAutoSteerBtnOn)
             {
                 isAutoSteerBtnOn = false;
                 btnAutoSteer.Image = Properties.Resources.AutoSteerOff;
-                if (yt.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
+                if (gyd.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
                 if (sounds.isSteerSoundOn) CSound.sndAutoSteerOff.Play();
             }
             else
             {
-                if (ABLine.isBtnABLineOn | ct.isContourBtnOn | curve.isBtnCurveOn)
+                if (gyd.isBtnABLineOn | gyd.isContourBtnOn | gyd.isBtnCurveOn)
                 {
                     isAutoSteerBtnOn = true;
                     btnAutoSteer.Image = Properties.Resources.AutoSteerOn;
@@ -396,7 +396,7 @@ namespace AgOpenGPS
                 return;
             }
             
-            yt.isTurnCreationTooClose = false;
+            gyd.isTurnCreationTooClose = false;
 
             if (bnd.bndList.Count == 0)
             {
@@ -404,35 +404,35 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (!yt.isYouTurnBtnOn)
+            if (!gyd.isYouTurnBtnOn)
             {
                 //new direction so reset where to put turn diagnostic
-                yt.ResetCreatedYouTurn();
+                gyd.ResetCreatedYouTurn();
 
-                if (ABLine.isBtnABLineOn || curve.isBtnCurveOn)
+                if (gyd.isBtnABLineOn || gyd.isBtnCurveOn)
                 {
                     if (!isAutoSteerBtnOn) btnAutoSteer.PerformClick();
                 }
                 else return;
 
-                yt.isYouTurnBtnOn = true;
-                yt.isTurnCreationTooClose = false;
-                yt.isTurnCreationNotCrossingError = false;
-                yt.ResetYouTurn();
+                gyd.isYouTurnBtnOn = true;
+                gyd.isTurnCreationTooClose = false;
+                gyd.isTurnCreationNotCrossingError = false;
+                gyd.ResetYouTurn();
                 p_239.pgn[p_239.uturn] = 0;
                 btnAutoYouTurn.Image = Properties.Resources.Youturn80;
             }
             else
             {
-                yt.isYouTurnBtnOn = false;
-                yt.rowSkipsWidth = Properties.Vehicle.Default.set_youSkipWidth;
-                yt.Set_Alternate_skips();
+                gyd.isYouTurnBtnOn = false;
+                gyd.rowSkipsWidth = Properties.Vehicle.Default.set_youSkipWidth;
+                gyd.Set_Alternate_skips();
 
                 btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
-                yt.ResetYouTurn();
+                gyd.ResetYouTurn();
 
                 //new direction so reset where to put turn diagnostic
-                yt.ResetCreatedYouTurn();
+                gyd.ResetCreatedYouTurn();
 
                 //mc.autoSteerData[mc.sdX] = 0;
                 p_239.pgn[p_239.uturn] = 0;
@@ -1258,12 +1258,12 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (ABLine.numABLineSelected > 0 && ABLine.isBtnABLineOn)
+            if (gyd.numABLineSelected > 0 && gyd.isBtnABLineOn)
             {
                 Form form = new FormEditAB(this, false);
                 form.Show(this);
             }
-            else if (curve.numCurveLineSelected > 0 && curve.isBtnCurveOn)
+            else if (gyd.numCurveLineSelected > 0 && gyd.isBtnCurveOn)
             {
                 Form form = new FormEditAB(this, true);
                 form.Show(this);
@@ -1377,13 +1377,13 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (ABLine.isBtnABLineOn)
+            if (gyd.isBtnABLineOn)
             {
-                ABLine.MoveABLine(ABLine.distanceFromCurrentLinePivot);
+                gyd.MoveABLine(gyd.distanceFromCurrentLinePivot);
             }
-            else if (curve.isBtnCurveOn)
+            else if (gyd.isBtnCurveOn)
             {
-                curve.MoveABCurve(curve.distanceFromCurrentLinePivot);
+                gyd.MoveABCurve(gyd.distanceFromCurrentLinePivot);
             }
             else
             {
@@ -1393,22 +1393,22 @@ namespace AgOpenGPS
         }
         private void SnapRight()
         {
-            if (!ct.isContourBtnOn)
+            if (!gyd.isContourBtnOn)
             {
-                if (ABLine.isABLineSet)
+                if (gyd.isABLineSet)
                 {
                     //snap distance is in cm
-                    yt.ResetCreatedYouTurn();
+                    gyd.ResetCreatedYouTurn();
                     double dist = 0.01 * Properties.Settings.Default.setAS_snapDistance;
 
-                    ABLine.MoveABLine(dist);
+                    gyd.MoveABLine(dist);
                 }
-                else if (curve.isCurveSet)
+                else if (gyd.isCurveSet)
                 {
                     //snap distance is in cm
-                    yt.ResetCreatedYouTurn();
+                    gyd.ResetCreatedYouTurn();
                     double dist = 0.01 * Properties.Settings.Default.setAS_snapDistance;
-                    curve.MoveABCurve(dist);
+                    gyd.MoveABCurve(dist);
 
                 }
                 else
@@ -1421,25 +1421,25 @@ namespace AgOpenGPS
         }
         private void SnapLeft()
         {
-            if (!ct.isContourBtnOn)
+            if (!gyd.isContourBtnOn)
             {
-                if (ABLine.isABLineSet)
+                if (gyd.isABLineSet)
                 {
                     //snap distance is in cm
-                    yt.ResetCreatedYouTurn();
+                    gyd.ResetCreatedYouTurn();
                     double dist = 0.01 * Properties.Settings.Default.setAS_snapDistance;
 
-                    ABLine.MoveABLine(-dist);
+                    gyd.MoveABLine(-dist);
 
                     //FileSaveABLine();
                 }
-                else if (curve.isCurveSet)
+                else if (gyd.isCurveSet)
                 {
                     //snap distance is in cm
-                    yt.ResetCreatedYouTurn();
+                    gyd.ResetCreatedYouTurn();
                     double dist = 0.01 * Properties.Settings.Default.setAS_snapDistance;
 
-                    curve.MoveABCurve(-dist);
+                    gyd.MoveABCurve(-dist);
 
                 }
                 else
@@ -1466,7 +1466,7 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (ct.isContourBtnOn)
+            if (gyd.isContourBtnOn)
             {
                 var form = new FormTimedMessage(2000, (gStr.gsContourOn), ("Turn Off Contour"));
                 form.Show(this);
@@ -1483,13 +1483,13 @@ namespace AgOpenGPS
         }
         public void GetAB()
         {
-            if (ct.isContourBtnOn) { if (ct.isContourBtnOn) btnContour.PerformClick(); }
+            if (gyd.isContourBtnOn) { if (gyd.isContourBtnOn) btnContour.PerformClick(); }
 
             using (var form = new FormABDraw(this))
             {
                 form.ShowDialog(this);
-                ABLine.moveDistance = 0;
-                curve.moveDistance = 0;
+                gyd.moveDistance = 0;
+                gyd.moveDistance = 0;
             }
         }
         private void btnYouSkipEnable_Click(object sender, EventArgs e)
@@ -1501,19 +1501,19 @@ namespace AgOpenGPS
                 return;
             }
             
-            yt.alternateSkips = !yt.alternateSkips;
-            if (yt.alternateSkips)
+            gyd.alternateSkips = !gyd.alternateSkips;
+            if (gyd.alternateSkips)
             {
                 btnYouSkipEnable.Image = Resources.YouSkipOn;
                 //make sure at least 1
-                if (yt.rowSkipsWidth < 2)
+                if (gyd.rowSkipsWidth < 2)
                 {
-                    yt.rowSkipsWidth = 2;
+                    gyd.rowSkipsWidth = 2;
                     cboxpRowWidth.Text = "1";
                 }
-                yt.Set_Alternate_skips();
-                yt.ResetCreatedYouTurn();
-                if (!yt.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
+                gyd.Set_Alternate_skips();
+                gyd.ResetCreatedYouTurn();
+                if (!gyd.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
             }
             else
             {
@@ -1523,10 +1523,10 @@ namespace AgOpenGPS
 
         private void cboxpRowWidth_SelectedIndexChanged(object sender, EventArgs e)
         {
-            yt.rowSkipsWidth = cboxpRowWidth.SelectedIndex + 1;
-            yt.Set_Alternate_skips();
-            yt.ResetCreatedYouTurn();
-            Properties.Vehicle.Default.set_youSkipWidth = yt.rowSkipsWidth;
+            gyd.rowSkipsWidth = cboxpRowWidth.SelectedIndex + 1;
+            gyd.Set_Alternate_skips();
+            gyd.ResetCreatedYouTurn();
+            Properties.Vehicle.Default.set_youSkipWidth = gyd.rowSkipsWidth;
             Properties.Vehicle.Default.Save();
         }
 
@@ -1603,7 +1603,7 @@ namespace AgOpenGPS
 
         private void SmoothABtoolStripMenu_Click(object sender, EventArgs e)
         {
-            if (isJobStarted && curve.isBtnCurveOn)
+            if (isJobStarted && gyd.isBtnCurveOn)
             {
                 using (var form = new FormSmoothAB(this))
                 {
@@ -1619,9 +1619,9 @@ namespace AgOpenGPS
          private void deleteContourPathsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //FileCreateContour();
-            ct.stripList?.Clear();
-            ct.ptList?.Clear();
-            ct.ctList?.Clear();
+            gyd.stripList?.Clear();
+            gyd.ptList?.Clear();
+            gyd.ctList?.Clear();
             contourSaveList?.Clear();
         }
         private void toolStripAreYouSure_Click(object sender, EventArgs e)
@@ -1655,8 +1655,8 @@ namespace AgOpenGPS
                         ManualAllBtnsUpdate();
 
                         //clear out the contour Lists
-                        ct.StopContourLine(pivotAxlePos);
-                        ct.ResetContour();
+                        gyd.StopContourLine(pivotAxlePos);
+                        gyd.ResetContour();
                         fd.workedAreaTotal = 0;
 
                         //clear the section lists
@@ -1957,16 +1957,16 @@ namespace AgOpenGPS
         }
         private void tramLinesMenuField_Click(object sender, EventArgs e)
         {
-            if (ct.isContourBtnOn) btnContour.PerformClick(); 
+            if (gyd.isContourBtnOn) btnContour.PerformClick(); 
 
-            if (ABLine.numABLineSelected > 0 && ABLine.isBtnABLineOn)
+            if (gyd.numABLineSelected > 0 && gyd.isBtnABLineOn)
             {
                 Form form99 = new FormTram(this, false);
                 form99.Show(this);
                 form99.Left = Width - 275;
                 form99.Top = 100;
             }
-            else if (curve.numCurveLineSelected > 0 && curve.isBtnCurveOn)
+            else if (gyd.numCurveLineSelected > 0 && gyd.isBtnCurveOn)
             {
                 Form form97 = new FormTram(this, true);
                 form97.Show(this);
@@ -2037,43 +2037,43 @@ namespace AgOpenGPS
         {
             #region Turn off Guidance
             //if contour is on, turn it off
-            if (ct.isContourBtnOn) { if (ct.isContourBtnOn) btnContour.PerformClick(); }
+            if (gyd.isContourBtnOn) { if (gyd.isContourBtnOn) btnContour.PerformClick(); }
             //btnContourPriority.Enabled = true;
 
-            if (yt.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
+            if (gyd.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
             if (isAutoSteerBtnOn) btnAutoSteer.PerformClick();
 
             DisableYouTurnButtons();
 
             //if ABLine isn't set, turn off the YouTurn
-            if (ABLine.isABLineSet)
+            if (gyd.isABLineSet)
             {
                 //ABLine.DeleteAB();
-                ABLine.isABLineBeingSet = false;
-                ABLine.isABLineSet = false;
+                gyd.isABLineBeingSet = false;
+                gyd.isABLineSet = false;
                 //lblDistanceOffLine.Visible = false;
 
                 //change image to reflect on off
                 btnABLine.Image = Properties.Resources.ABLineOff;
-                ABLine.isBtnABLineOn = false;
+                gyd.isBtnABLineOn = false;
             }
 
-            if (curve.isCurveSet)
+            if (gyd.isCurveSet)
             {
 
                 //make sure the other stuff is off
-                curve.isCurveSet = false;
+                gyd.isCurveSet = false;
                 //btnContourPriority.Enabled = false;
-                curve.isBtnCurveOn = false;
+                gyd.isBtnCurveOn = false;
                 btnCurve.Image = Properties.Resources.CurveOff;
             }
 
             #endregion
 
             //already running?
-            if (recPath.isDrivingRecordedPath)
+            if (gyd.isDrivingRecordedPath)
             {
-                recPath.StopDrivingRecordedPath();
+                gyd.StopDrivingRecordedPath();
                 btnPathGoStop.Image = Properties.Resources.boundaryPlay;
                 btnPathRecordStop.Enabled = true;
                 btnPathDelete.Enabled = true;
@@ -2081,10 +2081,10 @@ namespace AgOpenGPS
             }
 
             //start the recorded path driving process
-            if (!recPath.StartDrivingRecordedPath())
+            if (!gyd.StartDrivingRecordedPath())
             {
                 //Cancel the recPath - something went seriously wrong
-                recPath.StopDrivingRecordedPath();
+                gyd.StopDrivingRecordedPath();
                 TimedMessageBox(1500, gStr.gsProblemMakingPath, gStr.gsCouldntGenerateValidPath);
                 btnPathGoStop.Image = Properties.Resources.boundaryPlay;
                 btnPathRecordStop.Enabled = true;
@@ -2101,9 +2101,9 @@ namespace AgOpenGPS
 
         private void btnPathRecordStop_Click(object sender, EventArgs e)
         {
-            if (recPath.isRecordOn)
+            if (gyd.isRecordOn)
             {
-                recPath.isRecordOn = false;
+                gyd.isRecordOn = false;
                 btnPathRecordStop.Image = Properties.Resources.BoundaryRecord;
                 btnPathGoStop.Enabled = true;
                 btnPathDelete.Enabled = true;
@@ -2119,14 +2119,14 @@ namespace AgOpenGPS
                     }
                     else
                     {
-                        recPath.recList.Clear();
+                        gyd.recList.Clear();
                     }
                 }                
             }
             else if (isJobStarted)
             {
-                recPath.recList.Clear();
-                recPath.isRecordOn = true;
+                gyd.recList.Clear();
+                gyd.isRecordOn = true;
                 btnPathRecordStop.Image = Properties.Resources.boundaryStop;
                 btnPathGoStop.Enabled = false;
                 btnPathDelete.Enabled = false;
@@ -2162,8 +2162,8 @@ namespace AgOpenGPS
                 if (panelDrag.Visible)
                 {
                     panelDrag.Visible = false;
-                    recPath.recList.Clear();
-                    recPath.StopDrivingRecordedPath();
+                    gyd.recList.Clear();
+                    gyd.StopDrivingRecordedPath();
                 }
                 else
                 {
@@ -2202,7 +2202,7 @@ namespace AgOpenGPS
         #region Sim controls
         private void timerSim_Tick(object sender, EventArgs e)
         {
-            if (recPath.isDrivingRecordedPath || isAutoSteerBtnOn && (guidanceLineDistanceOff != 32000))
+            if (gyd.isDrivingRecordedPath || isAutoSteerBtnOn && (guidanceLineDistanceOff != 32000))
                 sim.DoSimTick(guidanceLineSteerAngle * 0.01);
             else sim.DoSimTick(sim.steerAngleScrollBar);
         }

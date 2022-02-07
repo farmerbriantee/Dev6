@@ -4,24 +4,17 @@ using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
-    public class CABCurve
+    public partial class CGuidance
     {
-        //pointers to mainform controls
-        private readonly FormGPS mf;
-
         //flag for starting stop adding points
         public bool isBtnCurveOn, isCurveSet, isOkToAddDesPoints;
 
-        public double distanceFromCurrentLinePivot;
         public double distanceFromRefLine;
-
-        public bool isHeadingSameWay = true;
 
         public double howManyPathsAway;
         public vec2 refPoint1 = new vec2(1, 1), refPoint2 = new vec2(2, 2);
 
         public double refHeading, moveDistance;
-        private int A, B, C;
         private int rA, rB;
 
         public int currentLocationIndex;
@@ -52,18 +45,7 @@ namespace AgOpenGPS
         public List<vec3> desList = new List<vec3>();
         public string desName = "**";
 
-        public double pivotDistanceError, pivotDistanceErrorLast, pivotDerivative, pivotDerivativeSmoothed, lastCurveDistance = 10000;
-        //derivative counters
-        private int counter2;
-        public double inty;
-
-        public CABCurve(FormGPS _f)
-        {
-            //constructor
-            mf = _f;
-            refList.Capacity = 1024;
-            curList.Capacity = 1024;
-        }
+        public double lastCurveDistance = 10000;
 
         public void BuildCurveCurrentList(vec3 pivot)
         {
@@ -126,7 +108,7 @@ namespace AgOpenGPS
             //same way as line creation or not
             isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(pivot.heading - refList[rA].heading) - Math.PI) < glm.PIBy2;
 
-            if (mf.yt.isYouTurnTriggered) isHeadingSameWay = !isHeadingSameWay;
+            if (isYouTurnTriggered) isHeadingSameWay = !isHeadingSameWay;
 
             //which side of the closest point are we on is next
             //calculate endpoints of reference line based on closest point
@@ -335,20 +317,20 @@ namespace AgOpenGPS
 
             if (ptCount > 0)
             {
-                if (mf.yt.isYouTurnTriggered && mf.yt.DistanceFromYouTurnLine())//do the pure pursuit from youTurn
+                if (isYouTurnTriggered && DistanceFromYouTurnLine())//do the pure pursuit from youTurn
                 {
                     //now substitute what it thinks are AB line values with auto turn values
-                    steerAngleCu = mf.yt.steerAngleYT;
-                    distanceFromCurrentLinePivot = mf.yt.distanceFromCurrentLine;
+                    steerAngleCu = steerAngleYT;
+                    distanceFromCurrentLinePivot = distanceFromCurrentLine;
 
-                    goalPointCu = mf.yt.goalPointYT;
-                    radiusPointCu.easting = mf.yt.radiusPointYT.easting;
-                    radiusPointCu.northing = mf.yt.radiusPointYT.northing;
-                    ppRadiusCu = mf.yt.ppRadiusYT;
+                    goalPointCu = goalPointYT;
+                    radiusPointCu.easting = radiusPointYT.easting;
+                    radiusPointCu.northing = radiusPointYT.northing;
+                    ppRadiusCu = ppRadiusYT;
                 }
                 else if (mf.isStanleyUsed)//Stanley
                 {
-                    mf.gyd.StanleyGuidanceCurve(pivot, steer, ref curList);
+                    StanleyGuidanceCurve(pivot, steer, ref curList);
                 }
                 else// Pure Pursuit ------------------------------------------
                 {
@@ -483,7 +465,7 @@ namespace AgOpenGPS
                         + ((goalPointCu.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));
 
                     if (mf.ahrs.imuRoll != 88888)
-                        steerAngleCu += mf.ahrs.imuRoll * -mf.gyd.sideHillCompFactor;
+                        steerAngleCu += mf.ahrs.imuRoll * -sideHillCompFactor;
 
                     if (steerAngleCu < -mf.vehicle.maxSteerAngle) steerAngleCu = -mf.vehicle.maxSteerAngle;
                     if (steerAngleCu > mf.vehicle.maxSteerAngle) steerAngleCu = mf.vehicle.maxSteerAngle;
@@ -535,11 +517,11 @@ namespace AgOpenGPS
             int ptCount = refList.Count;
             if (refList.Count == 0) return;
 
-            GL.LineWidth(mf.ABLine.lineWidth);
+            GL.LineWidth(lineWidth);
             GL.Color3(0.96, 0.2f, 0.2f);
             GL.Begin(PrimitiveType.Lines);
             for (int h = 0; h < ptCount; h++) GL.Vertex3(refList[h].easting, refList[h].northing, 0);
-            if (!mf.curve.isCurveSet)
+            if (!isCurveSet)
             {
                 GL.Color3(0.930f, 0.0692f, 0.260f);
                 ptCount--;
@@ -552,9 +534,9 @@ namespace AgOpenGPS
             //GL.Begin(PrimitiveType.Points);
             //GL.Color3(1.0f, 1.0f, 0.0f);
             ////GL.Vertex3(goalPointAB.easting, goalPointAB.northing, 0.0);
-            //GL.Vertex3(mf.gyd.rEastSteer, mf.gyd.rNorthSteer, 0.0);
+            //GL.Vertex3(rEastSteer, rNorthSteer, 0.0);
             //GL.Color3(1.0f, 0.0f, 1.0f);
-            //GL.Vertex3(mf.gyd.rEastPivot, mf.gyd.rNorthPivot, 0.0);
+            //GL.Vertex3(rEastPivot, rNorthPivot, 0.0);
             //GL.End();
             //GL.PointSize(1.0f);
 
@@ -576,7 +558,7 @@ namespace AgOpenGPS
                 ptCount = smooList.Count;
                 if (smooList.Count == 0) return;
 
-                GL.LineWidth(mf.ABLine.lineWidth);
+                GL.LineWidth(lineWidth);
                 GL.Color3(0.930f, 0.92f, 0.260f);
                 GL.Begin(PrimitiveType.Lines);
                 for (int h = 0; h < ptCount; h++) GL.Vertex3(smooList[h].easting, smooList[h].northing, 0);
@@ -627,13 +609,13 @@ namespace AgOpenGPS
                         GL.End();
                     }
 
-                    mf.yt.DrawYouTurn();
+                    DrawYouTurn();
                 }
             }
             GL.PointSize(1.0f);
         }
 
-        public void BuildTram()
+        public void BuildTram(bool _)
         {
             mf.tram.BuildTramBnd();
             mf.tram.tramList?.Clear();

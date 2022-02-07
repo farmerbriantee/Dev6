@@ -11,8 +11,6 @@ using System.Globalization;
 using System.IO;
 using System.Media;
 using System.Net.Sockets;
-using System.Reflection;
-using System.Resources;
 using System.Windows.Forms;
 
 namespace AgOpenGPS
@@ -149,30 +147,9 @@ namespace AgOpenGPS
         public CSection[] section;
 
         /// <summary>
-        /// AB Line object
-        /// </summary>
-        public CABLine ABLine;
-
-        /// <summary>
         /// TramLine class for boundary and settings
         /// </summary>
         public CTram tram;
-
-
-        /// <summary>
-        /// Contour Mode Instance
-        /// </summary>
-        public CContour ct;
-
-        /// <summary>
-        /// ABCurve instance
-        /// </summary>
-        public CABCurve curve;
-
-        /// <summary>
-        /// Auto Headland YouTurn
-        /// </summary>
-        public CYouTurn yt;
 
         /// <summary>
         /// Our vehicle only
@@ -200,19 +177,9 @@ namespace AgOpenGPS
         public CSim sim;
 
         /// <summary>
-        /// Resource manager for gloabal strings
-        /// </summary>
-        public ResourceManager _rm;
-
-        /// <summary>
         /// Heading, Roll, Pitch, GPS, Properties
         /// </summary>
         public CAHRS ahrs;
-
-        /// <summary>
-        /// Recorded Path
-        /// </summary>
-        public CRecordedPath recPath;
 
         /// <summary>
         /// Most of the displayed field data for GUI
@@ -312,18 +279,6 @@ namespace AgOpenGPS
             //our NMEA parser
             pn = new CNMEA(this);
 
-            //create the ABLine instance
-            ABLine = new CABLine(this);
-
-            //new instance of contour mode
-            ct = new CContour(this);
-
-            //new instance of contour mode
-            curve = new CABCurve(this);
-
-            ////new instance of auto headland turn
-            yt = new CYouTurn(this);
-
             //module communication
             mc = new CModuleComm(this);
 
@@ -336,9 +291,6 @@ namespace AgOpenGPS
             ////all the attitude, heading, roll, pitch reference system
             ahrs = new CAHRS();
 
-            //A recorded path
-            recPath = new CRecordedPath(this);
-
             //fieldData all in one place
             fd = new CFieldData(this);
 
@@ -347,9 +299,6 @@ namespace AgOpenGPS
 
             //instance of tram
             tram = new CTram(this);
-
-            //resource for gloabal language strings
-            _rm = new ResourceManager("AgOpenGPS.gStr", Assembly.GetExecutingAssembly());
 
             //access to font class
             font = new CFont(this);
@@ -707,12 +656,12 @@ namespace AgOpenGPS
 
         public void SwapDirection()
         {
-            if (!yt.isYouTurnTriggered)
+            if (!gyd.isYouTurnTriggered)
             {
-                yt.isYouTurnRight = !yt.isYouTurnRight;
-                yt.ResetCreatedYouTurn();
+                gyd.isYouTurnRight = !gyd.isYouTurnRight;
+                gyd.ResetCreatedYouTurn();
             }
-            else if (yt.isYouTurnBtnOn)
+            else if (gyd.isYouTurnBtnOn)
                 btnAutoYouTurn.PerformClick();
         }
 
@@ -965,7 +914,7 @@ namespace AgOpenGPS
             btnCycleLines.Image = Properties.Resources.ABLineCycle;
             btnCycleLines.Enabled = true;
 
-            ABLine.abHeading = 0.00;
+            gyd.abHeading = 0.00;
             btnAutoSteer.Enabled = true;
 
             DisableYouTurnButtons();
@@ -1096,20 +1045,20 @@ namespace AgOpenGPS
             //ABLine
             btnABLine.Enabled = false;
             btnABLine.Image = Properties.Resources.ABLineOff;
-            ABLine.isBtnABLineOn = false;
-            ABLine.DeleteAB();
-            ABLine.lineArr?.Clear();
-            ABLine.numABLineSelected = 0;
+            gyd.isBtnABLineOn = false;
+            gyd.DeleteAB();
+            gyd.lineArr?.Clear();
+            gyd.numABLineSelected = 0;
             tram.tramList?.Clear();
 
             //curve line
             btnCurve.Enabled = false;
             btnCurve.Image = Properties.Resources.CurveOff;
-            curve.isBtnCurveOn = false;
-            curve.isCurveSet = false;
-            curve.ResetCurveLine();
-            curve.curveArr?.Clear();
-            curve.numCurveLineSelected = 0;
+            gyd.isBtnCurveOn = false;
+            gyd.isCurveSet = false;
+            gyd.ResetCurveLine();
+            gyd.curveArr?.Clear();
+            gyd.numCurveLineSelected = 0;
 
             //clean up tram
             tram.displayMode = 0;
@@ -1120,10 +1069,10 @@ namespace AgOpenGPS
             btnContour.Enabled = false;
             //btnContourPriority.Enabled = false;
             btnSnapToPivot.Image = Properties.Resources.SnapToPivot;
-            ct.ResetContour();
-            ct.isContourBtnOn = false;
+            gyd.ResetContour();
+            gyd.isContourBtnOn = false;
             btnContour.Image = Properties.Resources.ContourOff;
-            ct.isContourOn = false;
+            gyd.isContourOn = false;
 
             btnCycleLines.Image = Properties.Resources.ABLineCycle;
             btnCycleLines.Enabled = false;
@@ -1134,13 +1083,13 @@ namespace AgOpenGPS
             btnAutoSteer.Image = Properties.Resources.AutoSteerOff;
 
             //auto YouTurn shutdown
-            yt.isYouTurnBtnOn = false;
+            gyd.isYouTurnBtnOn = false;
             btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
             btnAutoYouTurn.Enabled = false;
 
             btnABDraw.Visible = false;
 
-            yt.ResetYouTurn();
+            gyd.ResetYouTurn();
             DisableYouTurnButtons();
 
             //reset acre and distance counters
@@ -1152,9 +1101,9 @@ namespace AgOpenGPS
             displayFieldName = gStr.gsNone;
             FixTramModeButton();
 
-            recPath.recList?.Clear();
-            recPath.shortestDubinsList?.Clear();
-            recPath.shuttleDubinsList?.Clear();
+            gyd.recList?.Clear();
+            gyd.shortestDubinsList?.Clear();
+            gyd.shuttleDubinsList?.Clear();
 
             FixPanelsAndMenus();
             SetZoom();
@@ -1248,7 +1197,7 @@ namespace AgOpenGPS
         private void FileSaveEverythingBeforeClosingField()
         {
             //turn off contour line if on
-            if (ct.isContourOn) ct.StopContourLine(pivotAxlePos);
+            if (gyd.isContourOn) gyd.StopContourLine(pivotAxlePos);
 
             //turn off all the sections
             for (int j = 0; j < tool.numOfSections + 1; j++)

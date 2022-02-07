@@ -45,7 +45,7 @@ namespace AgOpenGPS
             tboxHeading.Visible = !isCurve;
             cboxDegrees.Visible = !isCurve;
 
-            tboxHeading.Text = Math.Round(glm.toDegrees(mf.ABLine.abHeading), 5).ToString();
+            tboxHeading.Text = Math.Round(glm.toDegrees(mf.gyd.abHeading), 5).ToString();
 
             mf.panelRight.Enabled = false;
         }
@@ -54,19 +54,19 @@ namespace AgOpenGPS
         {
             tboxHeading.Text = "";
 
-            using (FormNumeric form = new FormNumeric(0, 360, Math.Round(glm.toDegrees(mf.ABLine.abHeading), 5)))
+            using (FormNumeric form = new FormNumeric(0, 360, Math.Round(glm.toDegrees(mf.gyd.abHeading), 5)))
             {
                 if (form.ShowDialog(this) == DialogResult.OK)
                 {
                     tboxHeading.Text = ((double)form.ReturnValue).ToString();
-                    mf.ABLine.abHeading = glm.toRadians((double)form.ReturnValue);
-                    mf.ABLine.SetABLineByHeading();
+                    mf.gyd.abHeading = glm.toRadians((double)form.ReturnValue);
+                    mf.gyd.SetABLineByHeading();
                 }
-                else tboxHeading.Text = Math.Round(glm.toDegrees(mf.ABLine.abHeading), 5).ToString();
+                else tboxHeading.Text = Math.Round(glm.toDegrees(mf.gyd.abHeading), 5).ToString();
 
             }
 
-            mf.ABLine.isABValid = false;
+            mf.gyd.isABValid = false;
         }
 
         private void nudMinTurnRadius_Click(object sender, EventArgs e)
@@ -82,62 +82,62 @@ namespace AgOpenGPS
         private void btnAdjRight_Click(object sender, EventArgs e)
         {
             if (isCurve)
-                mf.curve.MoveABCurve(snapAdj);
+                mf.gyd.MoveABCurve(snapAdj);
             else
-                mf.ABLine.MoveABLine(snapAdj);
+                mf.gyd.MoveABLine(snapAdj);
         }
 
         private void btnAdjLeft_Click(object sender, EventArgs e)
         {
             if (isCurve)
-                mf.curve.MoveABCurve(-snapAdj);
+                mf.gyd.MoveABCurve(-snapAdj);
             else
-                mf.ABLine.MoveABLine(-snapAdj);
+                mf.gyd.MoveABLine(-snapAdj);
         }
 
         private void bntOk_Click(object sender, EventArgs e)
         {
             if (isCurve)
             {
-                if (mf.curve.refList.Count > 0)
+                if (mf.gyd.refList.Count > 0)
                 {
                     //array number is 1 less since it starts at zero
-                    int idx = mf.curve.numCurveLineSelected - 1;
+                    int idx = mf.gyd.numCurveLineSelected - 1;
 
                     if (idx >= 0)
                     {
-                        mf.curve.curveArr[idx].aveHeading = mf.curve.aveLineHeading;
-                        mf.curve.curveArr[idx].curvePts.Clear();
+                        mf.gyd.curveArr[idx].aveHeading = mf.gyd.aveLineHeading;
+                        mf.gyd.curveArr[idx].curvePts.Clear();
                         //write out the Curve Points
-                        foreach (vec3 item in mf.curve.refList)
+                        foreach (vec3 item in mf.gyd.refList)
                         {
-                            mf.curve.curveArr[idx].curvePts.Add(item);
+                            mf.gyd.curveArr[idx].curvePts.Add(item);
                         }
                     }
 
                     //save entire list
                     mf.FileSaveCurveLines();
                 }
-                mf.curve.moveDistance = 0;
-                mf.curve.isCurveValid = false;
+                mf.gyd.moveDistance = 0;
+                mf.gyd.isCurveValid = false;
             }
             else
             {
                 //index to last one. 
-                int idx = mf.ABLine.numABLineSelected - 1;
+                int idx = mf.gyd.numABLineSelected - 1;
 
                 if (idx >= 0)
                 {
-                    mf.ABLine.lineArr[idx].heading = mf.ABLine.abHeading;
+                    mf.gyd.lineArr[idx].heading = mf.gyd.abHeading;
                     //calculate the new points for the reference line and points
-                    mf.ABLine.lineArr[idx].origin.easting = mf.ABLine.refPoint1.easting;
-                    mf.ABLine.lineArr[idx].origin.northing = mf.ABLine.refPoint1.northing;
+                    mf.gyd.lineArr[idx].origin.easting = mf.gyd.refPoint1.easting;
+                    mf.gyd.lineArr[idx].origin.northing = mf.gyd.refPoint1.northing;
                 }
 
                 mf.FileSaveABLines();
 
-                mf.ABLine.moveDistance = 0;
-                mf.ABLine.isABValid = false;
+                mf.gyd.moveDistance = 0;
+                mf.gyd.isABValid = false;
             }
 
             isClosing = true;
@@ -148,37 +148,37 @@ namespace AgOpenGPS
         {
             if (isCurve)
             {
-                int last = mf.curve.numCurveLineSelected;
+                int last = mf.gyd.numCurveLineSelected;
                 mf.FileLoadCurveLines();
 
-                if (mf.curve.curveArr.Count > 0)
+                if (mf.gyd.curveArr.Count > 0)
                 {
-                    mf.curve.numCurveLineSelected = last;
-                    int idx = mf.curve.numCurveLineSelected - 1;
-                    mf.curve.aveLineHeading = mf.curve.curveArr[idx].aveHeading;
+                    mf.gyd.numCurveLineSelected = last;
+                    int idx = mf.gyd.numCurveLineSelected - 1;
+                    mf.gyd.aveLineHeading = mf.gyd.curveArr[idx].aveHeading;
 
-                    mf.curve.refList?.Clear();
-                    for (int i = 0; i < mf.curve.curveArr[idx].curvePts.Count; i++)
+                    mf.gyd.refList?.Clear();
+                    for (int i = 0; i < mf.gyd.curveArr[idx].curvePts.Count; i++)
                     {
-                        mf.curve.refList.Add(mf.curve.curveArr[idx].curvePts[i]);
+                        mf.gyd.refList.Add(mf.gyd.curveArr[idx].curvePts[i]);
                     }
-                    mf.curve.isCurveSet = true;
+                    mf.gyd.isCurveSet = true;
                 }
-                mf.curve.isCurveValid = false;
+                mf.gyd.isCurveValid = false;
             }
             else
             {
-                int last = mf.ABLine.numABLineSelected;
+                int last = mf.gyd.numABLineSelected;
                 mf.FileLoadABLines();
 
-                mf.ABLine.numABLineSelected = last;
-                mf.ABLine.refPoint1 = mf.ABLine.lineArr[mf.ABLine.numABLineSelected - 1].origin;
-                mf.ABLine.abHeading = mf.ABLine.lineArr[mf.ABLine.numABLineSelected - 1].heading;
-                mf.ABLine.SetABLineByHeading();
-                mf.ABLine.isABLineSet = true;
-                mf.ABLine.isABLineLoaded = true;
-                mf.ABLine.moveDistance = 0;
-                mf.ABLine.isABValid = false;
+                mf.gyd.numABLineSelected = last;
+                mf.gyd.refPoint1 = mf.gyd.lineArr[mf.gyd.numABLineSelected - 1].origin;
+                mf.gyd.abHeading = mf.gyd.lineArr[mf.gyd.numABLineSelected - 1].heading;
+                mf.gyd.SetABLineByHeading();
+                mf.gyd.isABLineSet = true;
+                mf.gyd.isABLineLoaded = true;
+                mf.gyd.moveDistance = 0;
+                mf.gyd.isABValid = false;
             }
 
             isClosing = true;
@@ -189,21 +189,21 @@ namespace AgOpenGPS
         {
             if (isCurve)
             {
-                mf.curve.isCurveValid = false;
-                mf.curve.lastSecond = 0;
-                int cnt = mf.curve.refList.Count;
+                mf.gyd.isCurveValid = false;
+                mf.gyd.lastSecond = 0;
+                int cnt = mf.gyd.refList.Count;
                 if (cnt > 0)
                 {
-                    mf.curve.refList.Reverse();
+                    mf.gyd.refList.Reverse();
 
                     vec3[] arr = new vec3[cnt];
                     cnt--;
-                    mf.curve.refList.CopyTo(arr);
-                    mf.curve.refList.Clear();
+                    mf.gyd.refList.CopyTo(arr);
+                    mf.gyd.refList.Clear();
 
-                    mf.curve.aveLineHeading += Math.PI;
-                    if (mf.curve.aveLineHeading < 0) mf.curve.aveLineHeading += glm.twoPI;
-                    if (mf.curve.aveLineHeading > glm.twoPI) mf.curve.aveLineHeading -= glm.twoPI;
+                    mf.gyd.aveLineHeading += Math.PI;
+                    if (mf.gyd.aveLineHeading < 0) mf.gyd.aveLineHeading += glm.twoPI;
+                    if (mf.gyd.aveLineHeading > glm.twoPI) mf.gyd.aveLineHeading -= glm.twoPI;
 
                     for (int i = 1; i < cnt; i++)
                     {
@@ -211,64 +211,64 @@ namespace AgOpenGPS
                         pt3.heading += Math.PI;
                         if (pt3.heading > glm.twoPI) pt3.heading -= glm.twoPI;
                         if (pt3.heading < 0) pt3.heading += glm.twoPI;
-                        mf.curve.refList.Add(pt3);
+                        mf.gyd.refList.Add(pt3);
                     }
                 }
             }
             else
             {
-                mf.ABLine.abHeading += Math.PI;
-                if (mf.ABLine.abHeading > glm.twoPI) mf.ABLine.abHeading -= glm.twoPI;
+                mf.gyd.abHeading += Math.PI;
+                if (mf.gyd.abHeading > glm.twoPI) mf.gyd.abHeading -= glm.twoPI;
 
-                mf.ABLine.refABLineP1.easting = mf.ABLine.refPoint1.easting - (Math.Sin(mf.ABLine.abHeading) * mf.ABLine.abLength);
-                mf.ABLine.refABLineP1.northing = mf.ABLine.refPoint1.northing - (Math.Cos(mf.ABLine.abHeading) * mf.ABLine.abLength);
-                mf.ABLine.refABLineP2.easting = mf.ABLine.refPoint1.easting + (Math.Sin(mf.ABLine.abHeading) * mf.ABLine.abLength);
-                mf.ABLine.refABLineP2.northing = mf.ABLine.refPoint1.northing + (Math.Cos(mf.ABLine.abHeading) * mf.ABLine.abLength);
+                mf.gyd.refABLineP1.easting = mf.gyd.refPoint1.easting - (Math.Sin(mf.gyd.abHeading) * mf.gyd.abLength);
+                mf.gyd.refABLineP1.northing = mf.gyd.refPoint1.northing - (Math.Cos(mf.gyd.abHeading) * mf.gyd.abLength);
+                mf.gyd.refABLineP2.easting = mf.gyd.refPoint1.easting + (Math.Sin(mf.gyd.abHeading) * mf.gyd.abLength);
+                mf.gyd.refABLineP2.northing = mf.gyd.refPoint1.northing + (Math.Cos(mf.gyd.abHeading) * mf.gyd.abLength);
 
-                mf.ABLine.refPoint2.easting = mf.ABLine.refABLineP2.easting;
-                mf.ABLine.refPoint2.northing = mf.ABLine.refABLineP2.northing;
-                tboxHeading.Text = Math.Round(glm.toDegrees(mf.ABLine.abHeading), 5).ToString();
-                mf.ABLine.isABValid = false;
+                mf.gyd.refPoint2.easting = mf.gyd.refABLineP2.easting;
+                mf.gyd.refPoint2.northing = mf.gyd.refABLineP2.northing;
+                tboxHeading.Text = Math.Round(glm.toDegrees(mf.gyd.abHeading), 5).ToString();
+                mf.gyd.isABValid = false;
             }
         }
 
         private void btnContourPriority_Click(object sender, EventArgs e)
         {
-            if (isCurve && mf.curve.isBtnCurveOn)
-                mf.curve.MoveABCurve(mf.isStanleyUsed ? mf.gyd.distanceFromCurrentLinePivot : mf.curve.distanceFromCurrentLinePivot);
-            else if (!isCurve && mf.ABLine.isABLineSet)
-                mf.ABLine.MoveABLine(mf.ABLine.distanceFromCurrentLinePivot);
+            if (isCurve && mf.gyd.isBtnCurveOn)
+                mf.gyd.MoveABCurve(mf.isStanleyUsed ? mf.gyd.distanceFromCurrentLinePivot : mf.gyd.distanceFromCurrentLinePivot);
+            else if (!isCurve && mf.gyd.isABLineSet)
+                mf.gyd.MoveABLine(mf.gyd.distanceFromCurrentLinePivot);
         }
 
         private void btnRightHalfWidth_Click(object sender, EventArgs e)
         {
             if (isCurve)
-                mf.curve.MoveABCurve(mf.tool.toolWidth * 0.5);
+                mf.gyd.MoveABCurve(mf.tool.toolWidth * 0.5);
             else
-               mf.ABLine.MoveABLine(mf.tool.toolWidth * 0.5);
+               mf.gyd.MoveABLine(mf.tool.toolWidth * 0.5);
         }
 
         private void btnLeftHalfWidth_Click(object sender, EventArgs e)
         {
             if (isCurve)
-                mf.curve.MoveABCurve(mf.tool.toolWidth * -0.5);
+                mf.gyd.MoveABCurve(mf.tool.toolWidth * -0.5);
             else
-                mf.ABLine.MoveABLine(mf.tool.toolWidth * -0.5);
+                mf.gyd.MoveABLine(mf.tool.toolWidth * -0.5);
         }
 
         private void btnNoSave_Click(object sender, EventArgs e)
         {
             isClosing = true;
-            mf.ABLine.isABValid = false;
-            mf.curve.isCurveValid = false;
+            mf.gyd.isABValid = false;
+            mf.gyd.isCurveValid = false;
             Close();
         }
 
         private void cboxDegrees_SelectedIndexChanged(object sender, EventArgs e)
         {
-            mf.ABLine.abHeading = glm.toRadians(double.Parse(cboxDegrees.SelectedItem.ToString()));
-            mf.ABLine.SetABLineByHeading();
-            tboxHeading.Text = Math.Round(glm.toDegrees(mf.ABLine.abHeading), 5).ToString();
+            mf.gyd.abHeading = glm.toRadians(double.Parse(cboxDegrees.SelectedItem.ToString()));
+            mf.gyd.SetABLineByHeading();
+            tboxHeading.Text = Math.Round(glm.toDegrees(mf.gyd.abHeading), 5).ToString();
         }
 
         private void FormEditAB_FormClosing(object sender, FormClosingEventArgs e)

@@ -4,21 +4,15 @@ using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
-    public class CContour
+    public partial class CGuidance
     {
-        //copy of the mainform address
-        private readonly FormGPS mf;
-
         public bool isContourOn, isContourBtnOn, isRightPriority = true;
 
         // for closest line point to current fix
         public double minDistance = 99999.0, refX, refZ;
 
-        public double distanceFromCurrentLinePivot;
 
-        private int A, B, C, stripNum, lastLockPt = int.MaxValue, backSpacing = 30;
-
-        public double abFixHeadingDelta, abHeading;
+        private int A, B, stripNum, lastLockPt = int.MaxValue, backSpacing = 30;
 
         public bool isHeadingSameWay = true;
 
@@ -27,12 +21,9 @@ namespace AgOpenGPS
         public double rEastCT, rNorthCT;
         public double ppRadiusCT;
 
-        public double pivotDistanceError, pivotDistanceErrorLast, pivotDerivative, pivotDerivativeSmoothed;
-        //derivative counters
-        private int counter2;
-        public double inty;
-        public double steerAngleSmoothed, pivotErrorTotal;
-        public double distSteerError, lastDistSteerError, derivativeDistError;
+        public double pivotDistanceErrorLast, pivotDerivative, pivotDerivativeSmoothed;
+
+        public double pivotErrorTotal;
 
 
         //list of strip data individual points
@@ -43,14 +34,6 @@ namespace AgOpenGPS
 
         //list of points for the new contour line
         public List<vec3> ctList = new List<vec3>();
-
-        //constructor
-        public CContour(FormGPS _f)
-        {
-            mf = _f;
-            ctList.Capacity = 128;
-            ptList.Capacity = 128;
-        }
 
         public bool isLocked = false;
 
@@ -282,7 +265,6 @@ namespace AgOpenGPS
         //    }
         //}
         #endregion
-        private double lastSecond;
         public void BuildContourGuidanceLine(vec3 pivot, vec3 steer)
         {
             if (ctList.Count == 0)
@@ -730,7 +712,7 @@ namespace AgOpenGPS
                         if (mf.isAutoSteerBtnOn
                             && Math.Abs(pivotDerivative) < (0.1)
                             && mf.avgSpeed > 2.5
-                            && !mf.yt.isYouTurnTriggered)
+                            && !isYouTurnTriggered)
                         {
                             //if over the line heading wrong way, rapidly decrease integral
                             if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
@@ -807,7 +789,7 @@ namespace AgOpenGPS
                         + ((goalPointCT.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));
 
                     if (mf.ahrs.imuRoll != 88888)
-                        steerAngleCT += mf.ahrs.imuRoll * -mf.gyd.sideHillCompFactor;
+                        steerAngleCT += mf.ahrs.imuRoll * -sideHillCompFactor;
 
                     if (steerAngleCT < -mf.vehicle.maxSteerAngle) steerAngleCT = -mf.vehicle.maxSteerAngle;
                     if (steerAngleCT > mf.vehicle.maxSteerAngle) steerAngleCT = mf.vehicle.maxSteerAngle;
@@ -963,13 +945,13 @@ namespace AgOpenGPS
             ////draw the guidance line
             int ptCount = ctList.Count;
             if (ptCount < 2) return;
-            GL.LineWidth(mf.ABLine.lineWidth);
+            GL.LineWidth(lineWidth);
             GL.Color3(0.98f, 0.2f, 0.980f);
             GL.Begin(PrimitiveType.LineStrip);
             for (int h = 0; h < ptCount; h++) GL.Vertex3(ctList[h].easting, ctList[h].northing, 0);
             GL.End();
 
-            GL.PointSize(mf.ABLine.lineWidth);
+            GL.PointSize(lineWidth);
             GL.Begin(PrimitiveType.Points);
 
             GL.Color3(0.87f, 08.7f, 0.25f);
@@ -986,7 +968,7 @@ namespace AgOpenGPS
             else
             {
                 GL.Color3(0.3f, 0.982f, 0.0f);
-                GL.LineWidth(mf.ABLine.lineWidth);
+                GL.LineWidth(lineWidth);
             }
 
             //GL.PointSize(6.0f);

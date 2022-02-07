@@ -284,28 +284,28 @@ namespace AgOpenGPS
                     GL.Color3(1, 1, 1);
 
                     //draw contour line if button on 
-                    if (ct.isContourBtnOn)
+                    if (gyd.isContourBtnOn)
                     {
-                        ct.DrawContourLine();
+                        gyd.DrawContourLine();
                     }
                     else// draw the current and reference AB Lines or CurveAB Ref and line
                     {
-                        if (ABLine.isABLineSet | ABLine.isABLineBeingSet) ABLine.DrawABLines();
-                        if (curve.isBtnCurveOn) curve.DrawCurve();
+                        if (gyd.isABLineSet || gyd.isABLineBeingSet) gyd.DrawABLines();
+                        if (gyd.isBtnCurveOn) gyd.DrawCurve();
                     }
 
-                    recPath.DrawRecordedLine();
-                    recPath.DrawDubins();
+                    gyd.DrawRecordedLine();
+                    gyd.DrawDubins();
 
                     if (bnd.bndList.Count > 0 || bnd.isBndBeingMade == true)
                     {
                         //draw Boundaries
                         bnd.DrawFenceLines();
 
-                        GL.LineWidth(ABLine.lineWidth);
+                        GL.LineWidth(gyd.lineWidth);
 
                         //draw the turnLines
-                        if (yt.isYouTurnBtnOn && !ct.isContourBtnOn)
+                        if (gyd.isYouTurnBtnOn && !gyd.isContourBtnOn)
                         {
                             GL.Color3(0.3555f, 0.6232f, 0.20f);
                             for (int i = 0; i < bnd.bndList.Count; i++)
@@ -341,7 +341,7 @@ namespace AgOpenGPS
                     {
                         if (flagNumberPicked > 0)
                         {
-                            GL.LineWidth(ABLine.lineWidth);
+                            GL.LineWidth(gyd.lineWidth);
                             GL.Enable(EnableCap.LineStipple);
                             GL.LineStipple(1, 0x0707);
                             GL.Begin(PrimitiveType.Lines);
@@ -394,9 +394,9 @@ namespace AgOpenGPS
                     if ((ahrs.imuRoll != 88888))
                         DrawRollBar();
 
-                    if (bnd.bndList.Count > 0 && yt.isYouTurnBtnOn) DrawUTurnBtn();
+                    if (bnd.bndList.Count > 0 && gyd.isYouTurnBtnOn) DrawUTurnBtn();
 
-                    if (isAutoSteerBtnOn && !ct.isContourBtnOn) DrawManUTurnBtn();
+                    if (isAutoSteerBtnOn && !gyd.isContourBtnOn) DrawManUTurnBtn();
 
                     //if (isCompassOn) DrawCompass();
                     DrawCompassText();
@@ -1123,7 +1123,7 @@ namespace AgOpenGPS
                     } //end of section patches
 
                     //draw the ABLine
-                    if ((ABLine.isABLineSet | ABLine.isABLineBeingSet) && ABLine.isBtnABLineOn)
+                    if ((gyd.isABLineSet || gyd.isABLineBeingSet) && gyd.isBtnABLineOn)
                     {
                         //Draw reference AB line
                         GL.LineWidth(1);
@@ -1132,29 +1132,29 @@ namespace AgOpenGPS
 
                         GL.Begin(PrimitiveType.Lines);
                         GL.Color3(0.9f, 0.2f, 0.2f);
-                        GL.Vertex3(ABLine.refABLineP1.easting, ABLine.refABLineP1.northing, 0);
-                        GL.Vertex3(ABLine.refABLineP2.easting, ABLine.refABLineP2.northing, 0);
+                        GL.Vertex3(gyd.refABLineP1.easting, gyd.refABLineP1.northing, 0);
+                        GL.Vertex3(gyd.refABLineP2.easting, gyd.refABLineP2.northing, 0);
                         GL.End();
                         GL.Disable(EnableCap.LineStipple);
 
                         //raw current AB Line
                         GL.Begin(PrimitiveType.Lines);
                         GL.Color3(0.9f, 0.20f, 0.90f);
-                        GL.Vertex3(ABLine.currentABLineP1.easting, ABLine.currentABLineP1.northing, 0.0);
-                        GL.Vertex3(ABLine.currentABLineP2.easting, ABLine.currentABLineP2.northing, 0.0);
+                        GL.Vertex3(gyd.currentABLineP1.easting, gyd.currentABLineP1.northing, 0.0);
+                        GL.Vertex3(gyd.currentABLineP2.easting, gyd.currentABLineP2.northing, 0.0);
                         GL.End();
                     }
 
                     //draw curve if there is one
-                    if (curve.isCurveSet && curve.isBtnCurveOn)
+                    if (gyd.isCurveSet && gyd.isBtnCurveOn)
                     {
-                        int ptC = curve.curList.Count;
+                        int ptC = gyd.curList.Count;
                         if (ptC > 0)
                         {
                             GL.LineWidth(2);
                             GL.Color3(0.925f, 0.2f, 0.90f);
                             GL.Begin(PrimitiveType.LineStrip);
-                            for (int h = 0; h < ptC; h++) GL.Vertex3(curve.curList[h].easting, curve.curList[h].northing, 0);
+                            for (int h = 0; h < ptC; h++) GL.Vertex3(gyd.curList[h].easting, gyd.curList[h].northing, 0);
                             GL.End();
                         }
                     }
@@ -1221,10 +1221,10 @@ namespace AgOpenGPS
         {
             GL.Enable(EnableCap.Texture2D);
 
-            if (!yt.isYouTurnTriggered)
+            if (!gyd.isYouTurnTriggered)
             {
                 GL.BindTexture(TextureTarget.Texture2D, texture[3]);        // Select Our Texture
-                if (distancePivotToTurnLine > 0 && !yt.isOutOfBounds) GL.Color3(0.3f, 0.95f, 0.3f);
+                if (distancePivotToTurnLine > 0 && !gyd.isOutOfBounds) GL.Color3(0.3f, 0.95f, 0.3f);
                 else GL.Color3(0.97f, 0.635f, 0.4f);
             }
             else
@@ -1235,7 +1235,7 @@ namespace AgOpenGPS
 
             int two3 = oglMain.Width / 5;
             GL.Begin(PrimitiveType.Quads);              // Build Quad From A Triangle Strip
-            if (!yt.isYouTurnRight)
+            if (!gyd.isYouTurnRight)
             {
                 GL.TexCoord2(0, 0); GL.Vertex2(-62 + two3, 40); // 
                 GL.TexCoord2(1, 0); GL.Vertex2(62 + two3, 40); // 
@@ -1255,25 +1255,25 @@ namespace AgOpenGPS
             // Done Building Triangle Strip
             if (isMetric)
             {
-                if (!yt.isYouTurnTriggered)
+                if (!gyd.isYouTurnTriggered)
                 {
                     font.DrawText(-30 + two3, 80, DistPivotM);
                 }
                 else
                 {
-                    font.DrawText(-30 + two3, 80, yt.onA.ToString());
+                    font.DrawText(-30 + two3, 80, gyd.onA.ToString());
                 }
             }
             else
             {
 
-                if (!yt.isYouTurnTriggered)
+                if (!gyd.isYouTurnTriggered)
                 {
                     font.DrawText(-40 + two3, 80, DistPivotFt);
                 }
                 else
                 {
-                    font.DrawText(-40 + two3, 80, yt.onA.ToString());
+                    font.DrawText(-40 + two3, 80, gyd.onA.ToString());
                 }
             }
         }
@@ -1556,7 +1556,7 @@ namespace AgOpenGPS
 
             GL.Disable(EnableCap.DepthTest);
 
-            if (ct.isContourBtnOn || ABLine.isBtnABLineOn || curve.isBtnCurveOn)
+            if (gyd.isContourBtnOn || gyd.isBtnABLineOn || gyd.isBtnCurveOn)
             {
 
                 //if (guidanceLineDistanceOff != 32000 && guidanceLineDistanceOff != 32020)
@@ -1808,9 +1808,9 @@ namespace AgOpenGPS
             GL.Color3(0.9752f, 0.62f, 0.325f);
             if (timerSim.Enabled) font.DrawText(-110, oglMain.Height - 130, "Simulator On", 1);
 
-            if (ct.isContourBtnOn)
+            if (gyd.isContourBtnOn)
             {
-                if (isFlashOnOff && ct.isLocked)
+                if (isFlashOnOff && gyd.isLocked)
                 {
                     GL.Color3(0.9652f, 0.752f, 0.75f);
                     font.DrawText(-center - 100, oglMain.Height / 2.3, "Locked", 1);
@@ -2103,7 +2103,7 @@ namespace AgOpenGPS
             }
 
 
-            if (maxFieldX == -9999999 | minFieldX == 9999999 | maxFieldY == -9999999 | minFieldY == 9999999)
+            if (maxFieldX == -9999999 || minFieldX == 9999999 || maxFieldY == -9999999 || minFieldY == 9999999)
             {
                 maxFieldX = 0; minFieldX = 0; maxFieldY = 0; minFieldY = 0; maxFieldDistance = 1500;
             }

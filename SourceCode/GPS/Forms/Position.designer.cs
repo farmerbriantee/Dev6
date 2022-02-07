@@ -632,28 +632,28 @@ namespace AgOpenGPS
             //preset the values
             guidanceLineDistanceOff = 32000;
 
-            if (ct.isContourBtnOn)
+            if (gyd.isContourBtnOn)
             {
-                ct.DistanceFromContourLine(pivotAxlePos, steerAxlePos);
+                gyd.DistanceFromContourLine(pivotAxlePos, steerAxlePos);
             }
             else
             {
-                if (curve.isCurveSet && curve.isBtnCurveOn)
+                if (gyd.isCurveSet && gyd.isBtnCurveOn)
                 {
                     //do the calcs for AB Curve
-                    curve.GetCurrentCurveLine(pivotAxlePos, steerAxlePos);
+                    gyd.GetCurrentCurveLine(pivotAxlePos, steerAxlePos);
                 }
 
-                if (ABLine.isABLineSet && ABLine.isBtnABLineOn)
+                if (gyd.isABLineSet && gyd.isBtnABLineOn)
                 {
-                    ABLine.GetCurrentABLine(pivotAxlePos, steerAxlePos);
+                    gyd.GetCurrentABLine(pivotAxlePos, steerAxlePos);
                 }
             }
 
             // autosteer at full speed of updates
 
             //if the whole path driving driving process is green
-            if (recPath.isDrivingRecordedPath) recPath.UpdatePosition();
+            if (gyd.isDrivingRecordedPath) gyd.UpdatePosition();
 
             // If Drive button off - normal autosteer 
             if (!vehicle.isInFreeDriveMode)
@@ -674,7 +674,7 @@ namespace AgOpenGPS
 
                 else p_254.pgn[p_254.status] = 1;
 
-                if (recPath.isDrivingRecordedPath || recPath.isFollowingDubinsToPath) p_254.pgn[p_254.status] = 1;
+                if (gyd.isDrivingRecordedPath || gyd.isFollowingDubinsToPath) p_254.pgn[p_254.status] = 1;
 
                 //mc.autoSteerData[7] = unchecked((byte)(guidanceLineDistanceOff >> 8));
                 //mc.autoSteerData[8] = unchecked((byte)(guidanceLineDistanceOff));
@@ -773,45 +773,45 @@ namespace AgOpenGPS
             if (bnd.bndList.Count > 0)
             {
                 //Are we inside outer and outside inner all turn boundaries, no turn creation problems
-                if (bnd.IsPointInsideFenceArea(pivotAxlePos) && !yt.isTurnCreationTooClose && !yt.isTurnCreationNotCrossingError)
+                if (bnd.IsPointInsideFenceArea(pivotAxlePos) && !gyd.isTurnCreationTooClose && !gyd.isTurnCreationNotCrossingError)
                 {
                     //reset critical stop for bounds violation
                     mc.isOutOfBounds = false;
 
                     //do the auto youturn logic if everything is on.
-                    if (yt.isYouTurnBtnOn && isAutoSteerBtnOn)
+                    if (gyd.isYouTurnBtnOn && isAutoSteerBtnOn)
                     {
                         //if we are too much off track > 1.3m, kill the diagnostic creation, start again
-                        if (crossTrackError > 1300 && !yt.isYouTurnTriggered)
+                        if (crossTrackError > 1300 && !gyd.isYouTurnTriggered)
                         {
-                            yt.ResetCreatedYouTurn();
+                            gyd.ResetCreatedYouTurn();
                         }
                         else
                         {
                             //now check to make sure we are not in an inner turn boundary - drive thru is ok
-                            if (yt.youTurnPhase != 3)
+                            if (gyd.youTurnPhase != 3)
                             {
                                 if (crossTrackError > 500)
                                 {
-                                    yt.ResetCreatedYouTurn();
+                                    gyd.ResetCreatedYouTurn();
                                 }
                                 else
                                 {
-                                    if (ABLine.isABLineSet)
+                                    if (gyd.isABLineSet)
                                     {
-                                        yt.BuildABLineDubinsYouTurn(yt.isYouTurnRight);
+                                        gyd.BuildABLineDubinsYouTurn(gyd.isYouTurnRight);
                                     }
-                                    else yt.BuildCurveDubinsYouTurn(yt.isYouTurnRight, pivotAxlePos);
+                                    else gyd.BuildCurveDubinsYouTurn(gyd.isYouTurnRight, pivotAxlePos);
                                 }
 
-                                if (yt.youTurnPhase == 3) yt.SmoothYouTurn(yt.uTurnSmoothing);
+                                if (gyd.youTurnPhase == 3) gyd.SmoothYouTurn(gyd.uTurnSmoothing);
                             }
                             else //wait to trigger the actual turn since its made and waiting
                             {
                                 //distance from current pivot to first point of youturn pattern
-                                distancePivotToTurnLine = glm.Distance(yt.ytList[5], pivotAxlePos);
+                                distancePivotToTurnLine = glm.Distance(gyd.ytList[5], pivotAxlePos);
 
-                                if ((distancePivotToTurnLine <= 20.0) && (distancePivotToTurnLine >= 18.0) && !yt.isYouTurnTriggered)
+                                if ((distancePivotToTurnLine <= 20.0) && (distancePivotToTurnLine >= 18.0) && !gyd.isYouTurnTriggered)
 
                                     if (!sounds.isBoundAlarming)
                                     {
@@ -820,9 +820,9 @@ namespace AgOpenGPS
                                     }
 
                                 //if we are close enough to pattern, trigger.
-                                if ((distancePivotToTurnLine <= 1.0) && (distancePivotToTurnLine >= 0) && !yt.isYouTurnTriggered)
+                                if ((distancePivotToTurnLine <= 1.0) && (distancePivotToTurnLine >= 0) && !gyd.isYouTurnTriggered)
                                 {
-                                    yt.YouTurnTrigger();
+                                    gyd.YouTurnTrigger();
                                     sounds.isBoundAlarming = false;
                                 }
                             }
@@ -833,9 +833,9 @@ namespace AgOpenGPS
                 else
                 {
                     mc.isOutOfBounds = true;
-                    if (yt.isYouTurnBtnOn)
+                    if (gyd.isYouTurnBtnOn)
                     {
-                        yt.ResetCreatedYouTurn();
+                        gyd.ResetCreatedYouTurn();
                         sim.stepDistance = 0 / 17.86;
                     }
                 }
@@ -917,7 +917,7 @@ namespace AgOpenGPS
 
             //guidance look ahead distance based on time or tool width at least 
             
-            if (!ABLine.isLateralTriggered && !curve.isLateralTriggered)
+            if (!gyd.isLateralTriggered && !gyd.isLateralTriggered)
             {
                 double guidanceLookDist = (Math.Max(tool.toolWidth * 0.5, avgSpeed * 0.277777 * guidanceLookAheadTime));
                 guidanceLookPos.easting = pivotAxlePos.easting + (Math.Sin(fixHeading) * guidanceLookDist);
@@ -1027,8 +1027,8 @@ namespace AgOpenGPS
             }
 
             //finally fixed distance for making a curve line
-            if (!curve.isOkToAddDesPoints) sectionTriggerStepDistance = sectionTriggerStepDistance + 0.2;
-            if (ct.isContourBtnOn) sectionTriggerStepDistance *=0.5;
+            if (!gyd.isOkToAddDesPoints) sectionTriggerStepDistance = sectionTriggerStepDistance + 0.2;
+            if (gyd.isContourBtnOn) sectionTriggerStepDistance *=0.5;
 
             //precalc the sin and cos of heading * -1
             sinSectionHeading = Math.Sin(-toolPos.heading);
@@ -1051,19 +1051,19 @@ namespace AgOpenGPS
         //add the points for section, contour line points, Area Calc feature
         private void AddSectionOrContourPathPoints()
         {
-            if (recPath.isRecordOn)
+            if (gyd.isRecordOn)
             {
                 //keep minimum speed of 1.0
                 double speed = pn.speed;
                 if (pn.speed < 1.0) speed = 1.0;
                 bool autoBtn = (autoBtnState == btnStates.Auto);
 
-                recPath.recList.Add(new CRecPathPt(pivotAxlePos.easting, pivotAxlePos.northing, pivotAxlePos.heading, speed, autoBtn));
+                gyd.recList.Add(new CRecPathPt(pivotAxlePos.easting, pivotAxlePos.northing, pivotAxlePos.heading, speed, autoBtn));
             }
 
-            if (curve.isOkToAddDesPoints)
+            if (gyd.isOkToAddDesPoints)
             {
-                curve.desList.Add(new vec3(pivotAxlePos.easting, pivotAxlePos.northing, pivotAxlePos.heading));
+                gyd.desList.Add(new vec3(pivotAxlePos.easting, pivotAxlePos.northing, pivotAxlePos.heading));
             }
 
             //save the north & east as previous
@@ -1082,11 +1082,11 @@ namespace AgOpenGPS
                     sectionCounter++;
                 }
             }
-            if ((ABLine.isBtnABLineOn && !ct.isContourBtnOn && ABLine.isABLineSet && isAutoSteerBtnOn) ||
-                        (!ct.isContourBtnOn && curve.isBtnCurveOn && curve.isCurveSet && isAutoSteerBtnOn))
+            if ((gyd.isBtnABLineOn && !gyd.isContourBtnOn && gyd.isABLineSet && isAutoSteerBtnOn) ||
+                        (!gyd.isContourBtnOn && gyd.isBtnCurveOn && gyd.isCurveSet && isAutoSteerBtnOn))
             {
                 //no contour recorded
-                if (ct.isContourOn) { ct.StopContourLine(pivotAxlePos); }
+                if (gyd.isContourOn) { gyd.StopContourLine(pivotAxlePos); }
             }
             else
             {
@@ -1094,19 +1094,19 @@ namespace AgOpenGPS
                 if (sectionCounter != 0)
                 {
                     //keep the line going, everything is on for recording path
-                    if (ct.isContourOn) ct.AddPoint(pivotAxlePos);
+                    if (gyd.isContourOn) gyd.AddPoint(pivotAxlePos);
                     else
                     {
-                        ct.StartContourLine(pivotAxlePos);
-                        ct.AddPoint(pivotAxlePos);
+                        gyd.StartContourLine(pivotAxlePos);
+                        gyd.AddPoint(pivotAxlePos);
                     }
                 }
 
                 //All sections OFF so if on, turn off
-                else { if (ct.isContourOn) { ct.StopContourLine(pivotAxlePos); } }
+                else { if (gyd.isContourOn) { gyd.StopContourLine(pivotAxlePos); } }
 
                 //Build contour line if close enough to a patch
-                if (ct.isContourBtnOn) ct.BuildContourGuidanceLine(pivotAxlePos, steerAxlePos);
+                if (gyd.isContourBtnOn) gyd.BuildContourGuidanceLine(pivotAxlePos, steerAxlePos);
             }
 
         }

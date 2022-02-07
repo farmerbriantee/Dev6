@@ -422,7 +422,7 @@ namespace AgOpenGPS
         {
             UpdateUturnText();
 
-            lblSmoothing.Text = mf.yt.uTurnSmoothing.ToString();
+            lblSmoothing.Text = mf.gyd.uTurnSmoothing.ToString();
 
             double bob = Properties.Vehicle.Default.set_youTurnDistanceFromBoundary * mf.m2FtOrM;
             if (bob < 0.2) bob = 0.2;
@@ -433,14 +433,14 @@ namespace AgOpenGPS
 
         private void tabUTurn_Leave(object sender, EventArgs e)
         {
-            Properties.Settings.Default.setAS_uTurnSmoothing = mf.yt.uTurnSmoothing;
-            Properties.Vehicle.Default.set_youTurnExtensionLength = mf.yt.youTurnStartOffset;
+            Properties.Settings.Default.setAS_uTurnSmoothing = mf.gyd.uTurnSmoothing;
+            Properties.Vehicle.Default.set_youTurnExtensionLength = mf.gyd.youTurnStartOffset;
 
             Properties.Settings.Default.Save();
             Properties.Vehicle.Default.Save();
 
             mf.bnd.BuildTurnLines();
-            mf.yt.ResetCreatedYouTurn();
+            mf.gyd.ResetCreatedYouTurn();
         }
 
         #endregion
@@ -450,11 +450,11 @@ namespace AgOpenGPS
         {
             if (mf.isMetric)
             {
-                lblDistance.Text = Math.Abs(mf.yt.youTurnStartOffset).ToString() + " m";
+                lblDistance.Text = Math.Abs(mf.gyd.youTurnStartOffset).ToString() + " m";
             }
             else
             {
-                lblDistance.Text = Math.Abs((int)(mf.yt.youTurnStartOffset * glm.m2ft)).ToString() + " ft";
+                lblDistance.Text = Math.Abs((int)(mf.gyd.youTurnStartOffset * glm.m2ft)).ToString() + " ft";
             }
         }
 
@@ -462,47 +462,47 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                mf.yt.uturnDistanceFromBoundary = (double)nudTurnDistanceFromBoundary.Value * mf.ftOrMtoM;
-                Properties.Vehicle.Default.set_youTurnDistanceFromBoundary = mf.yt.uturnDistanceFromBoundary;
+                mf.gyd.uturnDistanceFromBoundary = (double)nudTurnDistanceFromBoundary.Value * mf.ftOrMtoM;
+                Properties.Vehicle.Default.set_youTurnDistanceFromBoundary = mf.gyd.uturnDistanceFromBoundary;
             }
         }
 
         private void btnTriggerDistanceDn_Click(object sender, EventArgs e)
         {
-            mf.yt.uturnDistanceFromBoundary--;
-            if (mf.yt.uturnDistanceFromBoundary < 0.1) mf.yt.uturnDistanceFromBoundary = 0.1;
+            mf.gyd.uturnDistanceFromBoundary--;
+            if (mf.gyd.uturnDistanceFromBoundary < 0.1) mf.gyd.uturnDistanceFromBoundary = 0.1;
             UpdateUturnText();
         }
 
         private void btnTriggerDistanceUp_Click(object sender, EventArgs e)
         {
-            if (mf.yt.uturnDistanceFromBoundary++ > 50) mf.yt.uturnDistanceFromBoundary = 50;
+            if (mf.gyd.uturnDistanceFromBoundary++ > 50) mf.gyd.uturnDistanceFromBoundary = 50;
             UpdateUturnText();
         }
 
         private void btnDistanceDn_Click(object sender, EventArgs e)
         {
-            if (mf.yt.youTurnStartOffset-- < 4) mf.yt.youTurnStartOffset = 3;
+            if (mf.gyd.youTurnStartOffset-- < 4) mf.gyd.youTurnStartOffset = 3;
             UpdateUturnText();
         }
 
         private void btnDistanceUp_Click(object sender, EventArgs e)
         {
-            if (mf.yt.youTurnStartOffset++ > 49) mf.yt.youTurnStartOffset = 50;
+            if (mf.gyd.youTurnStartOffset++ > 49) mf.gyd.youTurnStartOffset = 50;
             UpdateUturnText();
         }
         private void btnTurnSmoothingDown_Click(object sender, EventArgs e)
         {
-            mf.yt.uTurnSmoothing -= 2;
-            if (mf.yt.uTurnSmoothing < 4) mf.yt.uTurnSmoothing = 4;
-            lblSmoothing.Text = mf.yt.uTurnSmoothing.ToString();
+            mf.gyd.uTurnSmoothing -= 2;
+            if (mf.gyd.uTurnSmoothing < 4) mf.gyd.uTurnSmoothing = 4;
+            lblSmoothing.Text = mf.gyd.uTurnSmoothing.ToString();
         }
 
         private void btnTurnSmoothingUp_Click(object sender, EventArgs e)
         {
-            mf.yt.uTurnSmoothing += 2;
-            if (mf.yt.uTurnSmoothing > 18) mf.yt.uTurnSmoothing = 18;
-            lblSmoothing.Text = mf.yt.uTurnSmoothing.ToString();
+            mf.gyd.uTurnSmoothing += 2;
+            if (mf.gyd.uTurnSmoothing > 18) mf.gyd.uTurnSmoothing = 18;
+            lblSmoothing.Text = mf.gyd.uTurnSmoothing.ToString();
         }
 
         #endregion
