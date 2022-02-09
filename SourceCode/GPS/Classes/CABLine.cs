@@ -16,9 +16,6 @@ namespace AgOpenGPS
         public vec3 currentABLineP1 = new vec3(0.0, 0.0, 0.0);
         public vec3 currentABLineP2 = new vec3(0.0, 1.0, 0.0);
 
-        //pure pursuit values
-        public vec2 goalPointAB = new vec2(0, 0);
-
         //List of all available ABLines
         public List<CABLines> lineArr = new List<CABLines>();
 
@@ -28,17 +25,11 @@ namespace AgOpenGPS
         public bool isABLineSet, isABLineLoaded;
         public bool isBtnABLineOn;
 
-        //public bool isOnTramLine;
-        //public int tramBasedOn;
-        public double ppRadiusAB;
-        public vec2 radiusPointAB = new vec2(0, 0);
-        public double rEastAB, rNorthAB;
         //the reference line endpoints
         public vec2 refABLineP1 = new vec2(0.0, 0.0);
         public vec2 refABLineP2 = new vec2(0.0, 1.0);
 
         public double snapDistance;
-        public double steerAngleAB;
         public int lineWidth;
 
         //design
@@ -112,13 +103,7 @@ namespace AgOpenGPS
             if (isYouTurnTriggered && DistanceFromYouTurnLine())//do the pure pursuit from youTurn
             {
                 //now substitute what it thinks are AB line values with auto turn values
-                steerAngleAB = steerAngleYT;
                 distanceFromCurrentLinePivot = distanceFromCurrentLine;
-
-                goalPointAB = goalPointYT;
-                radiusPointAB.easting = radiusPointYT.easting;
-                radiusPointAB.northing = radiusPointYT.northing;
-                ppRadiusAB = ppRadiusYT;
             }
             
             //Stanley
@@ -195,26 +180,27 @@ namespace AgOpenGPS
                             / ((dx * dx) + (dy * dy));
 
                 //point on AB line closest to pivot axle point
-                rEastAB = currentABLineP1.easting + (U * dx);
-                rNorthAB = currentABLineP1.northing + (U * dy);
+                rEast = currentABLineP1.easting + (U * dx);
+                rNorth = currentABLineP1.northing + (U * dy);
+                CurrentHeading = currentABLineP1.heading;
 
                 //update base on autosteer settings and distance from line
                 double goalPointDistance = mf.vehicle.UpdateGoalPointDistance();
 
                 if (mf.isReverse ? isHeadingSameWay : !isHeadingSameWay)
                 {
-                    goalPointAB.easting = rEastAB - (Math.Sin(abHeading) * goalPointDistance);
-                    goalPointAB.northing = rNorthAB - (Math.Cos(abHeading) * goalPointDistance);
+                    goalPoint.easting = rEast - (Math.Sin(abHeading) * goalPointDistance);
+                    goalPoint.northing = rNorth - (Math.Cos(abHeading) * goalPointDistance);
                 }
                 else
                 {
-                    goalPointAB.easting = rEastAB + (Math.Sin(abHeading) * goalPointDistance);
-                    goalPointAB.northing = rNorthAB + (Math.Cos(abHeading) * goalPointDistance);
+                    goalPoint.easting = rEast + (Math.Sin(abHeading) * goalPointDistance);
+                    goalPoint.northing = rNorth + (Math.Cos(abHeading) * goalPointDistance);
                 }
 
                 //calc "D" the distance from pivot axle to lookahead point
                 double goalPointDistanceDSquared
-                    = glm.DistanceSquared(goalPointAB.northing, goalPointAB.easting, pivot.northing, pivot.easting);
+                    = glm.DistanceSquared(goalPoint.northing, goalPoint.easting, pivot.northing, pivot.easting);
 
                 //calculate the the new x in local coordinates and steering angle degrees based on wheelbase
                 double localHeading;
@@ -222,30 +208,30 @@ namespace AgOpenGPS
                 if (isHeadingSameWay) localHeading = glm.twoPI - mf.fixHeading + inty;
                 else localHeading = glm.twoPI - mf.fixHeading - inty;
 
-                ppRadiusAB = goalPointDistanceDSquared / (2 * (((goalPointAB.easting - pivot.easting) * Math.Cos(localHeading))
-                    + ((goalPointAB.northing - pivot.northing) * Math.Sin(localHeading))));
+                ppRadius = goalPointDistanceDSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
+                    + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
 
-                steerAngleAB = glm.toDegrees(Math.Atan(2 * (((goalPointAB.easting - pivot.easting) * Math.Cos(localHeading))
-                    + ((goalPointAB.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase
+                steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
+                    + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase
                     / goalPointDistanceDSquared));
 
                 if (mf.ahrs.imuRoll != 88888)
-                    steerAngleAB += mf.ahrs.imuRoll * -sideHillCompFactor;
+                    steerAngle += mf.ahrs.imuRoll * -sideHillCompFactor;
 
-                if (steerAngleAB < -mf.vehicle.maxSteerAngle) steerAngleAB = -mf.vehicle.maxSteerAngle;
-                if (steerAngleAB > mf.vehicle.maxSteerAngle) steerAngleAB = mf.vehicle.maxSteerAngle;
+                if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
+                if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
 
                 //limit circle size for display purpose
-                if (ppRadiusAB < -500) ppRadiusAB = -500;
-                if (ppRadiusAB > 500) ppRadiusAB = 500;
+                if (ppRadius < -500) ppRadius = -500;
+                if (ppRadius > 500) ppRadius = 500;
 
-                radiusPointAB.easting = pivot.easting + (ppRadiusAB * Math.Cos(localHeading));
-                radiusPointAB.northing = pivot.northing + (ppRadiusAB * Math.Sin(localHeading));
+                radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
+                radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
 
                 if (mf.isAngVelGuidance)
                 {
                     //angular velocity in rads/sec  = 2PI * m/sec * radians/meters
-                    mf.setAngVel = 0.277777 * mf.pn.speed * (Math.Tan(glm.toRadians(steerAngleAB))) / mf.vehicle.wheelbase;
+                    mf.setAngVel = 0.277777 * mf.pn.speed * (Math.Tan(glm.toRadians(steerAngle))) / mf.vehicle.wheelbase;
                     mf.setAngVel = glm.toDegrees(mf.setAngVel) * 100;
 
                     //clamp the steering angle to not exceed safe angular velocity
@@ -262,7 +248,7 @@ namespace AgOpenGPS
 
                 //Convert to millimeters
                 mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
-                mf.guidanceLineSteerAngle = (short)(steerAngleAB * 100);
+                mf.guidanceLineSteerAngle = (short)(steerAngle * 100);
             }
         }
 
@@ -380,19 +366,19 @@ namespace AgOpenGPS
                 GL.PointSize(8.0f);
                 GL.Begin(PrimitiveType.Points);
                 GL.Color3(1.0f, 1.0f, 0.0f);
-                GL.Vertex3(goalPointAB.easting, goalPointAB.northing, 0.0);
+                GL.Vertex3(goalPoint.easting, goalPoint.northing, 0.0);
                 //GL.Vertex3(rEastSteer, rNorthSteer, 0.0);
                 //GL.Vertex3(rEastPivot, rNorthPivot, 0.0);
                 GL.End();
                 GL.PointSize(1.0f);
 
-                if (ppRadiusAB < 50 && ppRadiusAB > -50)
+                if (ppRadius < 50 && ppRadius > -50)
                 {
                     const int numSegments = 100;
                     double theta = glm.twoPI / numSegments;
                     double c = Math.Cos(theta);//precalculate the sine and cosine
                     double s = Math.Sin(theta);
-                    double x = ppRadiusAB;//we start at angle = 0
+                    double x = ppRadius;//we start at angle = 0
                     double y = 0;
 
                     GL.LineWidth(1);
@@ -401,7 +387,7 @@ namespace AgOpenGPS
                     for (int ii = 0; ii < numSegments; ii++)
                     {
                         //glVertex2f(x + cx, y + cy);//output vertex
-                        GL.Vertex3(x + radiusPointAB.easting, y + radiusPointAB.northing, 0);//output vertex
+                        GL.Vertex3(x + radiusPoint.easting, y + radiusPoint.northing, 0);//output vertex
                         double t = x;//apply the rotation matrix
                         x = (c * x) - (s * y);
                         y = (s * t) + (c * y);

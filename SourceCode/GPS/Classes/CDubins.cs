@@ -123,13 +123,13 @@ namespace AgOpenGPS
             //
 
             //RSR ****RSR and LSL is only working if the circles don't have the same position
-            if (startRightCircle.easting != goalRightCircle.easting && startRightCircle.northing != goalRightCircle.northing)
+            if (startRightCircle.easting != goalRightCircle.easting || startRightCircle.northing != goalRightCircle.northing)
             {
                 Get_RSR_Length();
             }
 
             //LSL
-            if (startLeftCircle.easting != goalLeftCircle.easting && startLeftCircle.northing != goalLeftCircle.northing)
+            if (startLeftCircle.easting != goalLeftCircle.easting || startLeftCircle.northing != goalLeftCircle.northing)
             {
                 Get_LSL_Length();
             }

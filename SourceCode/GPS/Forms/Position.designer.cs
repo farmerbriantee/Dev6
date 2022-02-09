@@ -666,9 +666,9 @@ namespace AgOpenGPS
                 //save distance for display
                 lightbarDistance = guidanceLineDistanceOff;
 
-                if (!isAutoSteerBtnOn) //32020 means auto steer is off
+                if (!isAutoSteerBtnOn) //32000 means auto steer is off
                 {
-                    guidanceLineDistanceOff = 32020;
+                    guidanceLineDistanceOff = 32000;
                     p_254.pgn[p_254.status] = 0;
                 }
 
@@ -681,7 +681,7 @@ namespace AgOpenGPS
 
                 //convert to cm from mm and divide by 2 - lightbar
                 int distanceX2;
-                if (guidanceLineDistanceOff == 32020 || guidanceLineDistanceOff == 32000)
+                if (guidanceLineDistanceOff == 32000)
                     distanceX2 = 255;
 
                 else

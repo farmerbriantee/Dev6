@@ -174,7 +174,6 @@ namespace AgOpenGPS
         private void btnAddTime_Click(object sender, EventArgs e)
         {
             textBox1.Text += DateTime.Now.ToString("hh:mm:ss", CultureInfo.InvariantCulture);
-            mf.gyd.desName = textBox1.Text;
         }
 
         private void btnEnter_APlus_Click(object sender, EventArgs e)
@@ -182,12 +181,9 @@ namespace AgOpenGPS
             panelAPlus.Visible = false;
             panelName.Visible = true;
 
-            mf.gyd.desName = "AB " +
+            textBox1.Text = "AB " +
                 (Math.Round(glm.toDegrees(mf.gyd.desHeading), 1)).ToString(CultureInfo.InvariantCulture) +
                 "\u00B0 " + mf.FindDirection(mf.gyd.desHeading);
-
-            textBox1.Text = mf.gyd.desName;
-
         }
 
         private void BtnNewABLine_Click(object sender, EventArgs e)
@@ -290,11 +286,8 @@ namespace AgOpenGPS
                 mf.gyd.desPoint1.easting = mf.gyd.lineArr[idx].origin.easting;
                 mf.gyd.desPoint1.northing = mf.gyd.lineArr[idx].origin.northing;
 
-                mf.gyd.desName = mf.gyd.lineArr[idx].Name + " Copy";
-
-                textBox1.Text = mf.gyd.desName;
+                textBox1.Text = mf.gyd.lineArr[idx].Name + " Copy";
             }
-
         }
 
         private void btnListUse_Click(object sender, EventArgs e)
@@ -430,11 +423,9 @@ namespace AgOpenGPS
                     panelAPlus.Visible = false;
                     panelName.Visible = true;
 
-                    mf.gyd.desName = "AB m " +
+                    textBox1.Text = "AB m " +
                         (Math.Round(glm.toDegrees(mf.gyd.desHeading), 1)).ToString(CultureInfo.InvariantCulture) +
                         "\u00B0 " + mf.FindDirection(mf.gyd.desHeading);
-
-                    textBox1.Text = mf.gyd.desName;
 
                     //sin x cos z for endpoints, opposite for additional lines
                     mf.gyd.desP1.easting = mf.gyd.desPoint1.easting - (Math.Sin(mf.gyd.desHeading) * mf.gyd.abLength);

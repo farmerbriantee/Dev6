@@ -153,11 +153,9 @@ namespace AgOpenGPS
                 panelAPlus.Visible = false;
                 panelName.Visible = true;
 
-                mf.gyd.desName = "Cu " +
+                textBox1.Text = "Cu " +
                     (Math.Round(glm.toDegrees(aveLineHeading), 1)).ToString(CultureInfo.InvariantCulture) +
                     "\u00B0 " + mf.FindDirection(aveLineHeading);
-
-                textBox1.Text = mf.gyd.desName;
             }
             else
             {
@@ -176,7 +174,6 @@ namespace AgOpenGPS
         private void btnAddTime_Click(object sender, EventArgs e)
         {
             textBox1.Text += DateTime.Now.ToString(" hh:mm:ss", CultureInfo.InvariantCulture);
-            mf.gyd.desName = textBox1.Text;
         }
 
         private void btnPausePlay_Click(object sender, EventArgs e)
@@ -450,7 +447,6 @@ namespace AgOpenGPS
                 panelName.Visible = true;
 
                 textBox1.Text = mf.gyd.curveArr[idx].Name + " Copy";
-                mf.gyd.desName = textBox1.Text;
 
                 aveLineHeading = mf.gyd.curveArr[idx].aveHeading;
                 mf.gyd.desList?.Clear();
