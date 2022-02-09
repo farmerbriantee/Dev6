@@ -632,10 +632,10 @@ namespace AgOpenGPS
             //preset the values
             guidanceLineDistanceOff = 32000;
 
-            if (gyd.isContourBtnOn)
-            {
+            if (gyd.isDrivingRecordedPath)
+                gyd.UpdatePosition();
+            else if (gyd.isContourBtnOn)
                 gyd.DistanceFromContourLine(pivotAxlePos, steerAxlePos);
-            }
             else
             {
                 if (gyd.isCurveSet && gyd.isBtnCurveOn)
@@ -649,11 +649,6 @@ namespace AgOpenGPS
                     gyd.GetCurrentABLine(pivotAxlePos, steerAxlePos);
                 }
             }
-
-            // autosteer at full speed of updates
-
-            //if the whole path driving driving process is green
-            if (gyd.isDrivingRecordedPath) gyd.UpdatePosition();
 
             // If Drive button off - normal autosteer 
             if (!vehicle.isInFreeDriveMode)

@@ -58,18 +58,27 @@ namespace AgOpenGPS
         {
             return new vec3(lhs.easting - rhs.easting, lhs.northing - rhs.northing, lhs.heading - rhs.heading);
         }
-
-        //public static bool operator ==(vec3 lhs, vec3 rhs)
-        //{
-        //    return (lhs.x == rhs.x && lhs.z == rhs.z && lhs.h == rhs.h);
-        //}
-
-        //public static bool operator !=(vec3 lhs, vec3 rhs)
-        //{
-        //    return (lhs.x != rhs.x && lhs.z != rhs.z && lhs.h != rhs.h);
-        //}
     }
 
+    public class CRecPathPt
+    {
+        public double easting { get; set; }
+        public double northing { get; set; }
+        public double heading { get; set; }
+        public double speed { get; set; }
+        public bool autoBtnState { get; set; }
+
+        //constructor
+        public CRecPathPt(double _easting, double _northing, double _heading, double _speed,
+                            bool _autoBtnState)
+        {
+            easting = _easting;
+            northing = _northing;
+            heading = _heading;
+            speed = _speed;
+            autoBtnState = _autoBtnState;
+        }
+    }
 
     public struct vecFix2Fix
     {
@@ -178,35 +187,6 @@ namespace AgOpenGPS
         public static vec2 operator +(vec2 lhs, vec2 rhs)
         {
             return new vec2(lhs.easting + rhs.easting, lhs.northing + rhs.northing);
-        }
-    }
-
-    //structure for contour guidance
-    public struct cvec
-    {
-        public double x;
-        public double z;
-        public double h;
-        public int strip;
-        public int pt;
-
-        //specialized contour vector
-        public cvec(double x, double z, double h, int s, int p)
-        {
-            this.x = x;
-            this.z = z;
-            this.h = h;
-            strip = s;
-            pt = p;
-        }
-
-        public cvec(vec3 v)
-        {
-            x = v.easting;
-            z = v.northing;
-            h = v.heading;
-            strip = 99999;
-            pt = 99999;
         }
     }
 }

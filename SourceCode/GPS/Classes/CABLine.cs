@@ -77,7 +77,7 @@ namespace AgOpenGPS
             //depending which way you are going, the offset can be either side
             vec2 point1 = new vec2((Math.Cos(-abHeading) * (widthMinusOverlap * howManyPathsAway + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset))) + refPoint1.easting,
             (Math.Sin(-abHeading) * ((widthMinusOverlap * howManyPathsAway) + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset))) + refPoint1.northing);
-
+            
             //create the new line extent points for current ABLine based on original heading of AB line
             currentABLineP1.easting = point1.easting - (Math.Sin(abHeading) * abLength);
             currentABLineP1.northing = point1.northing - (Math.Cos(abHeading) * abLength);
@@ -93,163 +93,19 @@ namespace AgOpenGPS
 
         public void GetCurrentABLine(vec3 pivot, vec3 steer)
         {
-            double dx, dy;
-
             //build new current ref line if required
             if (!isABValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh)))
                 BuildCurrentABLineList(pivot);
 
             //Check uturn first
-            if (isYouTurnTriggered && DistanceFromYouTurnLine())//do the pure pursuit from youTurn
+            if (isYouTurnTriggered)//do the pure pursuit from youTurn
             {
-                //now substitute what it thinks are AB line values with auto turn values
-                distanceFromCurrentLinePivot = distanceFromCurrentLine;
+                DistanceFromYouTurnLine(pivot, steer);
             }
-            
-            //Stanley
-            else if (mf.isStanleyUsed)
-                StanleyGuidanceABLine(currentABLineP1, currentABLineP2, pivot, steer);
-
-            //Pure Pursuit
-            else
-            {
-                //get the distance from currently active AB line
-                //x2-x1
-                dx = currentABLineP2.easting - currentABLineP1.easting;
-                //z2-z1
-                dy = currentABLineP2.northing - currentABLineP1.northing;
-
-                //how far from current AB Line is fix
-                distanceFromCurrentLinePivot = ((dy * pivot.easting) - (dx * pivot.northing) + (currentABLineP2.easting
-                            * currentABLineP1.northing) - (currentABLineP2.northing * currentABLineP1.easting))
-                            / Math.Sqrt((dy * dy) + (dx * dx));
-
-                //integral slider is set to 0
-                if (mf.vehicle.purePursuitIntegralGain != 0 && !mf.isReverse)
-                {
-                    pivotDistanceError = distanceFromCurrentLinePivot * 0.2 + pivotDistanceError * 0.8;
-
-                    if (counter2++ > 4)
-                    {
-                        pivotDerivative = pivotDistanceError - pivotDistanceErrorLast;
-                        pivotDistanceErrorLast = pivotDistanceError;
-                        counter2 = 0;
-                        pivotDerivative *= 2;
-
-                        //limit the derivative
-                        //if (pivotDerivative > 0.03) pivotDerivative = 0.03;
-                        //if (pivotDerivative < -0.03) pivotDerivative = -0.03;
-                        //if (Math.Abs(pivotDerivative) < 0.01) pivotDerivative = 0;
-                    }
-
-                    //pivotErrorTotal = pivotDistanceError + pivotDerivative;
-
-                    if (mf.isAutoSteerBtnOn
-                        && Math.Abs(pivotDerivative) < (0.1)
-                        && mf.avgSpeed > 2.5
-                        && !isYouTurnTriggered)
-                    //&& Math.Abs(pivotDistanceError) < 0.2)
-
-                    {
-                        //if over the line heading wrong way, rapidly decrease integral
-                        if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
-                        {
-                            inty += pivotDistanceError * mf.vehicle.purePursuitIntegralGain * -0.04;
-                        }
-                        else
-                        {
-                            if (Math.Abs(distanceFromCurrentLinePivot) > 0.02)
-                            {
-                                inty += pivotDistanceError * mf.vehicle.purePursuitIntegralGain * -0.02;
-                                if (inty > 0.2) inty = 0.2;
-                                else if (inty < -0.2) inty = -0.2;
-                            }
-                        }
-                    }
-                    else inty *= 0.95;
-                }
-                else inty = 0;
-
-                //Subtract the two headings, if > 1.57 its going the opposite heading as refAB
-                abFixHeadingDelta = (Math.Abs(mf.fixHeading - abHeading));
-                if (abFixHeadingDelta >= Math.PI) abFixHeadingDelta = Math.Abs(abFixHeadingDelta - glm.twoPI);
-
-                // ** Pure pursuit ** - calc point on ABLine closest to current position
-                double U = (((pivot.easting - currentABLineP1.easting) * dx)
-                            + ((pivot.northing - currentABLineP1.northing) * dy))
-                            / ((dx * dx) + (dy * dy));
-
-                //point on AB line closest to pivot axle point
-                rEast = currentABLineP1.easting + (U * dx);
-                rNorth = currentABLineP1.northing + (U * dy);
-                CurrentHeading = currentABLineP1.heading;
-
-                //update base on autosteer settings and distance from line
-                double goalPointDistance = mf.vehicle.UpdateGoalPointDistance();
-
-                if (mf.isReverse ? isHeadingSameWay : !isHeadingSameWay)
-                {
-                    goalPoint.easting = rEast - (Math.Sin(abHeading) * goalPointDistance);
-                    goalPoint.northing = rNorth - (Math.Cos(abHeading) * goalPointDistance);
-                }
-                else
-                {
-                    goalPoint.easting = rEast + (Math.Sin(abHeading) * goalPointDistance);
-                    goalPoint.northing = rNorth + (Math.Cos(abHeading) * goalPointDistance);
-                }
-
-                //calc "D" the distance from pivot axle to lookahead point
-                double goalPointDistanceDSquared
-                    = glm.DistanceSquared(goalPoint.northing, goalPoint.easting, pivot.northing, pivot.easting);
-
-                //calculate the the new x in local coordinates and steering angle degrees based on wheelbase
-                double localHeading;
-
-                if (isHeadingSameWay) localHeading = glm.twoPI - mf.fixHeading + inty;
-                else localHeading = glm.twoPI - mf.fixHeading - inty;
-
-                ppRadius = goalPointDistanceDSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
-                    + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
-
-                steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
-                    + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase
-                    / goalPointDistanceDSquared));
-
-                if (mf.ahrs.imuRoll != 88888)
-                    steerAngle += mf.ahrs.imuRoll * -sideHillCompFactor;
-
-                if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
-                if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
-
-                //limit circle size for display purpose
-                if (ppRadius < -500) ppRadius = -500;
-                if (ppRadius > 500) ppRadius = 500;
-
-                radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
-                radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
-
-                if (mf.isAngVelGuidance)
-                {
-                    //angular velocity in rads/sec  = 2PI * m/sec * radians/meters
-                    mf.setAngVel = 0.277777 * mf.pn.speed * (Math.Tan(glm.toRadians(steerAngle))) / mf.vehicle.wheelbase;
-                    mf.setAngVel = glm.toDegrees(mf.setAngVel) * 100;
-
-                    //clamp the steering angle to not exceed safe angular velocity
-                    if (Math.Abs(mf.setAngVel) > 1000)
-                    {
-                        //mf.setAngVel = mf.setAngVel < 0 ? -mf.vehicle.maxAngularVelocity : mf.vehicle.maxAngularVelocity;
-                        mf.setAngVel = mf.setAngVel < 0 ? -1000 : 1000;
-                    }
-                }
-
-                //distance is negative if on left, positive if on right
-                if (!isHeadingSameWay)
-                    distanceFromCurrentLinePivot *= -1.0;
-
-                //Convert to millimeters
-                mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
-                mf.guidanceLineSteerAngle = (short)(steerAngle * 100);
-            }
+            else if (mf.isStanleyUsed)//Stanley
+                StanleyGuidanceABLine(pivot, steer);
+            else //Pure Pursuit
+                PurePursuitABLine(pivot, steer);
         }
 
         public void DrawABLines()
@@ -503,26 +359,6 @@ namespace AgOpenGPS
             howManyPathsAway = 0.0;
             isABLineSet = false;
             isABLineLoaded = false;
-        }
-
-        public void SetABLineByBPoint()
-        {
-            refPoint2.easting = mf.pn.fix.easting;
-            refPoint2.northing = mf.pn.fix.northing;
-
-            //calculate the AB Heading
-            abHeading = Math.Atan2(refPoint2.easting - refPoint1.easting, refPoint2.northing - refPoint1.northing);
-            if (abHeading < 0) abHeading += glm.twoPI;
-
-            //sin x cos z for endpoints, opposite for additional lines
-            refABLineP1.easting = refPoint1.easting - (Math.Sin(abHeading) * abLength);
-            refABLineP1.northing = refPoint1.northing - (Math.Cos(abHeading) * abLength);
-
-            refABLineP2.easting = refPoint1.easting + (Math.Sin(abHeading) * abLength);
-            refABLineP2.northing = refPoint1.northing + (Math.Cos(abHeading) * abLength);
-
-            isABLineSet = true;
-            isABLineLoaded = true;
         }
 
         public void SetABLineByHeading()
