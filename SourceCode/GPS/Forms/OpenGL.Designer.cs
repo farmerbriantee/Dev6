@@ -920,7 +920,7 @@ namespace AgOpenGPS
             //tram           = -5 max 3x overlap
             //section        = -20 max 11x overlap
 
-            if (Debugger.IsAttached)
+            if (Debugger.IsAttached && false)
             {
                 //Paint to context for troubleshooting
                 oglBack.BringToFront();

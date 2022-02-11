@@ -305,18 +305,10 @@ namespace AgOpenGPS
         //determine distance from contour guidance line
         public void DistanceFromContourLine(vec3 pivot, vec3 steer)
         {
-            if (ctList.Count > 8)
-            {
-                if (mf.isStanleyUsed)
-                    StanleyGuidanceContour(pivot, steer, ctList);
-                else
-                    PurePursuitContour(pivot, steer, ctList);
-            }
+            if (mf.isStanleyUsed)
+                StanleyGuidance(pivot, steer, ctList);
             else
-            {
-                //invalid distance so tell AS module
-                mf.guidanceLineDistanceOff = 32000;
-            }
+                PurePursuit(pivot, steer, ctList);
         }
 
         //start stop and add points to list

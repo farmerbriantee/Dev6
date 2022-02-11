@@ -6,7 +6,6 @@ namespace AgOpenGPS
 {
     public partial class CGuidance
     {
-        public double abFixHeadingDelta;
         public double abHeading, abLength;
         public double angVel;
 
@@ -98,14 +97,16 @@ namespace AgOpenGPS
                 BuildCurrentABLineList(pivot);
 
             //Check uturn first
-            if (isYouTurnTriggered)//do the pure pursuit from youTurn
+            if (mf.isStanleyUsed)//Stanley
             {
-                DistanceFromYouTurnLine(pivot, steer);
+                List<vec3> ss = new List<vec3> { currentABLineP1, currentABLineP2 };//will be changed to List<> later
+                StanleyGuidance(pivot, steer, isYouTurnTriggered ? ytList : ss);
             }
-            else if (mf.isStanleyUsed)//Stanley
-                StanleyGuidanceABLine(pivot, steer);
             else //Pure Pursuit
-                PurePursuitABLine(pivot, steer);
+            {
+                List<vec3> ss = new List<vec3> { currentABLineP1, currentABLineP2 };//will be changed to List<> later
+                PurePursuit(pivot, steer, isYouTurnTriggered ? ytList : ss);
+            }
         }
 
         public void DrawABLines()

@@ -290,30 +290,14 @@ namespace AgOpenGPS
             if (refList == null || refList.Count < 5) return;
 
             //build new current ref line if required
-            if (!isCurveValid || ((mf.secondsSinceStart - lastSecond) > 0.66 
+            if (!isCurveValid || ((mf.secondsSinceStart - lastSecond) > 0.66
                 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh)))
                 BuildCurveCurrentList(pivot);
 
-            if (curList.Count > 0)
-            {
-                if (isYouTurnTriggered)//do the pure pursuit from youTurn
-                {
-                    DistanceFromYouTurnLine(pivot, steer);
-                }
-                else if (mf.isStanleyUsed)//Stanley
-                {
-                    StanleyGuidanceCurve(pivot, steer, curList);
-                }
-                else// Pure Pursuit ------------------------------------------
-                {
-                    PurePursuitCurve(pivot, steer, curList);
-                }
-            }
+            if (mf.isStanleyUsed)
+                StanleyGuidance(pivot, steer, isYouTurnTriggered ? ytList : curList);
             else
-            {
-                //invalid distance so tell AS module
-                mf.guidanceLineDistanceOff = 32000;
-            }
+                PurePursuit(pivot, steer, isYouTurnTriggered ? ytList : curList);
         }
 
         public void DrawCurve()

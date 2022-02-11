@@ -30,8 +30,6 @@ namespace AgOpenGPS
 
         public bool isTurnCreationTooClose = false, isTurnCreationNotCrossingError = false;
 
-        private int A, B;
-
         //list of points for scaled and rotated YouTurn line, used for pattern, dubins, abcurve, abline
         public List<vec3> ytList = new List<vec3>();
 
@@ -864,7 +862,7 @@ namespace AgOpenGPS
 
         public void ResetCreatedYouTurn()
         {
-            youTurnPhase = 0;
+            youTurnPhase = -2;
             ytList?.Clear();
         }
 
@@ -977,20 +975,6 @@ namespace AgOpenGPS
                 isABValid = false;
                 isCurveValid = false;
             }
-        }
-
-        //determine distance from youTurn guidance line
-        public void DistanceFromYouTurnLine(vec3 pivot, vec3 steer)
-        {
-            if (ytList.Count > 0)
-            {
-                if (mf.isStanleyUsed)
-                    StanleyGuidanceYouTurn(pivot, steer, ytList);
-                else
-                    PurePursuitYouTurn(pivot, steer, ytList);
-            }
-            else
-                CompleteYouTurn();
         }
 
         //Duh.... What does this do....

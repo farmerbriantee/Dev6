@@ -636,19 +636,10 @@ namespace AgOpenGPS
                 gyd.UpdatePosition();
             else if (gyd.isContourBtnOn)
                 gyd.DistanceFromContourLine(pivotAxlePos, steerAxlePos);
-            else
-            {
-                if (gyd.isCurveSet && gyd.isBtnCurveOn)
-                {
-                    //do the calcs for AB Curve
-                    gyd.GetCurrentCurveLine(pivotAxlePos, steerAxlePos);
-                }
-
-                if (gyd.isABLineSet && gyd.isBtnABLineOn)
-                {
-                    gyd.GetCurrentABLine(pivotAxlePos, steerAxlePos);
-                }
-            }
+            else if (gyd.isABLineSet && gyd.isBtnABLineOn)
+                gyd.GetCurrentABLine(pivotAxlePos, steerAxlePos);
+            else if (gyd.isCurveSet && gyd.isBtnCurveOn)
+                gyd.GetCurrentCurveLine(pivotAxlePos, steerAxlePos);
 
             // If Drive button off - normal autosteer 
             if (!vehicle.isInFreeDriveMode)
@@ -784,7 +775,9 @@ namespace AgOpenGPS
                         else
                         {
                             //now check to make sure we are not in an inner turn boundary - drive thru is ok
-                            if (gyd.youTurnPhase != 3)
+                            if (gyd.youTurnPhase < 0)
+                                gyd.youTurnPhase++;
+                            else if (gyd.youTurnPhase != 3)
                             {
                                 if (crossTrackError > 500)
                                 {
