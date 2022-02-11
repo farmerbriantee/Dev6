@@ -36,7 +36,7 @@ namespace AgOpenGPS.Forms
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.btnSave = new System.Windows.Forms.Button();
-            this.btnSerialCancel = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.checkBoxRecordAddTime = new System.Windows.Forms.CheckBox();
             this.checkBoxRecordAddDate = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
@@ -51,7 +51,7 @@ namespace AgOpenGPS.Forms
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.btnSave);
-            this.panel1.Controls.Add(this.btnSerialCancel);
+            this.panel1.Controls.Add(this.btnCancel);
             this.panel1.Controls.Add(this.checkBoxRecordAddTime);
             this.panel1.Controls.Add(this.checkBoxRecordAddDate);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -129,6 +129,7 @@ namespace AgOpenGPS.Forms
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
+            this.btnSave.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnSave.FlatAppearance.BorderSize = 0;
             this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSave.ForeColor = System.Drawing.SystemColors.ButtonFace;
@@ -140,23 +141,22 @@ namespace AgOpenGPS.Forms
             this.btnSave.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnSave.UseVisualStyleBackColor = false;
             // 
-            // btnSerialCancel
+            // btnCancel
             // 
-            this.btnSerialCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSerialCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
-            this.btnSerialCancel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnSerialCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnSerialCancel.FlatAppearance.BorderSize = 0;
-            this.btnSerialCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSerialCancel.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.btnSerialCancel.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.btnSerialCancel.Image = global::AgOpenGPS.Properties.Resources.Cancel64;
-            this.btnSerialCancel.Location = new System.Drawing.Point(454, 149);
-            this.btnSerialCancel.Name = "btnSerialCancel";
-            this.btnSerialCancel.Size = new System.Drawing.Size(77, 79);
-            this.btnSerialCancel.TabIndex = 4;
-            this.btnSerialCancel.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.btnSerialCancel.UseVisualStyleBackColor = false;
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.FlatAppearance.BorderSize = 0;
+            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCancel.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.btnCancel.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnCancel.Image = global::AgOpenGPS.Properties.Resources.Cancel64;
+            this.btnCancel.Location = new System.Drawing.Point(454, 149);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(77, 79);
+            this.btnCancel.TabIndex = 4;
+            this.btnCancel.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnCancel.UseVisualStyleBackColor = false;
             // 
             // checkBoxRecordAddTime
             // 
@@ -208,7 +208,6 @@ namespace AgOpenGPS.Forms
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Create New Record";
-            this.Load += new System.EventHandler(this.FormRecordName_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
@@ -221,7 +220,7 @@ namespace AgOpenGPS.Forms
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnSave;
-        private System.Windows.Forms.Button btnSerialCancel;
+        private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Label lblFilename;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tboxFieldName;

@@ -17,10 +17,6 @@ namespace AgOpenGPS.Forms
             mf = _callingForm as FormGPS;
 
             InitializeComponent();
-        }
-
-        private void FormRecordName_Load(object sender, EventArgs e)
-        {
             btnSave.Enabled = false;
             lblFilename.Text = "";
         }
@@ -32,7 +28,7 @@ namespace AgOpenGPS.Forms
             textboxSender.Text = Regex.Replace(textboxSender.Text, glm.fileRegex, "");
             textboxSender.SelectionStart = cursorPosition;
 
-            if (String.IsNullOrEmpty(tboxFieldName.Text.Trim()))
+            if (string.IsNullOrEmpty(tboxFieldName.Text.Trim()))
             {
                 btnSave.Enabled = false;
             }
@@ -44,12 +40,7 @@ namespace AgOpenGPS.Forms
             lblFilename.Text = tboxFieldName.Text.Trim();
             if (checkBoxRecordAddDate.Checked) lblFilename.Text += " " + DateTime.Now.ToString("MMM.dd", CultureInfo.InvariantCulture);
             if (checkBoxRecordAddTime.Checked) lblFilename.Text += " " + DateTime.Now.ToString("HH_mm", CultureInfo.InvariantCulture);
-        }
-
-        private void buttonRecordCancel_Click(object sender, EventArgs e)
-        {
-            DialogResult = DialogResult.Cancel;
-            Close();
+            filename = lblFilename.Text;
         }
 
         private void tboxFieldName_Click(object sender, EventArgs e)
@@ -57,14 +48,7 @@ namespace AgOpenGPS.Forms
             if (mf.isKeyboardOn)
             {
                 mf.KeyboardToText((TextBox)sender, this);
-                btnSerialCancel.Focus();
             }
-        }
-
-        private void buttonSave_Click(object sender, EventArgs e)
-        {
-            filename = lblFilename.Text;
-            DialogResult = DialogResult.OK;
         }
     }
 }
