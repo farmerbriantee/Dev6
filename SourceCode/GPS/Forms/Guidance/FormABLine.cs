@@ -115,8 +115,6 @@ namespace AgOpenGPS
             nudHeading.Enabled = true;
             nudHeading.Value = (decimal)(glm.toDegrees(mf.gyd.desHeading));
 
-            BuildDesLine();
-
             btnBPoint.Enabled = true;
             btnAPoint.Enabled = false;
 
@@ -138,28 +136,15 @@ namespace AgOpenGPS
                 mf.gyd.desPoint2.northing - mf.gyd.desPoint1.northing);
             if (mf.gyd.desHeading < 0) mf.gyd.desHeading += glm.twoPI;
 
-            nudHeading.Value = (decimal)(glm.toDegrees(mf.gyd.desHeading));
-
-            BuildDesLine();
+            nudHeading.Value = (decimal)glm.toDegrees(mf.gyd.desHeading);
         }
 
         private void nudHeading_Click(object sender, EventArgs e)
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                BuildDesLine();
+                mf.gyd.desHeading = glm.toRadians((double)nudHeading.Value);
             }
-        }
-
-        private void BuildDesLine()
-        {
-            mf.gyd.desHeading = glm.toRadians((double)nudHeading.Value);
-
-            //sin x cos z for endpoints, opposite for additional lines
-            mf.gyd.desP1.easting = mf.gyd.desPoint1.easting - (Math.Sin(mf.gyd.desHeading) * mf.gyd.abLength);
-            mf.gyd.desP1.northing = mf.gyd.desPoint1.northing - (Math.Cos(mf.gyd.desHeading) * mf.gyd.abLength);
-            mf.gyd.desP2.easting = mf.gyd.desPoint1.easting + (Math.Sin(mf.gyd.desHeading) * mf.gyd.abLength);
-            mf.gyd.desP2.northing = mf.gyd.desPoint1.northing + (Math.Cos(mf.gyd.desHeading) * mf.gyd.abLength);
         }
 
         private void textBox1_Click(object sender, EventArgs e)
@@ -426,12 +411,6 @@ namespace AgOpenGPS
                     textBox1.Text = "AB m " +
                         (Math.Round(glm.toDegrees(mf.gyd.desHeading), 1)).ToString(CultureInfo.InvariantCulture) +
                         "\u00B0 " + mf.FindDirection(mf.gyd.desHeading);
-
-                    //sin x cos z for endpoints, opposite for additional lines
-                    mf.gyd.desP1.easting = mf.gyd.desPoint1.easting - (Math.Sin(mf.gyd.desHeading) * mf.gyd.abLength);
-                    mf.gyd.desP1.northing = mf.gyd.desPoint1.northing - (Math.Cos(mf.gyd.desHeading) * mf.gyd.abLength);
-                    mf.gyd.desP2.easting = mf.gyd.desPoint1.easting + (Math.Sin(mf.gyd.desHeading) * mf.gyd.abLength);
-                    mf.gyd.desP2.northing = mf.gyd.desPoint1.northing + (Math.Cos(mf.gyd.desHeading) * mf.gyd.abLength);
                 }
                 else
                 {

@@ -27,7 +27,7 @@ namespace AgOpenGPS
             if (ctList.Count > 5) isLocked = !isLocked;
         }
 
-        public void BuildContourGuidanceLine(vec3 pivot, vec3 steer)
+        public void BuildCurrentContourLine(vec3 pivot, vec3 steer)
         {
             if ((mf.secondsSinceStart - lastSecond) < (ctList.Count == 0 ? 0.3 : 2.0)) return;
 
@@ -305,10 +305,10 @@ namespace AgOpenGPS
         //determine distance from contour guidance line
         public void DistanceFromContourLine(vec3 pivot, vec3 steer)
         {
-            if (mf.isStanleyUsed)
-                StanleyGuidance(pivot, steer, ctList);
-            else
-                PurePursuit(pivot, steer, ctList);
+            //Build contour line if close enough to a patch
+            BuildCurrentContourLine(pivot, steer);
+
+            CalculateSteerAngle(pivot, steer, ctList);
         }
 
         //start stop and add points to list

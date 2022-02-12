@@ -35,78 +35,65 @@ namespace AgOpenGPS
         public vec2 desPoint1 = new vec2(0.2, 0.15);
         public vec2 desPoint2 = new vec2(0.3, 0.3);
         public double desHeading = 0;
-        public vec2 desP1 = new vec2(0.0, 0.0);
-        public vec2 desP2 = new vec2(999997, 1.0);
 
-        //derivative counters
-        public double steerAngleSmoothed;
-
-        //Color tramColor = Color.YellowGreen;
         public int tramPassEvery;
 
-        public void BuildCurrentABLineList(vec3 pivot)
+        public void BuildCurrentABLine(vec3 pivot)
         {
-            double dx, dy;
+            if (!isABValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh)))
+            {
+                double dx, dy;
 
-            lastSecond = mf.secondsSinceStart;
+                lastSecond = mf.secondsSinceStart;
 
-            //move the ABLine over based on the overlap amount set in
-            double widthMinusOverlap = mf.tool.toolWidth - mf.tool.toolOverlap;
+                //move the ABLine over based on the overlap amount set in
+                double widthMinusOverlap = mf.tool.toolWidth - mf.tool.toolOverlap;
 
-            //x2-x1
-            dx = refABLineP2.easting - refABLineP1.easting;
-            //z2-z1
-            dy = refABLineP2.northing - refABLineP1.northing;
+                //x2-x1
+                dx = refABLineP2.easting - refABLineP1.easting;
+                //z2-z1
+                dy = refABLineP2.northing - refABLineP1.northing;
 
-            distanceFromRefLine = ((dy * mf.guidanceLookPos.easting) - (dx * mf.guidanceLookPos.northing) + (refABLineP2.easting
-                                    * refABLineP1.northing) - (refABLineP2.northing * refABLineP1.easting))
-                                        / Math.Sqrt((dy * dy) + (dx * dx));
+                distanceFromRefLine = ((dy * mf.guidanceLookPos.easting) - (dx * mf.guidanceLookPos.northing) + (refABLineP2.easting
+                                        * refABLineP1.northing) - (refABLineP2.northing * refABLineP1.easting))
+                                            / Math.Sqrt((dy * dy) + (dx * dx));
 
-            isLateralTriggered = false;
+                isLateralTriggered = false;
 
-            isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(pivot.heading - abHeading) - Math.PI) < glm.PIBy2;
+                isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(pivot.heading - abHeading) - Math.PI) < glm.PIBy2;
 
-            if (isYouTurnTriggered) isHeadingSameWay = !isHeadingSameWay;
+                if (isYouTurnTriggered) isHeadingSameWay = !isHeadingSameWay;
 
-            //Which ABLine is the vehicle on, negative is left and positive is right side
-            double RefDist = (distanceFromRefLine + (isHeadingSameWay ? mf.tool.toolOffset : -mf.tool.toolOffset)) / widthMinusOverlap;
-            if (RefDist < 0) howManyPathsAway = (int)(RefDist - 0.5);
-            else howManyPathsAway = (int)(RefDist + 0.5);
+                //Which ABLine is the vehicle on, negative is left and positive is right side
+                double RefDist = (distanceFromRefLine + (isHeadingSameWay ? mf.tool.toolOffset : -mf.tool.toolOffset)) / widthMinusOverlap;
+                if (RefDist < 0) howManyPathsAway = (int)(RefDist - 0.5);
+                else howManyPathsAway = (int)(RefDist + 0.5);
 
-            //depending which way you are going, the offset can be either side
-            vec2 point1 = new vec2((Math.Cos(-abHeading) * (widthMinusOverlap * howManyPathsAway + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset))) + refPoint1.easting,
-            (Math.Sin(-abHeading) * ((widthMinusOverlap * howManyPathsAway) + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset))) + refPoint1.northing);
-            
-            //create the new line extent points for current ABLine based on original heading of AB line
-            currentABLineP1.easting = point1.easting - (Math.Sin(abHeading) * abLength);
-            currentABLineP1.northing = point1.northing - (Math.Cos(abHeading) * abLength);
+                //depending which way you are going, the offset can be either side
+                vec2 point1 = new vec2((Math.Cos(-abHeading) * (widthMinusOverlap * howManyPathsAway + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset))) + refPoint1.easting,
+                (Math.Sin(-abHeading) * ((widthMinusOverlap * howManyPathsAway) + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset))) + refPoint1.northing);
 
-            currentABLineP2.easting = point1.easting + (Math.Sin(abHeading) * abLength);
-            currentABLineP2.northing = point1.northing + (Math.Cos(abHeading) * abLength);
+                //create the new line extent points for current ABLine based on original heading of AB line
+                currentABLineP1.easting = point1.easting - (Math.Sin(abHeading) * abLength);
+                currentABLineP1.northing = point1.northing - (Math.Cos(abHeading) * abLength);
 
-            currentABLineP1.heading = abHeading;
-            currentABLineP2.heading = abHeading;
+                currentABLineP2.easting = point1.easting + (Math.Sin(abHeading) * abLength);
+                currentABLineP2.northing = point1.northing + (Math.Cos(abHeading) * abLength);
 
-            isABValid = true;
+                currentABLineP1.heading = abHeading;
+                currentABLineP2.heading = abHeading;
+
+                isABValid = true;
+            }
         }
 
         public void GetCurrentABLine(vec3 pivot, vec3 steer)
         {
             //build new current ref line if required
-            if (!isABValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh)))
-                BuildCurrentABLineList(pivot);
+            BuildCurrentABLine(pivot);
 
-            //Check uturn first
-            if (mf.isStanleyUsed)//Stanley
-            {
-                List<vec3> ss = new List<vec3> { currentABLineP1, currentABLineP2 };//will be changed to List<> later
-                StanleyGuidance(pivot, steer, isYouTurnTriggered ? ytList : ss);
-            }
-            else //Pure Pursuit
-            {
-                List<vec3> ss = new List<vec3> { currentABLineP1, currentABLineP2 };//will be changed to List<> later
-                PurePursuit(pivot, steer, isYouTurnTriggered ? ytList : ss);
-            }
+            List<vec3> New = new List<vec3> { currentABLineP1, currentABLineP2 };//will be changed to List<> later
+            CalculateSteerAngle(pivot, steer, isYouTurnTriggered ? ytList : New);
         }
 
         public void DrawABLines()
@@ -154,8 +141,8 @@ namespace AgOpenGPS
                 GL.LineWidth(lineWidth);
                 GL.Begin(PrimitiveType.Lines);
                 GL.Color3(0.95f, 0.20f, 0.950f);
-                GL.Vertex3(desP1.easting, desP1.northing, 0.0);
-                GL.Vertex3(desP2.easting, desP2.northing, 0.0);
+                GL.Vertex3(desPoint1.easting - (Math.Sin(desHeading) * abLength), desPoint1.northing - (Math.Cos(desHeading) * abLength), 0.0);
+                GL.Vertex3(desPoint1.easting + (Math.Sin(desHeading) * abLength), desPoint1.northing + (Math.Cos(desHeading) * abLength), 0.0);
                 GL.End();
 
                 GL.Color3(0.2f, 0.950f, 0.20f);

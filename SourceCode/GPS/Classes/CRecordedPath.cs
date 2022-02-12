@@ -19,8 +19,6 @@ namespace AgOpenGPS
 
         public int currentPositonIndex;
 
-        public int pathCount = 0;
-
         public vec3 homePos = new vec3();
 
         public bool isBtnFollowOn, isEndOfTheRecLine, isRecordOn;
@@ -31,7 +29,7 @@ namespace AgOpenGPS
         public bool StartDrivingRecordedPath()
         {
             //create the dubins path based on start and goal to start of recorded path
-            pA = pB = currentPositonIndex = 0;
+            currentPositonIndex = 0;
             if (recList.Count < 5) return false;
 
             //save a copy of where we started.
@@ -105,8 +103,6 @@ namespace AgOpenGPS
                         shuttleDubinsList.Clear();
                         shortestDubinsList.Clear();
                         currentPositonIndex = starPathIndx;
-                        pA = currentPositonIndex + 3;
-                        pB = pA + 1;
                     }
                 }
             }

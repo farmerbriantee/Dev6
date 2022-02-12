@@ -1070,33 +1070,20 @@ namespace AgOpenGPS
                     sectionCounter++;
                 }
             }
-            if ((gyd.isBtnABLineOn && !gyd.isContourBtnOn && gyd.isABLineSet && isAutoSteerBtnOn) ||
-                        (!gyd.isContourBtnOn && gyd.isBtnCurveOn && gyd.isCurveSet && isAutoSteerBtnOn))
+            if (sectionCounter == 0 || (((gyd.isBtnABLineOn && gyd.isABLineSet) || (gyd.isBtnCurveOn && gyd.isCurveSet)) && !gyd.isContourBtnOn && isAutoSteerBtnOn))
             {
                 //no contour recorded
-                if (gyd.isContourOn) { gyd.StopContourLine(pivotAxlePos); }
+                if (gyd.isContourOn)
+                    gyd.StopContourLine(pivotAxlePos);
             }
+            //keep the line going, everything is on for recording path
+            else if (gyd.isContourOn)
+                gyd.AddPoint(pivotAxlePos);
             else
             {
-                //Contour Base Track.... At least One section on, turn on if not
-                if (sectionCounter != 0)
-                {
-                    //keep the line going, everything is on for recording path
-                    if (gyd.isContourOn) gyd.AddPoint(pivotAxlePos);
-                    else
-                    {
-                        gyd.StartContourLine(pivotAxlePos);
-                        gyd.AddPoint(pivotAxlePos);
-                    }
-                }
-
-                //All sections OFF so if on, turn off
-                else { if (gyd.isContourOn) { gyd.StopContourLine(pivotAxlePos); } }
-
-                //Build contour line if close enough to a patch
-                if (gyd.isContourBtnOn) gyd.BuildContourGuidanceLine(pivotAxlePos, steerAxlePos);
+                gyd.StartContourLine(pivotAxlePos);
+                gyd.AddPoint(pivotAxlePos);
             }
-
         }
 
         //calculate the extreme tool left, right velocities, each section lookahead, and whether or not its going backwards
