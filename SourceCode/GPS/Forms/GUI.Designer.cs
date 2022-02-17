@@ -442,6 +442,7 @@ namespace AgOpenGPS
             isRTK_KillAutosteer = Properties.Settings.Default.setGPS_isRTK_KillAutoSteer;
 
             pn.ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
+            pn.headingTrueDualOffset = Properties.Settings.Default.setGPS_dualHeadingOffset;
 
             isAngVelGuidance = Properties.Settings.Default.setAS_isAngVelGuidance;
 
@@ -507,6 +508,7 @@ namespace AgOpenGPS
                 this.WindowState = FormWindowState.Maximized;
 
             isTramOnBackBuffer = Properties.Settings.Default.setTram_isTramOnBackBuffer;
+
 
             //night mode
             isDay = !Properties.Settings.Default.setDisplay_isDayMode;

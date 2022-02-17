@@ -6,7 +6,8 @@ namespace AgOpenGPS
 {
     public partial class FormCorrection : Form
     {
-        private readonly FormGPS mf = null;
+        private readonly FormGPS mf;
+        private bool isPole = true;
 
         //chart data
         private string roll = "0.1";
@@ -31,12 +32,14 @@ namespace AgOpenGPS
         {
             {
                 roll = (mf.correctionDistanceGraph*20).ToString("N2");
-                east = (mf.pn.fix.easting*20).ToString("N2");
-                ost = (mf.uncorrectedEastingGraph*20).ToString("N2");
+                east = (mf.pn.fix.easting * 20).ToString("N2");
+                ost = (mf.uncorrectedEastingGraph * 20).ToString("N2");
+
+                if (!isPole) roll = ((mf.correctionDistanceGraph + mf.uncorrectedEastingGraph) * 20).ToString("N2");
 
                 lblCorrectionDistance.Text = (mf.correctionDistanceGraph).ToString("N2"); ;
                 lblEast.Text = (mf.pn.fix.easting).ToString("N2"); ;
-                lblOst.Text = (mf.uncorrectedEastingGraph).ToString("N2"); 
+                lblOst.Text = (mf.uncorrectedEastingGraph).ToString("N2");
                 lblRollDegrees.Text = (mf.RollInDegrees);
                 lblEastOnGraph.Text = ((int)(mf.pn.fix.easting * 100)).ToString();
             }
@@ -72,7 +75,9 @@ namespace AgOpenGPS
                 {
                     u.Points.RemoveAt(0);
                 }
-                rollChart.ChartAreas[0].RecalculateAxesScale();
+                //rollChart.ChartAreas[0].RecalculateAxesScale();
+                rollChart.ResetAutoValues();
+
             }
         }
 
@@ -148,6 +153,13 @@ namespace AgOpenGPS
         private void btnScroll_Click_1(object sender, EventArgs e)
         {
             isScroll = !isScroll;
+        }
+
+        private void btnPoleOrMoving_Click(object sender, EventArgs e)
+        {
+            isPole = !isPole;
+            if (isPole) btnPoleOrMoving.Text = "Pole";
+            else btnPoleOrMoving.Text = "Moving";
         }
     }
 }

@@ -224,7 +224,7 @@ namespace AgOpenGPS
 
             //ControlExtension.Draggable(panelSnap, true);
             ControlExtension.Draggable(oglZoom, true);
-            //ControlExtension.Draggable(panelSim, true);
+            ControlExtension.Draggable(panelDrag, true);
 
             setWorkingDirectoryToolStripMenuItem.Text = gStr.gsDirectories;
             enterSimCoordsToolStripMenuItem.Text = gStr.gsEnterSimCoords;
@@ -1048,7 +1048,13 @@ namespace AgOpenGPS
             gyd.howManyPathsAway = 0.0;
 
             gyd.curveArr.Clear();
-            gyd.recList?.Clear();
+            gyd.recList.Clear();
+            gyd.StopDrivingRecordedPath();
+            panelDrag.Visible = false;
+            gyd.resumeState = 0;
+            btnResumePath.Image = Resources.pathResumeStart;
+            gyd.currentPositonIndex = 0;
+
 
             //ABLine
             btnABLine.Enabled = false;

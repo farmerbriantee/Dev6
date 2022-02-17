@@ -14,59 +14,72 @@ namespace AgOpenGPS
         public bool isEndOfTheRecLine, isRecordOn;
         public bool isDrivingRecordedPath, isFollowingDubinsToPath, isFollowingRecPath, isFollowingDubinsHome;
 
-        int starPathIndx = 0;
+        public int resumeState;
 
         public bool StartDrivingRecordedPath()
         {
             //create the dubins path based on start and goal to start of recorded path
-            currentPositonIndex = 0;
             if (recList.Count < 5) return false;
 
             //save a copy of where we started.
             vec3 homePos = mf.pivotAxlePos;
 
-            // Try to find the nearest point of the recordet path in relation to the current position:
-            double distance = double.MaxValue;
-            int idx = 0;
-
-            for (int i = 0; i < recList.Count; i++)
+            if (resumeState == 0) //start at the start
+                currentPositonIndex = 0;
+            else if (resumeState == 1) //resume from where stopped mid path
             {
-                double dist = ((recList[i].easting - homePos.easting) * (recList[i].easting - homePos.easting)) + ((recList[i].northing - homePos.northing) * (recList[i].northing - homePos.northing));
-                if (dist < distance)
-                {
-                    distance = dist;
-                    idx = i;
-                }
+                if (currentPositonIndex + 5 > recList.Count)
+                    currentPositonIndex = 0;
             }
-            if (idx + 8 < recList.Count)
+            else //find closest point
             {
-                // Set the point where to lock on the recorded path four point forward
-                idx += 4;
+                // Try to find the nearest point of the recordet path in relation to the current position:
+                double distance = double.MaxValue;
+                int idx = 0;
+
+                for (int i = 0; i < recList.Count; i++)
+                {
+                    double temp = ((recList[i].easting - homePos.easting) * (recList[i].easting - homePos.easting)) + ((recList[i].northing - homePos.northing) * (recList[i].northing - homePos.northing));
+
+                    if (temp < distance)
+                    {
+                        distance = temp;
+                        idx = i;
+                    }
+                    i++;
+                }
+
+                //scootch down the line a bit
+                if (idx + 5 < recList.Count) idx += 5;
+                else idx = recList.Count - 1;
+
+                currentPositonIndex = idx;
+            }
+
+            if (currentPositonIndex < recList.Count)
+            {
+                //the goal is the first point of path, the start is the current position
+                vec3 goal = new vec3(recList[currentPositonIndex].easting, recList[currentPositonIndex].northing, recList[currentPositonIndex].heading);
+
+                //get the dubins for approach to recorded path
+                GetDubinsPath(goal);
+
+                //has a valid dubins path been created?
+                if (curList.Count == 0) return false;
+
+                //technically all good if we get here so set all the flags
+                isFollowingDubinsHome = false;
+                isFollowingRecPath = false;
+                isFollowingDubinsToPath = true;
+                isEndOfTheRecLine = false;
+                isDrivingRecordedPath = true;
+                return true;
             }
             else
             {
-                // if the nearest position is to near by the end of the recorded path,
-                // create DubinPath to the starting point!
-                idx = 0;
+                isDrivingRecordedPath = false;
+                return false;
             }
-            //the goal is the first point of path, the start is the current position
-            vec3 goal = new vec3(recList[idx].easting, recList[idx].northing, recList[idx].heading);
-             
-            //get the dubins for approach to recorded path
-            GetDubinsPath(goal);
-
-            //has a valid dubins path been created?
-            if (curList.Count == 0) return false;
-
-            starPathIndx = idx;
-            
-            //technically all good if we get here so set all the flags
-            isFollowingDubinsHome = false;
-            isFollowingRecPath = false;
-            isFollowingDubinsToPath = true;
-            isEndOfTheRecLine = false;
-            isDrivingRecordedPath = true;
-            return true;
         }
 
         public void UpdatePosition()
@@ -74,7 +87,7 @@ namespace AgOpenGPS
             if (isFollowingDubinsToPath)
             {
                 //set a speed of 10 kmh
-                mf.sim.stepDistance = 9.0 / 34.86;
+                mf.sim.stepDistance = 9.0 / 50;
 
                 CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList);
 
@@ -83,13 +96,12 @@ namespace AgOpenGPS
                 {
                     vec3 pivotAxlePosRP = mf.pivotAxlePos;
 
-                    double distSqr = glm.DistanceSquared(pivotAxlePosRP.northing, pivotAxlePosRP.easting, recList[starPathIndx].northing, recList[starPathIndx].easting);
-                    if (distSqr < 2)
+                    double distSqr = glm.Distance(pivotAxlePosRP.northing, pivotAxlePosRP.easting, recList[currentPositonIndex].northing, recList[currentPositonIndex].easting);
+                    if (distSqr < 4)
                     {
                         isFollowingRecPath = true;
                         isFollowingDubinsToPath = false;
                         curList.Clear();
-                        currentPositonIndex = starPathIndx;
                     }
                 }
             }
@@ -157,12 +169,13 @@ namespace AgOpenGPS
             isDrivingRecordedPath = false;
             mf.btnPathGoStop.Image = Properties.Resources.boundaryPlay;
             mf.btnPathRecordStop.Enabled = true;
-            mf.btnPathDelete.Enabled = true;
+            mf.btnPickPath.Enabled = true;
+            mf.btnResumePath.Enabled = true;
         }
 
         private void GetDubinsPath(vec3 goal)
         {
-            CDubins.turningRadius = mf.vehicle.minTurningRadius * 2.0;
+            CDubins.turningRadius = mf.vehicle.minTurningRadius * 1.2;
             CDubins dubPath = new CDubins();
 
             // current psition
@@ -191,17 +204,17 @@ namespace AgOpenGPS
             for (int h = 0; h < ptCount; h++) GL.Vertex3(recList[h].easting, recList[h].northing, 0);
             GL.End();
 
-            if (mf.isPureDisplayOn)
+            if (!isRecordOn)
             {
                 //Draw lookahead Point
-                GL.PointSize(8.0f);
+                GL.PointSize(16.0f);
                 GL.Begin(PrimitiveType.Points);
 
                 //GL.Color(1.0f, 1.0f, 0.25f);
                 //GL.Vertex(rEast, rNorth, 0.0);
 
                 GL.Color3(1.0f, 0.5f, 0.95f);
-                GL.Vertex3(rEast, rNorth, 0.0);
+                GL.Vertex3(recList[currentPositonIndex].easting, recList[currentPositonIndex].northing, 0);
                 GL.End();
                 GL.PointSize(1.0f);
             }

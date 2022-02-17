@@ -294,7 +294,8 @@ namespace AgOpenGPS
                     else
                         gyd.DrawCurve();
 
-                    gyd.DrawRecordedLine();
+                    if (panelDrag.Visible)
+                        gyd.DrawRecordedLine();
 
                     if (bnd.bndList.Count > 0 || bnd.isBndBeingMade == true)
                     {
@@ -702,7 +703,7 @@ namespace AgOpenGPS
                         p_239.pgn[p_239.hydLift] = 2;
                         if (!sounds.isHydLiftChange)
                         {
-                            if (sounds.isHydLiftSoundOn) CSound.sndHydLiftUp.Play();
+                            if (sounds.isHydLiftSoundOn) sounds.sndHydLiftUp.Play();
                             sounds.isHydLiftChange = true;
                         }
                     }
@@ -711,7 +712,7 @@ namespace AgOpenGPS
                         p_239.pgn[p_239.hydLift] = 1;
                         if (sounds.isHydLiftChange)
                         {
-                            if (sounds.isHydLiftSoundOn) CSound.sndHydLiftDn.Play();
+                            if (sounds.isHydLiftSoundOn) sounds.sndHydLiftDn.Play();
                             sounds.isHydLiftChange = false;
                         }
                     }
@@ -1526,7 +1527,7 @@ namespace AgOpenGPS
         {
             GL.Disable(EnableCap.DepthTest);
 
-            if (gyd.isContourBtnOn || gyd.isBtnABLineOn || gyd.isBtnCurveOn)
+            if (guidanceLineDistanceOff != 32000)
             {
                 double avgPivotDistance = avgPivDistance * (isMetric ? 0.1 : 0.03937);
                 string hede;
@@ -1739,16 +1740,13 @@ namespace AgOpenGPS
 
             if (ahrs.imuHeading != 99999)
             {
-                GL.Color3(0.98f, 0.72f, 0.3f);
-                font.DrawText(center, 50, "G:" + (gpsHeading * 57.2957795).ToString("N1"), 0.8);
-
-                if (!isSuperSlow) GL.Color3(0.9752f, 0.952f, 0.03f);
+                if (!isSuperSlow) GL.Color3(0.98f, 0.972f, 0.59903f);
                 else GL.Color3(0.298f, 0.972f, 0.99903f);
 
-                GL.Color3(0.98f, 0.972f, 0.59903f);
-                font.DrawText(center, 85, "H:" + Math.Round(ahrs.imuHeading, 1).ToString(), 0.8);
-                font.DrawText(center, 110, "R:" + Math.Round(ahrs.imuRoll, 1).ToString(), 0.8);
-                font.DrawText(center, 135, "Y:" + Math.Round(ahrs.imuYawRate, 1).ToString(), 0.8);
+                font.DrawText(center, 55, "Fix:" + (gpsHeading * 57.2957795).ToString("N1"), 0.8);
+                font.DrawText(center, 80, "IMU:" + Math.Round(ahrs.imuHeading, 1).ToString(), 0.8);
+                //font.DrawText(center, 110, "R:" + Math.Round(ahrs.imuRoll, 1).ToString(), 0.8);
+                //font.DrawText(center, 135, "Y:" + Math.Round(ahrs.imuYawRate, 1).ToString(), 0.8);
             }
 
             if (isAngVelGuidance)

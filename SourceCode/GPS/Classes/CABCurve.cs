@@ -382,7 +382,7 @@ namespace AgOpenGPS
 
                 if (mf.isPureDisplayOn && !mf.isStanleyUsed)
                 {
-                    if (ppRadius < 150 && ppRadius > -150)
+                    if (currentGuidanceLine.mode.HasFlag(Mode.AB) && ppRadius < 150 && ppRadius > -150)
                     {
                         const int numSegments = 100;
                         double theta = glm.twoPI / numSegments;

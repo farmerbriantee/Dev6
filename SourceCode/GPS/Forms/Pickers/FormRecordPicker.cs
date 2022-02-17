@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AgOpenGPS.Forms.Pickers
@@ -142,6 +136,15 @@ namespace AgOpenGPS.Forms.Pickers
             else return;
 
             LoadList();
+        }
+
+        private void btnTurnOffRecPath_Click(object sender, EventArgs e)
+        {
+            mf.gyd.StopDrivingRecordedPath();
+            mf.gyd.recList.Clear();
+            mf.FileSaveRecPath();
+            mf.panelDrag.Visible = false;
+            Close();
         }
     }
 }

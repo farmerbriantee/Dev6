@@ -160,6 +160,12 @@
     <Compile Include="Forms\FormFieldKML.Designer.cs">
       <DependentUpon>FormFieldKML.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\Form_About.fr.resx">
+      <DependentUpon>Form_About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Form_First.fr.resx">
+      <DependentUpon>Form_First.cs</DependentUpon>
+    </EmbeddedResource>
     <Compile Include="Forms\FormRecordName.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -541,6 +547,9 @@
     <EmbeddedResource Include="Forms\Pickers\FormDrivePicker.resx">
       <DependentUpon>FormDrivePicker.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Pickers\FormRecordPicker.resx">
+      <DependentUpon>FormRecordPicker.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormHeadland.resx">
       <DependentUpon>FormHeadland.cs</DependentUpon>
     </EmbeddedResource>
@@ -735,6 +744,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AOG.ico" />
+    <None Include="btnImages\pathResumeStart.png" />
+    <None Include="btnImages\pathResumeLast.png" />
+    <None Include="btnImages\pathResumeClose.png" />
     <None Include="btnImages\SwitchActiveOpen.png" />
     <None Include="btnImages\SwitchActiveClosed.png" />
     <None Include="btnImages\Config\ConSt_SteerForm.png" />

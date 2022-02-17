@@ -815,6 +815,9 @@ namespace AgOpenGPS
                                 gyd.recList.Add(point);
                             }
                         }
+
+                        if (gyd.recList.Count > 0) panelDrag.Visible = true;
+                        else panelDrag.Visible = false;
                     }
 
                     catch (Exception e)

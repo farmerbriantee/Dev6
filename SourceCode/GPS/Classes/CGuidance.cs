@@ -576,7 +576,7 @@ namespace AgOpenGPS
 
                 }
 
-                if (mf.isAutoSteerBtnOn && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.avgSpeed > 2.5)
+                if (isFollowingRecPath && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.avgSpeed > 2.5)
                 {
                     //if over the line heading wrong way, rapidly decrease integral
                     if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
@@ -651,16 +651,6 @@ namespace AgOpenGPS
 
             radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
             radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
-
-            //angular velocity in rads/sec  = 2PI * m/sec * radians/meters
-            double angVel = glm.twoPI * 0.277777 * mf.pn.speed * Math.Tan(glm.toRadians(steerAngle)) / mf.vehicle.wheelbase;
-
-            //clamp the steering angle to not exceed safe angular velocity
-            if (Math.Abs(angVel) > mf.vehicle.maxAngularVelocity)
-            {
-                steerAngle = glm.toDegrees(Math.Atan(mf.vehicle.wheelbase * (steerAngle > 0 ? mf.vehicle.maxAngularVelocity : -mf.vehicle.maxAngularVelocity)
-                    / (glm.twoPI * mf.avgSpeed * 0.277777)));
-            }
 
             //Convert to centimeters
             mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
