@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using System.IO;
 using System.Globalization;
-using System.Drawing;
 using System.Xml;
 using System.Text;
 
 namespace AgOpenGPS
 {
-    
     public partial class FormGPS
     {
         //list of the list of patch data individual triangles for field sections
@@ -32,23 +29,22 @@ namespace AgOpenGPS
             string filename = directoryName + "\\CurveLines.txt";
 
             int cnt = gyd.curveArr.Count;
-            gyd.numCurveLines = cnt;
 
             using (StreamWriter writer = new StreamWriter(filename, false))
             {
                 try
                 {
-                    if (cnt > 0)
-                    {
-                        writer.WriteLine("$CurveLines");
+                    writer.WriteLine("$CurveLines");
 
-                        for (int i = 0; i < cnt; i++)
+                    for (int i = 0; i < gyd.curveArr.Count; i++)
+                    {
+                        if (gyd.curveArr[i].mode.HasFlag(Mode.Curve))
                         {
                             //write out the Name
                             writer.WriteLine(gyd.curveArr[i].Name);
 
                             //write out the aveheading
-                            writer.WriteLine(gyd.curveArr[i].aveHeading.ToString(CultureInfo.InvariantCulture));
+                            writer.WriteLine(0.ToString(CultureInfo.InvariantCulture));
 
                             //write out the points of ref line
                             int cnt2 = gyd.curveArr[i].curvePts.Count;
@@ -63,10 +59,6 @@ namespace AgOpenGPS
                             }
                         }
                     }
-                    else
-                    {
-                        writer.WriteLine("$CurveLines");
-                    }
                 }
                 catch (Exception er)
                 {
@@ -75,19 +67,10 @@ namespace AgOpenGPS
                     return;
                 }
             }
-
-            if (gyd.numCurveLines == 0) gyd.numCurveLineSelected = 0;
-            if (gyd.numCurveLineSelected > gyd.numCurveLines) gyd.numCurveLineSelected = gyd.numCurveLines;
-
         }
 
         public void FileLoadCurveLines()
         {
-            gyd.moveDistance = 0;
-
-            gyd.curveArr?.Clear();
-            gyd.numCurveLines = 0;
-
             //get the directory and make sure it exists, create if not
             string dirField = fieldsDirectory + currentFieldDirectory + "\\";
             string directoryName = Path.GetDirectoryName(dirField);
@@ -126,20 +109,23 @@ namespace AgOpenGPS
 
                         while (!reader.EndOfStream)
                         {
-                            gyd.curveArr.Add(new CCurveLines());
+                            CGuidanceLine New = new CGuidanceLine(Mode.Curve);
 
                             //read header $CurveLine
-                            gyd.curveArr[gyd.numCurveLines].Name = reader.ReadLine();
+                            New.Name = reader.ReadLine();
+                            if (New.Name == "Boundary Curve")
+                                New.mode = Mode.Boundary;
+
                             // get the average heading
                             line = reader.ReadLine();
-                            gyd.curveArr[gyd.numCurveLines].aveHeading = double.Parse(line, CultureInfo.InvariantCulture);
+                            //aveHeading = double.Parse(line, CultureInfo.InvariantCulture);
 
                             line = reader.ReadLine();
                             int numPoints = int.Parse(line);
 
                             if (numPoints > 1)
                             {
-                                gyd.curveArr[gyd.numCurveLines].curvePts?.Clear();
+                                New.curvePts?.Clear();
 
                                 for (int i = 0; i < numPoints; i++)
                                 {
@@ -148,16 +134,9 @@ namespace AgOpenGPS
                                     vec3 vecPt = new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
                                         double.Parse(words[1], CultureInfo.InvariantCulture),
                                         double.Parse(words[2], CultureInfo.InvariantCulture));
-                                    gyd.curveArr[gyd.numCurveLines].curvePts.Add(vecPt);
+                                    New.curvePts.Add(vecPt);
                                 }
-                                gyd.numCurveLines++;
-                            }
-                            else
-                            {
-                                if (gyd.curveArr.Count > 0)
-                                {
-                                    gyd.curveArr.RemoveAt(gyd.numCurveLines);
-                                }
+                                gyd.curveArr.Add(New);
                             }
                         }
                     }
@@ -169,9 +148,6 @@ namespace AgOpenGPS
                     }
                 }
             }
-
-            if (gyd.numCurveLines == 0) gyd.numCurveLineSelected = 0;
-            if (gyd.numCurveLineSelected > gyd.numCurveLines) gyd.numCurveLineSelected = gyd.numCurveLines;
         }
 
         public void FileSaveABLines()
@@ -187,34 +163,30 @@ namespace AgOpenGPS
             { Directory.CreateDirectory(directoryName); }
 
             string filename = directoryName + "\\ABLines.txt";
-            int cnt = gyd.lineArr.Count;
 
             using (StreamWriter writer = new StreamWriter(filename, false))
             {
-                if (cnt > 0)
+                foreach (var item in gyd.curveArr)
                 {
-                    foreach (var item in gyd.lineArr)
+                    if (item.mode.HasFlag(Mode.AB) && item.curvePts.Count > 1)
                     {
+                        double heading = Math.Atan2(item.curvePts[1].easting - item.curvePts[0].easting, item.curvePts[1].northing - item.curvePts[0].northing);
+
                         //make it culture invariant
                         string line = item.Name
-                            + ',' + (Math.Round(glm.toDegrees(item.heading), 8)).ToString(CultureInfo.InvariantCulture)
-                            + ',' + (Math.Round(item.origin.easting, 3)).ToString(CultureInfo.InvariantCulture)
-                            + ',' + (Math.Round(item.origin.northing, 3)).ToString(CultureInfo.InvariantCulture);
+                            + ',' + (Math.Round(glm.toDegrees(heading), 8)).ToString(CultureInfo.InvariantCulture)
+                            + ',' + (Math.Round(item.curvePts[0].easting, 3)).ToString(CultureInfo.InvariantCulture)
+                            + ',' + (Math.Round(item.curvePts[0].northing, 3)).ToString(CultureInfo.InvariantCulture);
 
                         //write out to file
                         writer.WriteLine(line);
                     }
                 }
             }
-
-            if (gyd.numABLines == 0) gyd.numABLineSelected = 0;
-            if (gyd.numABLineSelected > gyd.numABLines) gyd.numABLineSelected = gyd.numABLines;
         }
 
         public void FileLoadABLines()
         {
-            gyd.moveDistance = 0;
-
             //make sure at least a global blank AB Line file exists
             string dirField = fieldsDirectory + currentFieldDirectory + "\\";
             string directoryName = Path.GetDirectoryName(dirField).ToString(CultureInfo.InvariantCulture);
@@ -242,28 +214,24 @@ namespace AgOpenGPS
                     try
                     {
                         string line;
-                        gyd.numABLines = 0;
-                        gyd.numABLineSelected = 0;
-                        gyd.lineArr?.Clear();
 
                         //read all the lines
                         for (int i = 0; !reader.EndOfStream; i++)
                         {
-
                             line = reader.ReadLine();
                             string[] words = line.Split(',');
 
                             if (words.Length != 4) break;
 
-                            gyd.lineArr.Add(new CABLines());
+                            CGuidanceLine New = new CGuidanceLine(Mode.AB);
 
-                            gyd.lineArr[i].Name = words[0];
+                            New.Name = words[0];
+                            double heading = glm.toRadians(double.Parse(words[1], CultureInfo.InvariantCulture));
 
+                            New.curvePts.Add(new vec3(double.Parse(words[2], CultureInfo.InvariantCulture), double.Parse(words[3], CultureInfo.InvariantCulture), heading));
+                            New.curvePts.Add(new vec3(New.curvePts[0].easting + Math.Sin(heading), New.curvePts[0].northing + Math.Cos(heading), heading));
 
-                            gyd.lineArr[i].heading = glm.toRadians(double.Parse(words[1], CultureInfo.InvariantCulture));
-                            gyd.lineArr[i].origin.easting = double.Parse(words[2], CultureInfo.InvariantCulture);
-                            gyd.lineArr[i].origin.northing = double.Parse(words[3], CultureInfo.InvariantCulture);
-                            gyd.numABLines++;
+                            gyd.curveArr.Add(New);
                         }
                     }
                     catch (Exception er)
@@ -274,9 +242,6 @@ namespace AgOpenGPS
                     }
                 }
             }
-
-            if (gyd.numABLines == 0) gyd.numABLineSelected = 0;
-            if (gyd.numABLineSelected > gyd.numABLines) gyd.numABLineSelected = gyd.numABLines;
         }
 
         //function to open a previously saved field, resume, open exisiting, open named field
@@ -364,48 +329,13 @@ namespace AgOpenGPS
                     return;
                 }
             }
-
-            // ABLine -------------------------------------------------------------------------------------------------
-            FileLoadABLines();
-
-            if (gyd.lineArr.Count > 0)
-            {
-                gyd.numABLineSelected = 1;
-                gyd.refPoint1 = gyd.lineArr[gyd.numABLineSelected - 1].origin;
-                //gyd.refPoint2 = gyd.lineArr[gyd.numABLineSelected - 1].ref2;
-                gyd.abHeading = gyd.lineArr[gyd.numABLineSelected - 1].heading;
-                gyd.SetABLineByHeading();
-                gyd.isABLineSet = false;
-                gyd.isABLineLoaded = true;
-            }
-            else
-            {
-                gyd.isABLineSet = false;
-                gyd.isABLineLoaded = false;
-            }
-
-
-            //CurveLines
-            FileLoadCurveLines();
-            if (gyd.curveArr.Count > 0)
-            {
-                gyd.numCurveLineSelected = 1;
-                int idx = gyd.numCurveLineSelected - 1;
-                gyd.aveLineHeading = gyd.curveArr[idx].aveHeading;
-
-                gyd.refList?.Clear();
-                for (int i = 0; i < gyd.curveArr[idx].curvePts.Count; i++)
-                {
-                    gyd.refList.Add(gyd.curveArr[idx].curvePts[i]);
-                }
-                gyd.isCurveSet = true;
-            }
-            else
-            {
-                gyd.isCurveSet = false;
-                gyd.refList?.Clear();
-            }
             
+            FileLoadABLines();
+            FileLoadCurveLines();
+
+            gyd.currentCurveLine = gyd.curveArr.First(x => x.mode.HasFlag(Mode.Curve));
+            gyd.currentABLine = gyd.curveArr.First(x => x.mode.HasFlag(Mode.AB));
+
             //section patches
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Sections.txt";
             if (!File.Exists(fileAndDirectory))
@@ -516,9 +446,7 @@ namespace AgOpenGPS
 
                             vec3 vecFix = new vec3(0, 0, 0);
 
-                            gyd.ptList = new List<vec3>();
-                            gyd.ptList.Capacity = verts + 1;
-                            gyd.stripList.Add(gyd.ptList);
+                            CGuidanceLine New = new CGuidanceLine(Mode.Contour);
 
                             for (int v = 0; v < verts; v++)
                             {
@@ -527,8 +455,10 @@ namespace AgOpenGPS
                                 vecFix.easting = double.Parse(words[0], CultureInfo.InvariantCulture);
                                 vecFix.northing = double.Parse(words[1], CultureInfo.InvariantCulture);
                                 vecFix.heading = double.Parse(words[2], CultureInfo.InvariantCulture);
-                                gyd.ptList.Add(vecFix);
+                                New.curvePts.Add(vecFix);
                             }
+
+                            gyd.curveArr.Add(New);
                         }
                     }
                     catch (Exception e)
@@ -573,7 +503,7 @@ namespace AgOpenGPS
                             double east;
                             double nort;
                             double head;
-                            int color, ID;
+                            int color;
                             string notes;
 
                             for (int v = 0; v < points; v++)
@@ -589,7 +519,6 @@ namespace AgOpenGPS
                                     nort = double.Parse(words[3], CultureInfo.InvariantCulture);
                                     head = double.Parse(words[4], CultureInfo.InvariantCulture);
                                     color = int.Parse(words[5]);
-                                    ID = int.Parse(words[6]);
                                     notes = words[7].Trim();
                                 }
                                 else
@@ -600,11 +529,10 @@ namespace AgOpenGPS
                                     nort = double.Parse(words[3], CultureInfo.InvariantCulture);
                                     head = 0;
                                     color = int.Parse(words[4]);
-                                    ID = int.Parse(words[5]);
                                     notes = "";
                                 }
 
-                                CFlag flagPt = new CFlag(lat, longi, east, nort, head, color, ID, notes);
+                                CFlag flagPt = new CFlag(lat, longi, east, nort, head, color, notes);
                                 flagPts.Add(flagPt);
                             }
                         }
@@ -1373,8 +1301,7 @@ namespace AgOpenGPS
                             flagPts[i].easting.ToString(CultureInfo.InvariantCulture) + "," +
                             flagPts[i].northing.ToString(CultureInfo.InvariantCulture) + "," +
                             flagPts[i].heading.ToString(CultureInfo.InvariantCulture) + "," +
-                            flagPts[i].color.ToString(CultureInfo.InvariantCulture) + "," +
-                            flagPts[i].ID.ToString(CultureInfo.InvariantCulture) + "," +
+                            flagPts[i].color.ToString(CultureInfo.InvariantCulture) + ",0," +
                             flagPts[i].notes);
                     }
                 }
@@ -1696,37 +1623,46 @@ namespace AgOpenGPS
             kml.WriteElementString("name", "AB_Lines");
             kml.WriteElementString("visibility", "0");
 
-            string linePts = "";
-
-            for (int i = 0; i < gyd.lineArr.Count; i++)
+            for (int i = 0; i < gyd.curveArr.Count; i++)
             {
-                kml.WriteStartElement("Placemark");
-                kml.WriteElementString("visibility", "0");
+                if (gyd.curveArr[i].mode.HasFlag(Mode.Curve))
+                {
+                    kml.WriteStartElement("Placemark");
+                    kml.WriteElementString("visibility", "0");
 
-                kml.WriteElementString("name", gyd.lineArr[i].Name);
-                kml.WriteStartElement("Style");
+                    kml.WriteElementString("name", gyd.curveArr[i].Name);
+                    kml.WriteStartElement("Style");
 
-                kml.WriteStartElement("LineStyle");
-                kml.WriteElementString("color", "ff0000ff");
-                kml.WriteElementString("width", "2");
-                kml.WriteEndElement(); // <LineStyle>
-                kml.WriteEndElement(); //Style
+                    kml.WriteStartElement("LineStyle");
+                    kml.WriteElementString("color", "ff0000ff");
+                    kml.WriteElementString("width", "2");
+                    kml.WriteEndElement(); // <LineStyle>
+                    kml.WriteEndElement(); //Style
 
-                kml.WriteStartElement("LineString");
-                kml.WriteElementString("tessellate", "1");
-                kml.WriteStartElement("coordinates");
+                    kml.WriteStartElement("LineString");
+                    kml.WriteElementString("tessellate", "1");
+                    kml.WriteStartElement("coordinates");
 
-                linePts = pn.GetLocalToWSG84_KML(gyd.lineArr[i].origin.easting - (Math.Sin(gyd.lineArr[i].heading) * gyd.abLength),
-                    gyd.lineArr[i].origin.northing - (Math.Cos(gyd.lineArr[i].heading) * gyd.abLength));
-                linePts += pn.GetLocalToWSG84_KML(gyd.lineArr[i].origin.easting + (Math.Sin(gyd.lineArr[i].heading) * gyd.abLength),
-                    gyd.lineArr[i].origin.northing + (Math.Cos(gyd.lineArr[i].heading) * gyd.abLength));
-                kml.WriteRaw(linePts);
+                    string linePts = "";
+                    for (int j = 0; j < gyd.curveArr[i].curvePts.Count; j++)
+                    {
+                        if (j == 0)
+                            linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting - (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
+                                gyd.curveArr[i].curvePts[j].northing - (Math.Cos(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength));
+                        linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
 
-                kml.WriteEndElement(); // <coordinates>
-                kml.WriteEndElement(); // <LineString>
+                        if (j == gyd.curveArr[i].curvePts.Count -1)
+                            linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting + (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
+                                gyd.curveArr[i].curvePts[j].northing + (Math.Cos(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength));
+                    }
 
-                kml.WriteEndElement(); // <Placemark>
+                    kml.WriteRaw(linePts);
 
+                    kml.WriteEndElement(); // <coordinates>
+                    kml.WriteEndElement(); // <LineString>
+
+                    kml.WriteEndElement(); // <Placemark>
+                }
             }
             kml.WriteEndElement(); // <Folder>   
 
@@ -1737,33 +1673,36 @@ namespace AgOpenGPS
 
             for (int i = 0; i < gyd.curveArr.Count; i++)
             {
-                linePts = "";
-                kml.WriteStartElement("Placemark");
-                kml.WriteElementString("visibility", "0");
-
-                kml.WriteElementString("name", gyd.curveArr[i].Name);
-                kml.WriteStartElement("Style");
-
-                kml.WriteStartElement("LineStyle");
-                kml.WriteElementString("color", "ff6699ff");
-                kml.WriteElementString("width", "2");
-                kml.WriteEndElement(); // <LineStyle>
-                kml.WriteEndElement(); //Style
-
-                kml.WriteStartElement("LineString");
-                kml.WriteElementString("tessellate", "1");
-                kml.WriteStartElement("coordinates");
-
-                for (int j = 0; j < gyd.curveArr[i].curvePts.Count; j++)
+                if (gyd.curveArr[i].mode.HasFlag(Mode.Curve))
                 {
-                    linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
+                    kml.WriteStartElement("Placemark");
+                    kml.WriteElementString("visibility", "0");
+
+                    kml.WriteElementString("name", gyd.curveArr[i].Name);
+                    kml.WriteStartElement("Style");
+
+                    kml.WriteStartElement("LineStyle");
+                    kml.WriteElementString("color", "ff6699ff");
+                    kml.WriteElementString("width", "2");
+                    kml.WriteEndElement(); // <LineStyle>
+                    kml.WriteEndElement(); //Style
+
+                    kml.WriteStartElement("LineString");
+                    kml.WriteElementString("tessellate", "1");
+                    kml.WriteStartElement("coordinates");
+
+                    string linePts = "";
+                    for (int j = 0; j < gyd.curveArr[i].curvePts.Count; j++)
+                    {
+                        linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
+                    }
+                    kml.WriteRaw(linePts);
+
+                    kml.WriteEndElement(); // <coordinates>
+                    kml.WriteEndElement(); // <LineString>
+
+                    kml.WriteEndElement(); // <Placemark>
                 }
-                kml.WriteRaw(linePts);
-
-                kml.WriteEndElement(); // <coordinates>
-                kml.WriteEndElement(); // <LineString>
-
-                kml.WriteEndElement(); // <Placemark>
             }
             kml.WriteEndElement(); // <Folder>   
 
@@ -1772,7 +1711,6 @@ namespace AgOpenGPS
             kml.WriteElementString("name", "Recorded Path");
             kml.WriteElementString("visibility", "1");
 
-            linePts = "";
             kml.WriteStartElement("Placemark");
             kml.WriteElementString("visibility", "1");
 
@@ -1789,11 +1727,12 @@ namespace AgOpenGPS
             kml.WriteElementString("tessellate", "1");
             kml.WriteStartElement("coordinates");
 
+            string linePts2 = "";
             for (int j = 0; j < gyd.recList.Count; j++)
             {
-                linePts += pn.GetLocalToWSG84_KML(gyd.recList[j].easting, gyd.recList[j].northing);
+                linePts2 += pn.GetLocalToWSG84_KML(gyd.recList[j].easting, gyd.recList[j].northing);
             }
-            kml.WriteRaw(linePts);
+            kml.WriteRaw(linePts2);
 
             kml.WriteEndElement(); // <coordinates>
             kml.WriteEndElement(); // <LineString>

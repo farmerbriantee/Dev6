@@ -27,7 +27,7 @@ namespace AgOpenGPS
             lblEasting.Text = mf.flagPts[mf.flagNumberPicked - 1].easting.ToString("N2");
             lblNorthing.Text = mf.flagPts[mf.flagNumberPicked - 1].northing.ToString("N2");
             lblHeading.Text = glm.toDegrees(mf.flagPts[mf.flagNumberPicked - 1].heading).ToString("N2");
-            lblFlagSelected.Text = mf.flagPts[mf.flagNumberPicked - 1].ID.ToString();
+            lblFlagSelected.Text = mf.flagNumberPicked.ToString();
             tboxFlagNotes.Text = mf.flagPts[mf.flagNumberPicked - 1].notes;
         }
         private void FormFlags_Load(object sender, EventArgs e)

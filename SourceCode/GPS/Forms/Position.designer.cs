@@ -11,14 +11,12 @@ namespace AgOpenGPS
         //very first fix to setup grid etc
         public bool isFirstFixPositionSet = false, isGPSPositionInitialized = false, isFirstHeadingSet = false, 
             isReverse = false, isSuperSlow = false;
-        public double startGPSHeading = 0;
 
         //string to record fixes for elevation maps
         public StringBuilder sbFix = new StringBuilder();
 
         // autosteer variables for sending serial
         public short guidanceLineDistanceOff, guidanceLineSteerAngle;
-        public double avGuidanceSteerAngle;
 
         public short errorAngVel;
         public double setAngVel;
@@ -26,7 +24,6 @@ namespace AgOpenGPS
 
         //guidance line look ahead
         public double guidanceLookAheadTime = 2;
-        public vec2 guidanceLookPos = new vec2(0, 0);
 
         //how many fix updates per sec
         public int fixUpdateHz = 10;
@@ -54,8 +51,6 @@ namespace AgOpenGPS
         //how far travelled since last section was added, section points
         double sectionTriggerDistance = 0, sectionTriggerStepDistance = 0;
         public vec2 prevSectionPos = new vec2(0, 0);
-        public int sectionCounter = 0;
-
         public vec2 prevBoundaryPos = new vec2(0, 0);
 
         //Everything is so wonky at the start
@@ -64,15 +59,11 @@ namespace AgOpenGPS
         //individual points for the flags in a list
         public List<CFlag> flagPts = new List<CFlag>();
 
-        //tally counters for display
-        //public double totalSquareMetersWorked = 0, totalUserSquareMeters = 0, userSquareMetersAlarm = 0;
-
         public double avgSpeed;//for average speed
         public int crossTrackError;
 
         //youturn
         public double distancePivotToTurnLine = -2222;
-        public double distanceToolToTurnLine = -2222;
 
         //the value to fill in you turn progress bar
         public int youTurnProgressBar = 0;
@@ -632,14 +623,7 @@ namespace AgOpenGPS
             //preset the values
             guidanceLineDistanceOff = 32000;
 
-            if (gyd.isDrivingRecordedPath)
-                gyd.UpdatePosition();
-            else if (gyd.isContourBtnOn)
-                gyd.DistanceFromContourLine(pivotAxlePos, steerAxlePos);
-            else if (gyd.isABLineSet && gyd.isBtnABLineOn)
-                gyd.GetCurrentABLine(pivotAxlePos, steerAxlePos);
-            else if (gyd.isCurveSet && gyd.isBtnCurveOn)
-                gyd.GetCurrentCurveLine(pivotAxlePos, steerAxlePos);
+            gyd.GetCurrentGuidanceLine(pivotAxlePos, steerAxlePos);
 
             // If Drive button off - normal autosteer 
             if (!vehicle.isInFreeDriveMode)
@@ -649,27 +633,19 @@ namespace AgOpenGPS
                 p_254.pgn[p_254.speedLo] = unchecked((byte)((int)(Math.Abs(pn.speed) * 10.0)));
                 //mc.machineControlData[mc.cnSpeed] = mc.autoSteerData[mc.sdSpeed];
 
-                //save distance for display
-                lightbarDistance = guidanceLineDistanceOff;
+                //save distance for display in millimeters
+                avgPivDistance = avgPivDistance * 0.5 + guidanceLineDistanceOff * 0.5;
 
-                if (!isAutoSteerBtnOn) //32000 means auto steer is off
+                if ((isAutoSteerBtnOn || gyd.isDrivingRecordedPath) && guidanceLineDistanceOff != 32000) //32000 means auto steer is off
                 {
-                    guidanceLineDistanceOff = 32000;
-                    p_254.pgn[p_254.status] = 0;
+                    p_254.pgn[p_254.status] = 1;
                 }
-
-                else p_254.pgn[p_254.status] = 1;
-
-                if (gyd.isDrivingRecordedPath || gyd.isFollowingDubinsToPath) p_254.pgn[p_254.status] = 1;
-
-                //mc.autoSteerData[7] = unchecked((byte)(guidanceLineDistanceOff >> 8));
-                //mc.autoSteerData[8] = unchecked((byte)(guidanceLineDistanceOff));
+                else p_254.pgn[p_254.status] = 0;
 
                 //convert to cm from mm and divide by 2 - lightbar
                 int distanceX2;
-                if (guidanceLineDistanceOff == 32000)
+                if (p_254.pgn[p_254.status] == 0)
                     distanceX2 = 255;
-
                 else
                 {
                     distanceX2 = (int)(guidanceLineDistanceOff * 0.05);
@@ -733,14 +709,12 @@ namespace AgOpenGPS
             SendPgnToLoop(p_254.pgn);
 
             //for average cross track error
-            if (guidanceLineDistanceOff < 29000)
+            if (p_254.pgn[p_254.status] == 1)
             {
                 crossTrackError = (int)((double)crossTrackError * 0.90 + Math.Abs((double)guidanceLineDistanceOff) * 0.1);
             }
             else
-            {
                 crossTrackError = 0;
-            }
 
             #endregion
 
@@ -785,11 +759,10 @@ namespace AgOpenGPS
                                 }
                                 else
                                 {
-                                    if (gyd.isABLineSet)
-                                    {
+                                    if (gyd.isBtnABLineOn)
                                         gyd.BuildABLineDubinsYouTurn(gyd.isYouTurnRight);
-                                    }
-                                    else gyd.BuildCurveDubinsYouTurn(gyd.isYouTurnRight, pivotAxlePos);
+                                    else
+                                        gyd.BuildCurveDubinsYouTurn(gyd.isYouTurnRight, pivotAxlePos);
                                 }
 
                                 if (gyd.youTurnPhase == 3) gyd.SmoothYouTurn(gyd.uTurnSmoothing);
@@ -902,15 +875,6 @@ namespace AgOpenGPS
             steerAxlePos.easting = pivotAxlePos.easting + (Math.Sin(fixHeading) * vehicle.wheelbase);
             steerAxlePos.northing = pivotAxlePos.northing + (Math.Cos(fixHeading) * vehicle.wheelbase);
             steerAxlePos.heading = fixHeading;
-
-            //guidance look ahead distance based on time or tool width at least 
-            
-            if (!gyd.isLateralTriggered && !gyd.isLateralTriggered)
-            {
-                double guidanceLookDist = (Math.Max(tool.toolWidth * 0.5, avgSpeed * 0.277777 * guidanceLookAheadTime));
-                guidanceLookPos.easting = pivotAxlePos.easting + (Math.Sin(fixHeading) * guidanceLookDist);
-                guidanceLookPos.northing = pivotAxlePos.northing + (Math.Cos(fixHeading) * guidanceLookDist);
-            }
 
             //determine where the rigid vehicle hitch ends
             hitchPos.easting = pn.fix.easting + (Math.Sin(fixHeading) * (tool.hitchLength - vehicle.antennaPivot));
@@ -1049,9 +1013,9 @@ namespace AgOpenGPS
                 gyd.recList.Add(new CRecPathPt(pivotAxlePos.easting, pivotAxlePos.northing, pivotAxlePos.heading, speed, autoBtn));
             }
 
-            if (gyd.isOkToAddDesPoints)
+            if (gyd.isOkToAddDesPoints && gyd.EditGuidanceLine != null)
             {
-                gyd.desList.Add(new vec3(pivotAxlePos.easting, pivotAxlePos.northing, pivotAxlePos.heading));
+                gyd.EditGuidanceLine.curvePts.Add(new vec3(pivotAxlePos.easting, pivotAxlePos.northing, pivotAxlePos.heading));
             }
 
             //save the north & east as previous
@@ -1059,7 +1023,7 @@ namespace AgOpenGPS
             prevSectionPos.easting = pn.fix.easting;
 
             // if non zero, at least one section is on.
-            sectionCounter = 0;
+            int sectionCounter = 0;
 
             //send the current and previous GPS fore/aft corrected fix to each section
             for (int j = 0; j < tool.numOfSections + 1; j++)
@@ -1070,20 +1034,10 @@ namespace AgOpenGPS
                     sectionCounter++;
                 }
             }
-            if (sectionCounter == 0 || (((gyd.isBtnABLineOn && gyd.isABLineSet) || (gyd.isBtnCurveOn && gyd.isCurveSet)) && !gyd.isContourBtnOn && isAutoSteerBtnOn))
-            {
-                //no contour recorded
-                if (gyd.isContourOn)
-                    gyd.StopContourLine(pivotAxlePos);
-            }
-            //keep the line going, everything is on for recording path
-            else if (gyd.isContourOn)
-                gyd.AddPoint(pivotAxlePos);
+            if (sectionCounter == 0 || (gyd.currentGuidanceLine != null && !gyd.isContourBtnOn && isAutoSteerBtnOn))
+                gyd.StopContourLine();
             else
-            {
-                gyd.StartContourLine(pivotAxlePos);
                 gyd.AddPoint(pivotAxlePos);
-            }
         }
 
         //calculate the extreme tool left, right velocities, each section lookahead, and whether or not its going backwards

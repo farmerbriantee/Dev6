@@ -7,14 +7,31 @@ namespace AgOpenGPS
     {
         private readonly FormGPS mf;
 
-        public double distanceFromRefLine;
-        public double howManyPathsAway;
+        public List<CGuidanceLine> curveArr = new List<CGuidanceLine>();
+
+        public CGuidanceLine currentGuidanceLine, currentABLine, currentCurveLine, EditGuidanceLine;
+
+        //the list of points to drive on
+        public List<vec3> curList = new List<vec3>();
+
+        public bool isBtnABLineOn, isBtnCurveOn, isContourBtnOn;
+
+        public int currentLocationIndexA, currentLocationIndexB;
+
+        public bool isValid, isOkToAddDesPoints;
+        public double lastSecond = 0, moveDistance, CurrentHeading;
+
+        public double abLength;
+        public double snapDistance;
+        public int lineWidth;
+        public int tramPassEvery;
+
+        public double distanceFromRefLine, howManyPathsAway, oldHowManyPathsAway;
 
         //steer, pivot, and ref indexes
         private int sA, sB, pA, pB, rA, rB;
 
-        public bool isHeadingSameWay = true;
-
+        public bool isSmoothWindowOpen, isHeadingSameWay = true, oldIsHeadingSameWay = true;
 
         public double distanceFromCurrentLinePivot;
         public double steerAngle, rEast, rNorth;
@@ -38,14 +55,10 @@ namespace AgOpenGPS
             mf = _f;
             sideHillCompFactor = Properties.Settings.Default.setAS_sideHillComp;
 
-            refList.Capacity = 1024;
             curList.Capacity = 1024;
 
             lineWidth = Properties.Settings.Default.setDisplay_lineWidth;
             abLength = Properties.Settings.Default.setAB_lineLength;
-
-            ctList.Capacity = 128;
-            ptList.Capacity = 128;
 
             uturnDistanceFromBoundary = Properties.Vehicle.Default.set_youTurnDistanceFromBoundary;
 
@@ -113,7 +126,6 @@ namespace AgOpenGPS
                     {
                         onA = curList.Count - pA;
                     }
-
                 }
 
                 //just need to make sure the points continue ascending or heading switches all over the place
@@ -150,7 +162,8 @@ namespace AgOpenGPS
 
                 rEast = curList[pA].easting + (U * dx2);
                 rNorth = curList[pA].northing + (U * dy2);
-                currentLocationIndex = pA;
+                currentLocationIndexA = pA;
+                currentLocationIndexB = pB;
                 CurrentHeading = curList[pA].heading;
 
                 if (mf.isStanleyUsed)
@@ -652,6 +665,27 @@ namespace AgOpenGPS
             //Convert to centimeters
             mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
             mf.guidanceLineSteerAngle = (short)(steerAngle * 100);
+        }
+    }
+
+    public enum Mode { AB = 2, Curve = 4, Contour = 8, Boundary = 16 };//, Heading, Circle, Spiral
+
+    public class CGuidanceLine
+    {
+        public Mode mode;
+        public List<vec3> curvePts = new List<vec3>();
+        public string Name = "aa";
+
+        public CGuidanceLine(Mode _mode)
+        {
+            mode = _mode;
+        }
+
+        public CGuidanceLine(CGuidanceLine old)
+        {
+            mode = old.mode;
+            Name = old.Name;
+            curvePts.AddRange(old.curvePts.ToArray());
         }
     }
 }

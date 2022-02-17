@@ -145,14 +145,9 @@ namespace AgOpenGPS
                 {
                     lblCurrentField.Text = "Field: " + displayFieldName;
 
-                    if (gyd.numCurveLineSelected > 0 && gyd.isBtnCurveOn)
+                    if (gyd.currentGuidanceLine != null)
                     {
-                        lblCurveLineName.Text = "Cur-" + gyd.curveArr[gyd.numCurveLineSelected - 1].Name;
-                    }
-
-                    else if (gyd.numABLineSelected > 0 && gyd.isBtnABLineOn)
-                    {
-                        lblCurveLineName.Text = "AB-" + gyd.lineArr[gyd.numABLineSelected - 1].Name;
+                        lblCurveLineName.Text = (gyd.currentGuidanceLine.mode.HasFlag(Mode.AB) ? "AB-" : "Cur-") + gyd.currentGuidanceLine.Name;
                     }
                     else lblCurveLineName.Text = string.Empty;
                 }
@@ -1026,13 +1021,6 @@ namespace AgOpenGPS
             //delete selected flag and set selected to none
             flagPts.RemoveAt(flagNumberPicked - 1);
             flagNumberPicked = 0;
-
-            // re-sort the id's based on how many flags left
-            int flagCnt = flagPts.Count;
-            if (flagCnt > 0)
-            {
-                for (int i = 0; i < flagCnt; i++) flagPts[i].ID = i + 1;
-            }
         }
         public void EnableYouTurnButtons()
         {

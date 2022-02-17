@@ -9,19 +9,9 @@ namespace AgOpenGPS
         //the recorded path from driving around
         public List<CRecPathPt> recList = new List<CRecPathPt>();
 
-        //the dubins path to get there
-        public List<CRecPathPt> shuttleDubinsList = new List<CRecPathPt>();
-
-        public int shuttleListCount;
-
-        //list of vec3 points of Dubins shortest path between 2 points - To be converted to RecPt
-        public List<vec3> shortestDubinsList = new List<vec3>();
-
         public int currentPositonIndex;
 
-        public vec3 homePos = new vec3();
-
-        public bool isBtnFollowOn, isEndOfTheRecLine, isRecordOn;
+        public bool isEndOfTheRecLine, isRecordOn;
         public bool isDrivingRecordedPath, isFollowingDubinsToPath, isFollowingRecPath, isFollowingDubinsHome;
 
         int starPathIndx = 0;
@@ -33,7 +23,7 @@ namespace AgOpenGPS
             if (recList.Count < 5) return false;
 
             //save a copy of where we started.
-            homePos = mf.pivotAxlePos;
+            vec3 homePos = mf.pivotAxlePos;
 
             // Try to find the nearest point of the recordet path in relation to the current position:
             double distance = double.MaxValue;
@@ -64,10 +54,9 @@ namespace AgOpenGPS
              
             //get the dubins for approach to recorded path
             GetDubinsPath(goal);
-            shuttleListCount = shuttleDubinsList.Count;
 
             //has a valid dubins path been created?
-            if (shuttleDubinsList.Count == 0) return false;
+            if (curList.Count == 0) return false;
 
             starPathIndx = idx;
             
@@ -85,13 +74,12 @@ namespace AgOpenGPS
             if (isFollowingDubinsToPath)
             {
                 //set a speed of 10 kmh
-                mf.sim.stepDistance = shuttleDubinsList[currentPositonIndex].speed / 34.86;
-                mf.sim.stepDistance = 0;
+                mf.sim.stepDistance = 9.0 / 34.86;
 
-                PurePursuitRecPath(mf.pivotAxlePos, shuttleDubinsList);
+                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList);
 
                 //check if close to recorded path
-                if (shuttleDubinsList.Count - pB < 8)
+                if (curList.Count - pB < 8)
                 {
                     vec3 pivotAxlePosRP = mf.pivotAxlePos;
 
@@ -100,8 +88,7 @@ namespace AgOpenGPS
                     {
                         isFollowingRecPath = true;
                         isFollowingDubinsToPath = false;
-                        shuttleDubinsList.Clear();
-                        shortestDubinsList.Clear();
+                        curList.Clear();
                         currentPositonIndex = starPathIndx;
                     }
                 }
@@ -147,16 +134,16 @@ namespace AgOpenGPS
 
             if (isFollowingDubinsHome)
             {
-                if (shuttleDubinsList.Count - pB < 3)
+                if (curList.Count - pB < 3)
                 {
                     StopDrivingRecordedPath();
                     return;
                 }
 
-                mf.sim.stepDistance = shuttleDubinsList[currentPositonIndex].speed / 35;
+                mf.sim.stepDistance = 9.0 / 35;
 
                 //StanleyDubinsPath(shuttleListCount);
-                PurePursuitRecPath(mf.pivotAxlePos, shuttleDubinsList);
+                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList);
             }
         }
 
@@ -165,8 +152,7 @@ namespace AgOpenGPS
             isFollowingDubinsHome = false;
             isFollowingRecPath = false;
             isFollowingDubinsToPath = false;
-            shuttleDubinsList.Clear();
-            shortestDubinsList.Clear();
+            curList.Clear();
             mf.sim.stepDistance = 0;
             isDrivingRecordedPath = false;
             mf.btnPathGoStop.Image = Properties.Resources.boundaryPlay;
@@ -191,24 +177,8 @@ namespace AgOpenGPS
             };
 
             //get the dubins path vec3 point coordinates of turn
-            shortestDubinsList.Clear();
-            shuttleDubinsList.Clear();
-
-            shortestDubinsList = dubPath.GenerateDubins(pt2, goal);
-
-            //if Dubins returns 0 elements, there is an unavoidable blockage in the way.
-            if (shortestDubinsList.Count > 0)
-            {
-                shortestDubinsList.Insert(0, mf.pivotAxlePos);
-
-                //transfer point list to recPath class point style
-                for (int i = 0; i < shortestDubinsList.Count; i++)
-                {
-                    CRecPathPt pt = new CRecPathPt(shortestDubinsList[i].easting, shortestDubinsList[i].northing, shortestDubinsList[i].heading, 9.0, false);
-                    shuttleDubinsList.Add(pt);
-                }
-                return;
-            }
+            curList = dubPath.GenerateDubins(pt2, goal);
+            curList.Insert(0, mf.pivotAxlePos);
         }
 
         public void DrawRecordedLine()
@@ -234,20 +204,6 @@ namespace AgOpenGPS
                 GL.Vertex3(rEast, rNorth, 0.0);
                 GL.End();
                 GL.PointSize(1.0f);
-            }
-        }
-
-        public void DrawDubins()
-        {
-            if (shuttleDubinsList.Count > 1)
-            {
-                //GL.LineWidth(2);
-                GL.PointSize(2);
-                GL.Color3(0.298f, 0.96f, 0.2960f);
-                GL.Begin(PrimitiveType.Points);
-                for (int h = 0; h < shuttleDubinsList.Count; h++)
-                    GL.Vertex3(shuttleDubinsList[h].easting, shuttleDubinsList[h].northing, 0);
-                GL.End();
             }
         }
     }

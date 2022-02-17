@@ -7,11 +7,9 @@ namespace AgOpenGPS
     {
         //access to the main GPS form and all its variables
         private readonly FormGPS mf = null;
-
         private bool isSaving;
-        private static bool isCurve;
 
-        public FormTram(Form callingForm, bool Curve)
+        public FormTram(Form callingForm)
         {
             //get copy of the calling main form
             mf = callingForm as FormGPS;
@@ -23,8 +21,6 @@ namespace AgOpenGPS
             lblTramWidth.Text = (mf.tram.tramWidth * mf.m2FtOrM).ToString("N2") + mf.unitsFtM;
 
             nudPasses.Controls[0].Enabled = false;
-
-            isCurve = Curve;
         }
 
         private void FormTram_Load(object sender, EventArgs e)
@@ -65,61 +61,27 @@ namespace AgOpenGPS
 
         private void MoveBuildTramLine(double Dist)
         {
-            if (isCurve)
-            {
-                if (Dist != 0)
-                    mf.gyd.MoveABCurve(Dist);
-                mf.gyd.BuildTram(true);
-            }
-            else
-            {
-                if (Dist != 0)
-                    mf.gyd.MoveABLine(Dist);
-                mf.gyd.BuildTram();
-            }
+            if (Dist != 0)
+                mf.gyd.MoveGuidanceLine(mf.gyd.currentGuidanceLine, Dist);
+            mf.tram.BuildTram(mf.gyd.currentCurveLine);
         }
 
         private void FormTram_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (isSaving)
             {
-                if (isCurve)
+                if (mf.gyd.currentGuidanceLine != null)
                 {
-                    if (mf.gyd.refList.Count > 0)
-                    {
-                        //array number is 1 less since it starts at zero
-                        int idx = mf.gyd.numCurveLineSelected - 1;
+                    int idx = mf.gyd.curveArr.FindIndex(x => x.Name == mf.gyd.currentGuidanceLine?.Name);
+                    if (idx > -1)
+                        mf.gyd.curveArr[idx] = new CGuidanceLine(mf.gyd.currentGuidanceLine);
 
-                        //mf.curve.curveArr[idx].Name = textBox1.Text.Trim();
-                        if (idx >= 0)
-                        {
-                            mf.gyd.curveArr[idx].aveHeading = mf.gyd.aveLineHeading;
-                            mf.gyd.curveArr[idx].curvePts.Clear();
-                            //write out the Curve Points
-                            foreach (vec3 item in mf.gyd.refList)
-                            {
-                                mf.gyd.curveArr[idx].curvePts.Add(item);
-                            }
-                        }
-
-                        //save entire list
+                    //save entire list
+                    if (mf.gyd.currentGuidanceLine.mode.HasFlag(Mode.AB))
+                        mf.FileSaveABLines();
+                    else
                         mf.FileSaveCurveLines();
-                        mf.gyd.moveDistance = 0;
-                    }
-                }
-                else
-                {
-                    int idx = mf.gyd.numABLineSelected - 1;
 
-                    if (idx >= 0)
-                    {
-                        mf.gyd.lineArr[idx].heading = mf.gyd.abHeading;
-                        //calculate the new points for the reference line and points
-                        mf.gyd.lineArr[idx].origin.easting = mf.gyd.refPoint1.easting;
-                        mf.gyd.lineArr[idx].origin.northing = mf.gyd.refPoint1.northing;
-                    }
-
-                    mf.FileSaveABLines();
                     mf.gyd.moveDistance = 0;
                 }
             }
@@ -180,45 +142,11 @@ namespace AgOpenGPS
 
         private void btnSwapAB_Click(object sender, EventArgs e)
         {
-            if (isCurve)
+            if (mf.gyd.currentGuidanceLine != null)
             {
-                int cnt = mf.gyd.refList.Count;
-                if (cnt > 0)
-                {
-                    mf.gyd.refList.Reverse();
-
-                    vec3[] arr = new vec3[cnt];
-                    cnt--;
-                    mf.gyd.refList.CopyTo(arr);
-                    mf.gyd.refList.Clear();
-
-                    mf.gyd.aveLineHeading += Math.PI;
-                    if (mf.gyd.aveLineHeading < 0) mf.gyd.aveLineHeading += glm.twoPI;
-                    if (mf.gyd.aveLineHeading > glm.twoPI) mf.gyd.aveLineHeading -= glm.twoPI;
-
-                    for (int i = 1; i < cnt; i++)
-                    {
-                        vec3 pt3 = arr[i];
-                        pt3.heading += Math.PI;
-                        if (pt3.heading > glm.twoPI) pt3.heading -= glm.twoPI;
-                        if (pt3.heading < 0) pt3.heading += glm.twoPI;
-                        mf.gyd.refList.Add(pt3);
-                    }
-                }
-            }
-            else
-            {
-                mf.gyd.abHeading += Math.PI;
-                if (mf.gyd.abHeading > glm.twoPI) mf.gyd.abHeading -= glm.twoPI;
-
-                mf.gyd.refABLineP1.easting = mf.gyd.refPoint1.easting - (Math.Sin(mf.gyd.abHeading) * mf.gyd.abLength);
-                mf.gyd.refABLineP1.northing = mf.gyd.refPoint1.northing - (Math.Cos(mf.gyd.abHeading) * mf.gyd.abLength);
-
-                mf.gyd.refABLineP2.easting = mf.gyd.refPoint1.easting + (Math.Sin(mf.gyd.abHeading) * mf.gyd.abLength);
-                mf.gyd.refABLineP2.northing = mf.gyd.refPoint1.northing + (Math.Cos(mf.gyd.abHeading) * mf.gyd.abLength);
-
-                mf.gyd.refPoint2.easting = mf.gyd.refABLineP2.easting;
-                mf.gyd.refPoint2.northing = mf.gyd.refABLineP2.northing;
+                mf.gyd.isValid = false;
+                mf.gyd.lastSecond = 0;
+                mf.gyd.ReverseGuidanceLine(mf.gyd.currentGuidanceLine);
             }
             MoveBuildTramLine(0);
         }

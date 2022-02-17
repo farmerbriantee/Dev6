@@ -12,8 +12,8 @@ namespace AgOpenGPS
         //extracted Near, Far, Right, Left clipping planes of frustum
         public double[] frustum = new double[24];
 
-        private double fovy = 0.7;
-        private double camDistanceFactor = -4;
+        private static double fovy = 0.7;
+        private static double camDistanceFactor = -4;
 
         int mouseX = 0, mouseY = 0;
         private int zoomUpdateCounter = 0;
@@ -26,6 +26,9 @@ namespace AgOpenGPS
 
         private bool isFastSections = false;
         private int bbCounter = 0;
+
+        private double maxFieldX, maxFieldY, minFieldX, minFieldY, avgPivDistance;
+        public double fieldCenterX, fieldCenterY, maxFieldDistance, maxCrossFieldLength;
 
         // When oglMain is created
         private void oglMain_Load(object sender, EventArgs e)
@@ -288,14 +291,10 @@ namespace AgOpenGPS
                     {
                         gyd.DrawContourLine();
                     }
-                    else// draw the current and reference AB Lines or CurveAB Ref and line
-                    {
-                        if (gyd.isABLineSet || gyd.isABLineBeingSet) gyd.DrawABLines();
-                        if (gyd.isBtnCurveOn) gyd.DrawCurve();
-                    }
+                    else
+                        gyd.DrawCurve();
 
                     gyd.DrawRecordedLine();
-                    gyd.DrawDubins();
 
                     if (bnd.bndList.Count > 0 || bnd.isBndBeingMade == true)
                     {
@@ -1122,41 +1121,14 @@ namespace AgOpenGPS
                         }
                     } //end of section patches
 
-                    //draw the ABLine
-                    if ((gyd.isABLineSet || gyd.isABLineBeingSet) && gyd.isBtnABLineOn)
-                    {
-                        //Draw reference AB line
-                        GL.LineWidth(1);
-                        GL.Enable(EnableCap.LineStipple);
-                        GL.LineStipple(1, 0x00F0);
-
-                        GL.Begin(PrimitiveType.Lines);
-                        GL.Color3(0.9f, 0.2f, 0.2f);
-                        GL.Vertex3(gyd.refABLineP1.easting, gyd.refABLineP1.northing, 0);
-                        GL.Vertex3(gyd.refABLineP2.easting, gyd.refABLineP2.northing, 0);
-                        GL.End();
-                        GL.Disable(EnableCap.LineStipple);
-
-                        //raw current AB Line
-                        GL.Begin(PrimitiveType.Lines);
-                        GL.Color3(0.9f, 0.20f, 0.90f);
-                        GL.Vertex3(gyd.currentABLineP1.easting, gyd.currentABLineP1.northing, 0.0);
-                        GL.Vertex3(gyd.currentABLineP2.easting, gyd.currentABLineP2.northing, 0.0);
-                        GL.End();
-                    }
-
                     //draw curve if there is one
-                    if (gyd.isCurveSet && gyd.isBtnCurveOn)
+                    if (gyd.currentGuidanceLine != null && gyd.curList.Count > 1)
                     {
-                        int ptC = gyd.curList.Count;
-                        if (ptC > 0)
-                        {
-                            GL.LineWidth(2);
-                            GL.Color3(0.925f, 0.2f, 0.90f);
-                            GL.Begin(PrimitiveType.LineStrip);
-                            for (int h = 0; h < ptC; h++) GL.Vertex3(gyd.curList[h].easting, gyd.curList[h].northing, 0);
-                            GL.End();
-                        }
+                        GL.LineWidth(2);
+                        GL.Color3(0.925f, 0.2f, 0.90f);
+                        GL.Begin(PrimitiveType.LineStrip);
+                        for (int h = 0; h < gyd.curList.Count; h++) GL.Vertex3(gyd.curList[h].easting, gyd.curList[h].northing, 0);
+                        GL.End();
                     }
 
                     //draw all the fences
@@ -1397,7 +1369,7 @@ namespace AgOpenGPS
             int flagCnt = flagPts.Count;
             for (int f = 0; f < flagCnt; f++)
             {
-                GL.StencilFunc(StencilFunction.Always, (flagPts[f].ID), 0xFF);
+                GL.StencilFunc(StencilFunction.Always, f + 1, 0xFF);
                 GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 
                 GL.Begin(PrimitiveType.Points);
@@ -1550,39 +1522,30 @@ namespace AgOpenGPS
             }
         }
 
-        private double avgPivDistance, lightbarDistance;
         private void DrawLightBarText()
         {
-
             GL.Disable(EnableCap.DepthTest);
 
             if (gyd.isContourBtnOn || gyd.isBtnABLineOn || gyd.isBtnCurveOn)
             {
+                double avgPivotDistance = avgPivDistance * (isMetric ? 0.1 : 0.03937);
+                string hede;
 
-                //if (guidanceLineDistanceOff != 32000 && guidanceLineDistanceOff != 32020)
+                DrawLightBar(oglMain.Width, oglMain.Height, avgPivotDistance);
+
+                if (avgPivotDistance > 0.0)
                 {
-                    // in millimeters
-                    avgPivDistance = avgPivDistance * 0.5 + lightbarDistance * 0.5;
-
-                    double avgPivotDistance = avgPivDistance * (isMetric ? 0.1 : 0.03937);
-                    string hede;
-
-                    DrawLightBar(oglMain.Width, oglMain.Height, avgPivotDistance);
-
-                    if (avgPivotDistance > 0.0)
-                    {
-                        GL.Color3(0.9752f, 0.50f, 0.3f);
-                        hede = "< " + (Math.Abs(avgPivotDistance)).ToString("N0");
-                    }
-                    else
-                    {
-                        GL.Color3(0.50f, 0.952f, 0.3f);
-                        hede = (Math.Abs(avgPivotDistance)).ToString("N0") + " >";
-                    }
-
-                    int center = -(int)(((double)(hede.Length) * 0.5) * 16);
-                    font.DrawText(center, 30, hede, 1);
+                    GL.Color3(0.9752f, 0.50f, 0.3f);
+                    hede = "< " + (Math.Abs(avgPivotDistance)).ToString("N0");
                 }
+                else
+                {
+                    GL.Color3(0.50f, 0.952f, 0.3f);
+                    hede = (Math.Abs(avgPivotDistance)).ToString("N0") + " >";
+                }
+
+                int center = -(int)(((double)(hede.Length) * 0.5) * 16);
+                font.DrawText(center, 30, hede, 1);
             }
         }
 
@@ -2043,8 +2006,6 @@ namespace AgOpenGPS
             frustum[22] = clip[11] - clip[9];
             frustum[23] = clip[15] - clip[13];
         }
-
-        public double maxFieldX, maxFieldY, minFieldX, minFieldY, fieldCenterX, fieldCenterY, maxFieldDistance, maxCrossFieldLength;
 
         //determine mins maxs of patches and whole field.
         public void CalculateMinMax()

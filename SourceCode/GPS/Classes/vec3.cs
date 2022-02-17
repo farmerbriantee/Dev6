@@ -1,6 +1,7 @@
 ﻿//Please, if you use this, share the improvements
 
 using System;
+using System.Collections.Generic;
 
 namespace AgOpenGPS
 {

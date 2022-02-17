@@ -55,7 +55,7 @@ namespace AgOpenGPS
 
     public static class StaticClass
     {
-        public static void CalculateHeadings(this List<vec3> points)
+        public static void CalculateHeadings(this List<vec3> points, bool loop)
         {
             //to calc heading based on next and previous points to give an average heading.
             int cnt = points.Count;
@@ -64,12 +64,15 @@ namespace AgOpenGPS
             points.CopyTo(arr);
             points.Clear();
 
-            //first point needs last, first, second points
             vec3 pt3 = arr[0];
-            pt3.heading = Math.Atan2(arr[1].easting - arr[cnt].easting, arr[1].northing - arr[cnt].northing);
-            if (pt3.heading < 0) pt3.heading += glm.twoPI;
-            points.Add(pt3);
 
+            if (loop)
+            {
+                //first point needs last, first, second points
+                pt3.heading = Math.Atan2(arr[1].easting - arr[cnt].easting, arr[1].northing - arr[cnt].northing);
+                if (pt3.heading < 0) pt3.heading += glm.twoPI;
+                points.Add(pt3);
+            }
             //middle points
             for (int i = 1; i < cnt; i++)
             {
@@ -79,11 +82,14 @@ namespace AgOpenGPS
                 points.Add(pt3);
             }
 
-            //last and first point
-            pt3 = arr[cnt];
-            pt3.heading = Math.Atan2(arr[0].easting - arr[cnt - 1].easting, arr[0].northing - arr[cnt - 1].northing);
-            if (pt3.heading < 0) pt3.heading += glm.twoPI;
-            points.Add(pt3);
+            if (loop)
+            {
+                //last and first point
+                pt3 = arr[cnt];
+                pt3.heading = Math.Atan2(arr[0].easting - arr[cnt - 1].easting, arr[0].northing - arr[cnt - 1].northing);
+                if (pt3.heading < 0) pt3.heading += glm.twoPI;
+                points.Add(pt3);
+            }
         }
 
         public static bool GetLineIntersection(vec2 PointAA, vec2 PointAB, vec2 PointBA, vec2 PointBB, out vec2 Crossing, out double TimeA, out double TimeB, bool Limit = false)

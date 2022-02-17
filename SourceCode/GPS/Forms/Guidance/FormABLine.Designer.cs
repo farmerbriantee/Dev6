@@ -51,18 +51,10 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnListUse = new System.Windows.Forms.Button();
             this.btnListDelete = new System.Windows.Forms.Button();
-            this.panelEditName = new System.Windows.Forms.Panel();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.btnAddTimeEdit = new System.Windows.Forms.Button();
-            this.btnSaveEditName = new System.Windows.Forms.Button();
-            this.btnCancelEditName = new System.Windows.Forms.Button();
-            this.textBox2 = new System.Windows.Forms.TextBox();
             this.panelAPlus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudHeading)).BeginInit();
             this.panelName.SuspendLayout();
             this.panelPick.SuspendLayout();
-            this.panelEditName.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvLines
@@ -99,7 +91,7 @@
             this.panelAPlus.Controls.Add(this.nudHeading);
             this.panelAPlus.Controls.Add(this.btnAPoint);
             this.panelAPlus.Controls.Add(this.btnBPoint);
-            this.panelAPlus.Location = new System.Drawing.Point(549, 21);
+            this.panelAPlus.Location = new System.Drawing.Point(448, 3);
             this.panelAPlus.Name = "panelAPlus";
             this.panelAPlus.Size = new System.Drawing.Size(233, 313);
             this.panelAPlus.TabIndex = 431;
@@ -222,7 +214,7 @@
             this.panelName.Controls.Add(this.btnAdd);
             this.panelName.Controls.Add(this.btnCancel_Name);
             this.panelName.Controls.Add(this.textBox1);
-            this.panelName.Location = new System.Drawing.Point(38, 353);
+            this.panelName.Location = new System.Drawing.Point(684, 3);
             this.panelName.Name = "panelName";
             this.panelName.Size = new System.Drawing.Size(233, 313);
             this.panelName.TabIndex = 433;
@@ -318,7 +310,7 @@
             this.panelPick.Controls.Add(this.btnCancel);
             this.panelPick.Controls.Add(this.btnListUse);
             this.panelPick.Controls.Add(this.btnListDelete);
-            this.panelPick.Location = new System.Drawing.Point(12, 21);
+            this.panelPick.Location = new System.Drawing.Point(3, 3);
             this.panelPick.Name = "panelPick";
             this.panelPick.Size = new System.Drawing.Size(442, 313);
             this.panelPick.TabIndex = 434;
@@ -443,116 +435,12 @@
             this.btnListDelete.Click += new System.EventHandler(this.btnListDelete_Click);
             this.btnListDelete.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.btnListDelete_HelpRequested);
             // 
-            // panelEditName
-            // 
-            this.panelEditName.BackColor = System.Drawing.Color.Transparent;
-            this.panelEditName.Controls.Add(this.label3);
-            this.panelEditName.Controls.Add(this.label2);
-            this.panelEditName.Controls.Add(this.btnAddTimeEdit);
-            this.panelEditName.Controls.Add(this.btnSaveEditName);
-            this.panelEditName.Controls.Add(this.btnCancelEditName);
-            this.panelEditName.Controls.Add(this.textBox2);
-            this.panelEditName.Location = new System.Drawing.Point(437, 353);
-            this.panelEditName.Name = "panelEditName";
-            this.panelEditName.Size = new System.Drawing.Size(233, 313);
-            this.panelEditName.TabIndex = 434;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(20, 19);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(29, 16);
-            this.label3.TabIndex = 425;
-            this.label3.Text = "Edit";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(48, 154);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(33, 29);
-            this.label2.TabIndex = 424;
-            this.label2.Text = "+";
-            // 
-            // btnAddTimeEdit
-            // 
-            this.btnAddTimeEdit.BackColor = System.Drawing.Color.Transparent;
-            this.btnAddTimeEdit.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.btnAddTimeEdit.FlatAppearance.BorderSize = 0;
-            this.btnAddTimeEdit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAddTimeEdit.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAddTimeEdit.Image = global::AgOpenGPS.Properties.Resources.Time;
-            this.btnAddTimeEdit.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnAddTimeEdit.Location = new System.Drawing.Point(87, 133);
-            this.btnAddTimeEdit.Name = "btnAddTimeEdit";
-            this.btnAddTimeEdit.Size = new System.Drawing.Size(88, 68);
-            this.btnAddTimeEdit.TabIndex = 150;
-            this.btnAddTimeEdit.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.btnAddTimeEdit.UseVisualStyleBackColor = false;
-            this.btnAddTimeEdit.Click += new System.EventHandler(this.btnAddTimeEdit_Click);
-            // 
-            // btnSaveEditName
-            // 
-            this.btnSaveEditName.BackColor = System.Drawing.Color.Transparent;
-            this.btnSaveEditName.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.btnSaveEditName.FlatAppearance.BorderSize = 0;
-            this.btnSaveEditName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSaveEditName.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSaveEditName.Image = global::AgOpenGPS.Properties.Resources.OK64;
-            this.btnSaveEditName.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnSaveEditName.Location = new System.Drawing.Point(138, 230);
-            this.btnSaveEditName.Name = "btnSaveEditName";
-            this.btnSaveEditName.Size = new System.Drawing.Size(88, 68);
-            this.btnSaveEditName.TabIndex = 150;
-            this.btnSaveEditName.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.btnSaveEditName.UseVisualStyleBackColor = false;
-            this.btnSaveEditName.Click += new System.EventHandler(this.btnSaveEditName_Click);
-            this.btnSaveEditName.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.btnSaveEditName_HelpRequested);
-            // 
-            // btnCancelEditName
-            // 
-            this.btnCancelEditName.BackColor = System.Drawing.Color.Transparent;
-            this.btnCancelEditName.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnCancelEditName.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancelEditName.FlatAppearance.BorderSize = 0;
-            this.btnCancelEditName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancelEditName.Font = new System.Drawing.Font("Tahoma", 14.25F);
-            this.btnCancelEditName.Image = global::AgOpenGPS.Properties.Resources.Cancel64;
-            this.btnCancelEditName.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnCancelEditName.Location = new System.Drawing.Point(8, 230);
-            this.btnCancelEditName.Name = "btnCancelEditName";
-            this.btnCancelEditName.Size = new System.Drawing.Size(88, 68);
-            this.btnCancelEditName.TabIndex = 423;
-            this.btnCancelEditName.UseVisualStyleBackColor = false;
-            this.btnCancelEditName.Click += new System.EventHandler(this.btnCancel_APlus_Click);
-            this.btnCancelEditName.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.btnCancelEditName_HelpRequested);
-            // 
-            // textBox2
-            // 
-            this.textBox2.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.textBox2.CausesValidation = false;
-            this.textBox2.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox2.Location = new System.Drawing.Point(17, 37);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(0);
-            this.textBox2.MaxLength = 100;
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(204, 77);
-            this.textBox2.TabIndex = 145;
-            this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.textBox2.Click += new System.EventHandler(this.textBox2_Click);
-            this.textBox2.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.textBox2_HelpRequested);
-            // 
             // FormABLine
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.ClientSize = new System.Drawing.Size(800, 695);
-            this.Controls.Add(this.panelEditName);
+            this.ClientSize = new System.Drawing.Size(920, 319);
             this.Controls.Add(this.panelPick);
             this.Controls.Add(this.panelName);
             this.Controls.Add(this.panelAPlus);
@@ -574,8 +462,6 @@
             this.panelName.ResumeLayout(false);
             this.panelName.PerformLayout();
             this.panelPick.ResumeLayout(false);
-            this.panelEditName.ResumeLayout(false);
-            this.panelEditName.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -602,13 +488,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnDuplicate;
         private System.Windows.Forms.Button btnEditName;
-        private System.Windows.Forms.Panel panelEditName;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button btnAddTimeEdit;
-        private System.Windows.Forms.Button btnSaveEditName;
-        private System.Windows.Forms.Button btnCancelEditName;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btnSwapAB;
         private System.Windows.Forms.Button btnManual;
     }

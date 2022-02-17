@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using System;
 using System.Collections.Generic;
 
 namespace AgOpenGPS
@@ -52,7 +53,7 @@ namespace AgOpenGPS
 
             GL.Color4(0.30f, 0.93692f, 0.7520f, 0.3);
 
-            if (mf.tram.displayMode == 1 || mf.tram.displayMode == 2)
+            if (displayMode == 1 || displayMode == 2)
             {
                 if (tramList.Count > 0)
                 {
@@ -66,7 +67,7 @@ namespace AgOpenGPS
                 }
             }
 
-            if (mf.tram.displayMode == 1 || mf.tram.displayMode == 3)
+            if (displayMode == 1 || displayMode == 3)
             {
                 if (tramBndOuterArr.Count > 0)
                 {
@@ -76,6 +77,192 @@ namespace AgOpenGPS
                     GL.Begin(PrimitiveType.LineLoop);
                     for (int h = 0; h < tramBndInnerArr.Count; h++) GL.Vertex3(tramBndInnerArr[h].easting, tramBndInnerArr[h].northing, 0);
                     GL.End();
+                }
+            }
+        }
+
+        public void BuildTram(CGuidanceLine currentGuidanceLine, CGuidanceLine currentGuidanceLine2)
+        {
+            BuildTramBnd();
+
+            tramList?.Clear();
+            tramArr?.Clear();
+            List<vec2> tramRef = new List<vec2>();
+
+            bool isBndExist = mf.bnd.bndList.Count != 0;
+
+            double pass = 0.5;
+            double hsin = Math.Sin(currentGuidanceLine.curvePts[0].heading);
+            double hcos = Math.Cos(currentGuidanceLine.curvePts[0].heading);
+
+            //divide up the AB line into segments
+            vec2 P1 = new vec2();
+            for (int i = 0; i < 3200; i += 4)
+            {
+                P1.easting = (hsin * i) + currentGuidanceLine.curvePts[0].easting;
+                P1.northing = (hcos * i) + currentGuidanceLine.curvePts[0].northing;
+                tramRef.Add(P1);
+            }
+
+            //create list of list of points of triangle strip of AB Highlight
+            double headingCalc = currentGuidanceLine.curvePts[0].heading + glm.PIBy2;
+            hsin = Math.Sin(headingCalc);
+            hcos = Math.Cos(headingCalc);
+
+            tramList?.Clear();
+            tramArr?.Clear();
+
+            //no boundary starts on first pass
+            int cntr = 0;
+            if (isBndExist) cntr = 1;
+
+            for (int i = cntr; i < passes; i++)
+            {
+                tramArr = new List<vec2>
+                {
+                    Capacity = 128
+                };
+
+                tramList.Add(tramArr);
+
+                for (int j = 0; j < tramRef.Count; j++)
+                {
+                    P1.easting = (hsin * ((tramWidth * (pass + i)) - halfWheelTrack + mf.tool.halfToolWidth)) + tramRef[j].easting;
+                    P1.northing = (hcos * ((tramWidth * (pass + i)) - halfWheelTrack + mf.tool.halfToolWidth)) + tramRef[j].northing;
+
+                    if (!isBndExist || mf.bnd.bndList[0].fenceLine.points.IsPointInPolygon(P1))
+                    {
+                        tramArr.Add(P1);
+                    }
+                }
+            }
+
+            for (int i = cntr; i < passes; i++)
+            {
+                tramArr = new List<vec2>
+                {
+                    Capacity = 128
+                };
+
+                tramList.Add(tramArr);
+
+                for (int j = 0; j < tramRef.Count; j++)
+                {
+                    P1.easting = (hsin * ((tramWidth * (pass + i)) + halfWheelTrack + mf.tool.halfToolWidth)) + tramRef[j].easting;
+                    P1.northing = (hcos * ((tramWidth * (pass + i)) + halfWheelTrack + mf.tool.halfToolWidth)) + tramRef[j].northing;
+
+                    if (!isBndExist || mf.bnd.bndList[0].fenceLine.points.IsPointInPolygon(P1))
+                    {
+                        tramArr.Add(P1);
+                    }
+                }
+            }
+        }
+
+        public void BuildTram(CGuidanceLine currentGuidanceLine)
+        {
+            BuildTramBnd();
+
+            tramList.Clear();
+            tramArr.Clear();
+
+            bool isBndExist = mf.bnd.bndList.Count != 0;
+
+            double pass = 0.5;
+
+            int refCount = currentGuidanceLine.curvePts.Count;
+
+            int cntr = 0;
+            if (isBndExist) cntr = 1;
+
+            for (int i = cntr; i <= passes; i++)
+            {
+                double distSqAway = (tramWidth * (i + 0.5) - halfWheelTrack + mf.tool.halfToolWidth)
+                        * (tramWidth * (i + 0.5) - halfWheelTrack + mf.tool.halfToolWidth) * 0.999999;
+
+                tramList.Add(tramArr);
+                for (int j = 0; j < refCount; j += 1)
+                {
+                    vec2 point = new vec2(
+                    (Math.Sin(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
+                        ((tramWidth * (pass + i)) - halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].easting,
+                    (Math.Cos(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
+                        ((tramWidth * (pass + i)) - halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].northing);
+
+                    bool Add = true;
+                    for (int t = 0; t < refCount; t++)
+                    {
+                        //distance check to be not too close to ref line
+                        double dist = ((point.easting - currentGuidanceLine.curvePts[t].easting) * (point.easting - currentGuidanceLine.curvePts[t].easting))
+                            + ((point.northing - currentGuidanceLine.curvePts[t].northing) * (point.northing - currentGuidanceLine.curvePts[t].northing));
+                        if (dist < distSqAway)
+                        {
+                            Add = false;
+                            break;
+                        }
+                    }
+                    if (Add)
+                    {
+                        //a new point only every 2 meters
+                        double dist = tramArr.Count > 0 ? ((point.easting - tramArr[tramArr.Count - 1].easting) * (point.easting - tramArr[tramArr.Count - 1].easting))
+                            + ((point.northing - tramArr[tramArr.Count - 1].northing) * (point.northing - tramArr[tramArr.Count - 1].northing)) : 3.0;
+                        if (dist > 2)
+                        {
+                            //if inside the boundary, add
+                            if (!isBndExist || mf.bnd.bndList[0].fenceLine.points.IsPointInPolygon(point))
+                            {
+                                tramArr.Add(point);
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = cntr; i <= passes; i++)
+            {
+                double distSqAway = (tramWidth * (i + 0.5) + halfWheelTrack + mf.tool.halfToolWidth)
+                        * (tramWidth * (i + 0.5) + halfWheelTrack + mf.tool.halfToolWidth) * 0.999999;
+
+                tramArr = new List<vec2>
+                {
+                    Capacity = 128
+                };
+
+                tramList.Add(tramArr);
+                for (int j = 0; j < refCount; j += 1)
+                {
+                    vec2 point = new vec2(
+                    (Math.Sin(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
+                        ((tramWidth * (pass + i)) + halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].easting,
+                    (Math.Cos(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
+                        ((tramWidth * (pass + i)) + halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].northing);
+
+                    bool Add = true;
+                    for (int t = 0; t < refCount; t++)
+                    {
+                        //distance check to be not too close to ref line
+                        double dist = ((point.easting - currentGuidanceLine.curvePts[t].easting) * (point.easting - currentGuidanceLine.curvePts[t].easting))
+                            + ((point.northing - currentGuidanceLine.curvePts[t].northing) * (point.northing - currentGuidanceLine.curvePts[t].northing));
+                        if (dist < distSqAway)
+                        {
+                            Add = false;
+                            break;
+                        }
+                    }
+                    if (Add)
+                    {
+                        //a new point only every 2 meters
+                        double dist = tramArr.Count > 0 ? ((point.easting - tramArr[tramArr.Count - 1].easting) * (point.easting - tramArr[tramArr.Count - 1].easting))
+                            + ((point.northing - tramArr[tramArr.Count - 1].northing) * (point.northing - tramArr[tramArr.Count - 1].northing)) : 3.0;
+                        if (dist > 2)
+                        {
+                            //if inside the boundary, add
+                            if (!isBndExist || mf.bnd.bndList[0].fenceLine.points.IsPointInPolygon(point))
+                            {
+                                tramArr.Add(point);
+                            }
+                        }
+                    }
                 }
             }
         }

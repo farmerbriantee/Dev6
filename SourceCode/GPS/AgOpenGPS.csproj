@@ -121,9 +121,9 @@
     <Compile Include="Classes\CBoundary.cs" />
     <Compile Include="Classes\CGuidance.cs" />
     <Compile Include="Classes\ZStaticClass.cs" />
-	<Compile Include="Classes\CRecordedPath.cs">
+    <Compile Include="Classes\CRecordedPath.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
-	</Compile>
+    </Compile>
     <Compile Include="Classes\CSettings.cs" />
     <Compile Include="Classes\CSound.cs" />
     <Compile Include="Classes\CSunTimes.cs" />
@@ -137,13 +137,10 @@
     <Compile Include="Classes\CFont.cs" />
     <Compile Include="Classes\CSim.cs" />
     <Compile Include="Classes\CTram.cs" />
-	<Compile Include="Classes\CYouTurn.cs">
-      <DependentUpon>CGuidance.cs</DependentUpon>
-	</Compile>
-    <Compile Include="Classes\CFlag.cs" />
-    <Compile Include="Classes\CABLine.cs">
+    <Compile Include="Classes\CYouTurn.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Classes\CFlag.cs" />
     <Compile Include="Classes\CCamera.cs" />
     <Compile Include="Classes\CContour.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>

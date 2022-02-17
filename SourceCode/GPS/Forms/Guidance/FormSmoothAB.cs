@@ -22,14 +22,6 @@ namespace AgOpenGPS
             this.Text = gStr.gsSmoothABCurve;
         }
 
-        private void bntOK_Click(object sender, EventArgs e)
-        {
-            mf.gyd.isSmoothWindowOpen = false;
-            mf.gyd.SaveSmoothAsRefList();
-            mf.gyd.smooList?.Clear();
-            Close();
-        }
-
         private void FormSmoothAB_Load(object sender, EventArgs e)
         {
             mf.gyd.isSmoothWindowOpen = true;
@@ -37,59 +29,122 @@ namespace AgOpenGPS
             lblSmooth.Text = "**";
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            mf.gyd.isSmoothWindowOpen = false;
-            mf.gyd.smooList?.Clear();
-            Close();
-        }
-
         private void btnNorth_MouseDown(object sender, MouseEventArgs e)
         {
-            if (smoothCount++ > 100) smoothCount = 100;
-            mf.gyd.SmoothAB(smoothCount * 2);
+            if (++smoothCount > 100) smoothCount = 100;
+            SmoothAB(smoothCount * 2);
             lblSmooth.Text = smoothCount.ToString();
         }
 
         private void btnSouth_MouseDown(object sender, MouseEventArgs e)
         {
-            smoothCount--;
-            if (smoothCount < 2) smoothCount = 2;
-            mf.gyd.SmoothAB(smoothCount * 2);
+            if (--smoothCount < 2) smoothCount = 2;
+            SmoothAB(smoothCount * 2);
             lblSmooth.Text = smoothCount.ToString();
+        }
+
+        //for calculating for display the averaged new line
+        public void SmoothAB(int smPts)
+        {
+            if (mf.gyd.currentCurveLine != null)
+            {
+                //count the reference list of original curve
+                int cnt = mf.gyd.currentCurveLine.curvePts.Count;
+
+                //just go back if not very long
+                if (cnt < 200) return;
+
+                //the temp array
+                vec3[] arr = new vec3[cnt];
+
+                //read the points before and after the setpoint
+                for (int s = 0; s < smPts / 2; s++)
+                {
+                    arr[s].easting = mf.gyd.currentCurveLine.curvePts[s].easting;
+                    arr[s].northing = mf.gyd.currentCurveLine.curvePts[s].northing;
+                    arr[s].heading = mf.gyd.currentCurveLine.curvePts[s].heading;
+                }
+
+                for (int s = cnt - (smPts / 2); s < cnt; s++)
+                {
+                    arr[s].easting = mf.gyd.currentCurveLine.curvePts[s].easting;
+                    arr[s].northing = mf.gyd.currentCurveLine.curvePts[s].northing;
+                    arr[s].heading = mf.gyd.currentCurveLine.curvePts[s].heading;
+                }
+
+                //average them - center weighted average
+                for (int i = smPts / 2; i < cnt - (smPts / 2); i++)
+                {
+                    for (int j = -smPts / 2; j < smPts / 2; j++)
+                    {
+                        arr[i].easting += mf.gyd.currentCurveLine.curvePts[j + i].easting;
+                        arr[i].northing += mf.gyd.currentCurveLine.curvePts[j + i].northing;
+                    }
+                    arr[i].easting /= smPts;
+                    arr[i].northing /= smPts;
+                    arr[i].heading = mf.gyd.currentCurveLine.curvePts[i].heading;
+                }
+
+                if (arr == null || cnt < 1) return;
+
+                //make a list to draw
+                mf.gyd.EditGuidanceLine = new CGuidanceLine(mf.gyd.currentCurveLine.mode);
+                mf.gyd.EditGuidanceLine.curvePts.AddRange(arr);
+            }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            mf.gyd.isSmoothWindowOpen = false;
-            mf.gyd.SaveSmoothAsRefList();
-            mf.gyd.smooList?.Clear();
+            SaveSmoothAsRefList();
 
-            if (mf.gyd.refList.Count > 0)
+            if (mf.gyd.currentCurveLine != null)
             {
-                //array number is 1 less since it starts at zero
-                int idx = mf.gyd.numCurveLineSelected - 1;
-
-                if (idx >= 0)
+                int idx = mf.gyd.curveArr.FindIndex(x => x.Name == mf.gyd.currentCurveLine.Name);
+                if (idx > -1)
                 {
-                    mf.gyd.curveArr[idx].aveHeading = mf.gyd.aveLineHeading;
-                    mf.gyd.curveArr[idx].curvePts.Clear();
-                    //write out the Curve Points
-                    foreach (vec3 item in mf.gyd.refList)
-                    {
-                        mf.gyd.curveArr[idx].curvePts.Add(item);
-                    }
+                    mf.gyd.curveArr[idx] = new CGuidanceLine(mf.gyd.currentCurveLine);
+
+                    //save entire list
+                    mf.FileSaveCurveLines();
                 }
 
-                //save entire list
-                mf.FileSaveCurveLines();
                 mf.gyd.moveDistance = 0;
-
-                //Close();
             }
 
-            //mf.FileSaveCurveLines();
             Close();
+        }
+
+        private void bntOK_Click(object sender, EventArgs e)
+        {
+            SaveSmoothAsRefList();
+            Close();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        //turning the visual line into the real reference line to use
+        public void SaveSmoothAsRefList()
+        {
+            //oops no smooth list generated
+            if (mf.gyd.EditGuidanceLine != null)
+            {
+                int cnt = mf.gyd.EditGuidanceLine.curvePts.Count;
+                if (cnt > 1)
+                {
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = mf.gyd.EditGuidanceLine;
+
+                    mf.gyd.EditGuidanceLine.curvePts.CalculateHeadings(mf.gyd.EditGuidanceLine.mode.HasFlag(Mode.Boundary));
+                }
+            }
+        }
+
+        private void FormSmoothAB_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            mf.gyd.isSmoothWindowOpen = false;
+            mf.gyd.EditGuidanceLine = null;
         }
     }
 }

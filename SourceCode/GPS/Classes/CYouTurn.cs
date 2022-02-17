@@ -1,5 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AgOpenGPS
@@ -44,13 +43,12 @@ namespace AgOpenGPS
         //Finds the point where an AB Curve crosses the turn line
         public bool FindCurveTurnPoints()
         {
-
             crossingCurvePoint.easting = -20000;
             //find closet AB Curve point that will cross and go out of bounds
             int Count = isHeadingSameWay ? 1 : -1;
             int turnNum = 99;
 
-            for (int j = currentLocationIndex; j > 0 && j < curList.Count; j += Count)
+            for (int j = currentLocationIndexA; j > 0 && j < curList.Count; j += Count)
             {
                 int idx = mf.bnd.IsPointInsideTurnArea(curList[j]);
                 if (idx != 0)
@@ -144,114 +142,9 @@ namespace AgOpenGPS
             }
         }
 
-        ////list of points of collision path avoidance
-        //public List<vec3> mazeList = new List<vec3>();
-
-        //public bool BuildDriveAround()
-        //{
-        //    double headAB = mf.ABLine.abHeading;
-        //    if (!mf.ABLine.isABSameAsVehicleHeading) headAB += Math.PI;
-
-        //    double cosHead = Math.Cos(headAB);
-        //    double sinHead = Math.Sin(headAB);
-
-        //    vec3 start = new vec3();
-        //    vec3 stop = new vec3();
-        //    vec3 pt2 = new vec3();
-
-        //    //grab the pure pursuit point right on ABLine
-        //    vec3 onPurePoint = new vec3(mf.ABLine.rEastAB, mf.ABLine.rNorthAB, 0);
-
-        //    //how far are we from any geoFence
-        //    mf.gf.FindPointsDriveAround(onPurePoint, headAB, ref start, ref stop);
-
-        //    //not an inside border
-        //    if (start.easting == 88888) return false;
-
-        //    //get the dubins path vec3 point coordinates of path
-        //    ytList?.Clear();
-
-        //    //find a path from start to goal - diagnostic, but also used later
-        //    mazeList = mf.mazeGrid.SearchForPath(start, stop);
-
-        //    //you can't get anywhere!
-        //    if (mazeList == null) return false;
-
-        //    //not really changing direction so need to fake a turn twice.
-        //    mf.SwapDirection();
-
-        //    //list of vec3 points of Dubins shortest path between 2 points - To be converted to RecPt
-        //    List<vec3> shortestDubinsList = new List<vec3>();
-
-        //    //Dubins at the start and stop of mazePath
-        //    CDubins.turningRadius = mf.vehicle.minTurningRadius * 1.0;
-        //    CDubins dubPath = new CDubins();
-
-        //    //start is navigateable - maybe
-        //    int cnt = mazeList.Count;
-        //    int cut = 8;
-        //    if (cnt < 18) cut = 3;
-
-        //    if (cnt > 0)
-        //    {
-        //        pt2.easting = start.easting - (sinHead * mf.vehicle.minTurningRadius * 1.5);
-        //        pt2.northing = start.northing - (cosHead * mf.vehicle.minTurningRadius * 1.5);
-        //        pt2.heading = headAB;
-
-        //        shortestDubinsList = dubPath.GenerateDubins(pt2, mazeList[cut - 1], mf.gf);
-        //        for (int i = 1; i < shortestDubinsList.Count; i++)
-        //        {
-        //            vec3 pt = new vec3(shortestDubinsList[i].easting, shortestDubinsList[i].northing, shortestDubinsList[i].heading);
-        //            ytList.Add(pt);
-        //        }
-
-        //        for (int i = cut; i < mazeList.Count - cut; i++)
-        //        {
-        //            vec3 pt = new vec3(mazeList[i].easting, mazeList[i].northing, mazeList[i].heading);
-        //            ytList.Add(pt);
-        //        }
-
-        //        pt2.easting = stop.easting + (sinHead * mf.vehicle.minTurningRadius * 1.5);
-        //        pt2.northing = stop.northing + (cosHead * mf.vehicle.minTurningRadius * 1.5);
-        //        pt2.heading = headAB;
-
-        //        shortestDubinsList = dubPath.GenerateDubins(mazeList[cnt - cut], pt2, mf.gf);
-
-        //        for (int i = 1; i < shortestDubinsList.Count; i++)
-        //        {
-        //            vec3 pt = new vec3(shortestDubinsList[i].easting, shortestDubinsList[i].northing, shortestDubinsList[i].heading);
-        //            ytList.Add(pt);
-        //        }
-        //    }
-
-        //    if (ytList.Count > 10) youTurnPhase = 3;
-
-        //    vec3 pt3 = new vec3();
-
-        //    for (int a = 0; a < youTurnStartOffset; a++)
-        //    {
-        //        pt3.easting = ytList[0].easting - sinHead;
-        //        pt3.northing = ytList[0].northing - cosHead;
-        //        pt3.heading = headAB;
-        //        ytList.Insert(0, pt3);
-        //    }
-
-        //    int count = ytList.Count;
-
-        //    for (int i = 1; i <= youTurnStartOffset; i++)
-        //    {
-        //        pt3.easting = ytList[count - 1].easting + (sinHead * i);
-        //        pt3.northing = ytList[count - 1].northing + (cosHead * i);
-        //        pt3.heading = headAB;
-        //        ytList.Add(pt3);
-        //    }
-
-        //    return true;
-        //}
-
         public bool BuildABLineDubinsYouTurn(bool isTurnRight)
         {
-            double headAB = abHeading;
+            double headAB = currentGuidanceLine.curvePts[0].heading;
             if (!isHeadingSameWay) headAB += Math.PI;
 
             if (youTurnPhase == 0)
@@ -319,7 +212,7 @@ namespace AgOpenGPS
                 CDubins.turningRadius = mf.vehicle.minTurningRadius;
 
                 //point on AB line closest to pivot axle point from ABLine PurePursuit
-                double head = abHeading;
+                double head = currentGuidanceLine.curvePts[0].heading;
 
                 //grab the vehicle widths and offsets
                 double turnOffset = (mf.tool.toolWidth - mf.tool.toolOverlap) * rowSkipsWidth + (isYouTurnRight ? -mf.tool.toolOffset * 2.0 : mf.tool.toolOffset * 2.0);
@@ -818,19 +711,7 @@ namespace AgOpenGPS
             }
             else isYouTurnRight = !isYouTurnRight;
 
-            mf.guidanceLookPos.easting = ytList[ytList.Count - 1].easting;
-            mf.guidanceLookPos.northing = ytList[ytList.Count - 1].northing;
-
-            if (isABLineSet)
-            {
-                isLateralTriggered = true;
-                isABValid = false;
-            }
-            else
-            {
-                isLateralTriggered = true;
-                isCurveValid = false;
-            }
+            isValid = false;
         }
 
         //Normal copmpletion of youturn
@@ -868,135 +749,74 @@ namespace AgOpenGPS
 
         public void BuildManualYouLateral(bool isTurnRight)
         {
-            if (isABLineSet || isCurveSet)
-            {
-                double head = CurrentHeading;
-
-                isLateralTriggered = true;
-
-                //grab the vehicle widths and offsets
-                double turnOffset = (mf.tool.toolWidth - mf.tool.toolOverlap); //remove rowSkips
-
-                //if its straight across it makes 2 loops instead so goal is a little lower then start
-                if (!isHeadingSameWay) head += Math.PI;
-
-                //move the start forward 2 meters, this point is critical to formation of uturn
-                rEast += (Math.Sin(head) * 2);
-                rNorth += (Math.Cos(head) * 2);
-
-                if (isTurnRight)
-                {
-                    mf.guidanceLookPos.easting = rEast + (Math.Cos(-head) * turnOffset);
-                    mf.guidanceLookPos.northing = rNorth + (Math.Sin(-head) * turnOffset);
-                }
-                else
-                {
-                    mf.guidanceLookPos.easting = rEast - (Math.Cos(-head) * turnOffset);
-                    mf.guidanceLookPos.northing = rNorth - (Math.Sin(-head) * turnOffset);
-                }
-
-                isABValid = false;
-                isCurveValid = false;
-            }
+            if (isHeadingSameWay == isTurnRight)
+                howManyPathsAway += 1;
+            else
+                howManyPathsAway -= 1;
         }
 
         //build the points and path of youturn to be scaled and transformed
         public void BuildManualYouTurn(bool isTurnRight, bool isTurnButtonTriggered)
         {
-            if (isABLineSet || isCurveSet)
-            {
-                double head = CurrentHeading;
-                isLateralTriggered = true;
+            isYouTurnTriggered = true;
 
-                //grab the vehicle widths and offsets
-                double turnOffset = (mf.tool.toolWidth - mf.tool.toolOverlap) * rowSkipsWidth + (isTurnRight ? mf.tool.toolOffset * 2.0 : -mf.tool.toolOffset * 2.0);
-
-                CDubins dubYouTurnPath = new CDubins();
-                CDubins.turningRadius = mf.vehicle.minTurningRadius;
-
-                //if its straight across it makes 2 loops instead so goal is a little lower then start
-                if (!isHeadingSameWay) head += 3.14;
-                else head -= 0.01;
-
-                //move the start forward 2 meters, this point is critical to formation of uturn
-                rEast += (Math.Sin(head) * 4);
-                rNorth += (Math.Cos(head) * 4);
-
-                //now we have our start point
-                vec3 start = new vec3(rEast, rNorth, head);
-                vec3 goal = new vec3();
-
-                //now we go the other way to turn round
-                head -= Math.PI;
-                if (head < 0) head += glm.twoPI;
-
-                //set up the goal point for Dubins
-                goal.heading = head;
-                if (isTurnButtonTriggered)
-                {
-                    if (isTurnRight)
-                    {
-                        goal.easting = rEast - (Math.Cos(-head) * turnOffset);
-                        goal.northing = rNorth - (Math.Sin(-head) * turnOffset);
-                    }
-                    else
-                    {
-                        goal.easting = rEast + (Math.Cos(-head) * turnOffset);
-                        goal.northing = rNorth + (Math.Sin(-head) * turnOffset);
-                    }
-                }
-
-                //generate the turn points
-                ytList = dubYouTurnPath.GenerateDubins(start, goal);
-
-                mf.guidanceLookPos.easting = ytList[ytList.Count - 1].easting;
-                mf.guidanceLookPos.northing = ytList[ytList.Count - 1].northing;
-
-                //vec3 pt;
-                //for (double a = 0; a < 2; a += 0.2)
-                //{
-                //    pt.easting = ytList[0].easting + (Math.Sin(head) * a);
-                //    pt.northing = ytList[0].northing + (Math.Cos(head) * a);
-                //    pt.heading = ytList[0].heading;
-                //    ytList.Insert(0, pt);
-                //}
-
-                //int count = ytList.Count;
-
-                //for (double i = 0.2; i <= 7; i += 0.2)
-                //{
-                //    pt.easting = ytList[count - 1].easting + (Math.Sin(head) * i);
-                //    pt.northing = ytList[count - 1].northing + (Math.Cos(head) * i);
-                //    pt.heading = head;
-                //    ytList.Add(pt);
-                //}
-
-
-                isABValid = false;
-                isCurveValid = false;
-            }
-        }
-
-        //Duh.... What does this do....
-        public void DrawYouTurn()
-        {
-            int ptCount = ytList.Count;
-            if (ptCount < 3) return;
-            GL.PointSize(lineWidth);
-
-            if (isYouTurnTriggered)
-                GL.Color3(0.95f, 0.5f, 0.95f);
-            else if (isOutOfBounds)
-                GL.Color3(0.9495f, 0.395f, 0.325f);
+            if (isHeadingSameWay == isTurnRight)
+                howManyPathsAway += rowSkipsWidth;
             else
-                GL.Color3(0.395f, 0.925f, 0.30f);
+                howManyPathsAway -= rowSkipsWidth;
 
-            GL.Begin(PrimitiveType.Points);
-            for (int i = 0; i < ptCount; i++)
+            if (curList.Count < 2) return;
+
+            double rEastYT = rEast;
+            double rNorthYT = rNorth;
+
+            //get the distance from currently active AB line
+            double Dx = curList[currentLocationIndexB].northing - curList[currentLocationIndexA].northing;
+            double Dy = curList[currentLocationIndexB].easting - curList[currentLocationIndexA].easting;
+
+            if (Math.Abs(Dy) < double.Epsilon && Math.Abs(Dx) < double.Epsilon) return;
+
+            double Heading = Math.Atan2(Dy, Dx);
+
+            isHeadingSameWay = !isHeadingSameWay;
+
+            //grab the vehicle widths and offsets
+            double turnOffset = (mf.tool.toolWidth - mf.tool.toolOverlap) * rowSkipsWidth + (isTurnRight ? mf.tool.toolOffset * 2.0 : -mf.tool.toolOffset * 2.0);
+
+            CDubins dubYouTurnPath = new CDubins();
+            CDubins.turningRadius = mf.vehicle.minTurningRadius;
+
+            //if its straight across it makes 2 loops instead so goal is a little lower then start
+            if (isHeadingSameWay) Heading += 3.14;
+            else Heading -= 0.01;
+
+            //move the start forward 2 meters, this point is critical to formation of uturn
+            rEastYT += (Math.Sin(Heading) * 4.0);
+            rNorthYT += (Math.Cos(Heading) * 4.0);
+
+            //now we have our start point
+            var start = new vec3(rEastYT, rNorthYT, Heading);
+            var goal = new vec3(0, 0, 0);
+
+            //now we go the other way to turn round
+            Heading -= Math.PI;
+            if (Heading < 0) Heading += glm.twoPI;
+
+            //set up the goal point for Dubins
+            goal.heading = Heading;
+            if (isTurnRight)
             {
-                GL.Vertex3(ytList[i].easting, ytList[i].northing, 0);
+                goal.easting = rEastYT - (Math.Cos(-Heading) * turnOffset);
+                goal.northing = rNorthYT - (Math.Sin(-Heading) * turnOffset);
             }
-            GL.End();
+            else
+            {
+                goal.easting = rEastYT + (Math.Cos(-Heading) * turnOffset);
+                goal.northing = rNorthYT + (Math.Sin(-Heading) * turnOffset);
+            }
+
+            //generate the turn points
+            ytList = dubYouTurnPath.GenerateDubins(start, goal);
         }
     }
 }

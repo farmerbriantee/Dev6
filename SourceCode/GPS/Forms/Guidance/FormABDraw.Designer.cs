@@ -218,7 +218,7 @@
             this.tboxNameCurve.TabIndex = 10;
             this.tboxNameCurve.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tboxNameCurve.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.tboxNameCurve_HelpRequested);
-            this.tboxNameCurve.Enter += new System.EventHandler(this.tboxNameCurve_Enter);
+            this.tboxNameCurve.Click += new System.EventHandler(this.tboxNameCurve_Click);
             this.tboxNameCurve.Leave += new System.EventHandler(this.tboxNameCurve_Leave);
             // 
             // tboxNameLine
@@ -234,7 +234,7 @@
             this.tboxNameLine.TabIndex = 9;
             this.tboxNameLine.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tboxNameLine.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.tboxNameLine_HelpRequested);
-            this.tboxNameLine.Enter += new System.EventHandler(this.tboxNameLine_Enter);
+            this.tboxNameLine.Click += new System.EventHandler(this.tboxNameLine_Click);
             this.tboxNameLine.Leave += new System.EventHandler(this.tboxNameLine_Leave);
             // 
             // label4

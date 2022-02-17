@@ -914,7 +914,6 @@ namespace AgOpenGPS
             btnCycleLines.Image = Properties.Resources.ABLineCycle;
             btnCycleLines.Enabled = true;
 
-            gyd.abHeading = 0.00;
             btnAutoSteer.Enabled = true;
 
             DisableYouTurnButtons();
@@ -1042,26 +1041,28 @@ namespace AgOpenGPS
             //clear the flags
             flagPts.Clear();
 
+            gyd.currentGuidanceLine = null;
+            gyd.currentCurveLine = null;
+            gyd.currentABLine = null;
+
+            gyd.howManyPathsAway = 0.0;
+
+            gyd.curveArr.Clear();
+            gyd.recList?.Clear();
+
             //ABLine
             btnABLine.Enabled = false;
             btnABLine.Image = Properties.Resources.ABLineOff;
             gyd.isBtnABLineOn = false;
-            gyd.DeleteAB();
-            gyd.lineArr?.Clear();
-            gyd.numABLineSelected = 0;
-            tram.tramList?.Clear();
 
             //curve line
             btnCurve.Enabled = false;
             btnCurve.Image = Properties.Resources.CurveOff;
             gyd.isBtnCurveOn = false;
-            gyd.isCurveSet = false;
-            gyd.ResetCurveLine();
-            gyd.curveArr?.Clear();
-            gyd.numCurveLineSelected = 0;
 
             //clean up tram
             tram.displayMode = 0;
+            tram.tramList?.Clear();
             tram.tramBndInnerArr?.Clear();
             tram.tramBndOuterArr?.Clear();
 
@@ -1072,7 +1073,6 @@ namespace AgOpenGPS
             gyd.ResetContour();
             gyd.isContourBtnOn = false;
             btnContour.Image = Properties.Resources.ContourOff;
-            gyd.isContourOn = false;
 
             btnCycleLines.Image = Properties.Resources.ABLineCycle;
             btnCycleLines.Enabled = false;
@@ -1100,10 +1100,6 @@ namespace AgOpenGPS
 
             displayFieldName = gStr.gsNone;
             FixTramModeButton();
-
-            gyd.recList?.Clear();
-            gyd.shortestDubinsList?.Clear();
-            gyd.shuttleDubinsList?.Clear();
 
             FixPanelsAndMenus();
             SetZoom();
@@ -1197,7 +1193,7 @@ namespace AgOpenGPS
         private void FileSaveEverythingBeforeClosingField()
         {
             //turn off contour line if on
-            if (gyd.isContourOn) gyd.StopContourLine(pivotAxlePos);
+            gyd.StopContourLine();
 
             //turn off all the sections
             for (int j = 0; j < tool.numOfSections + 1; j++)

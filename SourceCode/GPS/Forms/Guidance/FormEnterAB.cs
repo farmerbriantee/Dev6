@@ -9,7 +9,7 @@ namespace AgOpenGPS
         private readonly FormGPS mf = null;
 
         private bool isAB = true;
-
+        public string headingText = string.Empty;
         public FormEnterAB(Form callingForm)
         {
             //get copy of the calling main form
@@ -33,7 +33,8 @@ namespace AgOpenGPS
         private void FormEnterAB_Load(object sender, EventArgs e)
         {
             btnEnterManual.Focus();
-            textBox1.Text = "Create A New Line";
+            headingText = textBox1.Text = "Create A New Line";
+
         }
 
         private void nudHeading_Click(object sender, EventArgs e)
@@ -101,45 +102,58 @@ namespace AgOpenGPS
 
         private void btnEnterManual_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text == "Create A New Line") this.DialogResult = DialogResult.Cancel;
+            if (textBox1.Text == "Create A New Line")
+                this.DialogResult = DialogResult.Cancel;
             Close();
         }
 
         public void CalcHeading()
         {
-            double east, nort;
-
-            if (isAB)
+            if (mf.gyd.EditGuidanceLine != null)
             {
-                mf.pn.ConvertWGS84ToLocal((double)nudLatitude.Value, (double)nudLongitude.Value, out nort, out east);
+                mf.pn.ConvertWGS84ToLocal((double)nudLatitude.Value, (double)nudLongitude.Value, out double nort, out double east);
+                double heading;
+                double nort2, east2;
 
-                mf.gyd.desPoint1.easting = east;
-                mf.gyd.desPoint1.northing = nort;
+                if (isAB)
+                {
+                    mf.pn.ConvertWGS84ToLocal((double)nudLatitudeB.Value, (double)nudLongitudeB.Value, out nort2, out east2);
 
-                mf.pn.ConvertWGS84ToLocal((double)nudLatitudeB.Value, (double)nudLongitudeB.Value, out nort, out east);
-                mf.gyd.desPoint2.easting = east;
-                mf.gyd.desPoint2.northing = nort;
+                    // heading based on AB points
+                    heading = Math.Atan2(east2 - east, nort2 - nort);
+                    if (heading < 0) heading += glm.twoPI;
 
-                // heading based on AB points
-                mf.gyd.desHeading = Math.Atan2(mf.gyd.desPoint2.easting - mf.gyd.desPoint1.easting,
-                    mf.gyd.desPoint2.northing - mf.gyd.desPoint1.northing);
-                if (mf.gyd.desHeading < 0) mf.gyd.desHeading += glm.twoPI;
+                    nudHeading.Value = (decimal)(glm.toDegrees(heading));
+                }
+                else
+                {
+                    heading = glm.toRadians((double)nudHeading.Value);
+                    nort2 = nort + Math.Cos(heading);
+                    east2 = east + Math.Sin(heading);
+                }
 
-                nudHeading.Value = (decimal)(glm.toDegrees(mf.gyd.desHeading));
+                if (mf.gyd.EditGuidanceLine.curvePts.Count > 1)
+                {
+                    mf.gyd.EditGuidanceLine.curvePts[0] = new vec3(east, nort, heading);
+                    mf.gyd.EditGuidanceLine.curvePts[1] = new vec3(east2, nort2, heading);
+                }
+                else if (mf.gyd.EditGuidanceLine.curvePts.Count > 0)
+                {
+                    mf.gyd.EditGuidanceLine.curvePts[0] = new vec3(east, nort, heading);
+                    mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(east2, nort2, heading));
+                }
+                else
+                {
+                    mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(east, nort, heading));
+                    mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(east2, nort2, heading));
+                }
+
+                headingText = textBox1.Text = "Manual AB " +
+                    (Math.Round(glm.toDegrees(heading), 1)).ToString(CultureInfo.InvariantCulture) +
+                    "\u00B0 " + mf.FindDirection(heading);
+
+                if (textBox1.Text != "Create A New Line") btnEnterManual.Enabled = true;
             }
-            else
-            {
-                mf.pn.ConvertWGS84ToLocal((double)nudLatitude.Value, (double)nudLongitude.Value, out nort, out east);
-
-                mf.gyd.desHeading = glm.toRadians((double)nudHeading.Value);
-                mf.gyd.desPoint1.easting = east;
-                mf.gyd.desPoint1.northing = nort;
-            }
-
-            textBox1.Text = "Manual AB " +
-                (Math.Round(glm.toDegrees(mf.gyd.desHeading), 1)).ToString(CultureInfo.InvariantCulture) +
-                "\u00B0 " + mf.FindDirection(mf.gyd.desHeading);
-            if (textBox1.Text != "Create A New Line") btnEnterManual.Enabled = true;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
