@@ -10,24 +10,21 @@ namespace AgOpenGPS
     public partial class FormGPS
     {
         //extracted Near, Far, Right, Left clipping planes of frustum
-        public double[] frustum = new double[24];
+        private double[] frustum = new double[24];
 
-        private static double fovy = 0.7;
-        private static double camDistanceFactor = -4;
+        private const double fovy = 0.7, camDistanceFactor = -4;
 
-        int mouseX = 0, mouseY = 0;
+        private int mouseX = 0, mouseY = 0;
         private int zoomUpdateCounter = 0;
         private int steerModuleConnectedCounter = 0;
 
-        public bool isTramOnBackBuffer = false;
-
         //data buffer for pixels read from off screen buffer
-        byte[] grnPixels = new byte[150001];
-
+        private byte[] grnPixels = new byte[150001];
         private bool isFastSections = false;
-        private int bbCounter = 0;
-
+        private int bbCounter = 0, deadCam = 0;
         private double maxFieldX, maxFieldY, minFieldX, minFieldY, avgPivDistance;
+
+        public bool isTramOnBackBuffer = false;
         public double fieldCenterX, fieldCenterY, maxFieldDistance, maxCrossFieldLength;
 
         // When oglMain is created
@@ -55,11 +52,6 @@ namespace AgOpenGPS
             GL.MatrixMode(MatrixMode.Modelview);
         }
 
-        //oglMain rendering, Draw
-
-        int deadCam = 0;
-
-        StringBuilder sb = new StringBuilder();
         private void oglMain_Paint(object sender, PaintEventArgs e)
         {
             if (sentenceCounter > 299)
@@ -73,12 +65,6 @@ namespace AgOpenGPS
 
                 //match grid to cam distance and redo perspective
                 oglMain.MakeCurrent();
-                //GL.MatrixMode(MatrixMode.Projection);
-                //GL.LoadIdentity();
-                //Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView(0.7f, oglMain.AspectRatio, 1f, 100);
-                //GL.LoadMatrix(ref mat);
-                //GL.MatrixMode(MatrixMode.Modelview);
-
 
                 GL.Translate(0.0, 0.0, -10);
                 //rotate the camera down to look at fix
@@ -165,14 +151,8 @@ namespace AgOpenGPS
 
                     //the bounding box of the camera for cullling.
                     CalcFrustum();
+
                     worldGrid.DrawFieldSurface();
-
-                    ////if grid is on draw it
-                    if (isGridOn) worldGrid.DrawWorldGrid(camera.gridZoom);
-
-                    //section patch color
-                    //if (isDay) GL.Color4(sectionColorDay.R, sectionColorDay.G, sectionColorDay.B, (byte)152);
-                    //else GL.Color4(sectionColorNight.R, sectionColorNight.G, sectionColorNight.B, (byte)152);
 
                     if (isDrawPolygons) GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
 
@@ -248,36 +228,28 @@ namespace AgOpenGPS
                                 }
                             }
                         }
-                    }
 
-                    // the follow up to sections patches
-                    if (autoBtnState != btnStates.Off)
-                    {
-                        for (int j = 0; j < tool.numSuperSection; j++)
+                        if (section[j].isMappingOn && section[j].triangleList.Count > 0)
                         {
-                            if (section[j].isMappingOn && section[j].triangleList.Count > 0)
-                            {
-                                GL.Color4((byte)section[j].triangleList[0].easting, (byte)section[j].triangleList[0].northing, (byte)section[j].triangleList[0].heading, (byte)(isDay ? 152 : 76));
+                            GL.Color4((byte)section[j].triangleList[0].easting, (byte)section[j].triangleList[0].northing, (byte)section[j].triangleList[0].heading, (byte)(isDay ? 152 : 76));
 
-                                //draw the triangle in each triangle strip
-                                GL.Begin(PrimitiveType.TriangleStrip);
+                            //draw the triangle in each triangle strip
+                            GL.Begin(PrimitiveType.TriangleStrip);
 
+                            for (int i = 1; i < section[j].triangleList.Count; i++) GL.Vertex3(section[j].triangleList[i].easting, section[j].triangleList[i].northing, 0);
 
-                                for (int i = 1; i < section[j].triangleList.Count; i++) GL.Vertex3(section[j].triangleList[i].easting, section[j].triangleList[i].northing, 0);
+                            //left side of triangle
+                            vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
+                                    (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
 
-                                //left side of triangle
-                                vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
-                                        (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
+                            GL.Vertex3(pt.easting, pt.northing, 0);
 
-                                GL.Vertex3(pt.easting, pt.northing, 0);
+                            //Right side of triangle
+                            pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
+                               (sinSectionHeading * section[j].positionRight) + toolPos.northing);
 
-                                //Right side of triangle
-                                pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
-                                   (sinSectionHeading * section[j].positionRight) + toolPos.northing);
-
-                                GL.Vertex3(pt.easting, pt.northing, 0);
-                                GL.End();
-                            }
+                            GL.Vertex3(pt.easting, pt.northing, 0);
+                            GL.End();
                         }
                     }
 
@@ -286,18 +258,7 @@ namespace AgOpenGPS
                     GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
                     GL.Color3(1, 1, 1);
 
-                    //draw contour line if button on 
-                    if (gyd.isContourBtnOn)
-                    {
-                        gyd.DrawContourLine();
-                    }
-                    else
-                        gyd.DrawCurve();
-
-                    if (panelDrag.Visible)
-                        gyd.DrawRecordedLine();
-
-                    if (bnd.bndList.Count > 0 || bnd.isBndBeingMade == true)
+                    if (bnd.bndList.Count > 0)
                     {
                         //draw Boundaries
                         bnd.DrawFenceLines();
@@ -318,20 +279,45 @@ namespace AgOpenGPS
                         if (bnd.isHeadlandOn)
                         {
                             GL.Color3(0.960f, 0.96232f, 0.30f);
-                                bnd.bndList[0].hdLine.DrawPolyLine(DrawType.LineLoop);
+                            //There is only 1 headland for now. 
+                            //for (int i = 0; i < bnd.bndList.Count; i++)
+                            bnd.bndList[0].hdLine.DrawPolyLine(DrawType.LineLoop);
                         }
+                    }
 
-                        //There is only 1 headland for now. 
+                    //draw contour line if button on
+                    gyd.DrawGuidanceLines();
 
-                        //if (bnd.isHeadlandOn)
-                        //{
-                        //    GL.Color3(0.960f, 0.96232f, 0.30f);
-                        //    for (int i = 0; i < bnd.bndList.Count; i++)
-                        //    {
-                        //        bnd.bndList[i].hdLine.DrawPolygon();
-                        //    }
-                        //}
+                    if (bnd.isBndBeingMade && bnd.bndBeingMadePts.Count > 0)
+                    {
+                        //the boundary so far
+                        GL.Color3(0.825f, 0.22f, 0.90f);
+                        GL.Begin(PrimitiveType.LineStrip);
+                        for (int h = 0; h < bnd.bndBeingMadePts.Count; h++) GL.Vertex3(bnd.bndBeingMadePts[h].easting, bnd.bndBeingMadePts[h].northing, 0);
+                        GL.Color3(0.295f, 0.972f, 0.290f);
+                        GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
+                        GL.End();
 
+                        //line from last point to pivot marker
+                        GL.Color3(0.825f, 0.842f, 0.0f);
+                        GL.Enable(EnableCap.LineStipple);
+                        GL.LineStipple(1, 0x0700);
+                        GL.Begin(PrimitiveType.LineStrip);
+
+                        GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
+                        GL.Vertex3(pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)),
+                                  pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)), 0);
+                        GL.Vertex3(bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].easting, bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].northing, 0);
+
+                        GL.End();
+                        GL.Disable(EnableCap.LineStipple);
+
+                        //boundary points
+                        GL.Color3(0.0f, 0.95f, 0.95f);
+                        GL.PointSize(6.0f);
+                        GL.Begin(PrimitiveType.Points);
+                        for (int h = 0; h < bnd.bndBeingMadePts.Count; h++) GL.Vertex3(bnd.bndBeingMadePts[h].easting, bnd.bndBeingMadePts[h].northing, 0);
+                        GL.End();
                     }
 
                     if (flagPts.Count > 0) DrawFlags();
@@ -354,17 +340,6 @@ namespace AgOpenGPS
                     }
                     catch { }
 
-                    //if (flagDubinsList.Count > 1)
-                    //{
-                    //    //GL.LineWidth(2);
-                    //    GL.PointSize(2);
-                    //    GL.Color3(0.298f, 0.96f, 0.2960f);
-                    //    GL.Begin(PrimitiveType.Points);
-                    //    for (int h = 0; h < flagDubinsList.Count; h++)
-                    //        GL.Vertex3(flagDubinsList[h].easting, flagDubinsList[h].northing, 0);
-                    //    GL.End();
-                    //}
-
                     //draw the vehicle/implement
                     tool.DrawTool();
                     vehicle.DrawVehicle();
@@ -383,15 +358,14 @@ namespace AgOpenGPS
                     GL.PushMatrix();
                     GL.LoadIdentity();
 
-                    if (isSkyOn) DrawSky();
+                    if (isSkyOn)
+                        DrawSky();
 
                     //LightBar if AB Line is set and turned on or contour
                     if (isLightbarOn)
-                    {
                         DrawLightBarText();
-                    }
 
-                    if ((ahrs.imuRoll != 88888))
+                    if (ahrs.imuRoll != 88888)
                         DrawRollBar();
 
                     if (bnd.bndList.Count > 0 && gyd.isYouTurnBtnOn) DrawUTurnBtn();
@@ -466,11 +440,7 @@ namespace AgOpenGPS
             GL.Enable(EnableCap.Blend);
             GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
             GL.ClearColor((byte)0, (byte)0, (byte)0, (byte)255);
-        }
 
-        private void oglBack_Resize(object sender, EventArgs e)
-        {
-            oglBack.MakeCurrent();
             GL.Viewport(0, 0, 500, 300);
             Matrix4 projection = Matrix4.CreateOrthographicOffCenter(-25.0f, 25.0f, -1.0f, 29.0f, -1000.0f, 1000.0f);
 
@@ -538,13 +508,12 @@ namespace AgOpenGPS
                         int tagged2 = 0;
                         int totalPixs = 0;
 
-
                         for (int pos = start; pos < end; pos++)
                         {
                             int StartHeight = (int)Math.Round((tool.lookAheadDistanceOffPixelsLeft - (rpHeight2 + 1)) + (mOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
                             int StopHeight = (int)Math.Round((tool.lookAheadDistanceOnPixelsLeft - rpHeight2) + (mOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
                             int StopHydHeight = (int)Math.Round((vehicle.hydLiftLookAheadDistanceLeft - rpHeight2) + (mHyd * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
-
+                            int tagged3 = 0;
                             for (int a = isToolInHeadland ? pos : StartHeight; a <= StopHeight || (isToolInHeadland && a <= StopHydHeight); a += tool.rpWidth)
                             {
                                 if (a >= 0 && a < grnPixelsLength)
@@ -554,7 +523,10 @@ namespace AgOpenGPS
                                     {
                                         totalPixs++;
                                         if (bnd.bndList.Count == 0 ? grnPixels[a] == 252 : (grnPixels[a] == 250 || grnPixels[a] == 245 || grnPixels[a] == 240 || grnPixels[a] == 235))
-                                            ++tagged;
+                                        {
+                                            if (tagged3++ < 2)
+                                                ++tagged;
+                                        }
                                         else if (Procent5 == 2 || Procent5 == 1)//when outside fence dont wait for sectionOverlapTimer
                                             ++tagged2;
                                     }
@@ -573,9 +545,9 @@ namespace AgOpenGPS
                             if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
                         }
                         else if (section[j].sectionOnRequest)
-                            section[j].sectionOnRequest = tagged > 0 && (tagged * 100.0) / totalPixs >= 100.0 - tool.minCoverage;
+                            section[j].sectionOnRequest = tagged > 0 && (tagged * 100.0) / section[j].rpSectionWidth >= 200.0 - tool.minCoverage * 2;
                         else
-                            section[j].sectionOnRequest = tagged > 1 && (tagged * 100.0) / totalPixs >= 100.0 - tool.minCoverage;
+                            section[j].sectionOnRequest = tagged > 1 && (tagged * 100.0) / section[j].rpSectionWidth >= 200.0 - tool.minCoverage * 2;
 
                         isSuperSectionAllowedOn &= (section[j].mappingOnTimer < 2 && (section[j].mappingOffTimer > 1 || section[j].sectionOverlapTimer + section[j].mappingOffTimer > (section[j].sectionOnRequest ? 1 : 2))) || (section[j].sectionOnRequest && (section[j].isMappingOn || section[j].mappingOnTimer == 1 || HzTime * tool.lookAheadOnSetting < 1));
                     }
@@ -1208,7 +1180,7 @@ namespace AgOpenGPS
 
             int two3 = oglMain.Width / 5;
             GL.Begin(PrimitiveType.Quads);              // Build Quad From A Triangle Strip
-            if (!gyd.isYouTurnRight)
+            if (gyd.isYouTurnRight)
             {
                 GL.TexCoord2(0, 0); GL.Vertex2(-62 + two3, 40); // 
                 GL.TexCoord2(1, 0); GL.Vertex2(62 + two3, 40); // 
@@ -2086,30 +2058,11 @@ namespace AgOpenGPS
             }
 
             fd.UpdateFieldBoundaryGUIAreas();
-
-
-            //minFieldX -= 8;
-            //minFieldY -= 8;
-            //maxFieldX += 8;
-            //maxFieldY += 8;
-
-            //if (isMetric)
-            //{
-            //    lblFieldWidthEastWest.Text = Math.Abs((maxFieldX - minFieldX)).ToString("N0") + " m";
-            //    lblFieldWidthNorthSouth.Text = Math.Abs((maxFieldY - minFieldY)).ToString("N0") + " m";
-            //}
-            //else
-            //{
-            //    lblFieldWidthEastWest.Text = Math.Abs((maxFieldX - minFieldX) * glm.m2ft).ToString("N0") + " ft";
-            //    lblFieldWidthNorthSouth.Text = Math.Abs((maxFieldY - minFieldY) * glm.m2ft).ToString("N0") + " ft";
-            //}
-
-            //lblZooom.Text = ((int)(maxFieldDistance)).ToString();
-
         }
 
         private void DrawFieldText()
         {
+            StringBuilder sb = new StringBuilder();
             if (isMetric)
             {
                 if (bnd.bndList.Count > 0)
@@ -2173,80 +2126,5 @@ namespace AgOpenGPS
                 }
             }
         }
-
-        //else
-        //{
-        //    GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
-        //    GL.LoadIdentity();
-
-        //    //back the camera up
-        //    GL.CullFace(CullFaceMode.Front);
-        //    GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-        //    GL.Enable(EnableCap.Blend);
-
-        //    GL.Translate(0, 0,-250);
-        //    GL.Enable(EnableCap.Texture2D);
-
-        //    GL.BindTexture(TextureTarget.Texture2D, texture[7]);        // Select Our Texture
-        //    GL.Color4(0.952f, 0.70f, 0.23f, 0.6);
-
-        //    GL.Begin(PrimitiveType.Quads);              // Build Quad From A Triangle Strip
-        //    {
-        //        GL.TexCoord2(0, 0);
-        //        GL.Vertex2(-128, 128);
-
-        //        GL.TexCoord2(1, 0);
-        //        GL.Vertex2(128, 128);
-
-        //        GL.TexCoord2(1, 1);
-        //        GL.Vertex2(128, -128);
-
-        //        GL.TexCoord2(0, 1);
-        //        GL.Vertex2(-128, -128);
-        //    }
-        //    GL.End();
-
-        //    GL.BindTexture(TextureTarget.Texture2D, texture[8]);        // Select Our Texture
-        //    double angle = 0;
-        //    if (isMetric)
-        //    {
-        //        double aveSpd = 0;
-        //        for (int c = 0; c < 10; c++) aveSpd += avgSpeed[c];
-        //        aveSpd *= 0.1;
-        //        if (aveSpd > 20) aveSpd = 20;
-        //        angle = (aveSpd - 10) * -15;
-        //    }
-        //    else
-        //    {
-        //        double aveSpd = 0;
-        //        for (int c = 0; c < 10; c++) aveSpd += avgSpeed[c];
-        //        aveSpd *= 0.0621371;
-        //        angle = (aveSpd - 10) * -15;
-        //        if (aveSpd > 20) aveSpd = 20;
-        //    }
-
-        //    GL.Color3(0.952f, 0.70f, 0.23f);
-
-        //    GL.Rotate(angle, 0, 0, 1);
-        //    GL.Begin(PrimitiveType.Quads);              // Build Quad From A Triangle Strip
-        //    {
-        //        GL.TexCoord2(0, 0);
-        //        GL.Vertex2(-80, 80);
-
-        //        GL.TexCoord2(1, 0);
-        //        GL.Vertex2(80, 80);
-
-        //        GL.TexCoord2(1, 1);
-        //        GL.Vertex2(80, -80);
-
-        //        GL.TexCoord2(0, 1);
-        //        GL.Vertex2(-80, -80);
-        //    }
-        //    GL.End();
-
-        //    GL.Disable(EnableCap.Texture2D);
-        //    GL.CullFace(CullFaceMode.Back);
-        //    GL.Disable(EnableCap.Blend);
-        //}
     }
 }

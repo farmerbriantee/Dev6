@@ -193,31 +193,5 @@ namespace AgOpenGPS
             curList = dubPath.GenerateDubins(pt2, goal);
             curList.Insert(0, mf.pivotAxlePos);
         }
-
-        public void DrawRecordedLine()
-        {
-            int ptCount = recList.Count;
-            if (ptCount < 1) return;
-            GL.LineWidth(1);
-            GL.Color3(0.98f, 0.92f, 0.460f);
-            GL.Begin(PrimitiveType.LineStrip);
-            for (int h = 0; h < ptCount; h++) GL.Vertex3(recList[h].easting, recList[h].northing, 0);
-            GL.End();
-
-            if (!isRecordOn)
-            {
-                //Draw lookahead Point
-                GL.PointSize(16.0f);
-                GL.Begin(PrimitiveType.Points);
-
-                //GL.Color(1.0f, 1.0f, 0.25f);
-                //GL.Vertex(rEast, rNorth, 0.0);
-
-                GL.Color3(1.0f, 0.5f, 0.95f);
-                GL.Vertex3(recList[currentPositonIndex].easting, recList[currentPositonIndex].northing, 0);
-                GL.End();
-                GL.PointSize(1.0f);
-            }
-        }
     }
 }

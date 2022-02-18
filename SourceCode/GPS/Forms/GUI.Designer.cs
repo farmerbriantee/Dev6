@@ -36,7 +36,7 @@ namespace AgOpenGPS
         public bool isVehicleImage;
 
         //Is it in 2D or 3D, metric or imperial, display lightbar, display grid etc
-        public bool isMetric = true, isLightbarOn = true, isGridOn;
+        public bool isMetric = true, isLightbarOn = true;
         public bool isUTurnAlwaysOn, isCompassOn, isSpeedoOn, isAutoDayNight, isSideGuideLines = true;
         public bool isPureDisplayOn = true, isSkyOn = true, isRollMeterOn = false, isTextureOn = true;
         public bool isDay = true, isDayTime = true;
@@ -389,7 +389,7 @@ namespace AgOpenGPS
 
             isSkyOn = Settings.Default.setMenu_isSkyOn;
             isTextureOn = Settings.Default.setDisplay_isTextureOn;
-            isGridOn = Settings.Default.setMenu_isGridOn;
+            worldGrid.isGridOn = Settings.Default.setMenu_isGridOn;
             isCompassOn = Settings.Default.setMenu_isCompassOn;
             isSpeedoOn = Settings.Default.setMenu_isSpeedoOn;
             isAutoDayNight = Settings.Default.setDisplay_isAutoDayNight;

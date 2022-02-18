@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             this.oglSelf = new OpenTK.GLControl();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.nudDistance = new System.Windows.Forms.NumericUpDown();
             this.btnDeletePoints = new System.Windows.Forms.Button();
             this.btnMakeFixedHeadland = new System.Windows.Forms.Button();
@@ -63,12 +62,6 @@
             this.oglSelf.Paint += new System.Windows.Forms.PaintEventHandler(this.oglSelf_Paint);
             this.oglSelf.MouseDown += new System.Windows.Forms.MouseEventHandler(this.oglSelf_MouseDown);
             this.oglSelf.Resize += new System.EventHandler(this.oglSelf_Resize);
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 500;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // nudDistance
             // 
@@ -366,7 +359,6 @@
         #endregion
 
         private OpenTK.GLControl oglSelf;
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.NumericUpDown nudDistance;
         private System.Windows.Forms.Button btnMakeFixedHeadland;

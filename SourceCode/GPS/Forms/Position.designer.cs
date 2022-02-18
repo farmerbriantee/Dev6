@@ -739,54 +739,41 @@ namespace AgOpenGPS
                     mc.isOutOfBounds = false;
 
                     //do the auto youturn logic if everything is on.
-                    if (gyd.isYouTurnBtnOn && isAutoSteerBtnOn)
+                    if (gyd.isYouTurnBtnOn && isAutoSteerBtnOn && !gyd.isYouTurnTriggered)
                     {
                         //if we are too much off track > 1.3m, kill the diagnostic creation, start again
-                        if (crossTrackError > 1300 && !gyd.isYouTurnTriggered)
-                        {
+                        if (crossTrackError > 1300)
                             gyd.ResetCreatedYouTurn();
-                        }
                         else
                         {
                             //now check to make sure we are not in an inner turn boundary - drive thru is ok
                             if (gyd.youTurnPhase < 0)
                                 gyd.youTurnPhase++;
-                            else if (gyd.youTurnPhase != 3)
+                            else if (gyd.youTurnPhase < 255)
                             {
-                                if (crossTrackError > 500)
-                                {
-                                    gyd.ResetCreatedYouTurn();
-                                }
-                                else
-                                {
-                                    if (gyd.isBtnABLineOn)
-                                        gyd.BuildABLineDubinsYouTurn(gyd.isYouTurnRight);
-                                    else
-                                        gyd.BuildCurveDubinsYouTurn(gyd.isYouTurnRight, pivotAxlePos);
-                                }
+                                gyd.FindTurnPoints();
 
-                                if (gyd.youTurnPhase == 3) gyd.SmoothYouTurn(gyd.uTurnSmoothing);
+                                if (gyd.youTurnPhase == 254) gyd.SmoothYouTurn(gyd.uTurnSmoothing);
                             }
-                            else //wait to trigger the actual turn since its made and waiting
+                            else if (gyd.ytList.Count > 1) //wait to trigger the actual turn since its made and waiting
                             {
                                 //distance from current pivot to first point of youturn pattern
-                                distancePivotToTurnLine = glm.Distance(gyd.ytList[5], pivotAxlePos);
+                                distancePivotToTurnLine = glm.Distance(gyd.ytList[0], pivotAxlePos);
 
-                                if ((distancePivotToTurnLine <= 20.0) && (distancePivotToTurnLine >= 18.0) && !gyd.isYouTurnTriggered)
-
-                                    if (!sounds.isBoundAlarming)
-                                    {
-                                        if (sounds.isTurnSoundOn) sounds.sndBoundaryAlarm.Play();
-                                        sounds.isBoundAlarming = true;
-                                    }
+                                if (distancePivotToTurnLine < 20.0 && distancePivotToTurnLine >= 18.0 && !sounds.isBoundAlarming)
+                                {
+                                    if (sounds.isTurnSoundOn) sounds.sndBoundaryAlarm.Play();
+                                    sounds.isBoundAlarming = true;
+                                }
 
                                 //if we are close enough to pattern, trigger.
-                                if ((distancePivotToTurnLine <= 1.0) && (distancePivotToTurnLine >= 0) && !gyd.isYouTurnTriggered)
+                                if (distancePivotToTurnLine <= 10.0 && pivotAxlePos.isInFront(gyd.ytList[0] - gyd.ytList[1], gyd.ytList[0], gyd.ytList[1]))
                                 {
                                     gyd.YouTurnTrigger();
                                     sounds.isBoundAlarming = false;
                                 }
                             }
+                            else gyd.TurnCreationWidthError = true;
                         }
                     } // end of isInWorkingArea
                 }

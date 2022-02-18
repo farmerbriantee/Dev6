@@ -26,7 +26,9 @@ namespace AgOpenGPS
         public int lineWidth;
         public int tramPassEvery;
 
-        public double distanceFromRefLine, howManyPathsAway, oldHowManyPathsAway;
+        public double distanceFromRefLine;
+
+        public int howManyPathsAway, oldHowManyPathsAway = int.MaxValue;
 
         //steer, pivot, and ref indexes
         private int sA, sB, pA, pB, rA, rB;

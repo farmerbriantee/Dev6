@@ -118,6 +118,32 @@ namespace AgOpenGPS
             return false;
         }
 
+        public static bool GetLineIntersection(vec3 PointAA, vec3 PointAB, vec2 PointBA, vec2 PointBB, out vec2 Crossing, out double TimeA, out double TimeB, bool Limit = false)
+        {
+            TimeA = -1;
+            TimeB = -1;
+            Crossing = new vec2();
+            double denominator = (PointAB.northing - PointAA.northing) * (PointBB.easting - PointBA.easting) - (PointBB.northing - PointBA.northing) * (PointAB.easting - PointAA.easting);
+
+            if (denominator < -0.0001 || denominator > 0.0001)
+            {
+                TimeA = ((PointBB.northing - PointBA.northing) * (PointAA.easting - PointBA.easting) - (PointAA.northing - PointBA.northing) * (PointBB.easting - PointBA.easting)) / denominator;
+
+                if (Limit || (TimeA > 0.0 && TimeA < 1.0))
+                {
+                    TimeB = ((PointAB.northing - PointAA.northing) * (PointAA.easting - PointBA.easting) - (PointAA.northing - PointBA.northing) * (PointAB.easting - PointAA.easting)) / denominator;
+                    if (Limit || (TimeB > 0.0 && TimeB < 1.0))
+                    {
+                        Crossing = PointAA + ((PointAB - PointAA) * TimeA);
+                        return true;
+                    }
+                    else return false;
+                }
+                else return false;
+            }
+            return false;
+        }
+
         public static Polyline OffsetAndDissolvePolyline(this Polyline Poly, double width, bool loop, int start = -1, int end = -1, bool add = true)
         {
             List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, loop, 0, start, end, add);
@@ -756,6 +782,28 @@ namespace AgOpenGPS
             }
             return Math.Sqrt(dx * dx + dy * dy);
         }
+
+        public static bool isInFront(this vec3 point, vec3 a, vec3 b, vec3 c)
+        {
+            double Dx1 = b.northing - c.northing;
+            double Dy1 = b.easting - c.easting;
+            double Dx2 = b.northing - a.northing;
+            double Dy2 = b.easting - a.easting;
+
+            if ((Dx1 == 0 && Dy1 == 0) || (Dx2 == 0 && Dy2 == 0))
+                return false;
+
+            double Length1 = Math.Sqrt(Dx1 * Dx1 + Dy1 * Dy1);
+            double Length2 = Math.Sqrt(Dx2 * Dx2 + Dy2 * Dy2);
+
+            double Northing = (Dy1 / Length1 - Dy2 / Length2) / 2.0;
+            double Easting = (Dx1 / Length1 - Dx2 / Length2) / 2.0;
+
+            vec2 ss = new vec2(b.easting + Easting, b.northing - Northing);
+
+            return ((ss.northing - b.northing) * (point.easting - b.easting) - (ss.easting - b.easting) * (point.northing - b.northing)) > 0;
+        }
+
 
         public static double CalculateAverageHeadings(this List<vec2> curvePts)
         {

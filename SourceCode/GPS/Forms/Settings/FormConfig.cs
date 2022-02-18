@@ -145,7 +145,7 @@ namespace AgOpenGPS
 
             chkDisplaySky.Checked = mf.isSkyOn;
             chkDisplayFloor.Checked = mf.isTextureOn;
-            chkDisplayGrid.Checked = mf.isGridOn;
+            chkDisplayGrid.Checked = mf.worldGrid.isGridOn;
             chkDisplaySpeedo.Checked = mf.isSpeedoOn;
             chkDisplayDayNight.Checked = mf.isAutoDayNight;
             chkDisplayStartFullScreen.Checked = Properties.Settings.Default.setDisplay_isStartFullScreen;
@@ -298,7 +298,7 @@ namespace AgOpenGPS
         {
             chkDisplaySky.Checked = mf.isSkyOn;
             chkDisplayFloor.Checked = mf.isTextureOn;
-            chkDisplayGrid.Checked = mf.isGridOn;
+            chkDisplayGrid.Checked = mf.worldGrid.isGridOn;
             chkDisplaySpeedo.Checked = mf.isSpeedoOn;
             chkDisplayDayNight.Checked = mf.isAutoDayNight;
             chkDisplayStartFullScreen.Checked = Properties.Settings.Default.setDisplay_isStartFullScreen;

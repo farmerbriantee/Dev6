@@ -1,7 +1,4 @@
-﻿//Please, if you use this, share the improvements
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace AgOpenGPS
 {
@@ -25,39 +22,39 @@ namespace AgOpenGPS
             heading = v.heading;
         }
 
-        public double HeadingXZ()
-        {
-            return Math.Atan2(easting, northing);
-        }
-
-        public void Normalize()
-        {
-            double length = GetLength();
-            if (Math.Abs(length) < 0.0000000000001)
-            {
-                throw new DivideByZeroException("Trying to normalize a vector with length of zero.");
-            }
-
-            easting /= length;
-            northing /= length;
-            heading /= length;
-        }
-
-        //Returns the length of the vector
-        public double GetLength()
-        {
-            return Math.Sqrt((easting * easting) + (heading * heading) + (northing * northing));
-        }
-
-        // Calculates the squared length of the vector.
-        public double GetLengthSquared()
-        {
-            return (easting * easting) + (heading * heading) + (northing * northing);
-        }
-
         public static vec3 operator -(vec3 lhs, vec3 rhs)
         {
-            return new vec3(lhs.easting - rhs.easting, lhs.northing - rhs.northing, lhs.heading - rhs.heading);
+            return new vec3(lhs.easting - rhs.easting, lhs.northing - rhs.northing, 0);
+        }
+
+        public static vec2 operator +(vec3 lhs, vec3 rhs)
+        {
+            return new vec2(lhs.easting + rhs.easting, lhs.northing + rhs.northing);
+        }
+
+        public static vec3 operator *(vec3 self, double s)
+        {
+            return new vec3(self.easting * s, self.northing * s, 0);
+        }
+    }
+
+    public struct vecCrossing
+    {
+        public double easting;
+        public double northing;
+        public int crosssingIdx;
+        public int turnLineIdx;
+        public double time;
+        public int boundaryIdx;
+
+        public vecCrossing(double _easting, double _northing, double _time, int _boundaryIdx, int _crosssingIdx, int _turnLineIdx)
+        {
+            northing = _northing;
+            easting = _easting;
+            time = _time;
+            boundaryIdx = _boundaryIdx;
+            crosssingIdx = _crosssingIdx;
+            turnLineIdx = _turnLineIdx;
         }
     }
 
@@ -191,76 +188,3 @@ namespace AgOpenGPS
         }
     }
 }
-
-//public double this[int index]
-//{
-//    get
-//    {
-//        if (index == 0) return x;
-//        else if (index == 1) return z;
-//        else throw new Exception("Out of range.");
-//    }
-//    set
-//    {
-//        if (index == 0) x = value;
-//        else if (index == 1) z = value;
-//        else throw new Exception("Out of range.");
-//    }
-//}
-
-//public vec2(double s)
-//{
-//    x = z = s;
-//}
-
-//public vec2(vec2 v)
-//{
-//    this.x = v.x;
-//    this.z = v.z;
-//}
-
-//public vec2(vec3 v)
-//{
-//    this.x = v.x;
-//    this.z = v.z;
-//}
-
-//public static vec2 operator +(vec2 lhs, vec2 rhs)
-//{
-//    return new vec2(lhs.x + rhs.x, lhs.z + rhs.z);
-//}
-
-//public static vec2 operator +(vec2 lhs, double rhs)
-//{
-//    return new vec2(lhs.x + rhs, lhs.z + rhs);
-//}
-
-//public static vec2 operator -(vec2 lhs, double rhs)
-//{
-//    return new vec2(lhs.x - rhs, lhs.z - rhs);
-//}
-
-//public static vec2 operator *(vec2 self, double s)
-//{
-//    return new vec2(self.x * s, self.z * s);
-//}
-
-//public static vec2 operator *(double lhs, vec2 rhs)
-//{
-//    return new vec2(rhs.x * lhs, rhs.z * lhs);
-//}
-
-//public static vec2 operator *(vec2 lhs, vec2 rhs)
-//{
-//    return new vec2(rhs.x * lhs.x, rhs.z * lhs.z);
-//}
-
-//public static vec2 operator /(vec2 lhs, double rhs)
-//{
-//    return new vec2(lhs.x / rhs, lhs.z / rhs);
-//}
-
-//public double[] to_array()
-//{
-//    return new[] { x, z };
-//}

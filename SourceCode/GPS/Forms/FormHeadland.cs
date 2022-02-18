@@ -11,7 +11,7 @@ namespace AgOpenGPS
         //access to the main GPS form and all its variables
         private readonly FormGPS mf = null;
 
-        private bool isA, isSet, isSaving;
+        private bool isA = true, isSet, isSaving;
         private int start = -1, end = -1;
         private double totalHeadlandWidth = 0;
 
@@ -32,9 +32,6 @@ namespace AgOpenGPS
 
         private void FormHeadland_Load(object sender, EventArgs e)
         {
-            isA = true;
-            isSet = false;
-
             cboxIsSectionControlled.Checked = mf.bnd.isSectionControlledByHeadland;
 
             lblHeadlandWidth.Text = "0";
@@ -45,6 +42,8 @@ namespace AgOpenGPS
             nudSetDistance.Value = 0;
 
             BuildHeadLineTemplateFromBoundary(mf.bnd.bndList[0].hdLine.points.Count > 0);
+
+            oglSelf.Refresh();
 
             mf.CloseTopMosts();
         }
@@ -91,6 +90,11 @@ namespace AgOpenGPS
             double width = (double)nudSetDistance.Value * mf.ftOrMtoM;
 
             headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, start, end, true);
+
+            isSet = false;
+            start = end = -1;
+
+            oglSelf.Refresh();
         }
 
         private void btnMakeFixedHeadland_Click(object sender, EventArgs e)
@@ -104,6 +108,8 @@ namespace AgOpenGPS
 
             isSet = false;
             start = end = -1;
+
+            oglSelf.Refresh();
         }
 
         private void cboxToolWidths_SelectedIndexChanged(object sender, EventArgs e)
@@ -116,6 +122,8 @@ namespace AgOpenGPS
 
             lblHeadlandWidth.Text = (width * mf.m2FtOrM).ToString("N2");
             totalHeadlandWidth = width;
+
+            oglSelf.Refresh();
         }
 
         private void oglSelf_Paint(object sender, PaintEventArgs e)
@@ -165,50 +173,56 @@ namespace AgOpenGPS
             {
                 isSet = false;
                 start = end = -1;
-                return;
-            }
-
-            Point pt = oglSelf.PointToClient(Cursor.Position);
-
-            vec3 plotPt = new vec3
-            {
-                //convert screen coordinates to field coordinates
-                easting = (pt.X - 350) * mf.maxFieldDistance / 632.0,
-                northing = (700 - pt.Y - 350) * mf.maxFieldDistance / 632.0,
-                heading = 0
-            };
-
-            plotPt.easting += mf.fieldCenterX;
-            plotPt.northing += mf.fieldCenterY;
-
-            double minDist = double.MaxValue;
-            int A = -1;
-
-            //find the closest 2 points to current fix
-            for (int t = 0; t < headLineTemplate.points.Count; t++)
-            {
-                double dist = ((plotPt.easting - headLineTemplate.points[t].easting) * (plotPt.easting - headLineTemplate.points[t].easting))
-                                + ((plotPt.northing - headLineTemplate.points[t].northing) * (plotPt.northing - headLineTemplate.points[t].northing));
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    A = t;
-                }
-            }
-
-            if (isA)
-            {
-                start = A;
-                end = -1;
-                isA = false;
             }
             else
             {
-                end = A;
-                isA = true;
-                isSet = true;
-                if (((headLineTemplate.points.Count - end + start) % headLineTemplate.points.Count) < ((headLineTemplate.points.Count - start + end) % headLineTemplate.points.Count)) { int index = start; start = end; end = index; }
+                Point pt = oglSelf.PointToClient(Cursor.Position);
+
+                vec3 plotPt = new vec3
+                {
+                    //convert screen coordinates to field coordinates
+                    easting = (pt.X - 350) * mf.maxFieldDistance / 632.0,
+                    northing = (700 - pt.Y - 350) * mf.maxFieldDistance / 632.0,
+                    heading = 0
+                };
+
+                plotPt.easting += mf.fieldCenterX;
+                plotPt.northing += mf.fieldCenterY;
+
+                double minDist = double.MaxValue;
+                int A = -1;
+
+                //find the closest 2 points to current fix
+                for (int t = 0; t < headLineTemplate.points.Count; t++)
+                {
+                    double dist = ((plotPt.easting - headLineTemplate.points[t].easting) * (plotPt.easting - headLineTemplate.points[t].easting))
+                                    + ((plotPt.northing - headLineTemplate.points[t].northing) * (plotPt.northing - headLineTemplate.points[t].northing));
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        A = t;
+                    }
+                }
+
+                if (isA)
+                {
+                    start = A;
+                    end = -1;
+                    isA = false;
+                }
+                else
+                {
+                    end = A;
+                    isA = true;
+                    isSet = true;
+                    if (((headLineTemplate.points.Count - end + start) % headLineTemplate.points.Count) < ((headLineTemplate.points.Count - start + end) % headLineTemplate.points.Count)) { int index = start; start = end; end = index; }
+                }
             }
+
+            oglSelf.Refresh();
+
+            nudSetDistance.Enabled = btnSetDistance.Enabled = btnDeletePoints.Enabled = isSet;
+            btnMakeFixedHeadland.Enabled = nudDistance.Enabled = !isSet;
         }
 
         private void DrawABTouchLine()
@@ -250,42 +264,24 @@ namespace AgOpenGPS
         private void btnReset_Click(object sender, EventArgs e)
         {
             BuildHeadLineTemplateFromBoundary();
+
+            oglSelf.Refresh();
         }
 
         private void nudDistance_Click(object sender, EventArgs e)
         {
             mf.KeypadToNUD((NumericUpDown)sender, this);
             btnExit.Focus();
+
+            oglSelf.Refresh();
         }
 
         private void nudSetDistance_Click(object sender, EventArgs e)
         {
             mf.KeypadToNUD((NumericUpDown)sender, this);
             btnExit.Focus();
-        }
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
             oglSelf.Refresh();
-
-            if (isSet)
-            {
-                btnExit.Enabled = false;
-                btnMakeFixedHeadland.Enabled = false;
-                nudDistance.Enabled = false;
-                nudSetDistance.Enabled = true;
-                btnSetDistance.Enabled = true;
-                btnDeletePoints.Enabled = true;
-            }
-            else
-            {
-                nudSetDistance.Enabled = false;
-                btnSetDistance.Enabled = false;
-                btnDeletePoints.Enabled = false;
-                btnExit.Enabled = true;
-                btnMakeFixedHeadland.Enabled = true;
-                nudDistance.Enabled = true;
-            }
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -308,6 +304,8 @@ namespace AgOpenGPS
             }
             else
                 headLineTemplate.points.RemoveRange(start, end - start);
+
+            oglSelf.Refresh();
         }
 
         private void oglSelf_Load(object sender, EventArgs e)
@@ -316,6 +314,8 @@ namespace AgOpenGPS
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Back);
             GL.ClearColor(0.23122f, 0.2318f, 0.2315f, 1.0f);
+
+            oglSelf.Refresh();
         }
 
         private void oglSelf_Resize(object sender, EventArgs e)
@@ -329,6 +329,8 @@ namespace AgOpenGPS
             GL.LoadMatrix(ref mat);
 
             GL.MatrixMode(MatrixMode.Modelview);
+
+            oglSelf.Refresh();
         }
 
         #region Help

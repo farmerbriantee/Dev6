@@ -1045,7 +1045,7 @@ namespace AgOpenGPS
             gyd.currentCurveLine = null;
             gyd.currentABLine = null;
 
-            gyd.howManyPathsAway = 0.0;
+            gyd.howManyPathsAway = 0;
 
             gyd.curveArr.Clear();
             gyd.recList.Clear();

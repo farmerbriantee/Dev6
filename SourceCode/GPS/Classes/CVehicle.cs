@@ -414,49 +414,19 @@ namespace AgOpenGPS
 
             if (mf.bnd.isBndBeingMade)
             {
-                if (mf.bnd.isDrawRightSide)
-                {
-                    GL.LineWidth(2);
-                    GL.Color3(0.0, 1.270, 0.0);
-                    GL.Begin(PrimitiveType.LineStrip);
-                    {
-                        GL.Vertex3(0.0, 0, 0);
-                        GL.Color3(1.270, 1.220, 0.20);
-                        GL.Vertex3(mf.bnd.createBndOffset, 0, 0);
-                        GL.Vertex3(mf.bnd.createBndOffset * 0.75, 0.25, 0);
-                    }
-                    GL.End();
-                }
+                double Offset = mf.bnd.isDrawRightSide ? mf.bnd.createBndOffset : -mf.bnd.createBndOffset;
 
-                //draw on left side
-                else
+                GL.LineWidth(2);
+                GL.Color3(0.0, 1.270, 0.0);
+                GL.Begin(PrimitiveType.LineStrip);
                 {
-                    GL.LineWidth(2);
-                    GL.Color3(0.0, 1.270, 0.0);
-                    GL.Begin(PrimitiveType.LineStrip);
-                    {
-                        GL.Vertex3(0.0, 0, 0);
-                        GL.Color3(1.270, 1.220, 0.20);
-                        GL.Vertex3(-mf.bnd.createBndOffset, 0, 0);
-                        GL.Vertex3(-mf.bnd.createBndOffset * 0.75, 0.25, 0);
-                    }
-                    GL.End();
+                    GL.Vertex3(0.0, 0, 0);
+                    GL.Color3(1.270, 1.220, 0.20);
+                    GL.Vertex3(Offset, 0, 0);
+                    GL.Vertex3(Offset * 0.75, 0.25, 0);
                 }
+                GL.End();
             }
-
-            //Svenn Arrow
-            //if (mf.camera.camSetDistance > -350)
-            //{
-            //    GL.LineWidth(1);
-            //    GL.Color3(1.2, 1.25, 0.10);
-            //    GL.Begin(PrimitiveType.LineStrip);
-            //    {
-            //        GL.Vertex3(0.4, wheelbase + 5, 0.0);
-            //        GL.Vertex3(0, wheelbase + 6, 0.0);
-            //        GL.Vertex3(-0.4, wheelbase + 5, 0.0);
-            //    }
-            //    GL.End();
-            //}
 
             if ((mf.gyd.isBtnCurveOn || mf.gyd.isBtnABLineOn) && !mf.gyd.isContourBtnOn)
             {

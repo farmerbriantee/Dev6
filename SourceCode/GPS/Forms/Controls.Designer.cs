@@ -77,9 +77,15 @@ namespace AgOpenGPS
 
 
             //if contour is on, turn it off
-            if (gyd.isContourBtnOn) btnContour.PerformClick();
+            if (gyd.isContourBtnOn)
+                btnContour.PerformClick();
 
-
+            if (panelDrag.Visible)
+            {
+                panelDrag.Visible = false;
+                gyd.recList.Clear();
+                gyd.StopDrivingRecordedPath();
+            }
 
             //change image to reflect on off
             btnABLine.Image = Properties.Resources.ABLineOff;
@@ -148,11 +154,17 @@ namespace AgOpenGPS
                 return;
             }
 
-
             //if contour is on, turn it off
-            if (gyd.isContourBtnOn) { if (gyd.isContourBtnOn) btnContour.PerformClick(); }
-            //btnContourPriority.Enabled = true;
-                
+            if (gyd.isContourBtnOn)
+                btnContour.PerformClick();
+
+            if (panelDrag.Visible)
+            {
+                panelDrag.Visible = false;
+                gyd.recList.Clear();
+                gyd.StopDrivingRecordedPath();
+            }
+
             gyd.isBtnCurveOn = false;
             btnCurve.Image = Properties.Resources.CurveOff;
 
@@ -165,23 +177,10 @@ namespace AgOpenGPS
                 gyd.isBtnABLineOn = true;
                 return;
             }
-            
-            //check if window already exists, return if true
-            Form fc = Application.OpenForms["FormABLine"];
-
-            if (fc != null)
-            {
-                fc.Focus();
-                return;
-            }
 
             //Bring up the form
             gyd.isBtnABLineOn = true;
             btnABLine.Image = Properties.Resources.ABLineOn;
-
-            //turn off youturn...
-            //DisableYouTurnButtons();
-            //yt.ResetYouTurn();
 
             var form = new FormABLine(this);
                 form.Show(this);
@@ -1372,7 +1371,8 @@ namespace AgOpenGPS
         }
         public void GetAB()
         {
-            if (gyd.isContourBtnOn) { if (gyd.isContourBtnOn) btnContour.PerformClick(); }
+            if (gyd.isContourBtnOn) 
+                btnContour.PerformClick();
 
             using (var form = new FormABDraw(this))
             {
@@ -2053,6 +2053,8 @@ namespace AgOpenGPS
                     FileLoadRecPath();  
                     panelDrag.Visible = true;
                 }
+
+                gyd.isValid = false;
             }
             else
             {

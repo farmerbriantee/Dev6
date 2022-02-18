@@ -62,6 +62,7 @@ namespace AgOpenGPS
 
             if (currentContour != null)
             {
+                currentGuidanceLine = currentContour;
                 ptCount = currentContour.curvePts.Count - (currentContour == creatingContour ? backSpacing : 0);
                 if (ptCount < 2)
                 {
@@ -308,59 +309,6 @@ namespace AgOpenGPS
             }
 
             mf.TimedMessageBox(1500, "Boundary Contour", "Contour Path Created");
-        }
-
-        //draw the red follow me line
-        public void DrawContourLine()
-        {
-            ////draw the guidance line
-            int ptCount = curList.Count;
-            if (ptCount < 2) return;
-            GL.LineWidth(lineWidth);
-            GL.Color3(0.98f, 0.2f, 0.980f);
-            GL.Begin(PrimitiveType.LineStrip);
-            for (int h = 0; h < ptCount; h++) GL.Vertex3(curList[h].easting, curList[h].northing, 0);
-            GL.End();
-
-            GL.PointSize(lineWidth);
-            GL.Begin(PrimitiveType.Points);
-
-            GL.Color3(0.87f, 08.7f, 0.25f);
-            for (int h = 0; h < ptCount; h++) GL.Vertex3(curList[h].easting, curList[h].northing, 0);
-
-            GL.End();
-
-            //Draw the captured ref strip, red if locked
-            if (isLocked)
-            {
-                GL.Color3(0.983f, 0.2f, 0.20f);
-                GL.LineWidth(4);
-            }
-            else
-            {
-                GL.Color3(0.3f, 0.982f, 0.0f);
-                GL.LineWidth(lineWidth);
-            }
-
-            if (currentContour != null)
-            {
-                //GL.PointSize(6.0f);
-                GL.Begin(PrimitiveType.Points);
-                for (int h = 0; h < currentContour.curvePts.Count; h++) GL.Vertex3(currentContour.curvePts[h].easting, currentContour.curvePts[h].northing, 0);
-                GL.End();
-            }
-
-            if (mf.isPureDisplayOn && mf.guidanceLineDistanceOff != 32000 && !mf.isStanleyUsed)
-            {
-                //Draw lookahead Point
-                GL.PointSize(6.0f);
-                GL.Begin(PrimitiveType.Points);
-
-                GL.Color3(1.0f, 0.95f, 0.095f);
-                GL.Vertex3(goalPoint.easting, goalPoint.northing, 0.0);
-                GL.End();
-                GL.PointSize(1.0f);
-            }
         }
 
         //Reset the contour to zip

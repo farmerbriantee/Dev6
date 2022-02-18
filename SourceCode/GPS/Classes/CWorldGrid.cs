@@ -22,6 +22,7 @@ namespace AgOpenGPS
 
         public double GridSize = 20000;
         public double Count = 40;
+        public bool isGridOn;
 
         public CWorldGrid(FormGPS _f)
         {
@@ -68,6 +69,9 @@ namespace AgOpenGPS
                 GL.Vertex3(eastingMax, northingMin, 0.0);
                 GL.End();
             }
+
+            ////if grid is on draw it
+            if (isGridOn) DrawWorldGrid(mf.camera.gridZoom);
         }
 
         public void DrawWorldGrid(double _gridZoom)

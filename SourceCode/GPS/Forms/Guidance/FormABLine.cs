@@ -51,7 +51,7 @@ namespace AgOpenGPS
                 if (mf.gyd.curveArr[i].mode.HasFlag(Mode.AB) && mf.gyd.curveArr[i].curvePts.Count > 1)
                 {
                     lvLines.Items.Add(new ListViewItem(mf.gyd.curveArr[i].Name.Trim(), i));
-                    if (mf.gyd.curveArr[i].Name == mf.gyd.currentABLine.Name) idx = lvLines.Items.Count - 1;
+                    if (mf.gyd.curveArr[i].Name == mf.gyd.currentABLine?.Name) idx = lvLines.Items.Count - 1;
                 }
             }
 

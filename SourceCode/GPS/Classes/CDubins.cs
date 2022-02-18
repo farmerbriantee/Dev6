@@ -18,7 +18,7 @@ namespace AgOpenGPS
         public static readonly double driveDistance = 0.05;
 
         //The radius the car can turn 360 degrees with
-        public static double turningRadius = Properties.Vehicle.Default.setVehicle_minTurningRadius;
+        public static double turningRadius;
 
         //Position, Heading is in radians
         private vec2 startPos, goalPos;
@@ -32,6 +32,8 @@ namespace AgOpenGPS
         //takes 2 points and headings to create a path - returns list of vec3 points and headings
         public List<vec3> GenerateDubins(vec3 _start, vec3 _goal)
         {
+            turningRadius = Properties.Vehicle.Default.setVehicle_minTurningRadius;
+
             //positions and heading
             startPos.easting = _start.easting;
             startPos.northing = _start.northing;

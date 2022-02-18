@@ -114,7 +114,7 @@ namespace AgOpenGPS
                             //read header $CurveLine
                             New.Name = reader.ReadLine();
                             if (New.Name == "Boundary Curve")
-                                New.mode = Mode.Boundary;
+                                New.mode |= Mode.Boundary;
 
                             // get the average heading
                             line = reader.ReadLine();

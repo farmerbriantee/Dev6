@@ -143,35 +143,12 @@ namespace AgOpenGPS
 
                 GL.End();
 
-                //GL.LineWidth(4);
-                //GL.Color3(0.937f, 0.537f, 0.397f);
-                //GL.Begin(PrimitiveType.Lines);
-                //GL.Vertex3(0, trailingTank, 0);
-                //GL.Vertex3(0, 0, 0);
-                //GL.End();
-
-                //GL.Color3(0.937f, 0.537f, 0.397f);
-                //GL.Begin(PrimitiveType.Lines);
-                //GL.Vertex3(-1, trailingTank, 0);
-                //GL.Vertex3(1, trailingTank, 0);
-                //GL.End();
-
-                //pivot markers
-                //GL.Color3(0,0,0);
-                //GL.PointSize(8);
-                //GL.Begin(PrimitiveType.Points);
-                //GL.Vertex3(-1, trailingTank, 0.0);
-                //GL.Vertex3(1, trailingTank, 0.0);
-                //GL.End();
-
                 //move down the tank hitch, unwind, rotate to section heading
                 GL.Translate(0.0, trailingTank, 0.0);
                 GL.Rotate(glm.toDegrees(mf.tankPos.heading), 0.0, 0.0, 1.0);
                 GL.Rotate(glm.toDegrees(-mf.toolPos.heading), 0.0, 0.0, 1.0);
             }
-
-            //no tow between hitch
-            else
+            else//no tow between hitch
             {
                 GL.Rotate(glm.toDegrees(-mf.toolPos.heading), 0.0, 0.0, 1.0);
             }
@@ -231,121 +208,103 @@ namespace AgOpenGPS
             if (hite > 0.7) hite = 0.7;
             if (hite < 0.5) hite = 0.5;
 
+            for (int j = 0; j < numOfSections; j++)
             {
-                for (int j = 0; j < numOfSections; j++)
+                if (mf.section[j].sectionOnRequest)
                 {
-                    //if section is on, green, if off, red color
-                    if (mf.section[j].isSectionOn || mf.section[numOfSections].isSectionOn)
+                    if (mf.section[j].isMappingOn || mf.section[numOfSections].isMappingOn)
                     {
+                        //Both On
                         if (mf.section[j].manBtnState == FormGPS.btnStates.Auto)
-                        {
                             GL.Color3(0.0f, 0.9f, 0.0f);
-                            //if (mf.section[j].isMappingOn) GL.Color3(0.0f, 0.7f, 0.0f);
-                            //else GL.Color3(0.70f, 0.0f, 0.90f);
-                        }
-                        else GL.Color3(0.97, 0.97, 0);
+                        else
+                            GL.Color3(0.97f, 0.97f, 0f);
+                    }
+                    else //Section wants to turn mapping on
+                        GL.Color3(0.5f, 0.0f, 1.0f);//violet
+                }
+                else if (mf.section[j].isSectionOn || mf.section[numOfSections].isSectionOn)
+                    //Section wants to turn off
+                    GL.Color3(1.0f, 0.647f, 0.0f);//orange
+                else if (mf.section[j].isMappingOn || mf.section[numOfSections].isMappingOn)
+                    //Section wants to turn mapping off
+                    GL.Color3(0.5f, 0.5f, 0.5f);//gray
+                else if (mf.section[j].mappingOnTimer > 0 && mf.section[j].mappingOffTimer > mf.section[j].mappingOnTimer)
+                    GL.Color3(0.5f, 0.0f, 1.0f);//violet
+                else
+                    //Both Off
+                    GL.Color3(0.97f, 0.0f, 0.0f);//red
+
+                double mid = (mf.section[j].positionRight - mf.section[j].positionLeft) / 2 + mf.section[j].positionLeft;
+
+                GL.Begin(PrimitiveType.TriangleFan);
+                {
+                    GL.Vertex3(mf.section[j].positionLeft, trailingTool, 0);
+                    GL.Vertex3(mf.section[j].positionLeft, trailingTool - hite, 0);
+
+                    GL.Vertex3(mid, trailingTool - hite * 1.5, 0);
+
+                    GL.Vertex3(mf.section[j].positionRight, trailingTool - hite, 0);
+                    GL.Vertex3(mf.section[j].positionRight, trailingTool, 0);
+                }
+                GL.End();
+
+                GL.Begin(PrimitiveType.LineLoop);
+                {
+                    GL.Color3(0.0, 0.0, 0.0);
+                    GL.Vertex3(mf.section[j].positionLeft, trailingTool, 0);
+                    GL.Vertex3(mf.section[j].positionLeft, trailingTool - hite, 0);
+
+                    GL.Vertex3(mid, trailingTool - hite * 1.5, 0);
+
+                    GL.Vertex3(mf.section[j].positionRight, trailingTool - hite, 0);
+                    GL.Vertex3(mf.section[j].positionRight, trailingTool, 0);
+                }
+                GL.End();
+            }
+
+            //tram Dots
+            if (mf.tram.displayMode != 0)
+            {
+                if (mf.camera.camSetDistance > -200)
+                {
+                    GL.PointSize(8);
+
+                    GL.Begin(PrimitiveType.Points);
+                    //section markers
+                    if (mf.tram.isOuter)
+                    {
+                        //right side
+                        if (((mf.tram.controlByte) & 1) == 1)
+                            GL.Color3(0.0f, 0.900f, 0.39630f);
+                        else
+                            GL.Color3(0.90f, 0.00f, 0.0f);
+
+                        GL.Vertex3(toolFarRightPosition - mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
+
+                        //left side
+                        if (((mf.tram.controlByte >> 2) & 1) == 1) GL.Color3(0.0f, 0.900f, 0.3930f);
+                        else GL.Color3(0.90f, 0.00f, 0.0f);
+
+                        GL.Vertex3(toolFarLeftPosition + mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
+                        GL.End();
                     }
                     else
                     {
-                        //if (!mf.section[j].isMappingOn) GL.Color3(0.70f, 0.2f, 0.2f);
-                        //else GL.Color3(0.00f, 0.250f, 0.90f);
-                        GL.Color3(0.7f, 0.2f, 0.2f);
-                    }
-
-                    double mid = (mf.section[j].positionRight - mf.section[j].positionLeft) / 2 + mf.section[j].positionLeft;
-
-                    GL.Begin(PrimitiveType.TriangleFan);
-                    {
-                        GL.Vertex3(mf.section[j].positionLeft, trailingTool, 0);
-                        GL.Vertex3(mf.section[j].positionLeft, trailingTool - hite, 0);
-
-                        GL.Vertex3(mid, trailingTool - hite * 1.5, 0);
-
-                        GL.Vertex3(mf.section[j].positionRight, trailingTool - hite, 0);
-                        GL.Vertex3(mf.section[j].positionRight, trailingTool, 0);
-                    }
-                    GL.End();
-
-                    GL.Begin(PrimitiveType.LineLoop);
-                    {
-                        GL.Color3(0.0, 0.0, 0.0);
-                        GL.Vertex3(mf.section[j].positionLeft, trailingTool, 0);
-                        GL.Vertex3(mf.section[j].positionLeft, trailingTool - hite, 0);
-
-                        GL.Vertex3(mid, trailingTool - hite * 1.5, 0);
-
-                        GL.Vertex3(mf.section[j].positionRight, trailingTool - hite, 0);
-                        GL.Vertex3(mf.section[j].positionRight, trailingTool, 0);
-                    }
-                    GL.End();
-                }
-
-                //tram Dots
-                if (mf.tram.displayMode != 0)
-                {
-                    if (mf.camera.camSetDistance > -200)
-                    {
-                        GL.PointSize(8);
-
-                        if (mf.tram.isOuter)
-                        {
-
-                            //section markers
-                            GL.Begin(PrimitiveType.Points);
-
-                            //right side
-                            if (((mf.tram.controlByte) & 1) == 1) GL.Color3(0.0f, 0.900f, 0.39630f);
-                            else GL.Color3(0.90f, 0.00f, 0.0f);
-                            GL.Vertex3(toolFarRightPosition - mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
-
-                            //left side
-                            if (((mf.tram.controlByte >> 2) & 1) == 1) GL.Color3(0.0f, 0.900f, 0.3930f);
-                            else GL.Color3(0.90f, 0.00f, 0.0f);
-                            GL.Vertex3(toolFarLeftPosition + mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
-                            GL.End();
-
-                        }
+                        //right side
+                        if (((mf.tram.controlByte >> 1) & 1) == 1)
+                            GL.Color3(0.0f, 0.900f, 0.3930f);
                         else
-                        {
-                            GL.Begin(PrimitiveType.Points);
+                            GL.Color3(0.90f, 0.00f, 0.0f);
 
-                            //right side
-                            if (((mf.tram.controlByte >> 1) & 1) == 1) GL.Color3(0.0f, 0.900f, 0.3930f);
-                            else GL.Color3(0.90f, 0.00f, 0.0f);
-                            GL.Vertex3(-mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
+                        GL.Vertex3(-mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
 
-                            //left side
-                            GL.Vertex3(mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
-                            GL.End();
-
-                        }
+                        //left side
+                        GL.Vertex3(mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
                     }
+                    GL.End();
                 }
             }
-
-            //GL.End();
-
-            //draw section markers if close enough
-            //if (mf.camera.camSetDistance > -250)
-            //{
-            //    GL.Color3(0.0f, 0.0f, 0.0f);
-            //    //section markers
-            //    GL.PointSize(3.0f);
-            //    GL.Begin(PrimitiveType.Points);
-            //    for (int j = 0; j < numOfSections - 1; j++)
-            //        GL.Vertex3(mf.section[j].positionRight, trailingTool, 0);
-            //    GL.End();
-            //}
-
-            //GL.Color3(0.30f, 1.0f, 1.0f);
-            ////section markers
-            //GL.PointSize(4.0f);
-            //GL.Begin(PrimitiveType.Points);
-            ////for (int j = 0; j < numOfSections - 1; j++)
-            //GL.Vertex3(mf.section[0].positionLeft, (mf.vehicle.hydLiftLookAheadDistanceLeft * 0.1) + trailingTool, 0);
-            //GL.Vertex3(mf.section[mf.tool.numOfSections - 1].positionRight, (mf.vehicle.hydLiftLookAheadDistanceRight * 0.1) + trailingTool, 0);
-            //GL.End();
-
             GL.PopMatrix();
         }
     }

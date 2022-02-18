@@ -115,9 +115,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\CExtensionMethods.cs" />
-    <Compile Include="Classes\CFence.cs">
-      <DependentUpon>CBoundary.cs</DependentUpon>
-    </Compile>
     <Compile Include="Classes\CBoundary.cs" />
     <Compile Include="Classes\CGuidance.cs" />
     <Compile Include="Classes\ZStaticClass.cs" />
@@ -150,9 +147,6 @@
     <Compile Include="Classes\CSection.cs" />
     <Compile Include="Classes\CVehicle.cs" />
     <Compile Include="Classes\CWorldGrid.cs" />
-    <Compile Include="Classes\CTurn.cs">
-      <DependentUpon>CBoundary.cs</DependentUpon>
-    </Compile>
     <Compile Include="Classes\CTool.cs" />
     <Compile Include="Forms\FormFieldKML.cs">
       <SubType>Form</SubType>
