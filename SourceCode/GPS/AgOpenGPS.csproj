@@ -328,12 +328,6 @@
     <Compile Include="Forms\Guidance\FormSmoothAB.Designer.cs">
       <DependentUpon>FormSmoothAB.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Guidance\FormABCurve.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Guidance\FormABCurve.Designer.cs">
-      <DependentUpon>FormABCurve.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\FormBoundary.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -581,9 +575,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormShiftPos.resx">
       <DependentUpon>FormShiftPos.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Guidance\FormABCurve.resx">
-      <DependentUpon>FormABCurve.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormBoundary.resx">
       <DependentUpon>FormBoundary.cs</DependentUpon>

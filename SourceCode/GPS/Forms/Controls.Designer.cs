@@ -66,15 +66,6 @@ namespace AgOpenGPS
                 return;
             }
 
-            //check if window already exists
-            Form cf = Application.OpenForms["FormABCurve"];
-
-            if (cf != null)
-            {
-                cf.Close();
-                return;
-            }
-
             //if contour is on, turn it off
             if (gyd.isContourBtnOn)
                 btnContour.PerformClick();
@@ -105,7 +96,7 @@ namespace AgOpenGPS
             gyd.isBtnCurveOn = true;
             btnCurve.Image = Properties.Resources.CurveOn;
 
-            Form form = new FormABCurve(this);
+            Form form = new FormABLine(this, false);
             form.Show(this);
         }
         private void btnABLine_Click(object sender, EventArgs e)
@@ -119,15 +110,6 @@ namespace AgOpenGPS
 
             //invalidate line
             gyd.isValid = false;
-
-            //check if window already exists
-            Form f = Application.OpenForms["FormABCurve"];
-
-            if (f != null)
-            {
-                f.Focus();
-                return;
-            }
 
             Form af = Application.OpenForms["FormABLine"];
 
@@ -167,7 +149,7 @@ namespace AgOpenGPS
             gyd.isBtnABLineOn = true;
             btnABLine.Image = Properties.Resources.ABLineOn;
 
-            var form = new FormABLine(this);
+            var form = new FormABLine(this, true);
                 form.Show(this);
         }
 

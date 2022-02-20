@@ -11,29 +11,32 @@ namespace AgOpenGPS
         //access to the main GPS form and all its variables
         private readonly FormGPS mf = null;
 
-        private bool isSaving;
+        private bool isSaving, EditName, ModeAB;
 
-        public FormABLine(Form callingForm)
+        public FormABLine(Form callingForm, bool _ModeAB)
         {
             //get copy of the calling main form
             mf = callingForm as FormGPS;
+            ModeAB = _ModeAB;
 
             InitializeComponent();
-            this.Text = gStr.gsABline;
+
+            Text = ModeAB ? gStr.gsABline : gStr.gsABCurve;
+            btnListDelete.Image = ModeAB ? Properties.Resources.ABLineDelete : Properties.Resources.HideContour;
         }
 
         private void FormABLine_Load(object sender, EventArgs e)
         {
-            panelPick.Top = 3;
-            panelPick.Left = 3;
             panelAPlus.Top = 3;
             panelAPlus.Left = 3;
             panelName.Top = 3;
             panelName.Left = 3;
+            panelPick.Top = 3;
+            panelPick.Left = 3;
 
-            panelPick.Visible = true;
             panelAPlus.Visible = false;
             panelName.Visible = false;
+            panelPick.Visible = true;
 
             this.Size = new System.Drawing.Size(470, 360);
 
@@ -48,7 +51,7 @@ namespace AgOpenGPS
 
             for (int i = 0; i < mf.gyd.curveArr.Count; i++)
             {
-                if (mf.gyd.curveArr[i].mode.HasFlag(Mode.AB) && mf.gyd.curveArr[i].curvePts.Count > 1)
+                if (mf.gyd.curveArr[i].mode.HasFlag(ModeAB ? Mode.AB : Mode.Curve) && mf.gyd.curveArr[i].curvePts.Count > 1)
                 {
                     lvLines.Items.Add(new ListViewItem(mf.gyd.curveArr[i].Name.Trim(), i));
                     if (mf.gyd.curveArr[i].Name == mf.gyd.currentABLine?.Name) idx = lvLines.Items.Count - 1;
@@ -71,57 +74,133 @@ namespace AgOpenGPS
 
         private void btnCancel_APlus_Click(object sender, EventArgs e)
         {
+            if (ModeAB)
+                btnBPoint.BackColor = System.Drawing.Color.Transparent;
+            else
+                mf.gyd.isOkToAddDesPoints = false;
+
+            mf.gyd.EditGuidanceLine = null;
             panelPick.Visible = true;
             panelAPlus.Visible = false;
             panelName.Visible = false;
-
             this.Size = new System.Drawing.Size(470, 360);
-
             UpdateLineList();
-            btnBPoint.BackColor = System.Drawing.Color.Transparent;
-
-            mf.gyd.EditGuidanceLine = null;
         }
 
         private void btnAPoint_Click(object sender, EventArgs e)
         {
-            vec3 fix = new vec3(mf.pivotAxlePos);
+            if (ModeAB)
+            {
+                vec3 fix = new vec3(mf.pivotAxlePos);
 
-            mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(fix.easting + Math.Cos(fix.heading) * mf.tool.toolOffset, fix.northing - Math.Sin(fix.heading) * mf.tool.toolOffset, fix.heading));
+                mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(fix.easting + Math.Cos(fix.heading) * mf.tool.toolOffset, fix.northing - Math.Sin(fix.heading) * mf.tool.toolOffset, fix.heading));
 
-            nudHeading.Enabled = true;
-            nudHeading.Value = (decimal)glm.toDegrees(fix.heading);
+                nudHeading.Enabled = true;
+                nudHeading.Value = (decimal)glm.toDegrees(fix.heading);
 
+                btnEnter_APlus.Enabled = true;
+            }
+            else
+            {
+                mf.gyd.isOkToAddDesPoints = true;
+                btnPausePlay.Enabled = true;
+                btnPausePlay.Visible = true;
+            }
             btnBPoint.Enabled = true;
             btnAPoint.Enabled = false;
-
-            btnEnter_APlus.Enabled = true;
         }
 
         private void btnBPoint_Click(object sender, EventArgs e)
         {
-            vec3 fix = new vec3(mf.pivotAxlePos);
+            if (ModeAB)
+            {
+                vec3 fix = new vec3(mf.pivotAxlePos);
 
-            btnBPoint.BackColor = System.Drawing.Color.Teal;
+                btnBPoint.BackColor = System.Drawing.Color.Teal;
 
-            vec3 tt = new vec3(fix.easting + Math.Cos(fix.heading) * mf.tool.toolOffset, fix.northing - Math.Sin(fix.heading) * mf.tool.toolOffset, fix.heading);
+                vec3 tt = new vec3(fix.easting + Math.Cos(fix.heading) * mf.tool.toolOffset, fix.northing - Math.Sin(fix.heading) * mf.tool.toolOffset, fix.heading);
 
-            // heading based on AB points
-            double heading = Math.Atan2(tt.easting - mf.gyd.EditGuidanceLine.curvePts[0].easting,
-                tt.northing - mf.gyd.EditGuidanceLine.curvePts[0].northing);
-            if (heading < 0) heading += glm.twoPI;
-            tt.heading = heading;
+                // heading based on AB points
+                double heading = Math.Atan2(tt.easting - mf.gyd.EditGuidanceLine.curvePts[0].easting,
+                    tt.northing - mf.gyd.EditGuidanceLine.curvePts[0].northing);
+                if (heading < 0) heading += glm.twoPI;
+                tt.heading = heading;
 
-            if (mf.gyd.EditGuidanceLine.curvePts.Count > 1)
-                mf.gyd.EditGuidanceLine.curvePts[1] = tt;
+                if (mf.gyd.EditGuidanceLine.curvePts.Count > 1)
+                    mf.gyd.EditGuidanceLine.curvePts[1] = tt;
+                else
+                    mf.gyd.EditGuidanceLine.curvePts.Add(tt);
+
+                nudHeading.Value = (decimal)glm.toDegrees(heading);
+
+                textBox1.Text = "AB " +
+                    (Math.Round(glm.toDegrees(heading), 1)).ToString(CultureInfo.InvariantCulture) +
+                    "\u00B0 " + mf.FindDirection(heading);
+            }
             else
-                mf.gyd.EditGuidanceLine.curvePts.Add(tt);
+            {
+                mf.gyd.isOkToAddDesPoints = false;
+                panelAPlus.Visible = false;
+                panelName.Visible = true;
 
-            nudHeading.Value = (decimal)glm.toDegrees(heading);
+                int cnt = mf.gyd.EditGuidanceLine.curvePts.Count;
+                if (cnt > 3)
+                {
+                    //make sure distance isn't too big between points on Turn
+                    for (int i = 0; i < cnt - 1; i++)
+                    {
+                        int j = i + 1;
+                        //if (j == cnt) j = 0;
+                        double distance = glm.Distance(mf.gyd.EditGuidanceLine.curvePts[i], mf.gyd.EditGuidanceLine.curvePts[j]);
+                        if (distance > 1.2)
+                        {
+                            vec3 pointB = new vec3((mf.gyd.EditGuidanceLine.curvePts[i].easting + mf.gyd.EditGuidanceLine.curvePts[j].easting) / 2.0,
+                                (mf.gyd.EditGuidanceLine.curvePts[i].northing + mf.gyd.EditGuidanceLine.curvePts[j].northing) / 2.0,
+                                mf.gyd.EditGuidanceLine.curvePts[i].heading);
 
-            textBox1.Text = "AB " +
-                (Math.Round(glm.toDegrees(heading), 1)).ToString(CultureInfo.InvariantCulture) +
-                "\u00B0 " + mf.FindDirection(heading);
+                            mf.gyd.EditGuidanceLine.curvePts.Insert(j, pointB);
+                            cnt = mf.gyd.EditGuidanceLine.curvePts.Count;
+                            i = -1;
+                        }
+                    }
+
+                    //calculate average heading of line
+                    double x = 0, y = 0;
+                    foreach (vec3 pt in mf.gyd.EditGuidanceLine.curvePts)
+                    {
+                        x += Math.Cos(pt.heading);
+                        y += Math.Sin(pt.heading);
+                    }
+                    x /= mf.gyd.EditGuidanceLine.curvePts.Count;
+                    y /= mf.gyd.EditGuidanceLine.curvePts.Count;
+                    double aveLineHeading = Math.Atan2(y, x);
+                    if (aveLineHeading < 0) aveLineHeading += glm.twoPI;
+
+                    //build the tail extensions
+                    AddFirstLastPoints();
+                    SmoothAB(4);
+                    mf.gyd.EditGuidanceLine.curvePts.CalculateHeadings(false);
+
+                    panelAPlus.Visible = false;
+                    panelName.Visible = true;
+
+                    textBox1.Text = "Cu " +
+                        (Math.Round(glm.toDegrees(aveLineHeading), 1)).ToString(CultureInfo.InvariantCulture) +
+                        "\u00B0 " + mf.FindDirection(aveLineHeading);
+                }
+                else
+                {
+                    mf.gyd.EditGuidanceLine.curvePts?.Clear();
+
+                    panelPick.Visible = true;
+                    panelAPlus.Visible = false;
+                    panelName.Visible = false;
+
+                    this.Size = new System.Drawing.Size(470, 360);
+
+                    UpdateLineList();
+                }
+            }
         }
 
         private void nudHeading_Click(object sender, EventArgs e)
@@ -169,16 +248,27 @@ namespace AgOpenGPS
             panelPick.Visible = false;
             panelAPlus.Visible = true;
             panelName.Visible = false;
-
             btnAPoint.Enabled = true;
             btnBPoint.Enabled = false;
-            nudHeading.Enabled = false;
-
-            btnEnter_APlus.Enabled = false;
-
-            mf.gyd.EditGuidanceLine = new CGuidanceLine(Mode.AB);
-
             this.Size = new System.Drawing.Size(270, 360);
+
+            if (ModeAB)
+            {
+                btnManual.Visible = true;
+                btnPausePlay.Visible = false;
+                nudHeading.Enabled = false;
+                btnEnter_APlus.Enabled = false;
+
+                mf.gyd.EditGuidanceLine = new CGuidanceLine(Mode.AB);
+            }
+            else
+            {
+                btnManual.Visible = false;
+                nudHeading.Visible = false;
+                btnEnter_APlus.Visible = false;
+                btnPausePlay.Enabled = false;
+                mf.gyd.EditGuidanceLine = new CGuidanceLine(Mode.Curve);
+            }
         }
 
         private void btnEditName_Click(object sender, EventArgs e)
@@ -189,7 +279,7 @@ namespace AgOpenGPS
                 if (idx > -1)
                 {
                     textBox1.Text = mf.gyd.curveArr[idx].Name.Trim();
-
+                    EditName = true;
                     panelPick.Visible = false;
                     panelName.Visible = true;
                     this.Size = new System.Drawing.Size(270, 360);
@@ -201,30 +291,34 @@ namespace AgOpenGPS
         {
             if (textBox1.Text.Trim() == "") textBox1.Text = "No Name " + DateTime.Now.ToString("hh:mm:ss", CultureInfo.InvariantCulture);
 
-            if (mf.gyd.EditGuidanceLine != null)
-            {
-                string text = textBox1.Text.Trim();
-                while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
-                    text += " ";
+            string text = textBox1.Text.Trim();
+            while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                text += " ";
 
+            if (EditName)
+            {
+                EditName = false;
+                if (lvLines.SelectedItems.Count > 0)
+                {
+                    int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
+                    if (idx > -1)
+                    {
+                        mf.gyd.curveArr[idx].Name = text;
+                    }
+                }
+            }
+            else if (mf.gyd.EditGuidanceLine != null && mf.gyd.EditGuidanceLine.curvePts.Count > 1)
+            {
                 mf.gyd.EditGuidanceLine.Name = text;
                 mf.gyd.curveArr.Add(mf.gyd.EditGuidanceLine);
                 mf.gyd.EditGuidanceLine = null;
             }
-            else if (lvLines.SelectedItems.Count > 0)
-            {
-                int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
-                if (idx > -1)
-                {
-                    string text = textBox1.Text.Trim();
-                    while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
-                        text += " ";
 
-                    mf.gyd.curveArr[idx].Name = text;
-                }
-            }
+            if (ModeAB)
+                mf.FileSaveABLines();
+            else
+                mf.FileSaveCurveLines();
 
-            mf.FileSaveABLines();
             panelPick.Visible = true;
             panelAPlus.Visible = false;
             panelName.Visible = false;
@@ -248,10 +342,10 @@ namespace AgOpenGPS
 
                     this.Size = new System.Drawing.Size(270, 360);
 
-                    CGuidanceLine New = new CGuidanceLine(Mode.AB);
-                    New.curvePts.AddRange(mf.gyd.curveArr[idx].curvePts.ToArray());
-                    mf.gyd.EditGuidanceLine = New;
                     textBox1.Text = mf.gyd.curveArr[idx].Name.Trim() + " Copy";
+
+                    mf.gyd.EditGuidanceLine = new CGuidanceLine(mf.gyd.curveArr[idx].mode);
+                    mf.gyd.EditGuidanceLine.curvePts.AddRange(mf.gyd.curveArr[idx].curvePts.ToArray());
                 }
             }
         }
@@ -271,8 +365,10 @@ namespace AgOpenGPS
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
                     mf.gyd.ReverseGuidanceLine(mf.gyd.curveArr[idx]);
-
-                mf.FileSaveABLines();
+                if (ModeAB)
+                    mf.FileSaveABLines();
+                else
+                    mf.FileSaveCurveLines();
 
                 UpdateLineList();
                 lvLines.Focus();
@@ -289,6 +385,9 @@ namespace AgOpenGPS
                     if (mf.gyd.currentABLine.Name == mf.gyd.curveArr[idx].Name)
                         mf.gyd.currentABLine = null;
 
+                    if (mf.gyd.currentCurveLine == mf.gyd.curveArr[idx])
+                        mf.gyd.currentCurveLine = null;
+
                     if (mf.gyd.currentGuidanceLine.Name == mf.gyd.curveArr[idx].Name)
                     {
                         mf.gyd.isValid = false;
@@ -301,8 +400,10 @@ namespace AgOpenGPS
                     mf.gyd.curveArr.RemoveAt(idx);
                     lvLines.SelectedItems[0].Remove();
                 }
-
-                mf.FileSaveABLines();
+                if (ModeAB)
+                    mf.FileSaveABLines();
+                else
+                    mf.FileSaveCurveLines();
             }
 
             UpdateLineList();
@@ -313,23 +414,38 @@ namespace AgOpenGPS
         {
             mf.gyd.isValid = false;
             mf.gyd.moveDistance = 0;
+            mf.gyd.isOkToAddDesPoints = false;
+            mf.gyd.EditGuidanceLine = null;
 
             if (isSaving && lvLines.SelectedItems.Count > 0)
             {
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
                 {
-                    mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = new CGuidanceLine(mf.gyd.curveArr[idx]);
+                    mf.gyd.currentGuidanceLine = new CGuidanceLine(mf.gyd.curveArr[idx]);
+
+                    if (ModeAB)
+                        mf.gyd.currentABLine = mf.gyd.currentGuidanceLine;
+                    else
+                        mf.gyd.currentCurveLine = mf.gyd.currentGuidanceLine;
 
                     mf.EnableYouTurnButtons();
                 }
             }
             else
             {
-                mf.btnABLine.Image = Properties.Resources.ABLineOff;
-                mf.gyd.isBtnABLineOn = false;
-
-                mf.gyd.currentABLine = null;
+                if (ModeAB)
+                {
+                    mf.btnABLine.Image = Properties.Resources.ABLineOff;
+                    mf.gyd.isBtnABLineOn = false;
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = null;
+                }
+                else
+                {
+                    mf.gyd.isBtnCurveOn = false;
+                    mf.btnCurve.Image = Properties.Resources.CurveOff;
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = null;
+                }
 
                 mf.DisableYouTurnButtons();
                 if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
@@ -362,6 +478,78 @@ namespace AgOpenGPS
                 {
                     btnCancel_APlus.PerformClick();
                 }
+            }
+        }
+
+        private void btnPausePlay_Click(object sender, EventArgs e)
+        {
+            mf.gyd.isOkToAddDesPoints = !mf.gyd.isOkToAddDesPoints;
+            btnPausePlay.Image = mf.gyd.isOkToAddDesPoints ? Properties.Resources.boundaryPause : Properties.Resources.BoundaryRecord;
+        }
+
+        public void SmoothAB(int smPts)
+        {
+            //count the reference list of original curve
+            int cnt = mf.gyd.EditGuidanceLine.curvePts.Count;
+
+            //the temp array
+            vec3[] arr = new vec3[cnt];
+
+            //read the points before and after the setpoint
+            for (int s = 0; s < smPts / 2; s++)
+            {
+                arr[s].easting = mf.gyd.EditGuidanceLine.curvePts[s].easting;
+                arr[s].northing = mf.gyd.EditGuidanceLine.curvePts[s].northing;
+                arr[s].heading = mf.gyd.EditGuidanceLine.curvePts[s].heading;
+            }
+
+            for (int s = cnt - (smPts / 2); s < cnt; s++)
+            {
+                arr[s].easting = mf.gyd.EditGuidanceLine.curvePts[s].easting;
+                arr[s].northing = mf.gyd.EditGuidanceLine.curvePts[s].northing;
+                arr[s].heading = mf.gyd.EditGuidanceLine.curvePts[s].heading;
+            }
+
+            //average them - center weighted average
+            for (int i = smPts / 2; i < cnt - (smPts / 2); i++)
+            {
+                for (int j = -smPts / 2; j < smPts / 2; j++)
+                {
+                    arr[i].easting += mf.gyd.EditGuidanceLine.curvePts[j + i].easting;
+                    arr[i].northing += mf.gyd.EditGuidanceLine.curvePts[j + i].northing;
+                }
+                arr[i].easting /= smPts;
+                arr[i].northing /= smPts;
+                arr[i].heading = mf.gyd.EditGuidanceLine.curvePts[i].heading;
+            }
+
+            //make a list to draw
+            mf.gyd.EditGuidanceLine.curvePts?.Clear();
+            for (int i = 0; i < cnt; i++)
+            {
+                mf.gyd.EditGuidanceLine.curvePts.Add(arr[i]);
+            }
+        }
+
+        public void AddFirstLastPoints()
+        {
+            int ptCnt = mf.gyd.EditGuidanceLine.curvePts.Count - 1;
+            for (int i = 1; i < 200; i++)
+            {
+                vec3 pt = new vec3(mf.gyd.EditGuidanceLine.curvePts[ptCnt]);
+                pt.easting += (Math.Sin(pt.heading) * i);
+                pt.northing += (Math.Cos(pt.heading) * i);
+                mf.gyd.EditGuidanceLine.curvePts.Add(pt);
+            }
+
+            //and the beginning
+            vec3 start = new vec3(mf.gyd.EditGuidanceLine.curvePts[0]);
+            for (int i = 1; i < 200; i++)
+            {
+                vec3 pt = new vec3(start);
+                pt.easting -= (Math.Sin(pt.heading) * i);
+                pt.northing -= (Math.Cos(pt.heading) * i);
+                mf.gyd.EditGuidanceLine.curvePts.Insert(0, pt);
             }
         }
 
@@ -441,9 +629,9 @@ namespace AgOpenGPS
             MessageBox.Show(gStr.ha_btnCancelCreate, gStr.gsHelp);
         }
 
-        private void btnCancelEditName_HelpRequested(object sender, HelpEventArgs hlpevent)
+        private void btnPausePlay_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnCancelCreate, gStr.gsHelp);
+            MessageBox.Show(gStr.hcur_btnPausePlay, gStr.gsHelp);
         }
 
         private void btnEnter_APlus_HelpRequested(object sender, HelpEventArgs hlpevent)
@@ -455,12 +643,6 @@ namespace AgOpenGPS
         {
             MessageBox.Show(gStr.ha_btnEnterContinue, gStr.gsHelp);
         }
-
-        private void btnSaveEditName_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.ha_btnEnterContinue, gStr.gsHelp);
-        }
-
         #endregion
     }
 }
