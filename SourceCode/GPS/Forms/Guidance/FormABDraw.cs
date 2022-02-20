@@ -224,6 +224,8 @@ namespace AgOpenGPS
                     mf.gyd.currentCurveLine = null;
                 if (mf.gyd.currentGuidanceLine?.Name == selectedCurveLine.Name)
                 {
+                    mf.gyd.isValid = false;
+                    mf.gyd.moveDistance = 0;
                     mf.gyd.currentGuidanceLine = null;
 
                     if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
@@ -247,6 +249,8 @@ namespace AgOpenGPS
                     mf.gyd.currentABLine = null;
                 if (mf.gyd.currentGuidanceLine?.Name == selectedABLine.Name)
                 {
+                    mf.gyd.isValid = false;
+                    mf.gyd.moveDistance = 0;
                     mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = null;
 
                     if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
@@ -472,8 +476,12 @@ namespace AgOpenGPS
                 if (aveLineHeading < 0) aveLineHeading += glm.twoPI;
 
                 //create a name
-                New.Name = (Math.Round(glm.toDegrees(aveLineHeading), 1)).ToString(CultureInfo.InvariantCulture)
+                string text = (Math.Round(glm.toDegrees(aveLineHeading), 1)).ToString(CultureInfo.InvariantCulture)
                      + "\u00B0" + mf.FindDirection(aveLineHeading) + DateTime.Now.ToString("hh:mm:ss", CultureInfo.InvariantCulture);
+
+                while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                    text += " ";
+                New.Name = text;
 
                 //build the tail extensions
                 AddFirstLastPoints(New);
@@ -514,8 +522,11 @@ namespace AgOpenGPS
             New.curvePts.Add(new vec3(New.curvePts[0].easting + Math.Sin(abHead), New.curvePts[0].northing + Math.Cos(abHead), abHead));
 
             //create a name
-            New.Name = (Math.Round(glm.toDegrees(abHead), 1)).ToString(CultureInfo.InvariantCulture)
+            string text = (Math.Round(glm.toDegrees(abHead), 1)).ToString(CultureInfo.InvariantCulture)
                  + "\u00B0" + mf.FindDirection(abHead) + DateTime.Now.ToString("hh:mm:ss", CultureInfo.InvariantCulture);
+            while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+            text += " ";
+            New.Name = text;
 
             mf.gyd.curveArr.Add(New);
             selectedABLine = New;

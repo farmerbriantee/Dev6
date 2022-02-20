@@ -1,5 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AgOpenGPS
@@ -175,8 +174,7 @@ namespace AgOpenGPS
 
         private void GetDubinsPath(vec3 goal)
         {
-            CDubins.turningRadius = mf.vehicle.minTurningRadius * 1.2;
-            CDubins dubPath = new CDubins();
+            CDubins dubPath = new CDubins(mf.vehicle.minTurningRadius * 1.2);
 
             // current psition
             vec3 pivotAxlePosRP = mf.pivotAxlePos;

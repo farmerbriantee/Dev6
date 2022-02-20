@@ -135,7 +135,6 @@ namespace AgOpenGPS
             if (currentLine != null)
             {
                 mf.gyd.isValid = false;
-                mf.gyd.lastSecond = 0;
                 mf.gyd.ReverseGuidanceLine(currentLine);
 
                 if (currentLine.curvePts.Count > 0)

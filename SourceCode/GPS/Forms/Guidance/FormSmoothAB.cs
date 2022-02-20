@@ -134,8 +134,10 @@ namespace AgOpenGPS
                 int cnt = mf.gyd.EditGuidanceLine.curvePts.Count;
                 if (cnt > 1)
                 {
-                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = mf.gyd.EditGuidanceLine;
+                    mf.gyd.isValid = false;
+                    mf.gyd.moveDistance = 0;
 
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = mf.gyd.EditGuidanceLine;
                     mf.gyd.EditGuidanceLine.curvePts.CalculateHeadings(mf.gyd.EditGuidanceLine.mode.HasFlag(Mode.Boundary));
                 }
             }

@@ -13,12 +13,71 @@ namespace AgOpenGPS
             else
             {
                 if (isContourBtnOn)
-                    BuildCurrentContourLine(pivot);
-                else if (currentGuidanceLine != null)
+                    FindCurrentContourLine(pivot);
+
+                if (currentGuidanceLine != null)
                     BuildCurrentCurveLine(pivot, currentGuidanceLine);
-                else return;
+                else
+                {
+                    curList.Clear();
+                    isLocked = false;
+                    return;
+                }
 
                 CalculateSteerAngle(pivot, steer, isYouTurnTriggered ? ytList : curList);
+            }
+        }
+
+        public void FindCurrentContourLine(vec3 pivot)
+        {
+            if ((mf.secondsSinceStart - lastSecondSearch) < (curList.Count == 0 ? 0.3 : 2.0)) return;
+
+            lastSecondSearch = mf.secondsSinceStart;
+            int ptCount;
+            double minDistA = double.MaxValue;
+
+            if (!isLocked)
+            {
+                int stripNum = -1;
+                for (int s = 0; s < curveArr.Count; s++)
+                {
+                    if (curveArr[s].mode.HasFlag(Mode.Contour))
+                    {
+                        ptCount = curveArr[s].curvePts.Count - (curveArr[s] == creatingContour ? backSpacing : 1);
+                        if (ptCount == 0) continue;
+                        double dist;
+                        for (int p = 0; p < ptCount; p += 6)
+                        {
+                            dist = glm.Distance(pivot, curveArr[s].curvePts[p]);
+                            if (dist < minDistA)
+                            {
+                                minDistA = dist;
+                                stripNum = s;
+                            }
+                        }
+
+                        //catch the last point
+                        dist = glm.Distance(pivot, curveArr[s].curvePts[ptCount]);
+                        if (dist < minDistA)
+                        {
+                            minDistA = dist;
+                            stripNum = s;
+                        }
+                    }
+                }
+
+                if (stripNum < 0)
+                {
+                    isValid = false;
+                    moveDistance = 0;
+                    currentGuidanceLine = null;
+                }
+                else if (currentGuidanceLine != curveArr[stripNum])
+                {
+                    isValid = false;
+                    moveDistance = 0;
+                    currentGuidanceLine = curveArr[stripNum];
+                }
             }
         }
 
@@ -27,18 +86,19 @@ namespace AgOpenGPS
             //move the ABLine over based on the overlap amount set in vehicle
             double widthMinusOverlap = mf.tool.toolWidth - mf.tool.toolOverlap;
 
-            if (!isValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh)))
+            if (!isValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh || refList == creatingContour)))
             {
                 double minDistA = double.MaxValue, minDistB;
 
-                int refCount = refList.curvePts.Count;
+                int refCount = refList.curvePts.Count - (refList == creatingContour ? backSpacing : 0);
                 if (refList.curvePts.Count < 2)
                 {
-                    curList?.Clear();
+                    curList.Clear();
+                    isLocked = false;
                     return;
                 }
 
-                if (!isContourBtnOn)
+                if (!refList.mode.HasFlag(Mode.Contour))
                 {
                     //guidance look ahead distance based on time or tool width at least 
                     double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
@@ -107,10 +167,21 @@ namespace AgOpenGPS
                 if (!isValid) oldIsHeadingSameWay = !isHeadingSameWay;
             }
 
-            if (howManyPathsAway != oldHowManyPathsAway || oldIsHeadingSameWay != isHeadingSameWay)
+            if (refList?.mode.HasFlag(Mode.Contour) == true)
+            {
+                if (howManyPathsAway > 1)
+                    howManyPathsAway = 1;
+                if (howManyPathsAway < -1)
+                    howManyPathsAway = -1;
+            }
+
+            if (howManyPathsAway != oldHowManyPathsAway || (oldIsHeadingSameWay != isHeadingSameWay && mf.tool.toolOffset != 0))
             {
                 oldHowManyPathsAway = howManyPathsAway;
                 oldIsHeadingSameWay = isHeadingSameWay;
+                curList.Clear();
+
+                if (refList == creatingContour && howManyPathsAway == 0) return;
 
                 double distAway = widthMinusOverlap * howManyPathsAway + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset);
 
@@ -137,17 +208,18 @@ namespace AgOpenGPS
             }
             else
             {
-                for (int i = 0; i < refList.curvePts.Count; i++)
+                int ptCount = refList.curvePts.Count - (refList == creatingContour ? backSpacing : 0);
+
+                for (int i = 0; i < ptCount; i++)
                 {
                     vec3 point = new vec3(
-                    refList.curvePts[i].easting + (Math.Sin(glm.PIBy2 + refList.curvePts[i].heading) * distAway),
-                    refList.curvePts[i].northing + (Math.Cos(glm.PIBy2 + refList.curvePts[i].heading) * distAway),
+                    refList.curvePts[i].easting + Math.Cos(refList.curvePts[i].heading) * distAway,
+                    refList.curvePts[i].northing - Math.Sin(refList.curvePts[i].heading) * distAway,
                     refList.curvePts[i].heading);
                     bool Add = true;
-                    for (int t = 0; t < refList.curvePts.Count; t++)
+                    for (int t = 0; t < ptCount; t++)
                     {
-                        double dist = ((point.easting - refList.curvePts[t].easting) * (point.easting - refList.curvePts[t].easting))
-                            + ((point.northing - refList.curvePts[t].northing) * (point.northing - refList.curvePts[t].northing));
+                        double dist = glm.DistanceSquared(point, refList.curvePts[t]);
                         if (dist < distSqAway)
                         {
                             Add = false;
@@ -158,8 +230,7 @@ namespace AgOpenGPS
                     {
                         if (buildList.Count > 0)
                         {
-                            double dist = ((point.easting - buildList[buildList.Count - 1].easting) * (point.easting - buildList[buildList.Count - 1].easting))
-                                + ((point.northing - buildList[buildList.Count - 1].northing) * (point.northing - buildList[buildList.Count - 1].northing));
+                            double dist = glm.DistanceSquared(point, buildList[buildList.Count - 1]);
                             if (dist > 1)
                                 buildList.Add(point);
                         }
@@ -167,55 +238,21 @@ namespace AgOpenGPS
                     }
                 }
 
-                int cnt = buildList.Count;
-                if (cnt > 6)
+                if (refList.mode.HasFlag(Mode.Curve))
                 {
-                    vec3[] arr = new vec3[cnt];
-                    buildList.CopyTo(arr);
-
-                    for (int i = 1; i < (buildList.Count - 1); i++)
+                    int cnt = buildList.Count;
+                    if (cnt > 6)
                     {
-                        arr[i].easting = (buildList[i - 1].easting + buildList[i].easting + buildList[i + 1].easting) / 3;
-                        arr[i].northing = (buildList[i - 1].northing + buildList[i].northing + buildList[i + 1].northing) / 3;
-                    }
-                    buildList.Clear();
+                        vec3[] arr = new vec3[cnt];
+                        buildList.CopyTo(arr);
 
-                    for (int i = 0; i < (arr.Length - 1); i++)
-                    {
-                        arr[i].heading = Math.Atan2(arr[i + 1].easting - arr[i].easting, arr[i + 1].northing - arr[i].northing);
-                        if (arr[i].heading < 0) arr[i].heading += glm.twoPI;
-                        if (arr[i].heading >= glm.twoPI) arr[i].heading -= glm.twoPI;
-                    }
-
-                    arr[arr.Length - 1].heading = arr[arr.Length - 2].heading;
-
-
-                    if (mf.tool.isToolTrailing)
-                    {
-                        //depending on hitch is different profile of draft
-                        double hitch;
-                        if (mf.tool.isToolTBT && mf.tool.toolTankTrailingHitchLength < 0)
+                        for (int i = 1; i < (buildList.Count - 1); i++)
                         {
-                            hitch = mf.tool.toolTankTrailingHitchLength * 0.85;
-                            hitch += mf.tool.toolTrailingHitchLength * 0.65;
+                            arr[i].easting = (buildList[i - 1].easting + buildList[i].easting + buildList[i + 1].easting) / 3;
+                            arr[i].northing = (buildList[i - 1].northing + buildList[i].northing + buildList[i + 1].northing) / 3;
                         }
-                        else hitch = mf.tool.toolTrailingHitchLength * 1.0;// - mf.vehicle.wheelbase;
+                        buildList.Clear();
 
-                        //move the line forward based on hitch length ratio
-                        for (int i = 0; i < arr.Length; i++)
-                        {
-                            arr[i].easting -= Math.Sin(arr[i].heading) * (hitch);
-                            arr[i].northing -= Math.Cos(arr[i].heading) * (hitch);
-                        }
-
-                        ////average the points over 3, center weighted
-                        //for (int i = 1; i < arr.Length - 2; i++)
-                        //{
-                        //    arr2[i].easting = (arr[i - 1].easting + arr[i].easting + arr[i + 1].easting) / 3;
-                        //    arr2[i].northing = (arr[i - 1].northing + arr[i].northing + arr[i + 1].northing) / 3;
-                        //}
-
-                        //recalculate the heading
                         for (int i = 0; i < (arr.Length - 1); i++)
                         {
                             arr[i].heading = Math.Atan2(arr[i + 1].easting - arr[i].easting, arr[i + 1].northing - arr[i].northing);
@@ -224,40 +261,77 @@ namespace AgOpenGPS
                         }
 
                         arr[arr.Length - 1].heading = arr[arr.Length - 2].heading;
-                    }
 
-                    //replace the array 
-                    //curList.AddRange(arr);
-                    cnt = arr.Length;
-                    double distance;
-                    double spacing = 0.5;
 
-                    //add the first point of loop - it will be p1
-                    buildList.Add(arr[0]);
-                    buildList.Add(arr[1]);
-
-                    for (int i = 0; i < cnt - 3; i++)
-                    {
-                        // add p1
-                        buildList.Add(arr[i + 1]);
-
-                        distance = glm.Distance(arr[i + 1], arr[i + 2]);
-
-                        if (distance > spacing)
+                        if (mf.tool.isToolTrailing)
                         {
-                            int loopTimes = (int)(distance / spacing + 1);
-                            for (int j = 1; j < loopTimes; j++)
+                            //depending on hitch is different profile of draft
+                            double hitch;
+                            if (mf.tool.isToolTBT && mf.tool.toolTankTrailingHitchLength < 0)
                             {
-                                vec3 pos = new vec3(glm.Catmull(j / (double)(loopTimes), arr[i], arr[i + 1], arr[i + 2], arr[i + 3]));
-                                buildList.Add(pos);
+                                hitch = mf.tool.toolTankTrailingHitchLength * 0.85;
+                                hitch += mf.tool.toolTrailingHitchLength * 0.65;
+                            }
+                            else hitch = mf.tool.toolTrailingHitchLength * 1.0;// - mf.vehicle.wheelbase;
+
+                            //move the line forward based on hitch length ratio
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                arr[i].easting -= Math.Sin(arr[i].heading) * (hitch);
+                                arr[i].northing -= Math.Cos(arr[i].heading) * (hitch);
+                            }
+
+                            ////average the points over 3, center weighted
+                            //for (int i = 1; i < arr.Length - 2; i++)
+                            //{
+                            //    arr2[i].easting = (arr[i - 1].easting + arr[i].easting + arr[i + 1].easting) / 3;
+                            //    arr2[i].northing = (arr[i - 1].northing + arr[i].northing + arr[i + 1].northing) / 3;
+                            //}
+
+                            //recalculate the heading
+                            for (int i = 0; i < (arr.Length - 1); i++)
+                            {
+                                arr[i].heading = Math.Atan2(arr[i + 1].easting - arr[i].easting, arr[i + 1].northing - arr[i].northing);
+                                if (arr[i].heading < 0) arr[i].heading += glm.twoPI;
+                                if (arr[i].heading >= glm.twoPI) arr[i].heading -= glm.twoPI;
+                            }
+
+                            arr[arr.Length - 1].heading = arr[arr.Length - 2].heading;
+                        }
+
+                        //replace the array 
+                        //curList.AddRange(arr);
+                        cnt = arr.Length;
+                        double distance;
+                        double spacing = 0.5;
+
+                        //add the first point of loop - it will be p1
+                        buildList.Add(arr[0]);
+                        buildList.Add(arr[1]);
+
+                        for (int i = 0; i < cnt - 3; i++)
+                        {
+                            // add p1
+                            buildList.Add(arr[i + 1]);
+
+                            distance = glm.Distance(arr[i + 1], arr[i + 2]);
+
+                            if (distance > spacing)
+                            {
+                                int loopTimes = (int)(distance / spacing + 1);
+                                for (int j = 1; j < loopTimes; j++)
+                                {
+                                    vec3 pos = new vec3(glm.Catmull(j / (double)(loopTimes), arr[i], arr[i + 1], arr[i + 2], arr[i + 3]));
+                                    buildList.Add(pos);
+                                }
                             }
                         }
+
+                        buildList.Add(arr[cnt - 2]);
+                        buildList.Add(arr[cnt - 1]);
+
+                        buildList.CalculateHeadings(false);
                     }
-
-                    buildList.Add(arr[cnt - 2]);
-                    buildList.Add(arr[cnt - 1]);
-
-                    buildList.CalculateHeadings(false);
                 }
             }
             return buildList;
@@ -478,7 +552,6 @@ namespace AgOpenGPS
         {
             isValid = false;
 
-            lastSecond = 0;
             if (GuidanceLine != null)
             {
                 int cnt = GuidanceLine.curvePts.Count;
@@ -499,6 +572,8 @@ namespace AgOpenGPS
 
         public void ReverseGuidanceLine(CGuidanceLine guidanceLine)
         {
+            isValid = false;
+
             if (guidanceLine != null)
             {
                 int cnt = guidanceLine.curvePts.Count;

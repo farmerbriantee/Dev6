@@ -29,11 +29,14 @@ namespace AgOpenGPS
 
         private readonly List<vec3> dubinsShortestPathList = new List<vec3>();
 
+        public CDubins(double _turningRadius)
+        {
+            turningRadius = _turningRadius;
+        }
+
         //takes 2 points and headings to create a path - returns list of vec3 points and headings
         public List<vec3> GenerateDubins(vec3 _start, vec3 _goal)
         {
-            turningRadius = Properties.Vehicle.Default.setVehicle_minTurningRadius;
-
             //positions and heading
             startPos.easting = _start.easting;
             startPos.northing = _start.northing;

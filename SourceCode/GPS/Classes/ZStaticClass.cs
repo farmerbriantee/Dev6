@@ -118,11 +118,36 @@ namespace AgOpenGPS
             return false;
         }
 
-        public static bool GetLineIntersection(vec3 PointAA, vec3 PointAB, vec2 PointBA, vec2 PointBB, out vec2 Crossing, out double TimeA, out double TimeB, bool Limit = false)
+        public static bool GetLineIntersection(vec3 PointAA, vec3 PointAB, vec2 PointBA, vec2 PointBB, out vec3 Crossing, out double TimeA, out double TimeB, bool Limit = false)
         {
             TimeA = -1;
             TimeB = -1;
-            Crossing = new vec2();
+            Crossing = new vec3();
+            double denominator = (PointAB.northing - PointAA.northing) * (PointBB.easting - PointBA.easting) - (PointBB.northing - PointBA.northing) * (PointAB.easting - PointAA.easting);
+
+            if (denominator < -0.0001 || denominator > 0.0001)
+            {
+                TimeA = ((PointBB.northing - PointBA.northing) * (PointAA.easting - PointBA.easting) - (PointAA.northing - PointBA.northing) * (PointBB.easting - PointBA.easting)) / denominator;
+
+                if (Limit || (TimeA > 0.0 && TimeA < 1.0))
+                {
+                    TimeB = ((PointAB.northing - PointAA.northing) * (PointAA.easting - PointBA.easting) - (PointAA.northing - PointBA.northing) * (PointAB.easting - PointAA.easting)) / denominator;
+                    if (Limit || (TimeB > 0.0 && TimeB < 1.0))
+                    {
+                        Crossing = PointAA + ((PointAB - PointAA) * TimeA);
+                        return true;
+                    }
+                    else return false;
+                }
+                else return false;
+            }
+            return false;
+        }
+        public static bool GetLineIntersection(vec3 PointAA, vec3 PointAB, vec3 PointBA, vec3 PointBB, out vec3 Crossing, out double TimeA, out double TimeB, bool Limit = false)
+        {
+            TimeA = -1;
+            TimeB = -1;
+            Crossing = new vec3();
             double denominator = (PointAB.northing - PointAA.northing) * (PointBB.easting - PointBA.easting) - (PointBB.northing - PointBA.northing) * (PointAB.easting - PointAA.easting);
 
             if (denominator < -0.0001 || denominator > 0.0001)
@@ -236,6 +261,190 @@ namespace AgOpenGPS
                 }
             }
             return OffsetPoints;
+        }
+
+        public static vec2 GetProportionPoint(this vec3 point, double segment, double length, double dx, double dy)
+        {
+            double factor = segment / length;
+            if (double.IsNaN(factor))
+                factor = 0;
+            return new vec2(point.easting - dy * factor, point.northing - dx * factor);
+        }
+
+        public static void CalculateRoundedCorner(this List<vec3> Points, double Radius, double Radius2, bool Loop, double MaxAngle, int Count1 = 0, int Count2 = int.MaxValue)
+        {
+            double tt = Math.Min(Math.Asin(0.5 / Radius), Math.Asin(0.5 / Radius2));
+            if (!double.IsNaN(tt)) MaxAngle = Math.Min(tt, MaxAngle);
+
+            vec3 tt3;
+            int A, B, C, oldA, OldC;
+            bool reverse = false;
+
+            for (B = Count1; B < Points.Count && B < Count2; B++)
+            {
+                if (!Loop && (B == 0 || B + 1 == Points.Count)) continue;
+                A = (B == 0) ? Points.Count - 1 : B - 1;
+                C = (B + 1 == Points.Count) ? 0 : B + 1;
+                bool stop = false;
+                double dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0, angle, segment = 0, length1 = 0, length2 = 0;
+                while (true)
+                {
+                    tt3 = Points[B];
+                    if (GetLineIntersection(Points[A], Points[(A + 1).Clamp(Points.Count)], Points[C], Points[(C - 1).Clamp(Points.Count)], out vec3 Crossing, out double Time, out _, true))
+                    {
+                        if (Time > -100 && Time < 100)
+                            tt3 = Crossing;
+                    }
+
+                    dx1 = tt3.northing - Points[A].northing;
+                    dy1 = tt3.easting - Points[A].easting;
+                    dx2 = tt3.northing - Points[C].northing;
+                    dy2 = tt3.easting - Points[C].easting;
+
+                    angle = Math.Atan2(dy1, dx1) - Math.Atan2(dy2, dx2);
+
+                    if (angle < 0) angle += glm.twoPI;
+                    if (angle > glm.twoPI) angle -= glm.twoPI;
+                    angle /= 2;
+
+                    double Tan = Math.Abs(Math.Tan(angle));
+
+                    angle = Math.Abs(angle);
+
+                    if ((angle > glm.PIBy2 - MaxAngle && angle < glm.PIBy2 + MaxAngle) || (angle > Math.PI - MaxAngle && angle < Math.PI + MaxAngle))
+                    {
+                        if (C - A > 2)//Check why this is somethimes wrong!
+                        {
+                            while (C - 1 > A)
+                            {
+                                C = C == 0 ? Points.Count - 1 : C - 1;
+                                Points.RemoveAt(C);
+                            }
+                        }
+                        stop = true;
+                        break;
+                    }
+
+                    reverse = angle > glm.PIBy2;
+
+                    segment = (reverse ? Radius2 : Radius) / Tan;
+
+                    length1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
+                    length2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+                    oldA = A;
+                    OldC = C;
+                    if (segment > length1)
+                    {
+                        if (Loop || (!Loop && A > 0)) A = (A == 0) ? Points.Count - 1 : A - 1;
+
+                        if (A == C)
+                        {
+                            stop = true;
+                            break;
+                        }
+                    }
+                    if (segment > length2)
+                    {
+                        if (Loop || (!Loop && C < Points.Count - 1)) C = (C + 1 == Points.Count) ? 0 : C + 1;
+                        if (C == A)
+                        {
+                            stop = true;
+                            break;
+                        }
+                    }
+                    else if (segment < length1)
+                    {
+                        Points[B] = tt3;
+                        break;
+                    }
+
+                    if (oldA == A && OldC == C)
+                    {
+                        stop = true;
+                        break;
+                    }
+                }
+                if (stop) continue;
+
+                bool Looping = (A > C);
+                while (C - 1 > A || Looping)
+                {
+                    if (C == 0)
+                    {
+                        if (A == Points.Count - 1) break;
+                        Looping = false;
+                    }
+
+                    C = C == 0 ? Points.Count - 1 : C - 1;
+
+                    if (A > C) A--;
+
+                    Points.RemoveAt(C);
+                    if (Count2 != int.MaxValue)
+                        Count2--;
+                }
+
+
+                B = A > B ? -1 : A;
+
+                vec2 p1Cross = tt3.GetProportionPoint(segment, length1, dx1, dy1);
+                vec2 p2Cross = tt3.GetProportionPoint(segment, length2, dx2, dy2);
+
+                if (reverse)
+                {
+                    vec2 test = p1Cross;
+                    p1Cross = p2Cross;
+                    p2Cross = test;
+                }
+
+                double dx = tt3.northing * 2 - p1Cross.northing - p2Cross.northing;
+                double dy = tt3.easting * 2 - p1Cross.easting - p2Cross.easting;
+                if (dx1 == 0 && dy1 == 0 || dx2 == 0 && dy2 == 0 || dx == 0 && dy == 0) continue;
+
+                double L = Math.Sqrt(dx * dx + dy * dy);
+                double d = Math.Sqrt(segment * segment + (reverse ? Radius2 : Radius) * (reverse ? Radius2 : Radius));
+                vec2 circlePoint = tt3.GetProportionPoint(d, L, dx, dy);
+
+                double startAngle = Math.Atan2(p1Cross.easting - circlePoint.easting, p1Cross.northing - circlePoint.northing);
+                double endAngle = Math.Atan2(p2Cross.easting - circlePoint.easting, p2Cross.northing - circlePoint.northing);
+
+                if (startAngle < 0) startAngle += glm.twoPI;
+                if (endAngle < 0) endAngle += glm.twoPI;
+
+
+                double sweepAngle;
+
+                if (((glm.twoPI - endAngle + startAngle) % glm.twoPI) < ((glm.twoPI - startAngle + endAngle) % glm.twoPI))
+                    sweepAngle = (glm.twoPI - endAngle + startAngle) % glm.twoPI;
+                else
+                    sweepAngle = (glm.twoPI - startAngle + endAngle) % glm.twoPI;
+
+                int sign = Math.Sign(sweepAngle);
+
+                if (reverse)
+                {
+                    sign = -sign;
+                    startAngle = endAngle;
+                }
+
+                int pointsCount = (int)Math.Round(Math.Abs(sweepAngle / MaxAngle));
+
+                double degreeFactor = sweepAngle / pointsCount;
+
+                vec3[] points = new vec3[pointsCount];
+
+                for (int j = 0; j < pointsCount; ++j)
+                {
+                    var pointX = circlePoint.northing + Math.Cos(startAngle + sign * (j + 1) * degreeFactor) * (reverse ? Radius2 : Radius);
+                    var pointY = circlePoint.easting + Math.Sin(startAngle + sign * (j + 1) * degreeFactor) * (reverse ? Radius2 : Radius);
+                    points[j] = new vec3(pointY, pointX, 0);
+                }
+
+                Points.InsertRange(B + 1, points);
+                if (Count2 != int.MaxValue)
+                    Count2 += pointsCount;
+                B += points.Length;
+            }
         }
 
         public class VertexPoint

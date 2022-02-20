@@ -206,8 +206,11 @@ namespace AgOpenGPS
             if (mf.gyd.EditGuidanceLine != null && mf.gyd.EditGuidanceLine.curvePts.Count > 1)
             {
                 if (textBox1.Text.Length == 0) textBox1.Text = "No Name " + DateTime.Now.ToString("hh:mm:ss", CultureInfo.InvariantCulture);
-
-                mf.gyd.EditGuidanceLine.Name = textBox1.Text.Trim();
+                
+                string text = textBox1.Text.Trim();
+                while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                    text += " ";
+                mf.gyd.EditGuidanceLine.Name = text;
 
                 mf.gyd.curveArr.Add(mf.gyd.EditGuidanceLine);
 
@@ -228,20 +231,19 @@ namespace AgOpenGPS
 
         private void btnListDelete_Click(object sender, EventArgs e)
         {
-            mf.gyd.moveDistance = 0;
-
             if (lvLines.SelectedItems.Count > 0)
             {
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
                 {
-
-                    //if there are no saved oned, empty out current curve line and turn off
                     if (mf.gyd.currentCurveLine == mf.gyd.curveArr[idx])
                         mf.gyd.currentCurveLine = null;
 
                     if (mf.gyd.currentGuidanceLine == mf.gyd.curveArr[idx])
                     {
+                        mf.gyd.isValid = false;
+                        mf.gyd.moveDistance = 0;
+
                         mf.gyd.currentGuidanceLine = null;
                         if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
                         if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
@@ -344,8 +346,7 @@ namespace AgOpenGPS
                     panelAPlus.Visible = false;
                     panelName.Visible = true;
 
-                    textBox1.Text = mf.gyd.curveArr[idx].Name + " Copy";
-
+                    textBox1.Text = mf.gyd.curveArr[idx].Name.Trim() + " Copy";
                     mf.gyd.EditGuidanceLine = new CGuidanceLine(mf.gyd.curveArr[idx].mode);
                     mf.gyd.EditGuidanceLine.curvePts.AddRange(mf.gyd.curveArr[idx].curvePts.ToArray());
                 }
@@ -359,7 +360,7 @@ namespace AgOpenGPS
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
                 {
-                    textBox2.Text = mf.gyd.curveArr[idx].Name;
+                    textBox2.Text = mf.gyd.curveArr[idx].Name.Trim();
 
                     panelPick.Visible = false;
                     panelEditName.Visible = true;
@@ -379,8 +380,12 @@ namespace AgOpenGPS
 
             int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
             if (idx > -1)
-                mf.gyd.curveArr[idx].Name = textBox2.Text.Trim();
-
+            {
+                string text = textBox2.Text.Trim();
+                while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                    text += " ";
+                mf.gyd.curveArr[idx].Name = text;
+            }
             panelEditName.Visible = false;
             panelPick.Visible = true;
 
@@ -410,6 +415,7 @@ namespace AgOpenGPS
         private void FormABCurve_FormClosing(object sender, FormClosingEventArgs e)
         {
             //reset to generate new reference
+            mf.gyd.isValid = false;
             mf.gyd.moveDistance = 0;
             mf.gyd.isOkToAddDesPoints = false;
 
@@ -419,12 +425,10 @@ namespace AgOpenGPS
                 if (idx > -1)
                     mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = new CGuidanceLine(mf.gyd.curveArr[idx]);
 
-                mf.gyd.isValid = false;
                 mf.gyd.ResetYouTurn();
             }
             else
             {
-                mf.gyd.isValid = false;
                 mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = null;
                 mf.DisableYouTurnButtons();
                 mf.gyd.isBtnCurveOn = false;

@@ -188,7 +188,7 @@ namespace AgOpenGPS
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
                 {
-                    textBox1.Text = mf.gyd.curveArr[idx].Name;
+                    textBox1.Text = mf.gyd.curveArr[idx].Name.Trim();
 
                     panelPick.Visible = false;
                     panelName.Visible = true;
@@ -203,15 +203,25 @@ namespace AgOpenGPS
 
             if (mf.gyd.EditGuidanceLine != null)
             {
-                mf.gyd.EditGuidanceLine.Name = textBox1.Text.Trim();
+                string text = textBox1.Text.Trim();
+                while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                    text += " ";
+
+                mf.gyd.EditGuidanceLine.Name = text;
                 mf.gyd.curveArr.Add(mf.gyd.EditGuidanceLine);
                 mf.gyd.EditGuidanceLine = null;
             }
-            else if(lvLines.SelectedItems.Count > 0)
+            else if (lvLines.SelectedItems.Count > 0)
             {
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
-                    mf.gyd.curveArr[idx].Name = textBox1.Text.Trim();
+                {
+                    string text = textBox1.Text.Trim();
+                    while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                        text += " ";
+
+                    mf.gyd.curveArr[idx].Name = text;
+                }
             }
 
             mf.FileSaveABLines();
@@ -241,7 +251,7 @@ namespace AgOpenGPS
                     CGuidanceLine New = new CGuidanceLine(Mode.AB);
                     New.curvePts.AddRange(mf.gyd.curveArr[idx].curvePts.ToArray());
                     mf.gyd.EditGuidanceLine = New;
-                    textBox1.Text = mf.gyd.curveArr[idx].Name + " Copy";
+                    textBox1.Text = mf.gyd.curveArr[idx].Name.Trim() + " Copy";
                 }
             }
         }
@@ -281,6 +291,8 @@ namespace AgOpenGPS
 
                     if (mf.gyd.currentGuidanceLine.Name == mf.gyd.curveArr[idx].Name)
                     {
+                        mf.gyd.isValid = false;
+                        mf.gyd.moveDistance = 0;
                         mf.gyd.currentGuidanceLine = null;
                         if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
                         if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
@@ -299,8 +311,8 @@ namespace AgOpenGPS
 
         private void FormABLine_FormClosing(object sender, FormClosingEventArgs e)
         {
-            mf.gyd.moveDistance = 0;
             mf.gyd.isValid = false;
+            mf.gyd.moveDistance = 0;
 
             if (isSaving && lvLines.SelectedItems.Count > 0)
             {

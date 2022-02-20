@@ -147,7 +147,7 @@ namespace AgOpenGPS
 
                     if (gyd.currentGuidanceLine != null)
                     {
-                        lblCurveLineName.Text = (gyd.currentGuidanceLine.mode.HasFlag(Mode.AB) ? "AB-" : "Cur-") + gyd.currentGuidanceLine.Name;
+                        lblCurveLineName.Text = (gyd.currentGuidanceLine.mode.HasFlag(Mode.AB) ? "AB-" : "Cur-") + gyd.currentGuidanceLine.Name.Trim();
                     }
                     else lblCurveLineName.Text = string.Empty;
                 }

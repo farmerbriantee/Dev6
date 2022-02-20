@@ -63,7 +63,7 @@ namespace AgOpenGPS
         public int crossTrackError;
 
         //youturn
-        public double distancePivotToTurnLine = -2222;
+        public double distancePivotToTurnLine = -4444;
 
         //the value to fill in you turn progress bar
         public int youTurnProgressBar = 0;
@@ -631,7 +631,6 @@ namespace AgOpenGPS
                 //fill up0 the appropriate arrays with new values
                 p_254.pgn[p_254.speedHi] = unchecked((byte)((int)(Math.Abs(pn.speed) * 10.0) >> 8));
                 p_254.pgn[p_254.speedLo] = unchecked((byte)((int)(Math.Abs(pn.speed) * 10.0)));
-                //mc.machineControlData[mc.cnSpeed] = mc.autoSteerData[mc.sdSpeed];
 
                 //save distance for display in millimeters
                 avgPivDistance = avgPivDistance * 0.5 + guidanceLineDistanceOff * 0.5;
@@ -669,11 +668,7 @@ namespace AgOpenGPS
                     p_254.pgn[p_254.steerAngleHi] = unchecked((byte)(guidanceLineSteerAngle >> 8));
                     p_254.pgn[p_254.steerAngleLo] = unchecked((byte)(guidanceLineSteerAngle));
                 }
-
-                //for now if backing up, turn off autosteer
-                //if (isReverse) p_254.pgn[p_254.status] = 0;
             }
-
             else //Drive button is on
             {
                 //fill up the auto steer array with free drive values
@@ -696,7 +691,6 @@ namespace AgOpenGPS
                     p_254.pgn[p_254.steerAngleHi] = unchecked((byte)(errorAngVel >> 8));
                     p_254.pgn[p_254.steerAngleLo] = unchecked((byte)(errorAngVel));
                 }
-
                 else
                 {
                     p_254.pgn[p_254.steerAngleHi] = unchecked((byte)(guidanceLineSteerAngle >> 8));
@@ -721,8 +715,6 @@ namespace AgOpenGPS
             #region Youturn
 
             //reset the fault distance to an appropriate weird number
-            //-2222 means it fell out of the loop completely
-            //-3333 means unable to find a nearest point at all even though inside the work area of field
             // -4444 means cross trac error too high
             distancePivotToTurnLine = -4444;
 

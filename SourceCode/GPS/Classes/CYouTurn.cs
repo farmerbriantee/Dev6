@@ -36,7 +36,7 @@ namespace AgOpenGPS
         public bool isOutOfBounds = false, TurnRight;
 
         //sequence of operations of finding the next turn 0 to 3
-        public int youTurnPhase, onA;
+        public int youTurnPhase;
 
         //pure pursuit values
         public vecCrossing ExitPoint = new vecCrossing(0, 0, 0, 0, 0, 0), EntryPoint = new vecCrossing(0, 0, 0, 0, 0, 0);
@@ -45,8 +45,7 @@ namespace AgOpenGPS
         //Patterns or Dubins
         public byte YouTurnType = 2;
         public bool SwapYouTurn = true;
-        double ytLength;
-
+        public double totalUTurnLength, onA;
 
         public void FindTurnPoints()
         {
@@ -105,7 +104,7 @@ namespace AgOpenGPS
                             int k = mf.bnd.bndList[j].turnLine.points.Count - 1;
                             for (int l = 0; l < mf.bnd.bndList[j].turnLine.points.Count; l++)
                             {
-                                if (StaticClass.GetLineIntersection(Start, End, mf.bnd.bndList[j].turnLine.points[l], mf.bnd.bndList[j].turnLine.points[k], out vec2 _Crossing, out double Time, out _))
+                                if (StaticClass.GetLineIntersection(Start, End, mf.bnd.bndList[j].turnLine.points[l], mf.bnd.bndList[j].turnLine.points[k], out vec3 _Crossing, out double Time, out _))
                                 {
                                     if (Time < Crossing.time)
                                         Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time, j, i, l);
@@ -185,7 +184,7 @@ namespace AgOpenGPS
                     int L = 0;
                     for (int K = 1; K < OffsetList.Count; L = K++)
                     {
-                        if (StaticClass.GetLineIntersection(OffsetList[L], OffsetList[K], Start, End, out vec2 _Crossing, out double Time, out _))
+                        if (StaticClass.GetLineIntersection(OffsetList[L], OffsetList[K], Start, End, out vec3 _Crossing, out double Time, out _))
                         {
                             if (Time < Crossing.time)
                                 Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time, 1, K, j);
@@ -202,7 +201,7 @@ namespace AgOpenGPS
                         for (int i = (isHeadingSameWay ? ExitPoint.crosssingIdx : ExitPoint.crosssingIdx - 1).Clamp(curList.Count); i < curList.Count; i++)
                         {
                             End2 = curList[i];
-                            if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec2 _Crossing, out double Time, out _))
+                            if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec3 _Crossing, out double Time, out _))
                             {
                                 if (isHeadingSameWay)
                                 {
@@ -219,7 +218,7 @@ namespace AgOpenGPS
                         for (int i = (isHeadingSameWay ? ExitPoint.crosssingIdx - 1 : ExitPoint.crosssingIdx).Clamp(curList.Count); i > -1; i--)
                         {
                             End2 = curList[i];
-                            if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec2 _Crossing, out double Time, out _))
+                            if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec3 _Crossing, out double Time, out _))
                             {
                                 if (!isHeadingSameWay)
                                 {
@@ -374,7 +373,7 @@ namespace AgOpenGPS
                             {
                                 End2 = ExitLine[j];
 
-                                if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec2 _Crossing, out _, out _))
+                                if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec3 _Crossing, out _, out _))
                                 {
                                     ytList.Add(new vec3(_Crossing.easting, _Crossing.northing, 0));
                                     break;
@@ -387,7 +386,7 @@ namespace AgOpenGPS
                             for (int j = EntryLine.Count - 1; j >= 0; j--)
                             {
                                 End2 = EntryLine[j];
-                                if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec2 _Crossing, out _, out _))
+                                if (StaticClass.GetLineIntersection(Start2, End2, Start, End, out vec3 _Crossing, out _, out _))
                                 {
                                     ytList.Add(new vec3(_Crossing.easting, _Crossing.northing, 0));
                                     break;
@@ -407,30 +406,13 @@ namespace AgOpenGPS
                     FinalLine.AddRange(ytList);
                     FinalLine.AddRange(EntryLine);
 
-                    ytList = FinalLine;
-                    youTurnPhase = 254;
+                    double a = ExitPoint.boundaryIdx == 0 == TurnRight ? mf.vehicle.minTurningRadius : uturnDistanceFromBoundary;
+                    double b = ExitPoint.boundaryIdx == 0 == TurnRight ? Math.Max(mf.vehicle.minTurningRadius, uturnDistanceFromBoundary) : mf.vehicle.minTurningRadius;
 
-
-                    /*
-
-                    double a = ExitPoint.boundaryIndex == 0 == TurnRight ? mf.vehicle.minTurningRadius : -mf.vehicle.minTurningRadius;
-
-                    double b = ExitPoint.boundaryIndex == 0 == TurnRight ? -Math.Max(mf.vehicle.minTurningRadius, uturnDistanceFromBoundary) : Math.Max(mf.vehicle.minTurningRadius, uturnDistanceFromBoundary);
-
-                    double rad = ExitPoint.boundaryIndex == 0 == TurnRight ? mf.vehicle.minTurningRadius : -mf.vehicle.minTurningRadius;
-
-
-
-                    List<vec2> InwardLine = FinalLine.OffsetPolyline(rad, false);
-
-                    List<Polyline> Output = InwardLine.DissolvePolyLine(false, 1);
-                    */
+                    FinalLine.CalculateRoundedCorner(a, b, false, 0.0436332, ExitLine.Count, FinalLine.Count - EntryLine.Count);
 
                     if (FinalLine.Count > 0)
                     {
-
-                        //FinalLine = Output[0].points.CalculateRoundedCorner(a, b, false, 0.0436332);
-
                         int i = 0;
                         for (; FinalLine.Count > 0 && i < ExitLine.Count; i++)
                         {
@@ -498,21 +480,21 @@ namespace AgOpenGPS
                             }
                         }
 
-                        ytLength = 0;
+                        totalUTurnLength = 0;
                         isOutOfBounds = false;
                         for (int j = 0; j + 2 < FinalLine.Count; j++)
                         {
-                            ytLength += glm.Distance(FinalLine[j], FinalLine[j + 1]);
+                            totalUTurnLength += glm.Distance(FinalLine[j], FinalLine[j + 1]);
 
-                            if (mf.bnd.IsPointInsideTurnArea(FinalLine[j]) != 0)
-                            {
+                            //if (mf.bnd.IsPointInsideTurnArea(FinalLine[j]) != 0)
+                            //{
                                 //isOutOfBounds = true;
-                                break;
-                            }
+                                //break;
+                            //}
                         }
                     }
                     ytList = FinalLine;
-                    youTurnPhase = 254;
+                    youTurnPhase = 255;
                     return;
                 }
                 else
@@ -539,7 +521,7 @@ namespace AgOpenGPS
                     {
                         ytList.Clear();
 
-                        CDubins dubYouTurnPath = new CDubins();
+                        CDubins dubYouTurnPath = new CDubins(mf.vehicle.minTurningRadius);
                         ytList = dubYouTurnPath.GenerateDubins(Point, Point2);
 
                         isOutOfBounds = false;
@@ -567,10 +549,10 @@ namespace AgOpenGPS
                         }
                         else if (!isOutOfBounds && Offset == 0.05)
                         {
-                            ytLength = 0;
+                            totalUTurnLength = 0;
                             for (int k = 0; k + 2 < ytList.Count; k++)
                             {
-                                ytLength += glm.Distance(ytList[k], ytList[k + 1]);
+                                totalUTurnLength += glm.Distance(ytList[k], ytList[k + 1]);
                             }
 
                             youTurnPhase = 254;
@@ -835,6 +817,7 @@ namespace AgOpenGPS
         public void BuildManualYouTurn(bool isTurnRight, bool isTurnButtonTriggered)
         {
             isYouTurnTriggered = true;
+            SwapYouTurn = true;
 
             if (isHeadingSameWay == isTurnRight)
                 howManyPathsAway += rowSkipsWidth;
@@ -859,8 +842,7 @@ namespace AgOpenGPS
             //grab the vehicle widths and offsets
             double turnOffset = (mf.tool.toolWidth - mf.tool.toolOverlap) * rowSkipsWidth + (isTurnRight ? mf.tool.toolOffset * 2.0 : -mf.tool.toolOffset * 2.0);
 
-            CDubins dubYouTurnPath = new CDubins();
-            CDubins.turningRadius = mf.vehicle.minTurningRadius;
+            CDubins dubYouTurnPath = new CDubins(mf.vehicle.minTurningRadius);
 
             //if its straight across it makes 2 loops instead so goal is a little lower then start
             if (isHeadingSameWay) Heading += 3.14;

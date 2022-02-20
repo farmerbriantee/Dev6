@@ -9,17 +9,17 @@ namespace AgOpenGPS
 
         public List<CGuidanceLine> curveArr = new List<CGuidanceLine>();
 
-        public CGuidanceLine currentGuidanceLine, currentABLine, currentCurveLine, EditGuidanceLine;
+        public CGuidanceLine currentGuidanceLine, currentABLine, currentCurveLine, EditGuidanceLine, creatingContour;
 
         //the list of points to drive on
         public List<vec3> curList = new List<vec3>();
 
-        public bool isBtnABLineOn, isBtnCurveOn, isContourBtnOn;
+        public bool isBtnABLineOn, isBtnCurveOn, isContourBtnOn, isLocked = false;
 
-        public int currentLocationIndexA, currentLocationIndexB;
+        private int currentLocationIndexA, currentLocationIndexB, backSpacing = 30;
 
         public bool isValid, isOkToAddDesPoints;
-        public double lastSecond = 0, moveDistance, CurrentHeading;
+        public double lastSecond = 0, lastSecondSearch = 0, moveDistance, CurrentHeading;
 
         public double abLength;
         public double snapDistance;
@@ -117,19 +117,6 @@ namespace AgOpenGPS
                     }
                 }
 
-                if (isYouTurnTriggered)
-                {
-                    onA = curList.Count / 2;
-                    if (pA < onA)
-                    {
-                        onA = -pA;
-                    }
-                    else
-                    {
-                        onA = curList.Count - pA;
-                    }
-                }
-
                 //just need to make sure the points continue ascending or heading switches all over the place
                 if (pA > pB) { int C = pA; pA = pB; pB = C; }
 
@@ -142,7 +129,6 @@ namespace AgOpenGPS
                     if (isLocked && (pA < 1 || pB > curList.Count - 2))
                     {
                         isLocked = false;
-                        lastLockPt = int.MaxValue;
                         return;
                     }
                 }
@@ -164,6 +150,18 @@ namespace AgOpenGPS
 
                 rEast = curList[pA].easting + (U * dx2);
                 rNorth = curList[pA].northing + (U * dy2);
+
+                if (isYouTurnTriggered)
+                {
+                    onA = 0;
+                    for (int k = 0; k < pA; k++)
+                    {
+                        onA += glm.Distance(ytList[k], ytList[k + 1]);
+                    }
+
+                    onA += glm.Distance(ytList[pA], rEast, rNorth);
+                }
+
                 currentLocationIndexA = pA;
                 currentLocationIndexB = pB;
                 CurrentHeading = curList[pA].heading;
@@ -246,8 +244,6 @@ namespace AgOpenGPS
                     {
                         lineHeading = Math.Atan2(dx, dy);
                         if (lineHeading < 0) lineHeading += glm.twoPI;
-
-                        isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(steer.heading - lineHeading) - Math.PI) < glm.PIBy2;
                     }
 
                     if (!isYouTurnTriggered && (isBtnCurveOn || isBtnABLineOn))
@@ -370,9 +366,6 @@ namespace AgOpenGPS
                         else inty *= 0.95;
                     }
                     else inty = 0;
-
-                    if (isContourBtnOn)
-                        isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(pivot.heading - curList[pA].heading) - Math.PI) < glm.PIBy2;
 
                     //update base on autosteer settings and distance from line
                     double goalPointDistance = (isYouTurnTriggered ? 0.8 : 1.0) * mf.vehicle.UpdateGoalPointDistance();

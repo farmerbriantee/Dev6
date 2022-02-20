@@ -75,7 +75,6 @@ namespace AgOpenGPS
                 return;
             }
 
-
             //if contour is on, turn it off
             if (gyd.isContourBtnOn)
                 btnContour.PerformClick();
@@ -91,13 +90,10 @@ namespace AgOpenGPS
             btnABLine.Image = Properties.Resources.ABLineOff;
             gyd.isBtnABLineOn = false;
 
-            //new direction so reset where to put turn diagnostic
-            //yt.ResetCreatedYouTurn();
-
-            gyd.isValid = false;
-
             if (gyd.isBtnCurveOn == false && gyd.currentCurveLine != null)
             {
+                gyd.isValid = false;
+                gyd.moveDistance = 0;
                 gyd.currentGuidanceLine = gyd.currentCurveLine;
                 //display the curve
                 EnableYouTurnButtons();
@@ -106,21 +102,8 @@ namespace AgOpenGPS
                 return;
             }
 
-
-            //check if window already exists
-            Form fc = Application.OpenForms["FormABCurve"];
-
-            if (fc != null)
-            {
-                fc.Focus();
-                return;
-            }
-
             gyd.isBtnCurveOn = true;
             btnCurve.Image = Properties.Resources.CurveOn;
-
-            EnableYouTurnButtons();
-            //btnContourPriority.Enabled = true;
 
             Form form = new FormABCurve(this);
             form.Show(this);
@@ -171,6 +154,8 @@ namespace AgOpenGPS
             //if there is a line in memory, just use it.
             if (gyd.isBtnABLineOn == false && gyd.currentABLine != null)
             {
+                gyd.isValid = false;
+                gyd.moveDistance = 0;
                 gyd.currentGuidanceLine = gyd.currentABLine;
                 EnableYouTurnButtons();
                 btnABLine.Image = Properties.Resources.ABLineOn;
@@ -196,20 +181,16 @@ namespace AgOpenGPS
                     MessageBox.Show(gStr.h_btnLockToContour, gStr.gsHelp);
 
                 ResetHelpBtn();
-                return;
             }
-
-            if (gyd.isContourBtnOn)
+            else if (gyd.isContourBtnOn)
             {
                 if (gyd.curList.Count > 5) gyd.isLocked = !gyd.isLocked;
-                return;
             }
             else if (gyd.currentGuidanceLine != null)
             {
                 gyd.isValid = false;
                 gyd.moveDistance = 0;
                 gyd.ResetYouTurn();
-
 
                 Mode mode = gyd.isBtnABLineOn ? Mode.AB : Mode.Curve;
 
@@ -228,6 +209,8 @@ namespace AgOpenGPS
                         found = true;
                     else if (found && gyd.curveArr[i].mode.HasFlag(mode))
                     {
+                        gyd.isValid = false;
+                        gyd.moveDistance = 0;
                         gyd.currentGuidanceLine = new CGuidanceLine(gyd.curveArr[i]);
 
                         if (gyd.currentGuidanceLine.mode.HasFlag(Mode.AB))
@@ -241,6 +224,8 @@ namespace AgOpenGPS
                 }
                 if (!found)
                 {
+                    gyd.isValid = false;
+                    gyd.moveDistance = 0;
                     gyd.currentGuidanceLine = null;
                     lblCurveLineName.Text = string.Empty;
                 }
@@ -346,7 +331,7 @@ namespace AgOpenGPS
             }
             else
             {
-                if (gyd.isBtnABLineOn | gyd.isContourBtnOn | gyd.isBtnCurveOn)
+                if (gyd.isBtnABLineOn || gyd.isContourBtnOn || gyd.isBtnCurveOn)
                 {
                     isAutoSteerBtnOn = true;
                     btnAutoSteer.Image = Properties.Resources.AutoSteerOn;
@@ -1927,6 +1912,8 @@ namespace AgOpenGPS
             //if ABLine isn't set, turn off the YouTurn
             if (gyd.currentGuidanceLine != null)
             {
+                gyd.isValid = false;
+                gyd.moveDistance = 0;
                 gyd.currentGuidanceLine = null;
 
                 //change image to reflect on off

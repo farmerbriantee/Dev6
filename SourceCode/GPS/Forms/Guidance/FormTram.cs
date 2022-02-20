@@ -145,7 +145,6 @@ namespace AgOpenGPS
             if (mf.gyd.currentGuidanceLine != null)
             {
                 mf.gyd.isValid = false;
-                mf.gyd.lastSecond = 0;
                 mf.gyd.ReverseGuidanceLine(mf.gyd.currentGuidanceLine);
             }
             MoveBuildTramLine(0);

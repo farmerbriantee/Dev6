@@ -1041,6 +1041,8 @@ namespace AgOpenGPS
             //clear the flags
             flagPts.Clear();
 
+            gyd.isValid = false;
+            gyd.moveDistance = 0;
             gyd.currentGuidanceLine = null;
             gyd.currentCurveLine = null;
             gyd.currentABLine = null;

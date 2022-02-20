@@ -72,7 +72,7 @@ namespace AgOpenGPS
 
                 camHeading = 0;
 
-                deadCam+=2;
+                deadCam += 2;
                 GL.Rotate(deadCam, 0.0, 0.0, 1.0);
                 ////draw the guide
                 GL.Begin(PrimitiveType.Triangles);
@@ -132,302 +132,299 @@ namespace AgOpenGPS
                 lblHz.Text = " ???? \r\n Not Connected";
 
             }
-            else
+            else if (isGPSPositionInitialized)
             {
-                if (isGPSPositionInitialized)
+                oglMain.MakeCurrent();
+
+                //  Clear the color and depth buffer.
+                GL.Clear(ClearBufferMask.StencilBufferBit | ClearBufferMask.ColorBufferBit);
+
+                if (isDay) GL.ClearColor(0.27f, 0.4f, 0.7f, 1.0f);
+                else GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+                GL.LoadIdentity();
+
+                //position the camera
+                camera.SetWorldCam(pivotAxlePos.easting, pivotAxlePos.northing, camHeading);
+
+                //the bounding box of the camera for cullling.
+                CalcFrustum();
+
+                worldGrid.DrawFieldSurface();
+
+                if (isDrawPolygons) GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
+
+                GL.Enable(EnableCap.Blend);
+                //draw patches of sections
+
+                for (int j = 0; j < tool.numSuperSection; j++)
                 {
-                    oglMain.MakeCurrent();
+                    //every time the section turns off and on is a new patch
 
-                    //  Clear the color and depth buffer.
-                    GL.Clear(ClearBufferMask.StencilBufferBit | ClearBufferMask.ColorBufferBit);
+                    //check if in frustum or not
+                    bool isDraw;
 
-                    if (isDay) GL.ClearColor(0.27f, 0.4f, 0.7f, 1.0f);
-                    else GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    int patches = section[j].patchList.Count;
 
-                    GL.LoadIdentity();
-
-                    //position the camera
-                    camera.SetWorldCam(pivotAxlePos.easting, pivotAxlePos.northing, camHeading);
-
-                    //the bounding box of the camera for cullling.
-                    CalcFrustum();
-
-                    worldGrid.DrawFieldSurface();
-
-                    if (isDrawPolygons) GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
-
-                    GL.Enable(EnableCap.Blend);
-                    //draw patches of sections
-
-                    for (int j = 0; j < tool.numSuperSection; j++)
+                    if (patches > 0)
                     {
-                        //every time the section turns off and on is a new patch
+                        //initialize the steps for mipmap of triangles (skipping detail while zooming out)
+                        int mipmap = 0;
+                        if (camera.camSetDistance < -800) mipmap = 2;
+                        if (camera.camSetDistance < -1500) mipmap = 4;
+                        if (camera.camSetDistance < -2400) mipmap = 8;
+                        if (camera.camSetDistance < -5000) mipmap = 16;
 
-                        //check if in frustum or not
-                        bool isDraw;
-
-                        int patches = section[j].patchList.Count;
-
-                        if (patches > 0)
+                        //for every new chunk of patch
+                        foreach (var triList in section[j].patchList)
                         {
-                            //initialize the steps for mipmap of triangles (skipping detail while zooming out)
-                            int mipmap = 0;
-                            if (camera.camSetDistance < -800) mipmap = 2;
-                            if (camera.camSetDistance < -1500) mipmap = 4;
-                            if (camera.camSetDistance < -2400) mipmap = 8;
-                            if (camera.camSetDistance < -5000) mipmap = 16;
-
-                            //for every new chunk of patch
-                            foreach (var triList in section[j].patchList)
+                            isDraw = false;
+                            int count2 = triList.Count;
+                            for (int i = 1; i < count2; i += 3)
                             {
-                                isDraw = false;
-                                int count2 = triList.Count;
-                                for (int i = 1; i < count2; i += 3)
+                                //determine if point is in frustum or not, if < 0, its outside so abort, z always is 0                            
+                                if (frustum[0] * triList[i].easting + frustum[1] * triList[i].northing + frustum[3] <= 0)
+                                    continue;//right
+                                if (frustum[4] * triList[i].easting + frustum[5] * triList[i].northing + frustum[7] <= 0)
+                                    continue;//left
+                                if (frustum[16] * triList[i].easting + frustum[17] * triList[i].northing + frustum[19] <= 0)
+                                    continue;//bottom
+                                if (frustum[20] * triList[i].easting + frustum[21] * triList[i].northing + frustum[23] <= 0)
+                                    continue;//top
+                                if (frustum[8] * triList[i].easting + frustum[9] * triList[i].northing + frustum[11] <= 0)
+                                    continue;//far
+                                if (frustum[12] * triList[i].easting + frustum[13] * triList[i].northing + frustum[15] <= 0)
+                                    continue;//near
+
+                                //point is in frustum so draw the entire patch. The downside of triangle strips.
+                                isDraw = true;
+                                break;
+                            }
+
+                            if (isDraw)
+                            {
+                                count2 = triList.Count;
+
+                                GL.Color4((byte)triList[0].easting, (byte)triList[0].northing, (byte)triList[0].heading, (byte)(isDay ? 152 : 76));
+
+                                //draw the triangle in each triangle strip
+                                GL.Begin(PrimitiveType.TriangleStrip);
+
+                                //if large enough patch and camera zoomed out, fake mipmap the patches, skip triangles
+                                if (count2 >= (mipmap + 2))
                                 {
-                                    //determine if point is in frustum or not, if < 0, its outside so abort, z always is 0                            
-                                    if (frustum[0] * triList[i].easting + frustum[1] * triList[i].northing + frustum[3] <= 0)
-                                        continue;//right
-                                    if (frustum[4] * triList[i].easting + frustum[5] * triList[i].northing + frustum[7] <= 0)
-                                        continue;//left
-                                    if (frustum[16] * triList[i].easting + frustum[17] * triList[i].northing + frustum[19] <= 0)
-                                        continue;//bottom
-                                    if (frustum[20] * triList[i].easting + frustum[21] * triList[i].northing + frustum[23] <= 0)
-                                        continue;//top
-                                    if (frustum[8] * triList[i].easting + frustum[9] * triList[i].northing + frustum[11] <= 0)
-                                        continue;//far
-                                    if (frustum[12] * triList[i].easting + frustum[13] * triList[i].northing + frustum[15] <= 0)
-                                        continue;//near
-
-                                    //point is in frustum so draw the entire patch. The downside of triangle strips.
-                                    isDraw = true;
-                                    break;
-                                }
-
-                                if (isDraw)
-                                {
-                                    count2 = triList.Count;
-
-                                    GL.Color4((byte)triList[0].easting, (byte)triList[0].northing, (byte)triList[0].heading, (byte)(isDay ? 152 : 76));
-
-                                    //draw the triangle in each triangle strip
-                                    GL.Begin(PrimitiveType.TriangleStrip);
-
-                                    //if large enough patch and camera zoomed out, fake mipmap the patches, skip triangles
-                                    if (count2 >= (mipmap + 2))
+                                    int step = mipmap;
+                                    for (int i = 1; i < count2; i += step)
                                     {
-                                        int step = mipmap;
-                                        for (int i = 1; i < count2; i += step)
-                                        {
-                                            GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
-                                            GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
-                                            if (count2 - i <= (mipmap + 2)) step = 0;//too small to mipmap it
-                                        }
+                                        GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
+                                        GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
+                                        if (count2 - i <= (mipmap + 2)) step = 0;//too small to mipmap it
                                     }
-                                    else { for (int i = 1; i < count2; i++) GL.Vertex3(triList[i].easting, triList[i].northing, 0); }
-                                    GL.End();
                                 }
+                                else { for (int i = 1; i < count2; i++) GL.Vertex3(triList[i].easting, triList[i].northing, 0); }
+                                GL.End();
                             }
-                        }
-
-                        if (section[j].isMappingOn && section[j].triangleList.Count > 0)
-                        {
-                            GL.Color4((byte)section[j].triangleList[0].easting, (byte)section[j].triangleList[0].northing, (byte)section[j].triangleList[0].heading, (byte)(isDay ? 152 : 76));
-
-                            //draw the triangle in each triangle strip
-                            GL.Begin(PrimitiveType.TriangleStrip);
-
-                            for (int i = 1; i < section[j].triangleList.Count; i++) GL.Vertex3(section[j].triangleList[i].easting, section[j].triangleList[i].northing, 0);
-
-                            //left side of triangle
-                            vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
-                                    (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
-
-                            GL.Vertex3(pt.easting, pt.northing, 0);
-
-                            //Right side of triangle
-                            pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
-                               (sinSectionHeading * section[j].positionRight) + toolPos.northing);
-
-                            GL.Vertex3(pt.easting, pt.northing, 0);
-                            GL.End();
                         }
                     }
 
-                    if (tram.displayMode != 0) tram.DrawTram();
-
-                    GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
-                    GL.Color3(1, 1, 1);
-
-                    if (bnd.bndList.Count > 0)
+                    if (section[j].isMappingOn && section[j].triangleList.Count > 0)
                     {
-                        //draw Boundaries
-                        bnd.DrawFenceLines();
+                        GL.Color4((byte)section[j].triangleList[0].easting, (byte)section[j].triangleList[0].northing, (byte)section[j].triangleList[0].heading, (byte)(isDay ? 152 : 76));
 
-                        GL.LineWidth(gyd.lineWidth);
+                        //draw the triangle in each triangle strip
+                        GL.Begin(PrimitiveType.TriangleStrip);
 
-                        //draw the turnLines
-                        if (gyd.isYouTurnBtnOn && !gyd.isContourBtnOn)
-                        {
-                            GL.Color3(0.3555f, 0.6232f, 0.20f);
-                            for (int i = 0; i < bnd.bndList.Count; i++)
-                            {
-                                bnd.bndList[i].turnLine.DrawPolyLine(DrawType.LineLoop);
-                            }
-                        }
+                        for (int i = 1; i < section[j].triangleList.Count; i++) GL.Vertex3(section[j].triangleList[i].easting, section[j].triangleList[i].northing, 0);
 
-                        //Draw headland
-                        if (bnd.isHeadlandOn)
-                        {
-                            GL.Color3(0.960f, 0.96232f, 0.30f);
-                            //There is only 1 headland for now. 
-                            //for (int i = 0; i < bnd.bndList.Count; i++)
-                            bnd.bndList[0].hdLine.DrawPolyLine(DrawType.LineLoop);
-                        }
-                    }
+                        //left side of triangle
+                        vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
+                                (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
 
-                    //draw contour line if button on
-                    gyd.DrawGuidanceLines();
+                        GL.Vertex3(pt.easting, pt.northing, 0);
 
-                    if (bnd.isBndBeingMade && bnd.bndBeingMadePts.Count > 0)
-                    {
-                        //the boundary so far
-                        GL.Color3(0.825f, 0.22f, 0.90f);
-                        GL.Begin(PrimitiveType.LineStrip);
-                        for (int h = 0; h < bnd.bndBeingMadePts.Count; h++) GL.Vertex3(bnd.bndBeingMadePts[h].easting, bnd.bndBeingMadePts[h].northing, 0);
-                        GL.Color3(0.295f, 0.972f, 0.290f);
-                        GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
+                        //Right side of triangle
+                        pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
+                           (sinSectionHeading * section[j].positionRight) + toolPos.northing);
+
+                        GL.Vertex3(pt.easting, pt.northing, 0);
                         GL.End();
+                    }
+                }
 
-                        //line from last point to pivot marker
-                        GL.Color3(0.825f, 0.842f, 0.0f);
+                if (tram.displayMode != 0) tram.DrawTram();
+
+                GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+                GL.Color3(1, 1, 1);
+
+                if (bnd.bndList.Count > 0)
+                {
+                    //draw Boundaries
+                    bnd.DrawFenceLines();
+
+                    GL.LineWidth(gyd.lineWidth);
+
+                    //draw the turnLines
+                    if (gyd.isYouTurnBtnOn && !gyd.isContourBtnOn)
+                    {
+                        GL.Color3(0.3555f, 0.6232f, 0.20f);
+                        for (int i = 0; i < bnd.bndList.Count; i++)
+                        {
+                            bnd.bndList[i].turnLine.DrawPolyLine(DrawType.LineLoop);
+                        }
+                    }
+
+                    //Draw headland
+                    if (bnd.isHeadlandOn)
+                    {
+                        GL.Color3(0.960f, 0.96232f, 0.30f);
+                        //There is only 1 headland for now. 
+                        //for (int i = 0; i < bnd.bndList.Count; i++)
+                        bnd.bndList[0].hdLine.DrawPolyLine(DrawType.LineLoop);
+                    }
+                }
+
+                //draw contour line if button on
+                gyd.DrawGuidanceLines();
+
+                if (bnd.isBndBeingMade && bnd.bndBeingMadePts.Count > 0)
+                {
+                    //the boundary so far
+                    GL.Color3(0.825f, 0.22f, 0.90f);
+                    GL.Begin(PrimitiveType.LineStrip);
+                    for (int h = 0; h < bnd.bndBeingMadePts.Count; h++) GL.Vertex3(bnd.bndBeingMadePts[h].easting, bnd.bndBeingMadePts[h].northing, 0);
+                    GL.Color3(0.295f, 0.972f, 0.290f);
+                    GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
+                    GL.End();
+
+                    //line from last point to pivot marker
+                    GL.Color3(0.825f, 0.842f, 0.0f);
+                    GL.Enable(EnableCap.LineStipple);
+                    GL.LineStipple(1, 0x0700);
+                    GL.Begin(PrimitiveType.LineStrip);
+
+                    GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
+                    GL.Vertex3(pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)),
+                              pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)), 0);
+                    GL.Vertex3(bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].easting, bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].northing, 0);
+
+                    GL.End();
+                    GL.Disable(EnableCap.LineStipple);
+
+                    //boundary points
+                    GL.Color3(0.0f, 0.95f, 0.95f);
+                    GL.PointSize(6.0f);
+                    GL.Begin(PrimitiveType.Points);
+                    for (int h = 0; h < bnd.bndBeingMadePts.Count; h++) GL.Vertex3(bnd.bndBeingMadePts[h].easting, bnd.bndBeingMadePts[h].northing, 0);
+                    GL.End();
+                }
+
+                if (flagPts.Count > 0) DrawFlags();
+
+                //Direct line to flag if flag selected
+                try
+                {
+                    if (flagNumberPicked > 0)
+                    {
+                        GL.LineWidth(gyd.lineWidth);
                         GL.Enable(EnableCap.LineStipple);
-                        GL.LineStipple(1, 0x0700);
-                        GL.Begin(PrimitiveType.LineStrip);
-
-                        GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
-                        GL.Vertex3(pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)),
-                                  pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)), 0);
-                        GL.Vertex3(bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].easting, bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].northing, 0);
-
+                        GL.LineStipple(1, 0x0707);
+                        GL.Begin(PrimitiveType.Lines);
+                        GL.Color3(0.930f, 0.72f, 0.32f);
+                        GL.Vertex3(pivotAxlePos.easting, pivotAxlePos.northing, 0);
+                        GL.Vertex3(flagPts[flagNumberPicked - 1].easting, flagPts[flagNumberPicked - 1].northing, 0);
                         GL.End();
                         GL.Disable(EnableCap.LineStipple);
-
-                        //boundary points
-                        GL.Color3(0.0f, 0.95f, 0.95f);
-                        GL.PointSize(6.0f);
-                        GL.Begin(PrimitiveType.Points);
-                        for (int h = 0; h < bnd.bndBeingMadePts.Count; h++) GL.Vertex3(bnd.bndBeingMadePts[h].easting, bnd.bndBeingMadePts[h].northing, 0);
-                        GL.End();
                     }
+                }
+                catch { }
 
-                    if (flagPts.Count > 0) DrawFlags();
+                //draw the vehicle/implement
+                tool.DrawTool();
+                vehicle.DrawVehicle();
 
-                    //Direct line to flag if flag selected
-                    try
+                // 2D Ortho ---------------------------------------////////-------------------------------------------------
+
+                GL.MatrixMode(MatrixMode.Projection);
+                GL.PushMatrix();
+                GL.LoadIdentity();
+
+                //negative and positive on width, 0 at top to bottom ortho view
+                GL.Ortho(-(double)oglMain.Width / 2, (double)oglMain.Width / 2, (double)oglMain.Height, 0, -1, 1);
+
+                //  Create the appropriate modelview matrix.
+                GL.MatrixMode(MatrixMode.Modelview);
+                GL.PushMatrix();
+                GL.LoadIdentity();
+
+                if (isSkyOn)
+                    DrawSky();
+
+                //LightBar if AB Line is set and turned on or contour
+                if (isLightbarOn)
+                    DrawLightBarText();
+
+                if (ahrs.imuRoll != 88888)
+                    DrawRollBar();
+
+                if (bnd.bndList.Count > 0 && gyd.isYouTurnBtnOn) DrawUTurnBtn();
+
+                if (isAutoSteerBtnOn && !gyd.isContourBtnOn) DrawManUTurnBtn();
+
+                //if (isCompassOn) DrawCompass();
+                DrawCompassText();
+
+                if (isSpeedoOn) DrawSpeedo();
+
+                DrawSteerCircle();
+
+                if (vehicle.isHydLiftOn) DrawLiftIndicator();
+
+                if (isReverse) DrawReverse();
+
+                if (isRTK)
+                {
+                    if (pn.fixQuality != 4)
                     {
-                        if (flagNumberPicked > 0)
-                        {
-                            GL.LineWidth(gyd.lineWidth);
-                            GL.Enable(EnableCap.LineStipple);
-                            GL.LineStipple(1, 0x0707);
-                            GL.Begin(PrimitiveType.Lines);
-                            GL.Color3(0.930f, 0.72f, 0.32f);
-                            GL.Vertex3(pivotAxlePos.easting, pivotAxlePos.northing, 0);
-                            GL.Vertex3(flagPts[flagNumberPicked - 1].easting, flagPts[flagNumberPicked - 1].northing, 0);
-                            GL.End();
-                            GL.Disable(EnableCap.LineStipple);
-                        }
+                        DrawLostRTK();
+                        if (isRTK_KillAutosteer && isAutoSteerBtnOn) btnAutoSteer.PerformClick();
                     }
-                    catch { }
+                }
 
-                    //draw the vehicle/implement
-                    tool.DrawTool();
-                    vehicle.DrawVehicle();
+                if (pn.age > pn.ageAlarm) DrawAge();
 
-                    // 2D Ortho ---------------------------------------////////-------------------------------------------------
+                GL.Flush();//finish openGL commands
+                GL.PopMatrix();//  Pop the modelview.
 
-                    GL.MatrixMode(MatrixMode.Projection);
-                    GL.PushMatrix();
-                    GL.LoadIdentity();
+                ////-------------------------------------------------ORTHO END---------------------------------------
 
-                    //negative and positive on width, 0 at top to bottom ortho view
-                    GL.Ortho(-(double)oglMain.Width / 2, (double)oglMain.Width / 2, (double)oglMain.Height, 0, -1, 1);
+                //  back to the projection and pop it, then back to the model view.
+                GL.MatrixMode(MatrixMode.Projection);
+                GL.PopMatrix();
+                GL.MatrixMode(MatrixMode.Modelview);
 
-                    //  Create the appropriate modelview matrix.
-                    GL.MatrixMode(MatrixMode.Modelview);
-                    GL.PushMatrix();
-                    GL.LoadIdentity();
+                //reset point size
+                GL.PointSize(1.0f);
+                GL.Flush();
+                oglMain.SwapBuffers();
 
-                    if (isSkyOn)
-                        DrawSky();
+                if (leftMouseDownOnOpenGL) MakeFlagMark();
 
-                    //LightBar if AB Line is set and turned on or contour
-                    if (isLightbarOn)
-                        DrawLightBarText();
+                if (bbCounter++ > 0) bbCounter = 0;
 
-                    if (ahrs.imuRoll != 88888)
-                        DrawRollBar();
+                //draw the section control window off screen buffer
+                if (isJobStarted && (isFastSections || bbCounter == 0))
+                {
+                    oglBack.Refresh();
+                    SendPgnToLoop(p_239.pgn);
+                }
 
-                    if (bnd.bndList.Count > 0 && gyd.isYouTurnBtnOn) DrawUTurnBtn();
-
-                    if (isAutoSteerBtnOn && !gyd.isContourBtnOn) DrawManUTurnBtn();
-
-                    //if (isCompassOn) DrawCompass();
-                    DrawCompassText();
-
-                    if (isSpeedoOn) DrawSpeedo();
-
-                    DrawSteerCircle();
-
-                    if (vehicle.isHydLiftOn) DrawLiftIndicator();
-
-                    if (isReverse) DrawReverse();
-
-                    if (isRTK)
+                //draw the zoom window
+                if (isJobStarted && oglZoom.Width != 400)
+                {
+                    if (threeSeconds != zoomUpdateCounter)
                     {
-                        if (pn.fixQuality != 4)
-                        {
-                            DrawLostRTK();
-                            if (isRTK_KillAutosteer && isAutoSteerBtnOn) btnAutoSteer.PerformClick();
-                        }
-                    }
-
-                    if (pn.age > pn.ageAlarm) DrawAge();
-
-                    GL.Flush();//finish openGL commands
-                    GL.PopMatrix();//  Pop the modelview.
-
-                    ////-------------------------------------------------ORTHO END---------------------------------------
-
-                    //  back to the projection and pop it, then back to the model view.
-                    GL.MatrixMode(MatrixMode.Projection);
-                    GL.PopMatrix();
-                    GL.MatrixMode(MatrixMode.Modelview);
-
-                    //reset point size
-                    GL.PointSize(1.0f);
-                    GL.Flush();
-                    oglMain.SwapBuffers();
-
-                    if (leftMouseDownOnOpenGL) MakeFlagMark();
-                    
-                    if (bbCounter++ > 0) bbCounter = 0;
-
-                    //draw the section control window off screen buffer
-                    if (isJobStarted && (isFastSections || bbCounter == 0))
-                    {
-                        oglBack.Refresh();
-                        SendPgnToLoop(p_239.pgn);
-                    }
-
-                    //draw the zoom window
-                    if (isJobStarted && oglZoom.Width != 400)
-                    {
-                        if (threeSeconds != zoomUpdateCounter)
-                        {
-                            zoomUpdateCounter = threeSeconds;
-                            oglZoom.Refresh();
-                        }
+                        zoomUpdateCounter = threeSeconds;
+                        oglZoom.Refresh();
                     }
                 }
             }
@@ -1206,7 +1203,7 @@ namespace AgOpenGPS
                 }
                 else
                 {
-                    font.DrawText(-30 + two3, 80, gyd.onA.ToString());
+                    font.DrawText(-30 + two3, 80, (gyd.totalUTurnLength - gyd.onA).ToString("N0") + " m");
                 }
             }
             else
@@ -1218,7 +1215,7 @@ namespace AgOpenGPS
                 }
                 else
                 {
-                    font.DrawText(-40 + two3, 80, gyd.onA.ToString());
+                    font.DrawText(-40 + two3, 80, (glm.m2ft * (gyd.totalUTurnLength - gyd.onA)).ToString("N0") + " ft");
                 }
             }
         }
@@ -1367,12 +1364,11 @@ namespace AgOpenGPS
                 double offSet = (camera.zoomValue * camera.zoomValue * 0.01);
                 GL.LineWidth(4);
                 GL.Color3(0.980f, 0.0f, 0.980f);
-                GL.Begin(PrimitiveType.LineStrip);
+                GL.Begin(PrimitiveType.LineLoop);
                 GL.Vertex3(flagPts[flagNumberPicked - 1].easting, flagPts[flagNumberPicked - 1].northing + offSet, 0);
                 GL.Vertex3(flagPts[flagNumberPicked - 1].easting - offSet, flagPts[flagNumberPicked - 1].northing, 0);
                 GL.Vertex3(flagPts[flagNumberPicked - 1].easting, flagPts[flagNumberPicked - 1].northing - offSet, 0);
                 GL.Vertex3(flagPts[flagNumberPicked - 1].easting + offSet, flagPts[flagNumberPicked - 1].northing, 0);
-                GL.Vertex3(flagPts[flagNumberPicked - 1].easting, flagPts[flagNumberPicked - 1].northing + offSet, 0);
                 GL.End();
 
                 //draw the flag with a black dot inside
@@ -1741,13 +1737,10 @@ namespace AgOpenGPS
             GL.Color3(0.9752f, 0.62f, 0.325f);
             if (timerSim.Enabled) font.DrawText(-110, oglMain.Height - 130, "Simulator On", 1);
 
-            if (gyd.isContourBtnOn)
+            if (gyd.isContourBtnOn && gyd.isLocked && isFlashOnOff)
             {
-                if (isFlashOnOff && gyd.isLocked)
-                {
-                    GL.Color3(0.9652f, 0.752f, 0.75f);
-                    font.DrawText(-center - 100, oglMain.Height / 2.3, "Locked", 1);
-                }
+                GL.Color3(0.9652f, 0.752f, 0.75f);
+                font.DrawText(-center - 100, oglMain.Height / 2.3, "Locked", 1);
             }
 
             //GL.Color3(0.9752f, 0.52f, 0.23f);
@@ -1901,7 +1894,7 @@ namespace AgOpenGPS
             GL.Color3(0.9752f, 0.52f, 0.0f);
             font.DrawText(-oglMain.Width / 4, 110, "Lost RTK", 2.0);
         }
-
+        
         private void DrawAge()
         {
             GL.Color3(0.9752f, 0.52f, 0.0f);
@@ -1915,8 +1908,8 @@ namespace AgOpenGPS
             float[] clip = new float[16];							// Result Of Concatenating PROJECTION and MODELVIEW
 
             GL.GetFloat(GetPName.ProjectionMatrix, proj);	// Grab The Current PROJECTION Matrix
-            GL.GetFloat(GetPName.Modelview0MatrixExt, modl);   // Grab The Current MODELVIEW Matrix  
-            
+            GL.GetFloat(GetPName.Modelview0MatrixExt, modl);   // Grab The Current MODELVIEW Matrix 
+
             // Concatenate (Multiply) The Two Matricies
             clip[0] = modl[0] * proj[0] + modl[1] * proj[4] + modl[2] * proj[8] + modl[3] * proj[12];
             clip[1] = modl[0] * proj[1] + modl[1] * proj[5] + modl[2] * proj[9] + modl[3] * proj[13];

@@ -27,9 +27,9 @@ namespace AgOpenGPS
             return new vec3(lhs.easting - rhs.easting, lhs.northing - rhs.northing, 0);
         }
 
-        public static vec2 operator +(vec3 lhs, vec3 rhs)
+        public static vec3 operator +(vec3 lhs, vec3 rhs)
         {
-            return new vec2(lhs.easting + rhs.easting, lhs.northing + rhs.northing);
+            return new vec3(lhs.easting + rhs.easting, lhs.northing + rhs.northing, 0);
         }
 
         public static vec3 operator *(vec3 self, double s)

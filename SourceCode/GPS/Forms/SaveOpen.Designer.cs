@@ -41,7 +41,7 @@ namespace AgOpenGPS
                         if (gyd.curveArr[i].mode.HasFlag(Mode.Curve))
                         {
                             //write out the Name
-                            writer.WriteLine(gyd.curveArr[i].Name);
+                            writer.WriteLine(gyd.curveArr[i].Name.Trim());
 
                             //write out the aveheading
                             writer.WriteLine(0.ToString(CultureInfo.InvariantCulture));
@@ -112,7 +112,11 @@ namespace AgOpenGPS
                             CGuidanceLine New = new CGuidanceLine(Mode.Curve);
 
                             //read header $CurveLine
-                            New.Name = reader.ReadLine();
+                            string text = reader.ReadLine();
+                            while (gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                                text += " ";
+                            New.Name = text;
+
                             if (New.Name == "Boundary Curve")
                                 New.mode |= Mode.Boundary;
 
@@ -173,7 +177,7 @@ namespace AgOpenGPS
                         double heading = Math.Atan2(item.curvePts[1].easting - item.curvePts[0].easting, item.curvePts[1].northing - item.curvePts[0].northing);
 
                         //make it culture invariant
-                        string line = item.Name
+                        string line = item.Name.Trim()
                             + ',' + (Math.Round(glm.toDegrees(heading), 8)).ToString(CultureInfo.InvariantCulture)
                             + ',' + (Math.Round(item.curvePts[0].easting, 3)).ToString(CultureInfo.InvariantCulture)
                             + ',' + (Math.Round(item.curvePts[0].northing, 3)).ToString(CultureInfo.InvariantCulture);
@@ -225,7 +229,11 @@ namespace AgOpenGPS
 
                             CGuidanceLine New = new CGuidanceLine(Mode.AB);
 
-                            New.Name = words[0];
+                            string text = words[0];
+                            while (gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
+                                text += " ";
+                            New.Name = text;
+
                             double heading = glm.toRadians(double.Parse(words[1], CultureInfo.InvariantCulture));
 
                             New.curvePts.Add(new vec3(double.Parse(words[2], CultureInfo.InvariantCulture), double.Parse(words[3], CultureInfo.InvariantCulture), heading));
@@ -1633,7 +1641,7 @@ namespace AgOpenGPS
                     kml.WriteStartElement("Placemark");
                     kml.WriteElementString("visibility", "0");
 
-                    kml.WriteElementString("name", gyd.curveArr[i].Name);
+                    kml.WriteElementString("name", gyd.curveArr[i].Name.Trim());
                     kml.WriteStartElement("Style");
 
                     kml.WriteStartElement("LineStyle");
@@ -1681,7 +1689,7 @@ namespace AgOpenGPS
                     kml.WriteStartElement("Placemark");
                     kml.WriteElementString("visibility", "0");
 
-                    kml.WriteElementString("name", gyd.curveArr[i].Name);
+                    kml.WriteElementString("name", gyd.curveArr[i].Name.Trim());
                     kml.WriteStartElement("Style");
 
                     kml.WriteStartElement("LineStyle");
