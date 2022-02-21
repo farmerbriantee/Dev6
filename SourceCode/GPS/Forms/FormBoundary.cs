@@ -29,28 +29,22 @@ namespace AgOpenGPS
             Thru.Text = gStr.gsDriveThru;
             Area.Text = gStr.gsArea;
             btnDelete.Enabled = false;
-
         }
-
 
         private void FormBoundary_Load(object sender, EventArgs e)
         {
             this.Size = new Size(566, 377);
 
-
             //update the list view with real data
             UpdateChart();
-
+            panelCreate.Dock = DockStyle.Fill;
             panelMain.Dock = DockStyle.Fill;
             panelChoose.Dock = DockStyle.Fill;
             panelKML.Dock = DockStyle.Fill;
 
-            panelMain.Visible = true;
-            panelChoose.Visible = false;
-            panelKML.Visible = false;
             mf.CloseTopMosts();
-
         }
+
         private void UpdateChart()
         {
             int inner = 1;
@@ -420,10 +414,25 @@ namespace AgOpenGPS
 
         private void btnDriveOrExt_Click(object sender, EventArgs e)
         {
-            panelMain.Visible = false;
+            panelCreate.Visible = true;
             panelChoose.Visible = false;
-            panelKML.Visible = false;
-            isClosing = true;
+
+            //btnStop.Text = gStr.gsDone;
+            //btnPausePlay.Text = gStr.gsRecord;
+            Area2.Text = gStr.gsArea + ":";
+            this.Text = gStr.gsStopRecordPauseBoundary;
+            nudOffset.Controls[0].Enabled = false;
+            lblOffset.Text = gStr.gsOffset;
+
+            //mf.bnd.isOkToAddPoints = false;
+            nudOffset.Value = (decimal)(mf.tool.toolWidth * 0.5);
+            btnPausePlay.Image = Properties.Resources.BoundaryRecord;
+            btnLeftRight.Image = mf.bnd.isDrawRightSide ? Properties.Resources.BoundaryRight : Properties.Resources.BoundaryLeft;
+            mf.bnd.createBndOffset = (double)nudOffset.Value;
+            mf.bnd.isBndBeingMade = true;
+
+
+            //isClosing = true;
         }
 
         private void btnGetKML_Click(object sender, EventArgs e)
@@ -432,6 +441,121 @@ namespace AgOpenGPS
             panelChoose.Visible = false;
             panelKML.Visible = true;
         }
+
+        private void btnRestart_Click(object sender, EventArgs e)
+        {
+            DialogResult result3 = MessageBox.Show(gStr.gsCompletelyDeleteBoundary,
+                                    gStr.gsDeleteForSure,
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Question,
+                                    MessageBoxDefaultButton.Button2);
+            if (result3 == DialogResult.Yes)
+            {
+                mf.bnd.bndBeingMadePts?.Clear();
+                lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
+            }
+            mf.Focus();
+        }
+
+        private void btnPausePlay_Click(object sender, EventArgs e)
+        {
+            mf.bnd.isOkToAddPoints = !mf.bnd.isOkToAddPoints;
+
+            btnPausePlay.Image = mf.bnd.isOkToAddPoints ? Properties.Resources.boundaryPause : Properties.Resources.BoundaryRecord;
+            btnAddPoint.Enabled = btnDeleteLast.Enabled = !mf.bnd.isOkToAddPoints;
+
+            timer1.Enabled = mf.bnd.isOkToAddPoints;
+
+            mf.Focus();
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            if (mf.bnd.bndBeingMadePts.Count > 2)
+            {
+                CBoundaryList New = new CBoundaryList();
+
+                for (int i = 0; i < mf.bnd.bndBeingMadePts.Count; i++)
+                {
+                    New.fenceLine.points.Add(mf.bnd.bndBeingMadePts[i]);
+                }
+
+                New.CalculateFenceArea();
+
+                mf.bnd.bndList.Add(New);
+
+                //turn lines made from boundaries
+                mf.CalculateMinMax();
+                mf.FileSaveBoundary();
+                mf.bnd.BuildTurnLines();
+                //mf.hd.BuildSingleSpaceHeadLines();
+                mf.btnABDraw.Visible = true;
+            }
+
+            //stop it all for adding
+            mf.bnd.isOkToAddPoints = false;
+            mf.bnd.isBndBeingMade = false;
+            mf.bnd.bndBeingMadePts.Clear();
+
+            //close window
+            isClosing = true;
+            Close();
+        }
+
+        private void nudOffset_Click(object sender, EventArgs e)
+        {
+            mf.KeypadToNUD((NumericUpDown)sender, this);
+            btnPausePlay.Focus();
+            mf.bnd.createBndOffset = (double)nudOffset.Value;
+        }
+
+        private void btnLeftRight_Click(object sender, EventArgs e)
+        {
+            mf.bnd.isDrawRightSide = !mf.bnd.isDrawRightSide;
+            btnLeftRight.Image = mf.bnd.isDrawRightSide ? Properties.Resources.BoundaryRight : Properties.Resources.BoundaryLeft;
+        }
+
+        private void btnDeleteLast_Click(object sender, EventArgs e)
+        {
+            if (mf.bnd.bndBeingMadePts.Count > 0)
+                mf.bnd.bndBeingMadePts.RemoveAt(mf.bnd.bndBeingMadePts.Count - 1);
+
+            timer1_Tick(null, null);
+        }
+
+        private void btnAddPoint_Click(object sender, EventArgs e)
+        {
+            mf.AddBoundaryPoint();
+            timer1_Tick(null, null);
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            int ptCount = mf.bnd.bndBeingMadePts.Count;
+            double area = 0;
+
+            if (ptCount > 0)
+            {
+                int j = ptCount - 1;  // The last vertex is the 'previous' one to the first
+
+                for (int i = 0; i < ptCount; j = i++)
+                {
+                    area += (mf.bnd.bndBeingMadePts[j].easting + mf.bnd.bndBeingMadePts[i].easting) * (mf.bnd.bndBeingMadePts[j].northing - mf.bnd.bndBeingMadePts[i].northing);
+                }
+                area = Math.Abs(area / 2);
+            }
+
+            if (mf.isMetric)
+            {
+                lblArea.Text = Math.Round(area * 0.0001, 2) + " Ha";
+            }
+            else
+            {
+                lblArea.Text = Math.Round(area * 0.000247105, 2) + " Acre";
+            }
+            lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
+        }
+
 
         #region Help
 
@@ -463,6 +587,41 @@ namespace AgOpenGPS
         private void btnGetKML_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
             MessageBox.Show(gStr.hb_btnGetKML, gStr.gsHelp);
+        }
+
+        private void nudOffset_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show(gStr.hb_nudOffset, gStr.gsHelp);
+        }
+
+        private void btnLeftRight_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show(gStr.hb_btnLeftRight, gStr.gsHelp);
+        }
+
+        private void btnDeleteLast_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show(gStr.hb_btnDeleteLast, gStr.gsHelp);
+        }
+
+        private void btnAddPoint_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show(gStr.hb_btnAddPoint, gStr.gsHelp);
+        }
+
+        private void btnRestart_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show(gStr.hb_btnRestart, gStr.gsHelp);
+        }
+
+        private void btnPausePlay_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show(gStr.hb_btnPausePlay, gStr.gsHelp);
+        }
+
+        private void btnStop_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            MessageBox.Show(gStr.hb_btnStop, gStr.gsHelp);
         }
 
         private void btnDriveOrExt_HelpRequested(object sender, HelpEventArgs hlpevent)

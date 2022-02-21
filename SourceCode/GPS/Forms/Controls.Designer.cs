@@ -1848,18 +1848,13 @@ namespace AgOpenGPS
             }
             SetZoom();
         }
+
         private void boundariesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (isJobStarted)
             {
-                using (var form = new FormBoundary(this))
-                {
-                    if (form.ShowDialog(this) == DialogResult.OK)
-                    {
-                        Form form2 = new FormBoundaryPlayer(this);
-                        form2.Show(this);
-                    }
-                }
+                var form = new FormBoundary(this);
+                form.Show(this);
             }
             else { TimedMessageBox(3000, gStr.gsFieldNotOpen, gStr.gsStartNewField); }
         }

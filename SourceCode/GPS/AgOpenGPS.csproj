@@ -328,12 +328,6 @@
     <Compile Include="Forms\FormBoundary.Designer.cs">
       <DependentUpon>FormBoundary.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FormBoundaryPlayer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\FormBoundaryPlayer.Designer.cs">
-      <DependentUpon>FormBoundaryPlayer.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\FormJob.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -572,9 +566,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormBoundary.resx">
       <DependentUpon>FormBoundary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\FormBoundaryPlayer.resx">
-      <DependentUpon>FormBoundaryPlayer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Guidance\FormABLine.resx">
       <DependentUpon>FormABLine.cs</DependentUpon>
