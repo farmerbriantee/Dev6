@@ -322,12 +322,6 @@
     <Compile Include="Forms\FormShiftPos.Designer.cs">
       <DependentUpon>FormShiftPos.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Guidance\FormSmoothAB.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Guidance\FormSmoothAB.Designer.cs">
-      <DependentUpon>FormSmoothAB.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\FormBoundary.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -602,9 +596,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Settings\FormSimCoords.resx">
       <DependentUpon>FormSimCoords.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Guidance\FormSmoothAB.resx">
-      <DependentUpon>FormSmoothAB.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Settings\FormSteer.resx">
       <DependentUpon>FormSteer.cs</DependentUpon>

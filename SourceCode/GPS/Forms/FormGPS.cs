@@ -243,7 +243,6 @@ namespace AgOpenGPS
             steerChartStripMenu.Text = gStr.gsSteerChart;
 
             //Tools Menu
-            SmoothABtoolStripMenu.Text = gStr.gsSmoothABCurve;
             //toolStripBtnMakeBndContour.Text = gStr.gsMakeBoundaryContours;
             boundariesToolStripMenuItem.Text = gStr.gsBoundary;
             headlandToolStripMenuItem.Text = gStr.gsHeadland;
@@ -926,7 +925,6 @@ namespace AgOpenGPS
 
         public void FieldMenuButtonEnableDisable(bool isOn)
         {
-            SmoothABtoolStripMenu.Enabled = isOn;
             //toolStripBtnMakeBndContour.Enabled = isOn;
             boundariesToolStripMenuItem.Enabled = isOn;
             headlandToolStripMenuItem.Enabled = isOn;

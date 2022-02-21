@@ -1457,22 +1457,6 @@ namespace AgOpenGPS
 
         #region Tools Menu
 
-        private void SmoothABtoolStripMenu_Click(object sender, EventArgs e)
-        {
-            if (isJobStarted && gyd.isBtnCurveOn)
-            {
-                using (var form = new FormSmoothAB(this))
-                {
-                    form.ShowDialog(this);
-                }
-            }
-            else
-            {
-                if (!isJobStarted) TimedMessageBox(2000, gStr.gsFieldNotOpen, gStr.gsStartNewField);
-                else TimedMessageBox(2000, gStr.gsCurveNotOn, gStr.gsTurnABCurveOn);
-            }
-        }
-
         private void deleteContourPathsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //FileCreateContour();
@@ -1623,7 +1607,7 @@ namespace AgOpenGPS
                 return;
             }
             camera.camFollowing = true;
-            camera.camPitch = -73;
+            camera.camPitch = -69;
             navPanelCounter = 2;
         }
 
@@ -1648,7 +1632,7 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            camera.camPitch = -73;
+            camera.camPitch = -69;
             camera.camFollowing = false;
             navPanelCounter = 2;
         }
@@ -1718,7 +1702,7 @@ namespace AgOpenGPS
             //}
             if (camera.camPitch > -59) camera.camPitch = -60;
             camera.camPitch += ((camera.camPitch * 0.012) - 1);
-            if (camera.camPitch < -76) camera.camPitch = -76;
+            if (camera.camPitch < -69) camera.camPitch = -69;
             navPanelCounter = 2;
         }
 

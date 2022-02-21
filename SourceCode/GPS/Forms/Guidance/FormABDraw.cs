@@ -345,9 +345,7 @@ namespace AgOpenGPS
             //find the closest 2 points to current fix
             for (int t = 0; t < mf.bnd.bndList[0].fenceLine.points.Count; t++)
             {
-                double dist = ((plotPt.easting - mf.bnd.bndList[0].fenceLine.points[t].easting) * (plotPt.easting - mf.bnd.bndList[0].fenceLine.points[t].easting))
-                                + ((plotPt.northing - mf.bnd.bndList[0].fenceLine.points[t].northing) * (plotPt.northing - mf.bnd.bndList[0].fenceLine.points[t].northing));
-
+                double dist = glm.Distance(plotPt, mf.bnd.bndList[0].fenceLine.points[t]);
                 if (dist < minDistA)
                 {
                     minDistA = dist;

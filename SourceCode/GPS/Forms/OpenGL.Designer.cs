@@ -1903,6 +1903,37 @@ namespace AgOpenGPS
 
         private void CalcFrustum()
         {
+            //the bounding box of the camera for cullling without grabbing gl matrixes
+            /*
+            double planeDist = camera.camSetDistance * -0.5;
+
+            double angleA = fovy / 2.0;
+            double angleC = glm.PIBy2 - glm.toRadians(camera.camPitch);
+            double angleB = Math.PI - angleA - angleC;
+
+            //works only with camPitch > -70;
+            //law of sines
+            double TopHeight = Math.Abs(planeDist * (Math.Sin(angleA) / Math.Sin(angleB)));
+            double lengthC = Math.Sqrt(planeDist * planeDist + TopHeight * TopHeight - 2 * planeDist * TopHeight * Math.Cos(angleC));
+            double TopWidth = ((2 * Math.Tan(angleA) * lengthC) * oglMain.AspectRatio) * 0.473;
+
+            double angleC2 = glm.PIBy2 + glm.toRadians(camera.camPitch);
+            double angleB2 = Math.PI - angleA - angleC2;
+            double BottomHeight = planeDist * (Math.Sin(angleA) / Math.Sin(angleB2));
+            double lengthC2 = Math.Sqrt(planeDist * planeDist + BottomHeight * BottomHeight - 2 * planeDist * BottomHeight * Math.Cos(angleC2));
+            double BottomWidth = ((2 * Math.Tan(angleA) * lengthC2) * oglMain.AspectRatio) * 0.473;
+
+            double coshead = Math.Cos(glm.toRadians(camHeading));
+            double sinhead = Math.Sin(glm.toRadians(camHeading));
+
+            vec3 start = new vec3(pivotAxlePos.easting, pivotAxlePos.northing, 0);
+
+            vec3 TopLeft = start + new vec3(-TopWidth * coshead + TopHeight * sinhead, TopWidth * sinhead + TopHeight * coshead, 0);
+            vec3 TopRight = start + new vec3(TopWidth * coshead + TopHeight * sinhead, -TopWidth * sinhead + TopHeight * coshead, 0);
+            vec3 bottomLeft = start + new vec3(-BottomWidth * coshead - BottomHeight * sinhead, BottomWidth * sinhead - BottomHeight * coshead, 0);
+            vec3 bottomRigh = start + new vec3(BottomWidth * coshead - BottomHeight * sinhead, -BottomWidth * sinhead - BottomHeight * coshead, 0);
+            */
+
             float[] proj = new float[16];							// For Grabbing The PROJECTION Matrix
             float[] modl = new float[16];							// For Grabbing The MODELVIEW Matrix
             float[] clip = new float[16];							// Result Of Concatenating PROJECTION and MODELVIEW

@@ -38,7 +38,7 @@ namespace AgOpenGPS
 
                 for (int i = 0; i < recList.Count; i++)
                 {
-                    double temp = ((recList[i].easting - homePos.easting) * (recList[i].easting - homePos.easting)) + ((recList[i].northing - homePos.northing) * (recList[i].northing - homePos.northing));
+                    double temp = glm.Distance(homePos, recList[i]);
 
                     if (temp < distance)
                     {

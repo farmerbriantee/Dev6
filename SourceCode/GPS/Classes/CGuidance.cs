@@ -499,8 +499,7 @@ namespace AgOpenGPS
 
                 for (int t = currentPositonIndex; t < top; t++)
                 {
-                    dist = ((pivot.easting - recList[t].easting) * (pivot.easting - recList[t].easting))
-                                    + ((pivot.northing - recList[t].northing) * (pivot.northing - recList[t].northing));
+                    dist = glm.Distance(pivot, recList[t]);
                     if (dist < minDistA)
                     {
                         minDistA = dist;
@@ -523,8 +522,7 @@ namespace AgOpenGPS
                 //find the closest 2 points to current fix
                 for (int t = 0; t < recList.Count; t++)
                 {
-                    dist = ((pivot.easting - recList[t].easting) * (pivot.easting - recList[t].easting))
-                                    + ((pivot.northing - recList[t].northing) * (pivot.northing - recList[t].northing));
+                    dist = glm.Distance(pivot, recList[t]);
                     if (dist < minDistA)
                     {
                         minDistB = minDistA;
@@ -612,8 +610,7 @@ namespace AgOpenGPS
             for (int i = ReverseHeading ? pB : pA; i < recList.Count && i >= 0; i += count)
             {
                 // used for calculating the length squared of next segment.
-                double tempDist = Math.Sqrt((start.easting - recList[i].easting) * (start.easting - recList[i].easting)
-                    + (start.northing - recList[i].northing) * (start.northing - recList[i].northing));
+                double tempDist = glm.DistanceSquared(start, recList[i]);
 
                 //will we go too far?
                 if ((tempDist + distSoFar) > goalPointDistance)

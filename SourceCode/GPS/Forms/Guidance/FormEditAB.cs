@@ -10,6 +10,7 @@ namespace AgOpenGPS
         private double snapAdj = 0;
         CGuidanceLine currentLine;
         private bool isClosing;
+        private int smoothCount = 20;
 
         public FormEditAB(Form callingForm, CGuidanceLine _currentLine)
         {
@@ -24,6 +25,7 @@ namespace AgOpenGPS
             nudMinTurnRadius.Controls[0].Enabled = false;
 
             tboxHeading.Visible = cboxDegrees.Visible = currentLine.mode.HasFlag(Mode.AB);
+            btnSouth.Visible = lblSmooth.Visible = btnNorth.Visible = !currentLine.mode.HasFlag(Mode.AB);
         }
 
         private void FormEditAB_Load(object sender, EventArgs e)
@@ -119,12 +121,12 @@ namespace AgOpenGPS
             if (New != null)
             {
                 if (New.mode.HasFlag(Mode.AB))
-                    currentLine = mf.gyd.currentABLine = new CGuidanceLine(New);
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = new CGuidanceLine(New);
                 else
-                    currentLine = mf.gyd.currentCurveLine = new CGuidanceLine(New);
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = new CGuidanceLine(New);
             }
             else
-                currentLine = null;
+                mf.gyd.currentGuidanceLine = null;
 
             isClosing = true;
             Close();
@@ -164,6 +166,22 @@ namespace AgOpenGPS
             Close();
         }
 
+        private void btnSouth_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (--smoothCount < 2) smoothCount = 2;
+            SmoothAB(smoothCount * 2);
+            lblSmooth.Text = smoothCount.ToString();
+            mf.gyd.isSmoothWindowOpen = true;
+        }
+
+        private void btnNorth_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (++smoothCount > 100) smoothCount = 100;
+            SmoothAB(smoothCount * 2);
+            lblSmooth.Text = smoothCount.ToString();
+            mf.gyd.isSmoothWindowOpen = true;
+        }
+
         private void cboxDegrees_SelectedIndexChanged(object sender, EventArgs e)
         {
             double heading = glm.toRadians(double.Parse(cboxDegrees.SelectedItem.ToString()));
@@ -179,12 +197,76 @@ namespace AgOpenGPS
 
         private void FormEditAB_FormClosing(object sender, FormClosingEventArgs e)
         {
+            mf.gyd.isSmoothWindowOpen = false;
+
             if (!isClosing)
             {
                 e.Cancel = true;
                 return;
             }
             mf.panelRight.Enabled = true;
+        }
+
+        //for calculating for display the averaged new line
+        public void SmoothAB(int smPts)
+        {
+            int idx = mf.gyd.curveArr.FindIndex(x => x.Name == currentLine?.Name);
+            if (idx > -1)
+            {
+                CGuidanceLine currentLine2 = new CGuidanceLine(mf.gyd.curveArr[idx]);
+                if (mf.gyd.moveDistance != 0)
+                {
+                    double old = mf.gyd.isHeadingSameWay ? mf.gyd.moveDistance : -mf.gyd.moveDistance;
+                    mf.gyd.moveDistance = 0;
+                    mf.gyd.MoveGuidanceLine(currentLine2, old);
+                }
+
+                //count the reference list of original curve
+                int cnt = currentLine2.curvePts.Count;
+
+                //just go back if not very long
+                if (cnt < 200) return;
+
+                //the temp array
+                vec3[] arr = new vec3[cnt];
+
+                //read the points before and after the setpoint
+                for (int s = 0; s < smPts / 2; s++)
+                {
+                    arr[s].easting = currentLine2.curvePts[s].easting;
+                    arr[s].northing = currentLine2.curvePts[s].northing;
+                    arr[s].heading = currentLine2.curvePts[s].heading;
+                }
+
+                for (int s = cnt - (smPts / 2); s < cnt; s++)
+                {
+                    arr[s].easting = currentLine2.curvePts[s].easting;
+                    arr[s].northing = currentLine2.curvePts[s].northing;
+                    arr[s].heading = currentLine2.curvePts[s].heading;
+                }
+
+                //average them - center weighted average
+                for (int i = smPts / 2; i < cnt - (smPts / 2); i++)
+                {
+                    for (int j = -smPts / 2; j < smPts / 2; j++)
+                    {
+                        arr[i].easting += currentLine2.curvePts[j + i].easting;
+                        arr[i].northing += currentLine2.curvePts[j + i].northing;
+                    }
+                    arr[i].easting /= smPts;
+                    arr[i].northing /= smPts;
+                    arr[i].heading = currentLine2.curvePts[i].heading;
+                }
+
+                if (arr == null || cnt < 1) return;
+
+                currentLine2.curvePts.Clear();
+                currentLine2.curvePts.AddRange(arr);
+                currentLine2.curvePts.CalculateHeadings(currentLine2.mode.HasFlag(Mode.Boundary));
+
+                mf.gyd.isValid = false;
+                mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = currentLine = currentLine2;
+            }
         }
 
         private void btnCancel_HelpRequested(object sender, HelpEventArgs hlpevent)

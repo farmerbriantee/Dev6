@@ -125,6 +125,8 @@ namespace AgOpenGPS
                     tt.northing - mf.gyd.EditGuidanceLine.curvePts[0].northing);
                 if (heading < 0) heading += glm.twoPI;
                 tt.heading = heading;
+                if (mf.gyd.EditGuidanceLine.curvePts.Count > 0)
+                    mf.gyd.EditGuidanceLine.curvePts[0] = new vec3(mf.gyd.EditGuidanceLine.curvePts[0].easting, mf.gyd.EditGuidanceLine.curvePts[0].northing, heading);
 
                 if (mf.gyd.EditGuidanceLine.curvePts.Count > 1)
                     mf.gyd.EditGuidanceLine.curvePts[1] = tt;

@@ -207,6 +207,13 @@ namespace AgOpenGPS
                 + Math.Pow(first.northing - second.northing, 2));
         }
 
+        public static double Distance(vec3 first, CRecPathPt second)
+        {
+            return Math.Sqrt(
+                Math.Pow(first.easting - second.easting, 2)
+                + Math.Pow(first.northing - second.northing, 2));
+        }
+
         public static double Distance(vec2 first, double east, double north)
         {
             return Math.Sqrt(
@@ -264,6 +271,13 @@ namespace AgOpenGPS
             + Math.Pow(first.northing - second.northing, 2));
         }
         public static double DistanceSquared(vec2 first, vec2 second)
+        {
+            return (
+            Math.Pow(first.easting - second.easting, 2)
+            + Math.Pow(first.northing - second.northing, 2));
+        }
+
+        public static double DistanceSquared(CRecPathPt first, CRecPathPt second)
         {
             return (
             Math.Pow(first.easting - second.easting, 2)

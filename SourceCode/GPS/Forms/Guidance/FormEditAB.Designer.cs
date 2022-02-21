@@ -43,6 +43,9 @@
             this.tboxHeading = new System.Windows.Forms.TextBox();
             this.cboxDegrees = new System.Windows.Forms.ComboBox();
             this.nudMinTurnRadius = new System.Windows.Forms.NumericUpDown();
+            this.lblSmooth = new System.Windows.Forms.Label();
+            this.btnSouth = new ProXoft.WinForms.RepeatButton();
+            this.btnNorth = new ProXoft.WinForms.RepeatButton();
             ((System.ComponentModel.ISupportInitialize)(this.nudMinTurnRadius)).BeginInit();
             this.SuspendLayout();
             // 
@@ -287,12 +290,58 @@
             this.nudMinTurnRadius.ValueChanged += new System.EventHandler(this.nudMinTurnRadius_ValueChanged);
             this.nudMinTurnRadius.Click += new System.EventHandler(this.nudMinTurnRadius_Click);
             // 
+            // lblSmooth
+            // 
+            this.lblSmooth.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblSmooth.BackColor = System.Drawing.Color.Transparent;
+            this.lblSmooth.Font = new System.Drawing.Font("Tahoma", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSmooth.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.lblSmooth.Location = new System.Drawing.Point(71, 281);
+            this.lblSmooth.Name = "lblSmooth";
+            this.lblSmooth.Size = new System.Drawing.Size(110, 58);
+            this.lblSmooth.TabIndex = 455;
+            this.lblSmooth.Text = "**";
+            this.lblSmooth.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btnSouth
+            // 
+            this.btnSouth.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnSouth.FlatAppearance.BorderSize = 0;
+            this.btnSouth.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSouth.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Bold);
+            this.btnSouth.Image = global::AgOpenGPS.Properties.Resources.DnArrow64;
+            this.btnSouth.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnSouth.Location = new System.Drawing.Point(3, 269);
+            this.btnSouth.Name = "btnSouth";
+            this.btnSouth.Size = new System.Drawing.Size(72, 72);
+            this.btnSouth.TabIndex = 456;
+            this.btnSouth.UseVisualStyleBackColor = true;
+            this.btnSouth.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnSouth_MouseDown);
+            // 
+            // btnNorth
+            // 
+            this.btnNorth.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnNorth.FlatAppearance.BorderSize = 0;
+            this.btnNorth.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnNorth.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Bold);
+            this.btnNorth.Image = global::AgOpenGPS.Properties.Resources.UpArrow64;
+            this.btnNorth.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnNorth.Location = new System.Drawing.Point(177, 269);
+            this.btnNorth.Name = "btnNorth";
+            this.btnNorth.Size = new System.Drawing.Size(72, 72);
+            this.btnNorth.TabIndex = 457;
+            this.btnNorth.UseVisualStyleBackColor = true;
+            this.btnNorth.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnNorth_MouseDown);
+            // 
             // FormEditAB
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
             this.ClientSize = new System.Drawing.Size(252, 413);
+            this.Controls.Add(this.btnSouth);
+            this.Controls.Add(this.btnNorth);
+            this.Controls.Add(this.lblSmooth);
             this.Controls.Add(this.cboxDegrees);
             this.Controls.Add(this.tboxHeading);
             this.Controls.Add(this.lblHalfSnapFtM);
@@ -340,5 +389,8 @@
         private System.Windows.Forms.TextBox tboxHeading;
         private System.Windows.Forms.ComboBox cboxDegrees;
         private System.Windows.Forms.NumericUpDown nudMinTurnRadius;
+        private System.Windows.Forms.Label lblSmooth;
+        private ProXoft.WinForms.RepeatButton btnSouth;
+        private ProXoft.WinForms.RepeatButton btnNorth;
     }
 }

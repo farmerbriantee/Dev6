@@ -193,8 +193,7 @@ namespace AgOpenGPS
                     for (int t = 0; t < refCount; t++)
                     {
                         //distance check to be not too close to ref line
-                        double dist = ((point.easting - currentGuidanceLine.curvePts[t].easting) * (point.easting - currentGuidanceLine.curvePts[t].easting))
-                            + ((point.northing - currentGuidanceLine.curvePts[t].northing) * (point.northing - currentGuidanceLine.curvePts[t].northing));
+                        double dist = glm.Distance(point, currentGuidanceLine.curvePts[t]);
                         if (dist < distSqAway)
                         {
                             Add = false;
@@ -204,8 +203,7 @@ namespace AgOpenGPS
                     if (Add)
                     {
                         //a new point only every 2 meters
-                        double dist = tramArr.Count > 0 ? ((point.easting - tramArr[tramArr.Count - 1].easting) * (point.easting - tramArr[tramArr.Count - 1].easting))
-                            + ((point.northing - tramArr[tramArr.Count - 1].northing) * (point.northing - tramArr[tramArr.Count - 1].northing)) : 3.0;
+                        double dist = tramArr.Count > 0 ? glm.Distance(point, tramArr[tramArr.Count - 1]) : 3.0;
                         if (dist > 2)
                         {
                             //if inside the boundary, add
@@ -241,8 +239,7 @@ namespace AgOpenGPS
                     for (int t = 0; t < refCount; t++)
                     {
                         //distance check to be not too close to ref line
-                        double dist = ((point.easting - currentGuidanceLine.curvePts[t].easting) * (point.easting - currentGuidanceLine.curvePts[t].easting))
-                            + ((point.northing - currentGuidanceLine.curvePts[t].northing) * (point.northing - currentGuidanceLine.curvePts[t].northing));
+                        double dist = glm.Distance(point, currentGuidanceLine.curvePts[t]);
                         if (dist < distSqAway)
                         {
                             Add = false;
@@ -252,8 +249,7 @@ namespace AgOpenGPS
                     if (Add)
                     {
                         //a new point only every 2 meters
-                        double dist = tramArr.Count > 0 ? ((point.easting - tramArr[tramArr.Count - 1].easting) * (point.easting - tramArr[tramArr.Count - 1].easting))
-                            + ((point.northing - tramArr[tramArr.Count - 1].northing) * (point.northing - tramArr[tramArr.Count - 1].northing)) : 3.0;
+                        double dist = tramArr.Count > 0 ? glm.Distance(point, tramArr[tramArr.Count - 1]) : 3.0;
                         if (dist > 2)
                         {
                             //if inside the boundary, add

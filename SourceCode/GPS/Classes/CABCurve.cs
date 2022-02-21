@@ -111,8 +111,7 @@ namespace AgOpenGPS
 
                 for (int j = 0; j < refCount; j += 10)
                 {
-                    double dist = ((pivot.easting - refList.curvePts[j].easting) * (pivot.easting - refList.curvePts[j].easting))
-                                    + ((pivot.northing - refList.curvePts[j].northing) * (pivot.northing - refList.curvePts[j].northing));
+                    double dist = glm.Distance(pivot, refList.curvePts[j]);
                     if (dist < minDistA)
                     {
                         minDistA = dist;
@@ -128,8 +127,7 @@ namespace AgOpenGPS
                 //find the closest 2 points to current close call
                 for (int j = cc; j < dd; j++)
                 {
-                    double dist = ((pivot.easting - refList.curvePts[j].easting) * (pivot.easting - refList.curvePts[j].easting))
-                                    + ((pivot.northing - refList.curvePts[j].northing) * (pivot.northing - refList.curvePts[j].northing));
+                    double dist = glm.Distance(pivot, refList.curvePts[j]);
                     if (dist < minDistA)
                     {
                         minDistB = minDistA;
@@ -164,7 +162,7 @@ namespace AgOpenGPS
                 else howManyPathsAway = (int)(RefDist + 0.5);
 
                 lastSecond = mf.secondsSinceStart;
-                if (!isValid) oldIsHeadingSameWay = !isHeadingSameWay;
+                if (!isValid) oldHowManyPathsAway = howManyPathsAway+1;
             }
 
             if (refList?.mode.HasFlag(Mode.Contour) == true)
@@ -360,43 +358,37 @@ namespace AgOpenGPS
                     GL.PointSize(1.0f);
                 }
             }
-            else
+            else if (EditGuidanceLine != null)
             {
-                if (EditGuidanceLine != null)
+                GL.Color3(0.95f, 0.42f, 0.750f);
+                GL.Begin(PrimitiveType.LineStrip);
+
+                for (int h = 0; h < EditGuidanceLine.curvePts.Count; h++)
                 {
-                    if (isSmoothWindowOpen)
-                    {
-                        GL.Color3(0.930f, 0.92f, 0.260f);
-                        GL.Begin(PrimitiveType.Lines);
-                    }
-                    else
-                    {
-                        GL.Color3(0.95f, 0.42f, 0.750f);
-                        GL.Begin(PrimitiveType.LineStrip);
-                    }
+                    if (h == 0 && !EditGuidanceLine.mode.HasFlag(Mode.Boundary))
+                        GL.Vertex3(EditGuidanceLine.curvePts[h].easting - (Math.Sin(EditGuidanceLine.curvePts[h].heading) * abLength), EditGuidanceLine.curvePts[h].northing - (Math.Cos(EditGuidanceLine.curvePts[h].heading) * abLength), 0.0);
 
-                    for (int h = 0; h < EditGuidanceLine.curvePts.Count; h++)
-                    {
-                        if (h == 0 && !EditGuidanceLine.mode.HasFlag(Mode.Boundary))
-                            GL.Vertex3(EditGuidanceLine.curvePts[h].easting - (Math.Sin(EditGuidanceLine.curvePts[h].heading) * abLength), EditGuidanceLine.curvePts[h].northing - (Math.Cos(EditGuidanceLine.curvePts[h].heading) * abLength), 0.0);
+                    GL.Vertex3(EditGuidanceLine.curvePts[h].easting, EditGuidanceLine.curvePts[h].northing, 0);
 
-                        GL.Vertex3(EditGuidanceLine.curvePts[h].easting, EditGuidanceLine.curvePts[h].northing, 0);
-
-                        if (h == EditGuidanceLine.curvePts.Count - 1 && !EditGuidanceLine.mode.HasFlag(Mode.Boundary))
-                            GL.Vertex3(EditGuidanceLine.curvePts[h].easting + (Math.Sin(EditGuidanceLine.curvePts[h].heading) * abLength), EditGuidanceLine.curvePts[h].northing + (Math.Cos(EditGuidanceLine.curvePts[h].heading) * abLength), 0.0);
-                    }
-
-                    if (!EditGuidanceLine.mode.HasFlag(Mode.AB) || EditGuidanceLine.curvePts.Count == 1)
-                    {
-                        GL.Color3(0.930f, 0.0692f, 0.260f);
-                        GL.Vertex3(mf.pivotAxlePos.easting, mf.pivotAxlePos.northing, 0);
-                    }
-                    GL.End();
+                    if (h == EditGuidanceLine.curvePts.Count - 1 && EditGuidanceLine.mode.HasFlag(Mode.AB))
+                        GL.Vertex3(EditGuidanceLine.curvePts[h].easting + (Math.Sin(EditGuidanceLine.curvePts[h].heading) * abLength), EditGuidanceLine.curvePts[h].northing + (Math.Cos(EditGuidanceLine.curvePts[h].heading) * abLength), 0.0);
                 }
 
+                if (!EditGuidanceLine.mode.HasFlag(Mode.AB))
+                {
+                    GL.Color3(0.930f, 0.0692f, 0.260f);
+                    GL.Vertex3(mf.pivotAxlePos.easting, mf.pivotAxlePos.northing, 0);
+                }
+                GL.End();
+            }
+            else
+            {
                 if (currentGuidanceLine != null && currentGuidanceLine.curvePts.Count > 1)
                 {
-                    GL.Color3(0.96, 0.2f, 0.2f);
+                    if (isSmoothWindowOpen)
+                        GL.Color3(0.930f, 0.92f, 0.260f);
+                    else
+                        GL.Color3(0.96, 0.2f, 0.2f);
                     GL.Enable(EnableCap.LineStipple);
                     GL.LineStipple(1, 0x0F00);
                     bool Extend = false;
@@ -420,10 +412,10 @@ namespace AgOpenGPS
                     {
                         if (Extend && h == 0)
                             GL.Vertex3(currentGuidanceLine.curvePts[h].easting - (Math.Sin(currentGuidanceLine.curvePts[h].heading) * abLength), currentGuidanceLine.curvePts[h].northing - (Math.Cos(currentGuidanceLine.curvePts[h].heading) * abLength), 0.0);
-                        
+
                         GL.Vertex3(currentGuidanceLine.curvePts[h].easting, currentGuidanceLine.curvePts[h].northing, 0);
 
-                        if (Extend && h == currentGuidanceLine.curvePts.Count -1)
+                        if (Extend && h == currentGuidanceLine.curvePts.Count - 1)
                             GL.Vertex3(currentGuidanceLine.curvePts[h].easting + (Math.Sin(currentGuidanceLine.curvePts[h].heading) * abLength), currentGuidanceLine.curvePts[h].northing + (Math.Cos(currentGuidanceLine.curvePts[h].heading) * abLength), 0.0);
                     }
                     GL.End();
@@ -506,6 +498,29 @@ namespace AgOpenGPS
 
                     if (mf.isPureDisplayOn && !mf.isStanleyUsed)
                     {
+                        if (currentGuidanceLine.mode.HasFlag(Mode.AB) && ppRadius < 150 && ppRadius > -150)
+                        {
+                            const int numSegments = 100;
+                            double theta = glm.twoPI / numSegments;
+                            double c = Math.Cos(theta);//precalculate the sine and cosine
+                            double s = Math.Sin(theta);
+                            double x = ppRadius;//we start at angle = 0
+                            double y = 0;
+
+                            GL.LineWidth(1);
+                            GL.Color3(0.53f, 0.530f, 0.950f);
+                            GL.Begin(PrimitiveType.LineLoop);
+                            for (int ii = 0; ii < numSegments; ii++)
+                            {
+                                //glVertex2f(x + cx, y + cy);//output vertex
+                                GL.Vertex3(x + radiusPoint.easting, y + radiusPoint.northing, 0);//output vertex
+                                double t = x;//apply the rotation matrix
+                                x = (c * x) - (s * y);
+                                y = (s * t) + (c * y);
+                            }
+                            GL.End();
+                        }
+
                         //Draw lookahead Point
                         GL.PointSize(8.0f);
                         GL.Begin(PrimitiveType.Points);
@@ -527,7 +542,7 @@ namespace AgOpenGPS
 
                     if (ytList.Count > 1)
                     {
-                        GL.PointSize(lineWidth*2);
+                        GL.PointSize(lineWidth * 2);
 
                         if (isYouTurnTriggered)
                             GL.Color3(0.95f, 0.5f, 0.95f);

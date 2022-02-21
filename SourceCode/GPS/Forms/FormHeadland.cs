@@ -195,8 +195,7 @@ namespace AgOpenGPS
                 //find the closest 2 points to current fix
                 for (int t = 0; t < headLineTemplate.points.Count; t++)
                 {
-                    double dist = ((plotPt.easting - headLineTemplate.points[t].easting) * (plotPt.easting - headLineTemplate.points[t].easting))
-                                    + ((plotPt.northing - headLineTemplate.points[t].northing) * (plotPt.northing - headLineTemplate.points[t].northing));
+                    double dist = glm.Distance(plotPt, headLineTemplate.points[t]);
                     if (dist < minDist)
                     {
                         minDist = dist;
