@@ -12,7 +12,7 @@ namespace AgOpenGPS
         //extracted Near, Far, Right, Left clipping planes of frustum
         private double[] frustum = new double[24];
 
-        private const double fovy = 0.7, camDistanceFactor = -4;
+        private const float fovy = 0.7f, camDistanceFactor = -4.0f;
 
         private int mouseX = 0, mouseY = 0;
         private int zoomUpdateCounter = 0;
@@ -46,8 +46,7 @@ namespace AgOpenGPS
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
             GL.Viewport(0, 0, oglMain.Width, oglMain.Height);
-            Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView((float)fovy, (float)oglMain.Width / (float)oglMain.Height,
-                1.0f, (float)(camDistanceFactor * camera.camSetDistance));
+            Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView(fovy, oglMain.AspectRatio, 1.0f, (float)(camDistanceFactor * camera.camSetDistance));
             GL.LoadMatrix(ref mat);
             GL.MatrixMode(MatrixMode.Modelview);
         }
@@ -147,10 +146,11 @@ namespace AgOpenGPS
                 //position the camera
                 camera.SetWorldCam(pivotAxlePos.easting, pivotAxlePos.northing, camHeading);
 
-                //the bounding box of the camera for cullling.
-                CalcFrustum();
 
                 worldGrid.DrawFieldSurface();
+
+                //the bounding box of the camera for cullling.
+                CalcFrustum();
 
                 if (isDrawPolygons) GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
 
@@ -251,7 +251,12 @@ namespace AgOpenGPS
                     }
                 }
 
-                if (tram.displayMode != 0) tram.DrawTram();
+                if (tram.displayMode != 0)
+                {
+                    if (camera.camSetDistance > -250) GL.LineWidth(4);
+                    else GL.LineWidth(2);
+                    GL.Color4(0.30f, 0.93692f, 0.7520f, 0.3); tram.DrawTram();
+                }
 
                 GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
                 GL.Color3(1, 1, 1);
@@ -434,7 +439,6 @@ namespace AgOpenGPS
         {
             oglBack.MakeCurrent();
             GL.Disable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
             GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
             GL.ClearColor((byte)0, (byte)0, (byte)0, (byte)255);
 
@@ -501,31 +505,42 @@ namespace AgOpenGPS
 
                         if (end > tool.rpWidth) end = tool.rpWidth;
 
-                        int tagged = 0;
-                        int tagged2 = 0;
                         int totalPixs = 0;
+                        int totalPixsbnd = 0;
 
                         for (int pos = start; pos < end; pos++)
                         {
                             int StartHeight = (int)Math.Round((tool.lookAheadDistanceOffPixelsLeft - (rpHeight2 + 1)) + (mOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
                             int StopHeight = (int)Math.Round((tool.lookAheadDistanceOnPixelsLeft - rpHeight2) + (mOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
                             int StopHydHeight = (int)Math.Round((vehicle.hydLiftLookAheadDistanceLeft - rpHeight2) + (mHyd * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
-                            int tagged3 = 0;
-                            for (int a = isToolInHeadland ? pos : StartHeight; a <= StopHeight || (isToolInHeadland && a <= StopHydHeight); a += tool.rpWidth)
+
+                            int taggedOn = 0;
+                            int taggedOff = 0;
+                            int taggedBound = 0;
+
+                            for (int a = isToolInHeadland ? pos : StartHeight; (isToolInHeadland ? a <= StopHydHeight : a <= StopHeight); a += tool.rpWidth)
                             {
                                 if (a >= 0 && a < grnPixelsLength)
                                 {
                                     int Procent5 = grnPixels[a] % 5;
-                                    if (a >= StartHeight && a <= StopHeight)
+                                    if (a >= StartHeight && a <= StartHeight + tool.rpWidth)
                                     {
-                                        totalPixs++;
+                                        if (grnPixels[a] < 233)
+                                        {
+                                            ++taggedOff;
+                                        }
+                                        if (Procent5 == 2 || Procent5 == 1)//when outside fence dont wait for sectionOverlapTimer
+                                        {
+                                            ++taggedBound;
+                                        }
+                                    }
+
+                                    if (a >= StopHeight - tool.rpWidth && a <= StopHeight)
+                                    {
                                         if (bnd.bndList.Count == 0 ? grnPixels[a] == 252 : (grnPixels[a] == 250 || grnPixels[a] == 245 || grnPixels[a] == 240 || grnPixels[a] == 235))
                                         {
-                                            if (tagged3++ < 2)
-                                                ++tagged;
+                                            ++taggedOn;
                                         }
-                                        else if (Procent5 == 2 || Procent5 == 1)//when outside fence dont wait for sectionOverlapTimer
-                                            ++tagged2;
                                     }
                                     if (isToolInHeadland)
                                     {
@@ -535,16 +550,19 @@ namespace AgOpenGPS
                                     }
                                 }
                             }
+                            if (taggedOn >= taggedOff)
+                                totalPixs++;
+                            if (taggedOn >= taggedBound)
+                                totalPixsbnd++;
                         }
-                        if (tagged2 > totalPixs * 0.1)
+
+                        if (totalPixsbnd == 0 || (double)totalPixsbnd / section[j].rpSectionWidth < 1 - tool.boundOverlap)
                         {
                             section[j].sectionOnRequest = false;
                             if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
                         }
-                        else if (section[j].sectionOnRequest)
-                            section[j].sectionOnRequest = tagged > 0 && (tagged * 100.0) / section[j].rpSectionWidth >= 200.0 - tool.minCoverage * 2;
                         else
-                            section[j].sectionOnRequest = tagged > 1 && (tagged * 100.0) / section[j].rpSectionWidth >= 200.0 - tool.minCoverage * 2;
+                            section[j].sectionOnRequest = totalPixs > 0 && ((double)totalPixs / section[j].rpSectionWidth >= 1 - tool.minOverlap * 0.01);
 
                         isSuperSectionAllowedOn &= (section[j].mappingOnTimer < 2 && (section[j].mappingOffTimer > 1 || section[j].sectionOverlapTimer + section[j].mappingOffTimer > (section[j].sectionOnRequest ? 1 : 2))) || (section[j].sectionOnRequest && (section[j].isMappingOn || section[j].mappingOnTimer == 1 || HzTime * tool.lookAheadOnSetting < 1));
                     }
@@ -873,7 +891,7 @@ namespace AgOpenGPS
                     }
                 }
             }
-
+            
             //finish it up - we need to read the ram of video card
             GL.Flush();
 
@@ -916,8 +934,7 @@ namespace AgOpenGPS
             GL.LoadIdentity();
 
             GL.Viewport(0, 0, oglZoom.Width, oglZoom.Height);
-            //58 degrees view
-            Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView(1.01f, 1.0f, 100.0f, 5000.0f);
+            Matrix4 mat = Matrix4.CreateOrthographic((float)maxFieldDistance, (float)maxFieldDistance, -1.0f, 1.0f);
             GL.LoadMatrix(ref mat);
 
             GL.MatrixMode(MatrixMode.Modelview);
@@ -1042,9 +1059,6 @@ namespace AgOpenGPS
 
                     GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
                     GL.LoadIdentity();                  // Reset The View
-
-                    //back the camera up
-                    GL.Translate(0, 0, -maxFieldDistance);
 
                     //translate to that spot in the world 
                     GL.Translate(-fieldCenterX, -fieldCenterY, 0);
@@ -1905,33 +1919,54 @@ namespace AgOpenGPS
         {
             //the bounding box of the camera for cullling without grabbing gl matrixes
             /*
-            double planeDist = camera.camSetDistance * -0.5;
+            Matrix4 inv_view = Matrix4.CreatePerspectiveFieldOfView(fovy, oglMain.AspectRatio, 1.0f, (float)(camDistanceFactor * camera.camSetDistance));
+            inv_view.Invert();
 
-            double angleA = fovy / 2.0;
-            double angleC = glm.PIBy2 - glm.toRadians(camera.camPitch);
-            double angleB = Math.PI - angleA - angleC;
+            double radhead = glm.toRadians(camHeading);
+            double radpitch = glm.toRadians(camera.camPitch);
+            float coshead = (float)Math.Cos(glm.toRadians(camHeading));
+            float sinhead = (float)Math.Sin(glm.toRadians(camHeading));
+            float cosPitch = (float)Math.Cos(glm.toRadians(camera.camPitch));
+            float sinPitch = (float)Math.Sin(glm.toRadians(camera.camPitch));
+            float eastsinhead = (float)pivotAxlePos.easting * sinhead;
+            float northcoshead = (float)pivotAxlePos.northing * coshead;
 
-            //works only with camPitch > -70;
-            //law of sines
-            double TopHeight = Math.Abs(planeDist * (Math.Sin(angleA) / Math.Sin(angleB)));
-            double lengthC = Math.Sqrt(planeDist * planeDist + TopHeight * TopHeight - 2 * planeDist * TopHeight * Math.Cos(angleC));
-            double TopWidth = ((2 * Math.Tan(angleA) * lengthC) * oglMain.AspectRatio) * 0.473;
+            Matrix4 inv_proj = new Matrix4(
+                new Vector4(coshead, sinhead * cosPitch, sinhead * sinPitch, 0),
+                new Vector4(-sinhead, cosPitch * coshead, sinPitch * coshead, 0),
+                new Vector4(0, -sinPitch, cosPitch, 0),
+                new Vector4((float)(-pivotAxlePos.easting * coshead + pivotAxlePos.northing * sinhead), (float)((-eastsinhead + -northcoshead) * cosPitch), (float)((camera.camSetDistance * 0.5) + (eastsinhead + northcoshead) * -sinPitch), 1));
 
-            double angleC2 = glm.PIBy2 + glm.toRadians(camera.camPitch);
-            double angleB2 = Math.PI - angleA - angleC2;
-            double BottomHeight = planeDist * (Math.Sin(angleA) / Math.Sin(angleB2));
-            double lengthC2 = Math.Sqrt(planeDist * planeDist + BottomHeight * BottomHeight - 2 * planeDist * BottomHeight * Math.Cos(angleC2));
-            double BottomWidth = ((2 * Math.Tan(angleA) * lengthC2) * oglMain.AspectRatio) * 0.473;
+            inv_proj.Invert();
 
-            double coshead = Math.Cos(glm.toRadians(camHeading));
-            double sinhead = Math.Sin(glm.toRadians(camHeading));
+            Vector4 ftl = NDCToWorld(new Vector4(-1, 1, 1, 1), inv_view, inv_proj);
+            Vector4 ftr = NDCToWorld(new Vector4(1, 1, 1, 1), inv_view, inv_proj);
+            Vector4 fbl = NDCToWorld(new Vector4(-1, -1, 1, 1), inv_view, inv_proj);
+            Vector4 fbr = NDCToWorld(new Vector4(1, -1, 1, 1), inv_view, inv_proj);
 
-            vec3 start = new vec3(pivotAxlePos.easting, pivotAxlePos.northing, 0);
+            Vector4 ntl = NDCToWorld(new Vector4(-1, 1, -1, 1), inv_view, inv_proj);
+            Vector4 ntr = NDCToWorld(new Vector4(1, 1, -1, 1), inv_view, inv_proj);
+            Vector4 nbl = NDCToWorld(new Vector4(-1, -1, -1, 1), inv_view, inv_proj);
+            Vector4 nbr = NDCToWorld(new Vector4(1, -1, -1, 1), inv_view, inv_proj);
 
-            vec3 TopLeft = start + new vec3(-TopWidth * coshead + TopHeight * sinhead, TopWidth * sinhead + TopHeight * coshead, 0);
-            vec3 TopRight = start + new vec3(TopWidth * coshead + TopHeight * sinhead, -TopWidth * sinhead + TopHeight * coshead, 0);
-            vec3 bottomLeft = start + new vec3(-BottomWidth * coshead - BottomHeight * sinhead, BottomWidth * sinhead - BottomHeight * coshead, 0);
-            vec3 bottomRigh = start + new vec3(BottomWidth * coshead - BottomHeight * sinhead, -BottomWidth * sinhead - BottomHeight * coshead, 0);
+            if (nbl.Z > 0 && fbl.Z < 0)
+            {
+                vec2 pbl = new vec2(nbl.Z * (nbl.X - fbl.X) / (fbl.Z - nbl.Z) + nbl.X, nbl.Z * (nbl.Y - fbl.Y) / (fbl.Z - nbl.Z) + nbl.Y);
+                vec2 pbr = new vec2(nbr.Z * (nbr.X - fbr.X) / (fbr.Z - nbr.Z) + nbr.X, nbr.Z * (nbr.Y - fbr.Y) / (fbr.Z - nbr.Z) + nbr.Y);
+                if (ntl.Z > 0)
+                {
+                    if (ftl.Z < 0)
+                    {
+                        vec2 ptl = new vec2(ntl.Z * (ntl.X - ftl.X) / (ftl.Z - ntl.Z) + ntl.X, ntl.Z * (ntl.Y - ftl.Y) / (ftl.Z - ntl.Z) + ntl.Y);
+                        vec2 ptr = new vec2(ntr.Z * (ntr.X - ftr.X) / (ftr.Z - ntr.Z) + ntr.X, ntr.Z * (ntr.Y - ftr.Y) / (ftr.Z - ntr.Z) + ntr.Y);
+                    }
+                    else
+                    {
+                        vec2 ptl = new vec2(ftl.Z * (ftl.X - fbl.X) / (fbl.Z - ftl.Z) + ftl.X, ftl.Z * (ftl.Y - fbl.Y) / (fbl.Z - ftl.Z) + ftl.Y);
+                        vec2 ptr = new vec2(ftr.Z * (ftr.X - fbr.X) / (fbr.Z - ftr.Z) + ftr.X, ftr.Z * (ftr.Y - fbr.Y) / (fbr.Z - ftr.Z) + ftr.Y);
+                    }
+                }
+            }
             */
 
             float[] proj = new float[16];							// For Grabbing The PROJECTION Matrix
@@ -1939,7 +1974,7 @@ namespace AgOpenGPS
             float[] clip = new float[16];							// Result Of Concatenating PROJECTION and MODELVIEW
 
             GL.GetFloat(GetPName.ProjectionMatrix, proj);	// Grab The Current PROJECTION Matrix
-            GL.GetFloat(GetPName.Modelview0MatrixExt, modl);   // Grab The Current MODELVIEW Matrix 
+            GL.GetFloat(GetPName.Modelview0MatrixExt, modl);   // Grab The Current MODELVIEW Matrix
 
             // Concatenate (Multiply) The Two Matricies
             clip[0] = modl[0] * proj[0] + modl[1] * proj[4] + modl[2] * proj[8] + modl[3] * proj[12];
@@ -2057,7 +2092,6 @@ namespace AgOpenGPS
                 }
             }
 
-
             if (maxFieldX == -9999999 || minFieldX == 9999999 || maxFieldY == -9999999 || minFieldY == 9999999)
             {
                 maxFieldX = 0; minFieldX = 0; maxFieldY = 0; minFieldY = 0; maxFieldDistance = 1500;
@@ -2073,15 +2107,20 @@ namespace AgOpenGPS
                 if (dist > dist2) maxFieldDistance = (dist);
                 else maxFieldDistance = (dist2);
 
-                if (maxFieldDistance < 100) maxFieldDistance = 100;
-                if (maxFieldDistance > 19900) maxFieldDistance = 19900;
-                //lblMax.Text = ((int)maxFieldDistance).ToString();
+                maxFieldDistance += 100;
 
                 fieldCenterX = (maxFieldX + minFieldX) / 2.0;
                 fieldCenterY = (maxFieldY + minFieldY) / 2.0;
             }
 
             fd.UpdateFieldBoundaryGUIAreas();
+        }
+
+        public Vector4 NDCToWorld(Vector4 ndc_corner, Matrix4 inv_view, Matrix4 inv_proj)
+        {
+            var view_corner_h = Vector4.Transform(ndc_corner, inv_view);
+            var view_corner = view_corner_h * 1 / view_corner_h[3];
+            return Vector4.Transform(view_corner, inv_proj);
         }
 
         private void DrawFieldText()

@@ -39,7 +39,8 @@ namespace AgOpenGPS
         public int numSuperSection;
 
         //used for super section off on
-        public int minCoverage;
+        public int minOverlap;
+        public double boundOverlap = 0.0;
 
         //read pixel values
         public int rpXPosition;
@@ -75,7 +76,7 @@ namespace AgOpenGPS
             numOfSections = Properties.Vehicle.Default.setVehicle_numSections;
             numSuperSection = numOfSections + 1;
 
-            minCoverage = Properties.Vehicle.Default.setVehicle_minCoverage;
+            minOverlap = Properties.Vehicle.Default.setVehicle_minCoverage;
             isMultiColoredSections = Properties.Settings.Default.setColor_isMultiColorSections;
 
             secColors[0] =  Properties.Settings.Default.setColor_sec01;

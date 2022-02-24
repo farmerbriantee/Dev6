@@ -48,11 +48,6 @@ namespace AgOpenGPS
 
         public void DrawTram()
         {
-            if (mf.camera.camSetDistance > -250) GL.LineWidth(4);
-            else GL.LineWidth(2);
-
-            GL.Color4(0.30f, 0.93692f, 0.7520f, 0.3);
-
             if (displayMode == 1 || displayMode == 2)
             {
                 if (tramList.Count > 0)
@@ -168,8 +163,6 @@ namespace AgOpenGPS
 
             bool isBndExist = mf.bnd.bndList.Count != 0;
 
-            double pass = 0.5;
-
             int refCount = currentGuidanceLine.curvePts.Count;
 
             int cntr = 0;
@@ -177,17 +170,14 @@ namespace AgOpenGPS
 
             for (int i = cntr; i <= passes; i++)
             {
-                double distSqAway = (tramWidth * (i + 0.5) - halfWheelTrack + mf.tool.halfToolWidth)
-                        * (tramWidth * (i + 0.5) - halfWheelTrack + mf.tool.halfToolWidth) * 0.999999;
+                double offset = tramWidth * (i + 0.5) - halfWheelTrack + mf.tool.halfToolWidth;
+                double distSqAway = offset * offset - 0.001;
 
                 tramList.Add(tramArr);
                 for (int j = 0; j < refCount; j += 1)
                 {
-                    vec2 point = new vec2(
-                    (Math.Sin(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
-                        ((tramWidth * (pass + i)) - halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].easting,
-                    (Math.Cos(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
-                        ((tramWidth * (pass + i)) - halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].northing);
+                    vec2 point = new vec2(currentGuidanceLine.curvePts[j].easting + (Math.Sin(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) * offset),
+                                         currentGuidanceLine.curvePts[j].northing + (Math.Cos(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) * offset));
 
                     bool Add = true;
                     for (int t = 0; t < refCount; t++)
@@ -218,8 +208,8 @@ namespace AgOpenGPS
 
             for (int i = cntr; i <= passes; i++)
             {
-                double distSqAway = (tramWidth * (i + 0.5) + halfWheelTrack + mf.tool.halfToolWidth)
-                        * (tramWidth * (i + 0.5) + halfWheelTrack + mf.tool.halfToolWidth) * 0.999999;
+                double offset = tramWidth * (i + 0.5) + halfWheelTrack + mf.tool.halfToolWidth;
+                double distSqAway = offset * offset - 0.001;
 
                 tramArr = new List<vec2>
                 {
@@ -229,11 +219,8 @@ namespace AgOpenGPS
                 tramList.Add(tramArr);
                 for (int j = 0; j < refCount; j += 1)
                 {
-                    vec2 point = new vec2(
-                    (Math.Sin(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
-                        ((tramWidth * (pass + i)) + halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].easting,
-                    (Math.Cos(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) *
-                        ((tramWidth * (pass + i)) + halfWheelTrack + mf.tool.halfToolWidth)) + currentGuidanceLine.curvePts[j].northing);
+                    vec2 point = new vec2(currentGuidanceLine.curvePts[j].easting + (Math.Sin(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) * offset),
+                                         currentGuidanceLine.curvePts[j].northing + (Math.Cos(glm.PIBy2 + currentGuidanceLine.curvePts[j].heading) * offset));
 
                     bool Add = true;
                     for (int t = 0; t < refCount; t++)

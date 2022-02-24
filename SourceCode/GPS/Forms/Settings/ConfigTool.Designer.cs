@@ -477,8 +477,8 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                mf.tool.minCoverage = (int)nudMinCoverage.Value;
-                Properties.Vehicle.Default.setVehicle_minCoverage = mf.tool.minCoverage;
+                mf.tool.minOverlap = (int)nudMinCoverage.Value;
+                Properties.Vehicle.Default.setVehicle_minCoverage = mf.tool.minOverlap;
             }
         }
 

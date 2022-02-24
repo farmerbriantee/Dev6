@@ -133,9 +133,6 @@ namespace AgOpenGPS
             GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
             GL.LoadIdentity();                  // Reset The View
 
-            //back the camera up
-            GL.Translate(0, 0, -mf.maxFieldDistance);
-
             //translate to that spot in the world
             GL.Translate(-mf.fieldCenterX, -mf.fieldCenterY, 0);
 
@@ -178,16 +175,11 @@ namespace AgOpenGPS
             {
                 Point pt = oglSelf.PointToClient(Cursor.Position);
 
-                vec3 plotPt = new vec3
-                {
-                    //convert screen coordinates to field coordinates
-                    easting = (pt.X - 350) * mf.maxFieldDistance / 632.0,
-                    northing = (700 - pt.Y - 350) * mf.maxFieldDistance / 632.0,
-                    heading = 0
-                };
-
-                plotPt.easting += mf.fieldCenterX;
-                plotPt.northing += mf.fieldCenterY;
+                //convert screen coordinates to field coordinates
+                vec2 plotPt = new vec2(
+                    mf.fieldCenterX + (pt.X - 350)/700.0 * mf.maxFieldDistance,
+                    mf.fieldCenterY + (350 - pt.Y)/700.0 * mf.maxFieldDistance
+                );
 
                 double minDist = double.MaxValue;
                 int A = -1;
@@ -314,21 +306,11 @@ namespace AgOpenGPS
             GL.CullFace(CullFaceMode.Back);
             GL.ClearColor(0.23122f, 0.2318f, 0.2315f, 1.0f);
 
-            oglSelf.Refresh();
-        }
-
-        private void oglSelf_Resize(object sender, EventArgs e)
-        {
-            oglSelf.MakeCurrent();
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-
-            //58 degrees view
-            Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView(1.01f, 1.0f, 1.0f, 20000);
+            Matrix4 mat = Matrix4.CreateOrthographic((float)mf.maxFieldDistance, (float)mf.maxFieldDistance, -1.0f, 1.0f);
             GL.LoadMatrix(ref mat);
-
             GL.MatrixMode(MatrixMode.Modelview);
-
             oglSelf.Refresh();
         }
 

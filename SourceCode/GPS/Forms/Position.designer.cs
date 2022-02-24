@@ -1104,11 +1104,14 @@ namespace AgOpenGPS
             if (vehicle.hydLiftLookAheadDistanceRight > 250) vehicle.hydLiftLookAheadDistanceRight = 250;
             else if (vehicle.hydLiftLookAheadDistanceRight < -250) vehicle.hydLiftLookAheadDistanceRight = -250;
 
+            oneFrameLeft *= (50.0 / (tool.minOverlap - 50.0));
+            oneFrameRight *= (50.0 / (tool.minOverlap - 50.0));
+
             tool.lookAheadDistanceOnPixelsLeft = oneFrameLeft + tool.toolFarLeftSpeed * tool.lookAheadOnSetting * 10;
             tool.lookAheadDistanceOnPixelsRight = oneFrameRight + tool.toolFarRightSpeed * tool.lookAheadOnSetting * 10;
 
             tool.lookAheadDistanceOffPixelsLeft = -oneFrameLeft + tool.toolFarLeftSpeed * tool.lookAheadOffSetting * 10;
-            tool.lookAheadDistanceOffPixelsRight = -oneFrameLeft + tool.toolFarRightSpeed * tool.lookAheadOffSetting * 10;
+            tool.lookAheadDistanceOffPixelsRight = -oneFrameRight + tool.toolFarRightSpeed * tool.lookAheadOffSetting * 10;
 
             if (tool.lookAheadDistanceOnPixelsLeft > 250)
             {

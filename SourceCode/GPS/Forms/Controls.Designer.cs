@@ -1607,7 +1607,7 @@ namespace AgOpenGPS
                 return;
             }
             camera.camFollowing = true;
-            camera.camPitch = -69;
+            camera.camPitch = -60;
             navPanelCounter = 2;
         }
 
@@ -1632,7 +1632,7 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            camera.camPitch = -69;
+            camera.camPitch = -60;
             camera.camFollowing = false;
             navPanelCounter = 2;
         }
@@ -1689,7 +1689,7 @@ namespace AgOpenGPS
             //    return;
             //}
             camera.camPitch -= ((camera.camPitch * 0.012) - 1);
-            if (camera.camPitch > -58) camera.camPitch = 0;
+            if (camera.camPitch > -40) camera.camPitch = 0;
             navPanelCounter = 2;
         }
         private void btnpTiltDown_MouseDown(object sender, MouseEventArgs e)
@@ -1700,9 +1700,9 @@ namespace AgOpenGPS
             //    isTT = false;
             //    return;
             //}
-            if (camera.camPitch > -59) camera.camPitch = -60;
+            if (camera.camPitch > -40) camera.camPitch = -40;
             camera.camPitch += ((camera.camPitch * 0.012) - 1);
-            if (camera.camPitch < -69) camera.camPitch = -69;
+            if (camera.camPitch < -80) camera.camPitch = -80;
             navPanelCounter = 2;
         }
 
