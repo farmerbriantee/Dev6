@@ -38,7 +38,7 @@ namespace AgOpenGPS
         public double distanceFromCurrentLinePivot;
         public double steerAngle, rEast, rNorth;
 
-        public vec2 goalPoint = new vec2(0, 0), radiusPoint = new vec2(0, 0);
+        public vec2 goalPoint = new vec2(0, 0);//, radiusPoint = new vec2(0, 0);
 
         public double inty, steerHeadingError, xTrackSteerCorrection = 0;
 
@@ -46,7 +46,7 @@ namespace AgOpenGPS
         public double steerDistError, lastSteerDistError, steerDerivativeDistError;
 
         //for adding steering angle based on side slope hill
-        public double sideHillCompFactor, ppRadius;
+        public double sideHillCompFactor;//, ppRadius;
 
         //derivative counter
         private int counter2;
@@ -419,8 +419,6 @@ namespace AgOpenGPS
                     //calculate the the delta x in local coordinates and steering angle degrees based on wheelbase
                     double localHeading = glm.twoPI - mf.fixHeading + ((isYouTurnTriggered || isHeadingSameWay) ? inty : -inty);
 
-                    ppRadius = goalPointDistanceSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading)) + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
-
                     steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
                         + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));
 
@@ -430,11 +428,14 @@ namespace AgOpenGPS
                     if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
                     if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
 
-                    if (ppRadius < -500) ppRadius = -500;
-                    if (ppRadius > 500) ppRadius = 500;
+                    //ppRadius = goalPointDistanceSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading)) + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
 
-                    radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
-                    radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
+                    //if (ppRadius < -500) ppRadius = -500;
+                    //if (ppRadius > 500) ppRadius = 500;
+
+                    //radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
+                    //radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
+
                     if (!isYouTurnTriggered)
                     {
                         if (isBtnABLineOn)
@@ -630,19 +631,19 @@ namespace AgOpenGPS
 
             double localHeading = glm.twoPI - mf.fixHeading + inty;
 
-            ppRadius = goalPointDistanceSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading)) + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
-
             steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
                 + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));
 
             if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
             if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
 
-            if (ppRadius < -500) ppRadius = -500;
-            if (ppRadius > 500) ppRadius = 500;
+            //ppRadius = goalPointDistanceSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading)) + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
 
-            radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
-            radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
+            //if (ppRadius < -500) ppRadius = -500;
+            //if (ppRadius > 500) ppRadius = 500;
+
+            //radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
+            //radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
 
             //Convert to centimeters
             mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);

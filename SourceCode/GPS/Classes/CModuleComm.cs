@@ -75,7 +75,7 @@
                 {
                     if (mf.autoBtnState == FormGPS.btnStates.Auto)
                         mf.btnSectionOffAutoOn.PerformClick();
-                    if (mf.autoBtnState != FormGPS.btnStates.On)
+                    if (mf.autoBtnState == FormGPS.btnStates.On)
                         mf.btnManualOffOn.PerformClick();
                 }
             }

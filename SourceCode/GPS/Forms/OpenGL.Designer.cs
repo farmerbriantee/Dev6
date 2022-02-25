@@ -660,24 +660,14 @@ namespace AgOpenGPS
 
                 if (tool.toolWidth > vehicle.trackWidth)
                 {
-                    int int1 = grnPixels[offset + (int)(tram.halfWheelTrack * 10)];
-                    int int2 = grnPixels[offset + (int)(tool.rpWidth / 2 - tram.halfWheelTrack * 10)];
-                    int int3 = grnPixels[offset + (int)(tool.rpWidth / 2 + tram.halfWheelTrack * 10)];
-                    int int4 = grnPixels[offset + (int)(tool.rpWidth - tram.halfWheelTrack * 10)];
+                    int tramRight = grnPixels[offset + (int)(tram.isOuter ? (tool.rpWidth - tram.halfWheelTrack * 10) : (tool.rpWidth / 2 + tram.halfWheelTrack * 10))];
+                    int tramLeft = grnPixels[offset + (int)(tram.isOuter ? (tram.halfWheelTrack * 10) : (tool.rpWidth / 2 - tram.halfWheelTrack * 10))];
 
-                    //%20
-                    //13-19
-                    //00-07
-                    int pos1 = int1 % 20;
-                    int pos2 = int2 % 20;
-                    int pos3 = int3 % 20;
-                    int pos4 = int4 % 20;
+                    int pos2 = tramLeft % 20;
+                    int pos1 = tramRight % 20;
 
-                    //1 pixels in is there a tram line?
-                    if (int1 > 0 && (((pos1 > 12) && (pos1 < 20)) || ((pos1 >= 0) && (pos1 < 8)))) tram.controlByte += 4;
-                    if (int2 > 0 && int3 > 0 && (((pos2 > 12) && (pos2 < 20)) || ((pos2 >= 0) && (pos2 < 8))) &&
-                       (((pos3 > 12) && (pos3 < 20)) || ((pos3 >= 0) && (pos3 < 8)))) tram.controlByte += 2;
-                    if (int4 > 0 && (((pos4 > 12) && (pos4 < 20)) || ((pos4 >= 0) && (pos4 < 8)))) tram.controlByte += 1;
+                    if (tramRight > 0 && (((pos1 > 12) && (pos1 < 20)) || (pos1 < 8))) tram.controlByte += 1;
+                    if (tramLeft > 0 && (((pos2 > 12) && (pos2 < 20)) || (pos2 < 8))) tram.controlByte += 2;
                 }
             }
 

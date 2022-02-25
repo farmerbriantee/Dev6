@@ -43,7 +43,8 @@ namespace AgOpenGPS
 
             passes = Properties.Settings.Default.setTram_passes;
             displayMode = 0;
-            isOuter = Properties.Settings.Default.setTool_isTramOuter;
+
+            isOuter = ((int)(tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
         }
 
         public void DrawTram()

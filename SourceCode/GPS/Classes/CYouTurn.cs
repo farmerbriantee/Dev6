@@ -155,7 +155,13 @@ namespace AgOpenGPS
                 #region FindEntryPoint
 
                 turnOffset = ((mf.tool.toolWidth - mf.tool.toolOverlap) * rowSkipsWidth) + (isYouTurnRight ? mf.tool.toolOffset * 2.0 : -mf.tool.toolOffset * 2.0);
+                if (turnOffset == 0)
+                {
 
+                    EntryPoint = ExitPoint;
+                    youTurnPhase = 13;
+                    return;
+                }
                 TurnRight = (turnOffset > 0) ? isYouTurnRight : !isYouTurnRight;
                 if (ExitPoint.boundaryIdx != 0) TurnRight = !TurnRight;
 

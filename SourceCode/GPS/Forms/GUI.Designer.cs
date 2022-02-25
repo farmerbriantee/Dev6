@@ -37,8 +37,8 @@ namespace AgOpenGPS
 
         //Is it in 2D or 3D, metric or imperial, display lightbar, display grid etc
         public bool isMetric = true, isLightbarOn = true;
-        public bool isUTurnAlwaysOn, isCompassOn, isSpeedoOn, isAutoDayNight, isSideGuideLines = true;
-        public bool isPureDisplayOn = true, isSkyOn = true, isRollMeterOn = false, isTextureOn = true;
+        public bool isUTurnAlwaysOn, isSpeedoOn, isAutoDayNight, isSideGuideLines = true;
+        public bool isSkyOn = true, isTextureOn = true;
         public bool isDay = true, isDayTime = true;
         public bool isKeyboardOn = true;
 
@@ -389,11 +389,9 @@ namespace AgOpenGPS
             isSkyOn = Settings.Default.setMenu_isSkyOn;
             isTextureOn = Settings.Default.setDisplay_isTextureOn;
             worldGrid.isGridOn = Settings.Default.setMenu_isGridOn;
-            isCompassOn = Settings.Default.setMenu_isCompassOn;
             isSpeedoOn = Settings.Default.setMenu_isSpeedoOn;
             isAutoDayNight = Settings.Default.setDisplay_isAutoDayNight;
             isSideGuideLines = Settings.Default.setMenu_isSideGuideLines;
-            isPureDisplayOn = Settings.Default.setMenu_isPureOn;
             isLightbarOn = Settings.Default.setMenu_isLightbarOn;
             isKeyboardOn = Settings.Default.setDisplay_isKeyboardOn;
 

@@ -158,7 +158,9 @@ namespace AgOpenGPS
                                     / Math.Sqrt((dz * dz) + (dx * dx));
 
                 double RefDist = (distanceFromRefLine + (isHeadingSameWay ? mf.tool.toolOffset : -mf.tool.toolOffset)) / widthMinusOverlap;
-                if (RefDist < 0) howManyPathsAway = (int)(RefDist - 0.5);
+                if (double.IsInfinity(RefDist))
+                    howManyPathsAway = 0;
+                else if (RefDist < 0) howManyPathsAway = (int)(RefDist - 0.5);
                 else howManyPathsAway = (int)(RefDist + 0.5);
 
                 lastSecond = mf.secondsSinceStart;
@@ -496,9 +498,10 @@ namespace AgOpenGPS
                         GL.End();
                     }
 
-                    if (mf.isPureDisplayOn && !mf.isStanleyUsed)
+                    if (!mf.isStanleyUsed && mf.camera.camSetDistance > -200)
                     {
-                        if (currentGuidanceLine.mode.HasFlag(Mode.AB) && ppRadius < 150 && ppRadius > -150)
+                        /*
+                        if (ppRadius < 150 && ppRadius > -150)
                         {
                             const int numSegments = 100;
                             double theta = glm.twoPI / numSegments;
@@ -520,7 +523,7 @@ namespace AgOpenGPS
                             }
                             GL.End();
                         }
-
+                        */
                         //Draw lookahead Point
                         GL.PointSize(8.0f);
                         GL.Begin(PrimitiveType.Points);

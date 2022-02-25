@@ -108,7 +108,7 @@ namespace AgOpenGPS
         {
             get
             {
-                if (mf.pn.speed > 2)
+                if (mf.pn.speed > 2 && mf.tool.toolWidth > 0)
                 {
                     TimeSpan timeSpan = TimeSpan.FromHours(((areaBoundaryOuterLessInner - workedAreaTotal) * glm.m2ha
                         / (mf.tool.toolWidth * mf.pn.speed * 0.1)));

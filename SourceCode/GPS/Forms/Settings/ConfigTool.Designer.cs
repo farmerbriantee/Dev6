@@ -394,6 +394,8 @@ namespace AgOpenGPS
             //update the sections to newly configured widths and positions in main
             mf.SectionSetPosition();
 
+            mf.tram.isOuter = ((int)(mf.tram.tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
+
 
             Properties.Vehicle.Default.setVehicle_toolWidth = mf.tool.toolWidth;
             Properties.Vehicle.Default.setSection_isFast = cboxSectionResponse.Checked;
