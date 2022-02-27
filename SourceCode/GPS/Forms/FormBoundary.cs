@@ -451,7 +451,7 @@ namespace AgOpenGPS
                                     MessageBoxDefaultButton.Button2);
             if (result3 == DialogResult.Yes)
             {
-                mf.bnd.bndBeingMadePts?.Clear();
+                mf.bnd.bndBeingMadePts.Clear();
                 lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
             }
             mf.Focus();

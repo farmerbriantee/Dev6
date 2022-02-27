@@ -87,10 +87,10 @@ namespace AgOpenGPS
             }
             else
             {
-                mf.tram.tramArr?.Clear();
-                mf.tram.tramList?.Clear();
-                mf.tram.tramBndOuterArr?.Clear();
-                mf.tram.tramBndInnerArr?.Clear();
+                mf.tram.tramArr.Clear();
+                mf.tram.tramList.Clear();
+                mf.tram.tramBndOuterArr.Clear();
+                mf.tram.tramBndInnerArr.Clear();
 
                 mf.tram.displayMode = 0;
             }

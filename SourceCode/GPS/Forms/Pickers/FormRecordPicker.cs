@@ -27,13 +27,11 @@ namespace AgOpenGPS.Forms.Pickers
 
         private void LoadList()
         {
-            ListViewItem itm;
-
             string fieldDir = mf.fieldsDirectory + mf.currentFieldDirectory;
 
             string[] files = Directory.GetFiles(fieldDir);
 
-            fileList?.Clear();
+            fileList.Clear();
             lvLines.Items.Clear();
 
             // Here we use the filename of all .rec files in the current field dir.
@@ -44,8 +42,7 @@ namespace AgOpenGPS.Forms.Pickers
                 if (file.EndsWith(".rec"))
                 {
                     string recordName = file.Replace(".rec", "").Replace(fieldDir, "").Replace("\\", "");
-                    itm = new ListViewItem(recordName);
-                    lvLines.Items.Add(itm);
+                    lvLines.Items.Add(new ListViewItem(recordName));
                 }
             }
 

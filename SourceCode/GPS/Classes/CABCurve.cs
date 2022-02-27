@@ -44,7 +44,7 @@ namespace AgOpenGPS
                     if (curveArr[s].mode.HasFlag(Mode.Contour))
                     {
                         ptCount = curveArr[s].curvePts.Count - (curveArr[s] == creatingContour ? backSpacing : 1);
-                        if (ptCount == 0) continue;
+                        if (ptCount < 1) continue;
                         double dist;
                         for (int p = 0; p < ptCount; p += 6)
                         {
@@ -164,7 +164,7 @@ namespace AgOpenGPS
                 else howManyPathsAway = (int)(RefDist + 0.5);
 
                 lastSecond = mf.secondsSinceStart;
-                if (!isValid) oldHowManyPathsAway = howManyPathsAway+1;
+                if (!isValid || refList == creatingContour) oldHowManyPathsAway = howManyPathsAway+1;
             }
 
             if (refList?.mode.HasFlag(Mode.Contour) == true)
@@ -210,14 +210,20 @@ namespace AgOpenGPS
             {
                 int ptCount = refList.curvePts.Count - (refList == creatingContour ? backSpacing : 0);
 
-                for (int i = 0; i < ptCount; i++)
+                int start = (refList.mode.HasFlag(Mode.Contour) && refList == creatingContour) ? (rA - (isHeadingSameWay ? 10 : 50)) : 0;
+                if (start < 0) start = 0;
+
+                int end = (refList.mode.HasFlag(Mode.Contour) && refList == creatingContour) ? (rA + (isHeadingSameWay ? 50 : 10)) : ptCount;
+                if (end > ptCount) end = ptCount;
+
+                for (int i = start; i < end; i++)
                 {
                     vec3 point = new vec3(
                     refList.curvePts[i].easting + Math.Cos(refList.curvePts[i].heading) * distAway,
                     refList.curvePts[i].northing - Math.Sin(refList.curvePts[i].heading) * distAway,
                     refList.curvePts[i].heading);
                     bool Add = true;
-                    for (int t = 0; t < ptCount; t++)
+                    for (int t = start; t < end; t++)
                     {
                         double dist = glm.DistanceSquared(point, refList.curvePts[t]);
                         if (dist < distSqAway)

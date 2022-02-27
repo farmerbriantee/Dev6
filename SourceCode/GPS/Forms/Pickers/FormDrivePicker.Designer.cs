@@ -113,7 +113,6 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "FormFilePicker";
-            this.Load += new System.EventHandler(this.FormFilePicker_Load);
             this.ResumeLayout(false);
 
         }

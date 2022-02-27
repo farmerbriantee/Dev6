@@ -129,8 +129,6 @@ namespace AgOpenGPS
 
                             if (numPoints > 1)
                             {
-                                New.curvePts?.Clear();
-
                                 for (int i = 0; i < numPoints; i++)
                                 {
                                     line = reader.ReadLine();
@@ -341,8 +339,8 @@ namespace AgOpenGPS
             FileLoadABLines();
             FileLoadCurveLines();
 
-            gyd.currentCurveLine = gyd.curveArr.First(x => x.mode.HasFlag(Mode.Curve));
-            gyd.currentABLine = gyd.curveArr.First(x => x.mode.HasFlag(Mode.AB));
+            gyd.currentCurveLine = gyd.curveArr.Find(x => x.mode.HasFlag(Mode.Curve));
+            gyd.currentABLine = gyd.curveArr.Find(x => x.mode.HasFlag(Mode.AB));
 
             //section patches
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Sections.txt";
@@ -492,7 +490,6 @@ namespace AgOpenGPS
 
             else
             {
-                flagPts?.Clear();
                 using (StreamReader reader = new StreamReader(fileAndDirectory))
                 {
                     try
@@ -646,8 +643,6 @@ namespace AgOpenGPS
 
                             if (bnd.bndList.Count > k)
                             {
-                                bnd.bndList[k].hdLine.points.Clear();
-
                                 //read the number of points
                                 line = reader.ReadLine();
                                 int numPoints = int.Parse(line);
@@ -697,10 +692,6 @@ namespace AgOpenGPS
             //trams ---------------------------------------------------------------------------------
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Tram.txt";
 
-            tram.tramBndOuterArr?.Clear();
-            tram.tramBndInnerArr?.Clear();
-            tram.tramList?.Clear();
-            tram.displayMode = 0;
             btnTramDisplayMode.Visible = false;
 
             if (File.Exists(fileAndDirectory))
@@ -824,8 +815,8 @@ namespace AgOpenGPS
                             }
                         }
 
-                        if (gyd.recList.Count > 0) panelDrag.Visible = true;
-                        else panelDrag.Visible = false;
+                        //if (gyd.recList.Count > 0) panelDrag.Visible = true;
+                        //else panelDrag.Visible = false;
                     }
 
                     catch (Exception e)

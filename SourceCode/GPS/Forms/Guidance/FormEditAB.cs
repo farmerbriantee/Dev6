@@ -117,13 +117,13 @@ namespace AgOpenGPS
             mf.gyd.moveDistance = 0;
             mf.gyd.isValid = false;
 
-            CGuidanceLine New = mf.gyd.curveArr.Find(x => x.Name == currentLine?.Name);
-            if (New != null)
+            int idx = mf.gyd.curveArr.FindIndex(x => x.Name == currentLine?.Name);
+            if (idx > -1)
             {
-                if (New.mode.HasFlag(Mode.AB))
-                    mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = new CGuidanceLine(New);
+                if (mf.gyd.curveArr[idx].mode.HasFlag(Mode.AB))
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = new CGuidanceLine(mf.gyd.curveArr[idx]);
                 else
-                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = new CGuidanceLine(New);
+                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = new CGuidanceLine(mf.gyd.curveArr[idx]);
             }
             else
                 mf.gyd.currentGuidanceLine = null;

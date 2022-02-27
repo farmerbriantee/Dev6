@@ -50,7 +50,7 @@ namespace AgOpenGPS
 
         private void FormHeadland_FormClosing(object sender, FormClosingEventArgs e)
         {
-            mf.bnd.bndList[0].hdLine.points?.Clear();
+            mf.bnd.bndList[0].hdLine.points.Clear();
 
             if (isSaving)
             {

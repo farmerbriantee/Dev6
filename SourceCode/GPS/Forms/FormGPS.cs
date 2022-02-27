@@ -452,32 +452,22 @@ namespace AgOpenGPS
                     return;
                 }
 
-                bool closing = true;
-                int choice = SaveOrNot(closing);
+                int choice = SaveOrNot(true);
 
-                if (choice == 1)
+                if (choice == 0)
                 {
                     e.Cancel = true;
                     return;
                 }
-
                 //Save, return, cancel save
-                if (isJobStarted)
+                if (choice == 1)
                 {
-                    if (choice == 3)
-                    {
-                        e.Cancel = true;
-                        return;
-                    }
-                    else if (choice == 0)
-                    {
-                        Settings.Default.setF_CurrentDir = currentFieldDirectory;
-                        Settings.Default.Save();
+                    Settings.Default.setF_CurrentDir = currentFieldDirectory;
+                    Settings.Default.Save();
 
-                        FileSaveEverythingBeforeClosingField();
+                    FileSaveEverythingBeforeClosingField();
 
-                        displayFieldName = gStr.gsNone;
-                    }
+                    displayFieldName = gStr.gsNone;
                 }
             }
 
@@ -720,10 +710,10 @@ namespace AgOpenGPS
             {
                 DialogResult result = form.ShowDialog(this);
 
-                if (result == DialogResult.OK) return 0;      //Save and Exit
-                if (result == DialogResult.Ignore) return 1;   //Ignore
+                if (result == DialogResult.Ignore) return 0;   //Ignore
+                if (result == DialogResult.OK) return 1;      //Save and Exit
                 if (result == DialogResult.Yes) return 2;      //Save As
-                return 3;  // oops something is really busted
+                return 0;  // oops something is really busted
             }
         }
 
@@ -1032,8 +1022,8 @@ namespace AgOpenGPS
             for (int j = 0; j < MAXSECTIONS; j++)
             {
                 //clean out the lists
-                section[j].patchList?.Clear();
-                section[j].triangleList?.Clear();
+                section[j].patchList.Clear();
+                section[j].triangleList.Clear();
             }
 
             //clear the flags
@@ -1047,6 +1037,8 @@ namespace AgOpenGPS
 
             gyd.howManyPathsAway = 0;
 
+            gyd.creatingContour = null;
+            gyd.curList.Clear();
             gyd.curveArr.Clear();
             gyd.recList.Clear();
             gyd.StopDrivingRecordedPath();
@@ -1068,15 +1060,16 @@ namespace AgOpenGPS
 
             //clean up tram
             tram.displayMode = 0;
-            tram.tramList?.Clear();
-            tram.tramBndInnerArr?.Clear();
-            tram.tramBndOuterArr?.Clear();
+            tram.tramList.Clear();
+            tram.tramBndInnerArr.Clear();
+            tram.tramBndOuterArr.Clear();
 
             //clear out contour and Lists
             btnContour.Enabled = false;
             //btnContourPriority.Enabled = false;
             btnSnapToPivot.Image = Properties.Resources.SnapToPivot;
-            gyd.ResetContour();
+            contourSaveList.Clear();
+
             gyd.isContourBtnOn = false;
             btnContour.Image = Properties.Resources.ContourOff;
 

@@ -731,7 +731,7 @@ namespace AgOpenGPS
                 arr[i].heading = ytList[i].heading;
             }
 
-            ytList?.Clear();
+            ytList.Clear();
 
             //calculate new headings on smoothed line
             for (int i = 1; i < cnt - 1; i++)
@@ -797,7 +797,7 @@ namespace AgOpenGPS
         {
             //fix you turn
             isYouTurnTriggered = false;
-            ytList?.Clear();
+            ytList.Clear();
             ResetCreatedYouTurn();
             mf.sounds.isBoundAlarming = false;
             isTurnCreationTooClose = false;
@@ -808,7 +808,7 @@ namespace AgOpenGPS
         public void ResetCreatedYouTurn()
         {
             youTurnPhase = -2;
-            ytList?.Clear();
+            ytList.Clear();
         }
 
         public void BuildManualYouLateral(bool isTurnRight)

@@ -117,7 +117,7 @@ namespace AgOpenGPS
 
             if (count > 0)
             {
-                tboxNameCurve.Text = selectedCurveLine.Name.Trim();
+                tboxNameCurve.Text = selectedCurveLine?.Name.Trim();
                 tboxNameCurve.Enabled = true;
                 lblCurveSelected.Text = count.ToString();
             }
@@ -131,7 +131,7 @@ namespace AgOpenGPS
 
             if (count2 > 0)
             {
-                tboxNameLine.Text = selectedABLine.Name.Trim();
+                tboxNameLine.Text = selectedABLine?.Name.Trim();
                 tboxNameLine.Enabled = true;
                 lblABSelected.Text = count2.ToString();
             }

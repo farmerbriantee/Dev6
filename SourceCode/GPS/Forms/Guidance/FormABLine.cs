@@ -192,7 +192,7 @@ namespace AgOpenGPS
                 }
                 else
                 {
-                    mf.gyd.EditGuidanceLine.curvePts?.Clear();
+                    mf.gyd.EditGuidanceLine.curvePts.Clear();
 
                     panelPick.Visible = true;
                     panelAPlus.Visible = false;
@@ -384,13 +384,13 @@ namespace AgOpenGPS
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
                 {
-                    if (mf.gyd.currentABLine.Name == mf.gyd.curveArr[idx].Name)
+                    if (mf.gyd.currentABLine?.Name == mf.gyd.curveArr[idx].Name)
                         mf.gyd.currentABLine = null;
 
-                    if (mf.gyd.currentCurveLine == mf.gyd.curveArr[idx])
+                    if (mf.gyd.currentCurveLine?.Name == mf.gyd.curveArr[idx].Name)
                         mf.gyd.currentCurveLine = null;
 
-                    if (mf.gyd.currentGuidanceLine.Name == mf.gyd.curveArr[idx].Name)
+                    if (mf.gyd.currentGuidanceLine?.Name == mf.gyd.curveArr[idx].Name)
                     {
                         mf.gyd.isValid = false;
                         mf.gyd.moveDistance = 0;
@@ -526,7 +526,7 @@ namespace AgOpenGPS
             }
 
             //make a list to draw
-            mf.gyd.EditGuidanceLine.curvePts?.Clear();
+            mf.gyd.EditGuidanceLine.curvePts.Clear();
             for (int i = 0; i < cnt; i++)
             {
                 mf.gyd.EditGuidanceLine.curvePts.Add(arr[i]);

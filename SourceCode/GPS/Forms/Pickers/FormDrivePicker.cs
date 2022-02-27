@@ -6,7 +6,6 @@ namespace AgOpenGPS
     public partial class FormDrivePicker : Form
     {
         private readonly FormGPS mf = null;
-        private readonly ListViewItem itm;
 
         public FormDrivePicker(Form callingForm, string _fileList)
         {
@@ -18,14 +17,9 @@ namespace AgOpenGPS
             string[] fileList = _fileList.Split(',');
             for (int i = 0; i < fileList.Length; i++)
             {
-                itm = new ListViewItem(fileList[i]);
-                lvLines.Items.Add(itm);
+                lvLines.Items.Add(new ListViewItem(fileList[i]));
             }
         }
-        private void FormFilePicker_Load(object sender, EventArgs e)
-        {
-        }
-
 
         private void btnOpenExistingLv_Click(object sender, EventArgs e)
         {
@@ -41,6 +35,5 @@ namespace AgOpenGPS
         {
             mf.filePickerFileAndDirectory = "";
         }
-
     }
 }

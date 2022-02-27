@@ -1247,24 +1247,7 @@ namespace AgOpenGPS
             tram.displayMode++;
             if (tram.displayMode > 3) tram.displayMode = 0;
 
-            switch (tram.displayMode)
-            {
-                case 0:
-                    btnTramDisplayMode.Image = Properties.Resources.TramOff;
-                    break;
-                case 1:
-                    btnTramDisplayMode.Image = Properties.Resources.TramAll;
-                    break;
-                case 2:
-                    btnTramDisplayMode.Image = Properties.Resources.TramLines;
-                    break;
-                case 3:
-                    btnTramDisplayMode.Image = Properties.Resources.TramOuter;
-                    break;
-
-                default:
-                    break;
-            }
+            FixTramModeButton();
         }
 
         private void btnChangeMappingColor_Click(object sender, EventArgs e)
@@ -1461,7 +1444,7 @@ namespace AgOpenGPS
         {
             //FileCreateContour();
             gyd.ResetContour();
-            contourSaveList?.Clear();
+            contourSaveList.Clear();
         }
 
         private void toolStripAreYouSure_Click(object sender, EventArgs e)
@@ -1502,10 +1485,10 @@ namespace AgOpenGPS
                         for (int j = 0; j < MAXSECTIONS; j++)
                         {
                             //clean out the lists
-                            section[j].patchList?.Clear();
-                            section[j].triangleList?.Clear();
+                            section[j].patchList.Clear();
+                            section[j].triangleList.Clear();
                         }
-                        patchSaveList?.Clear();
+                        patchSaveList.Clear();
 
                         FileCreateContour();
                         FileCreateSections();
@@ -1754,34 +1737,23 @@ namespace AgOpenGPS
             if (isJobStarted)
             {
                 int choice = SaveOrNot(false);
-                switch (choice)
+
+                if (choice > 0)
                 {
-                    //OK
-                    case 0:
-                        Settings.Default.setF_CurrentDir = currentFieldDirectory;
-                        Settings.Default.Save();
-                        FileSaveEverythingBeforeClosingField();
-                        displayFieldName = gStr.gsNone;
-                        break;
+                    Settings.Default.setF_CurrentDir = currentFieldDirectory;
+                    Settings.Default.Save();
+                    FileSaveEverythingBeforeClosingField();
 
-                    //Ignore and return
-                    case 1:
-                        break;
-
-                    //Save As
-                    case 2:
-                        //close current field but remember last used like normal
-                        Settings.Default.setF_CurrentDir = currentFieldDirectory;
-                        Settings.Default.Save();
-                        FileSaveEverythingBeforeClosingField();
-
+                    if (choice > 1)
+                    {
                         //ask for a directory name
                         using (var form2 = new FormSaveAs(this))
                         {
                             form2.ShowDialog(this);
                         }
-
-                        break;
+                    }
+                    else
+                        displayFieldName = gStr.gsNone;
                 }
             }
             //update GUI areas

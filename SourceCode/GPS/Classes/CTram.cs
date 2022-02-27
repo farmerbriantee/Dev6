@@ -81,8 +81,6 @@ namespace AgOpenGPS
         {
             BuildTramBnd();
 
-            tramList?.Clear();
-            tramArr?.Clear();
             List<vec2> tramRef = new List<vec2>();
 
             bool isBndExist = mf.bnd.bndList.Count != 0;
@@ -105,8 +103,8 @@ namespace AgOpenGPS
             hsin = Math.Sin(headingCalc);
             hcos = Math.Cos(headingCalc);
 
-            tramList?.Clear();
-            tramArr?.Clear();
+            tramList.Clear();
+            tramArr.Clear();
 
             //no boundary starts on first pass
             int cntr = 0;
@@ -253,8 +251,8 @@ namespace AgOpenGPS
 
         public void BuildTramBnd()
         {
-            tramBndInnerArr?.Clear();
-            tramBndOuterArr?.Clear();
+            tramBndInnerArr.Clear();
+            tramBndOuterArr.Clear();
 
             if (mf.bnd.bndList.Count > 0)
             {

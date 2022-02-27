@@ -7,7 +7,10 @@ namespace AgOpenGPS
         public void AddPoint(vec3 pivot)
         {
             if (creatingContour == null)
+            {
                 creatingContour = new CGuidanceLine(Mode.Contour);
+                curveArr.Add(creatingContour);
+            }
 
             creatingContour.curvePts.Add(new vec3(pivot.easting + Math.Cos(pivot.heading) * mf.tool.toolOffset, pivot.northing - Math.Sin(pivot.heading) * mf.tool.toolOffset, pivot.heading));
         }
@@ -43,10 +46,11 @@ namespace AgOpenGPS
 
                 //add the point list to the save list for appending to contour file
                 mf.contourSaveList.Add(creatingContour.curvePts);
-
-                curveArr.Add(creatingContour);
             }
-            else creatingContour = null;
+            else
+                curveArr.Remove(creatingContour);
+
+            creatingContour = null;
         }
 
         //build contours for boundaries
@@ -92,7 +96,13 @@ namespace AgOpenGPS
         public void ResetContour()
         {
             creatingContour = null;
-            curList?.Clear();
+            curList.Clear();
+
+            for (int i = curveArr.Count - 1; i >= 0; i--)
+            {
+                if (curveArr[i].mode.HasFlag(Mode.Contour))
+                    curveArr.RemoveAt(i);
+            }
         }
     }//class
 }//namespace
