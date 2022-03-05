@@ -312,12 +312,11 @@ namespace AgOpenGPS
 
                         if (timerSim.Enabled)
                         {
-                            pn.latitude = pn.latStart;
-                            pn.longitude = pn.lonStart;
-
-                            sim.latitude = Properties.Settings.Default.setGPS_SimLatitude = pn.latitude;
-                            sim.longitude = Properties.Settings.Default.setGPS_SimLongitude = pn.longitude;
+                            Properties.Settings.Default.setGPS_SimLatitude = pn.latStart;
+                            Properties.Settings.Default.setGPS_SimLongitude = pn.lonStart;
                             Properties.Settings.Default.Save();
+
+                            sim.resetSim();
                         }
 
                         pn.SetLocalMetersPerDegree();

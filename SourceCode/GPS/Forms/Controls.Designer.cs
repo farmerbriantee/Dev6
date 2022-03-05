@@ -2019,7 +2019,7 @@ namespace AgOpenGPS
         }
         private void hsbarStepDistance_Scroll(object sender, ScrollEventArgs e)
         {
-            sim.stepDistance = ((double)(hsbarStepDistance.Value)) / 5.0 / (double)fixUpdateHz;
+            sim.stepDistance = ((double)(hsbarStepDistance.Value)) / 3.6;
         }
         private void btnResetSteerAngle_Click(object sender, EventArgs e)
         {
@@ -2029,8 +2029,7 @@ namespace AgOpenGPS
         }
         private void btnResetSim_Click(object sender, EventArgs e)
         {
-            sim.latitude = Properties.Settings.Default.setGPS_SimLatitude;
-            sim.longitude = Properties.Settings.Default.setGPS_SimLongitude;
+            sim.resetSim();
         }
         private void btnSimSetSpeedToZero_Click(object sender, EventArgs e)
         {

@@ -776,7 +776,7 @@ namespace AgOpenGPS
                     if (gyd.isYouTurnBtnOn)
                     {
                         gyd.ResetCreatedYouTurn();
-                        sim.stepDistance = 0 / 17.86;
+                        sim.stepDistance = 0;
                     }
                 }
             }
@@ -786,6 +786,14 @@ namespace AgOpenGPS
             }
 
             #endregion
+
+            //draw the section control window off screen buffer
+            if (isJobStarted && (isFastSections || bbCounter++ > 0))
+            {
+                bbCounter = 0;
+                oglBack.Refresh();
+                SendPgnToLoop(p_239.pgn);
+            }
 
             //update main window
             oglMain.MakeCurrent();
@@ -1104,42 +1112,77 @@ namespace AgOpenGPS
             if (vehicle.hydLiftLookAheadDistanceRight > 250) vehicle.hydLiftLookAheadDistanceRight = 250;
             else if (vehicle.hydLiftLookAheadDistanceRight < -250) vehicle.hydLiftLookAheadDistanceRight = -250;
 
-            oneFrameLeft *= (50.0 / (tool.minOverlap - 50.0));
-            oneFrameRight *= (50.0 / (tool.minOverlap - 50.0));
+            double oneFrameLeftBoundary = oneFrameLeft * ((tool.boundOverlap - 50.0) * 0.02);
+            double oneFrameRightBoundary = oneFrameRight * ((tool.boundOverlap - 50.0) * 0.02);
 
-            tool.lookAheadDistanceOnPixelsLeft = oneFrameLeft + tool.toolFarLeftSpeed * tool.lookAheadOnSetting * 10;
-            tool.lookAheadDistanceOnPixelsRight = oneFrameRight + tool.toolFarRightSpeed * tool.lookAheadOnSetting * 10;
+            oneFrameLeft *= (tool.minOverlap - 50.0) * 0.02;
+            oneFrameRight *= (tool.minOverlap - 50.0) * 0.02;
 
-            tool.lookAheadDistanceOffPixelsLeft = -oneFrameLeft + tool.toolFarLeftSpeed * tool.lookAheadOffSetting * 10;
-            tool.lookAheadDistanceOffPixelsRight = -oneFrameRight + tool.toolFarRightSpeed * tool.lookAheadOffSetting * 10;
+            tool.lookAheadBoundaryOnPixelsLeft = Math.Max(oneFrameLeftBoundary, 0) + tool.toolFarLeftSpeed * tool.lookAheadOnSetting * 10;
+            tool.lookAheadBoundaryOnPixelsRight = Math.Max(oneFrameRightBoundary, 0) + tool.toolFarRightSpeed * tool.lookAheadOnSetting * 10;
 
-            if (tool.lookAheadDistanceOnPixelsLeft > 250)
+            tool.lookAheadBoundaryOffPixelsLeft = Math.Max(-oneFrameLeftBoundary, 0) + tool.toolFarLeftSpeed * tool.lookAheadOffSetting * 10;
+            tool.lookAheadBoundaryOffPixelsRight = Math.Max(-oneFrameRightBoundary, 0) + tool.toolFarRightSpeed * tool.lookAheadOffSetting * 10;
+
+            tool.lookAheadDistanceOnPixelsLeft = Math.Max(oneFrameLeft, 0) + tool.toolFarLeftSpeed * tool.lookAheadOnSetting * 10;
+            tool.lookAheadDistanceOnPixelsRight = Math.Max(oneFrameRight, 0) + tool.toolFarRightSpeed * tool.lookAheadOnSetting * 10;
+
+            tool.lookAheadDistanceOffPixelsLeft = Math.Max(-oneFrameLeft, 0) + tool.toolFarLeftSpeed * tool.lookAheadOffSetting * 10;
+            tool.lookAheadDistanceOffPixelsRight = Math.Max(-oneFrameRight, 0) + tool.toolFarRightSpeed * tool.lookAheadOffSetting * 10;
+
+            double maxLookAhead = 250;
+
+
+            if (tool.lookAheadBoundaryOnPixelsLeft > maxLookAhead)
             {
-                tool.lookAheadDistanceOnPixelsLeft = 250;
-                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
-                if (tool.lookAheadDistanceOffPixelsLeft > 250 * ss)
-                    tool.lookAheadDistanceOffPixelsLeft = 250 * ss;
+                tool.lookAheadBoundaryOnPixelsLeft = maxLookAhead;
+                if (tool.lookAheadBoundaryOffPixelsLeft > maxLookAhead)
+                    tool.lookAheadBoundaryOffPixelsLeft = maxLookAhead;
             }
-            else if (tool.lookAheadDistanceOnPixelsLeft < -250)
+            else if (tool.lookAheadBoundaryOnPixelsLeft < -maxLookAhead)
             {
-                tool.lookAheadDistanceOnPixelsLeft = -250;
-                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
-                if (tool.lookAheadDistanceOffPixelsLeft < -250 * ss)
-                    tool.lookAheadDistanceOffPixelsLeft = -250 * ss;
+                tool.lookAheadBoundaryOnPixelsLeft = -maxLookAhead;
+                if (tool.lookAheadBoundaryOffPixelsLeft < -maxLookAhead)
+                    tool.lookAheadBoundaryOffPixelsLeft = -maxLookAhead;
             }
-            if (tool.lookAheadDistanceOnPixelsRight > 250)
+
+            if (tool.lookAheadBoundaryOnPixelsRight > maxLookAhead)
             {
-                tool.lookAheadDistanceOnPixelsRight = 250;
-                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
-                if (tool.lookAheadDistanceOffPixelsRight > 250 * ss)
-                    tool.lookAheadDistanceOffPixelsRight = 250 * ss;
+                tool.lookAheadBoundaryOnPixelsRight = maxLookAhead;
+                if (tool.lookAheadBoundaryOffPixelsRight > maxLookAhead)
+                    tool.lookAheadBoundaryOffPixelsRight = maxLookAhead;
             }
-            else if (tool.lookAheadDistanceOnPixelsRight < -250)
+            else if (tool.lookAheadBoundaryOnPixelsRight < -maxLookAhead)
             {
-                tool.lookAheadDistanceOnPixelsRight = -250;
-                double ss = (1.0 / tool.lookAheadOnSetting) * tool.lookAheadOffSetting;
-                if (tool.lookAheadDistanceOffPixelsRight < -250 * ss)
-                    tool.lookAheadDistanceOffPixelsRight = -250 * ss;
+                tool.lookAheadBoundaryOnPixelsRight = -maxLookAhead;
+                if (tool.lookAheadBoundaryOffPixelsRight < -maxLookAhead)
+                    tool.lookAheadBoundaryOffPixelsRight = -maxLookAhead;
+            }
+
+            if (tool.lookAheadDistanceOnPixelsLeft > maxLookAhead)
+            {
+                tool.lookAheadDistanceOnPixelsLeft = maxLookAhead;
+                if (tool.lookAheadDistanceOffPixelsLeft > maxLookAhead)
+                    tool.lookAheadDistanceOffPixelsLeft = maxLookAhead;
+            }
+            else if (tool.lookAheadDistanceOnPixelsLeft < -maxLookAhead)
+            {
+                tool.lookAheadDistanceOnPixelsLeft = -maxLookAhead;
+                if (tool.lookAheadDistanceOffPixelsLeft < -maxLookAhead)
+                    tool.lookAheadDistanceOffPixelsLeft = -maxLookAhead;
+            }
+
+            if (tool.lookAheadDistanceOnPixelsRight > maxLookAhead)
+            {
+                tool.lookAheadDistanceOnPixelsRight = maxLookAhead;
+                if (tool.lookAheadDistanceOffPixelsRight > maxLookAhead)
+                    tool.lookAheadDistanceOffPixelsRight = maxLookAhead;
+            }
+            else if (tool.lookAheadDistanceOnPixelsRight < -maxLookAhead)
+            {
+                tool.lookAheadDistanceOnPixelsRight = -maxLookAhead;
+                if (tool.lookAheadDistanceOffPixelsRight < -maxLookAhead)
+                    tool.lookAheadDistanceOffPixelsRight = -maxLookAhead;
             }
         }
 
@@ -1446,8 +1489,17 @@ namespace AgOpenGPS
             {
                 if (!isJobStarted)
                 {
-                    pn.latStart = pn.latitude;
-                    pn.lonStart = pn.longitude;
+                    if (timerSim.Enabled)
+                    {
+                        pn.latStart = Properties.Settings.Default.setGPS_SimLatitude;
+                        pn.lonStart = Properties.Settings.Default.setGPS_SimLongitude;
+                        sim.resetSim();
+                    }
+                    else
+                    {
+                        pn.latStart = pn.latitude;
+                        pn.lonStart = pn.longitude;
+                    }
                     pn.SetLocalMetersPerDegree();
                 }
 

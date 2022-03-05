@@ -414,15 +414,6 @@ namespace AgOpenGPS
 
                 if (leftMouseDownOnOpenGL) MakeFlagMark();
 
-                if (bbCounter++ > 0) bbCounter = 0;
-
-                //draw the section control window off screen buffer
-                if (isJobStarted && (isFastSections || bbCounter == 0))
-                {
-                    oglBack.Refresh();
-                    SendPgnToLoop(p_239.pgn);
-                }
-
                 //draw the zoom window
                 if (isJobStarted && oglZoom.Width != 400)
                 {
@@ -459,8 +450,8 @@ namespace AgOpenGPS
             bool Needsupdate = true;
 
             //determine farthest lookahead - is the height of the readpixel line
-            int rpHeight = (int)Math.Max(Math.Max((vehicle.isHydLiftOn ? Math.Max(vehicle.hydLiftLookAheadDistanceRight, vehicle.hydLiftLookAheadDistanceLeft) : 0), Math.Max(tool.lookAheadDistanceOnPixelsRight, tool.lookAheadDistanceOnPixelsLeft) + 1) + 0.5, 1);
-            int rpHeight2 = (int)Math.Max(vehicle.isHydLiftOn ? -1 : Math.Min(tool.lookAheadDistanceOffPixelsRight, tool.lookAheadDistanceOffPixelsLeft) - 1.5, -1);
+            int rpHeight = (int)Math.Max(Math.Max((vehicle.isHydLiftOn ? Math.Max(vehicle.hydLiftLookAheadDistanceRight, vehicle.hydLiftLookAheadDistanceLeft) : 0), Math.Max(Math.Max(tool.lookAheadDistanceOnPixelsRight, tool.lookAheadDistanceOnPixelsLeft), Math.Max(tool.lookAheadBoundaryOnPixelsRight, tool.lookAheadBoundaryOnPixelsLeft)) + 1) + 0.5, 1);
+            int rpHeight2 = (int)Math.Max(vehicle.isHydLiftOn ? -1 : Math.Min(Math.Min(tool.lookAheadDistanceOffPixelsRight, tool.lookAheadDistanceOffPixelsLeft),Math.Min(tool.lookAheadBoundaryOffPixelsRight, tool.lookAheadBoundaryOffPixelsLeft)) - 1.5, -1);
 
             int grnPixelsLength = tool.rpWidth * (rpHeight - rpHeight2);
 
@@ -501,22 +492,27 @@ namespace AgOpenGPS
                         //calculate the slope
                         double mOn = (tool.lookAheadDistanceOnPixelsRight - tool.lookAheadDistanceOnPixelsLeft) / tool.rpWidth;
                         double mOff = (tool.lookAheadDistanceOffPixelsRight - tool.lookAheadDistanceOffPixelsLeft) / tool.rpWidth;
+                        double mBoundOff = (tool.lookAheadBoundaryOffPixelsRight - tool.lookAheadBoundaryOffPixelsLeft) / tool.rpWidth;
+                        double mBoundOn = (tool.lookAheadBoundaryOnPixelsRight - tool.lookAheadBoundaryOnPixelsLeft) / tool.rpWidth;
                         double mHyd = (vehicle.hydLiftLookAheadDistanceRight - vehicle.hydLiftLookAheadDistanceLeft) / tool.rpWidth;
 
                         if (end > tool.rpWidth) end = tool.rpWidth;
 
-                        int totalPixs = 0;
-                        int totalPixsbnd = 0;
+                        int totalOn = 0;
+                        int totalInBound = 0;
 
                         for (int pos = start; pos < end; pos++)
                         {
                             int StartHeight = (int)Math.Round((tool.lookAheadDistanceOffPixelsLeft - (rpHeight2 + 1)) + (mOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
                             int StopHeight = (int)Math.Round((tool.lookAheadDistanceOnPixelsLeft - rpHeight2) + (mOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int StartBound = (int)Math.Round((tool.lookAheadBoundaryOffPixelsLeft - (rpHeight2 + 1)) + (mBoundOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int StopBound = (int)Math.Round((tool.lookAheadBoundaryOnPixelsLeft - rpHeight2) + (mBoundOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
                             int StopHydHeight = (int)Math.Round((vehicle.hydLiftLookAheadDistanceLeft - rpHeight2) + (mHyd * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
 
                             int taggedOn = 0;
                             int taggedOff = 0;
-                            int taggedBound = 0;
+                            int taggedOutBound = 0;
+                            int taggedInBound = 0;
 
                             for (int a = isToolInHeadland ? pos : StartHeight; (isToolInHeadland ? a <= StopHydHeight : a <= StopHeight); a += tool.rpWidth)
                             {
@@ -529,12 +525,7 @@ namespace AgOpenGPS
                                         {
                                             ++taggedOff;
                                         }
-                                        if (Procent5 == 2 || Procent5 == 1)//when outside fence dont wait for sectionOverlapTimer
-                                        {
-                                            ++taggedBound;
-                                        }
                                     }
-
                                     if (a >= StopHeight - tool.rpWidth && a <= StopHeight)
                                     {
                                         if (bnd.bndList.Count == 0 ? grnPixels[a] == 252 : (grnPixels[a] == 250 || grnPixels[a] == 245 || grnPixels[a] == 240 || grnPixels[a] == 235))
@@ -542,6 +533,24 @@ namespace AgOpenGPS
                                             ++taggedOn;
                                         }
                                     }
+
+
+                                    if (a >= StartBound && a <= StartBound + tool.rpWidth)
+                                    {
+                                        if (Procent5 == 2 || Procent5 == 1)//when outside fence dont wait for sectionOverlapTimer
+                                        {
+                                            ++taggedOutBound;
+                                        }
+                                    }
+                                    if (a >= StopBound - tool.rpWidth && a <= StopBound)
+                                    {
+                                        if (bnd.bndList.Count == 0 || Procent5 < 1 || Procent5 > 2)
+                                        {
+                                            ++taggedInBound;
+                                        }
+                                    }
+
+
                                     if (isToolInHeadland)
                                     {
                                         totalHead++;
@@ -551,18 +560,18 @@ namespace AgOpenGPS
                                 }
                             }
                             if (taggedOn >= taggedOff)
-                                totalPixs++;
-                            if (taggedOn >= taggedBound)
-                                totalPixsbnd++;
+                                totalOn++;
+                            if (taggedInBound >= taggedOutBound)
+                                totalInBound++;
                         }
 
-                        if (totalPixsbnd == 0 || (double)totalPixsbnd / section[j].rpSectionWidth < 1 - tool.boundOverlap)
+                        if (totalInBound == 0 || (double)totalInBound / section[j].rpSectionWidth < 1 - tool.boundOverlap)
                         {
                             section[j].sectionOnRequest = false;
                             if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
                         }
                         else
-                            section[j].sectionOnRequest = totalPixs > 0 && ((double)totalPixs / section[j].rpSectionWidth >= 1 - tool.minOverlap * 0.01);
+                            section[j].sectionOnRequest = totalOn > 0 && ((double)totalOn / section[j].rpSectionWidth >= 1 - tool.minOverlap * 0.01);
 
                         isSuperSectionAllowedOn &= (section[j].mappingOnTimer < 2 && (section[j].mappingOffTimer > 1 || section[j].sectionOverlapTimer + section[j].mappingOffTimer > (section[j].sectionOnRequest ? 1 : 2))) || (section[j].sectionOnRequest && (section[j].isMappingOn || section[j].mappingOnTimer == 1 || HzTime * tool.lookAheadOnSetting < 1));
                     }

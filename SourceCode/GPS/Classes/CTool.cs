@@ -25,6 +25,8 @@ namespace AgOpenGPS
 
         public double lookAheadDistanceOnPixelsLeft, lookAheadDistanceOnPixelsRight;
         public double lookAheadDistanceOffPixelsLeft, lookAheadDistanceOffPixelsRight;
+        public double lookAheadBoundaryOnPixelsLeft, lookAheadBoundaryOnPixelsRight;
+        public double lookAheadBoundaryOffPixelsLeft, lookAheadBoundaryOffPixelsRight;
 
         public bool isToolTrailing, isToolTBT;
         public bool isToolRearFixed, isToolFrontFixed;
@@ -185,19 +187,19 @@ namespace AgOpenGPS
 
                 //lookahead section on
                 GL.Color3(0.20f, 0.7f, 0.2f);
-                GL.Vertex3(mf.tool.toolFarLeftPosition, (mf.tool.lookAheadDistanceOnPixelsLeft) * 0.1 + trailingTool, 0);
-                GL.Vertex3(mf.tool.toolFarRightPosition, (mf.tool.lookAheadDistanceOnPixelsRight) * 0.1 + trailingTool, 0);
+                GL.Vertex3(mf.tool.toolFarLeftPosition, mf.tool.toolFarLeftSpeed * mf.tool.lookAheadOnSetting + trailingTool, 0);
+                GL.Vertex3(mf.tool.toolFarRightPosition, mf.tool.toolFarRightSpeed * mf.tool.lookAheadOnSetting + trailingTool, 0);
 
                 //lookahead section off
                 GL.Color3(0.70f, 0.2f, 0.2f);
-                GL.Vertex3(mf.tool.toolFarLeftPosition, (mf.tool.lookAheadDistanceOffPixelsLeft) * 0.1 + trailingTool, 0);
-                GL.Vertex3(mf.tool.toolFarRightPosition, (mf.tool.lookAheadDistanceOffPixelsRight) * 0.1 + trailingTool, 0);
+                GL.Vertex3(mf.tool.toolFarLeftPosition, mf.tool.toolFarLeftSpeed * mf.tool.lookAheadOffSetting + trailingTool, 0);
+                GL.Vertex3(mf.tool.toolFarRightPosition, mf.tool.toolFarRightSpeed * mf.tool.lookAheadOffSetting + trailingTool, 0);
 
                 if (mf.vehicle.isHydLiftOn)
                 {
                     GL.Color3(0.70f, 0.2f, 0.72f);
-                    GL.Vertex3(mf.section[0].positionLeft, (mf.vehicle.hydLiftLookAheadDistanceLeft * 0.1) + trailingTool, 0);
-                    GL.Vertex3(mf.section[mf.tool.numOfSections - 1].positionRight, (mf.vehicle.hydLiftLookAheadDistanceRight * 0.1) + trailingTool, 0);
+                    GL.Vertex3(mf.tool.toolFarLeftPosition, (mf.vehicle.hydLiftLookAheadDistanceLeft * 0.1) + trailingTool, 0);
+                    GL.Vertex3(mf.tool.toolFarRightPosition, (mf.vehicle.hydLiftLookAheadDistanceRight * 0.1) + trailingTool, 0);
                 }
 
                 GL.End();

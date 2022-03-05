@@ -86,7 +86,7 @@ namespace AgOpenGPS
             if (isFollowingDubinsToPath)
             {
                 //set a speed of 10 kmh
-                mf.sim.stepDistance = 9.0 / 50;
+                mf.sim.stepDistance = 2.77778;
 
                 CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList);
 
@@ -112,7 +112,7 @@ namespace AgOpenGPS
                 //if end of the line then stop
                 if (!isEndOfTheRecLine)
                 {
-                    mf.sim.stepDistance = recList[currentPositonIndex].speed / 34.86;
+                    mf.sim.stepDistance = recList[currentPositonIndex].speed / 3.6;
 
                     //section control - only if different click the button
                     bool autoBtn = (mf.autoBtnState == FormGPS.btnStates.Auto);
@@ -151,7 +151,7 @@ namespace AgOpenGPS
                     return;
                 }
 
-                mf.sim.stepDistance = 9.0 / 35;
+                mf.sim.stepDistance = 2.77778;
 
                 //StanleyDubinsPath(shuttleListCount);
                 CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList);

@@ -105,7 +105,17 @@ namespace AgOpenGPS
                     }
                     else
                     {
-                        mf.pn.latStart = mf.pn.latitude; mf.pn.lonStart = mf.pn.longitude;
+                        mf.pn.latStart = mf.pn.latitude;
+                        mf.pn.lonStart = mf.pn.longitude;
+
+                        if (mf.timerSim.Enabled)
+                        {
+                            Properties.Settings.Default.setGPS_SimLatitude = mf.pn.latStart;
+                            Properties.Settings.Default.setGPS_SimLongitude = mf.pn.lonStart;
+                            Properties.Settings.Default.Save();
+
+                            mf.sim.resetSim();
+                        }
 
                         mf.pn.SetLocalMetersPerDegree();
 
@@ -402,13 +412,11 @@ namespace AgOpenGPS
 
                     if (mf.timerSim.Enabled)
                     {
-                        mf.sim.latitude = Properties.Settings.Default.setGPS_SimLatitude = latK;
-                        mf.sim.longitude = Properties.Settings.Default.setGPS_SimLongitude = lonK;
-
-                        mf.pn.latitude = latK;
-                        mf.pn.longitude = lonK;
-
+                        Properties.Settings.Default.setGPS_SimLatitude = mf.pn.latStart;
+                        Properties.Settings.Default.setGPS_SimLongitude = mf.pn.lonStart;
                         Properties.Settings.Default.Save();
+
+                        mf.sim.resetSim();
                     }
 
                     mf.pn.SetLocalMetersPerDegree();
