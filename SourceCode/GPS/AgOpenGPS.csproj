@@ -106,6 +106,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Windows.Forms.MapControl">
+      <HintPath>..\References\System.Windows.Forms.MapControl.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="WebEye.Controls.WinForms.WebCameraControl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -154,12 +157,21 @@
     <Compile Include="Forms\FormFieldKML.Designer.cs">
       <DependentUpon>FormFieldKML.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\FormMap.resx">
+      <DependentUpon>FormMap.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\Form_About.fr.resx">
       <DependentUpon>Form_About.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Form_First.fr.resx">
       <DependentUpon>Form_First.cs</DependentUpon>
     </EmbeddedResource>
+    <Compile Include="Forms\FormMap.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormMap.Designer.cs">
+      <DependentUpon>FormMap.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\FormRecordName.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -711,6 +723,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AOG.ico" />
+    <None Include="btnImages\Images\z_bingMap.png" />
+    <None Include="btnImages\Marker.png" />
+    <None Include="btnImages\MapGray.png" />
+    <None Include="btnImages\MapColor.png" />
+    <None Include="btnImages\bing.png" />
     <None Include="btnImages\pathResumeStart.png" />
     <None Include="btnImages\pathResumeLast.png" />
     <None Include="btnImages\pathResumeClose.png" />

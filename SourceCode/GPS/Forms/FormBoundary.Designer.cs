@@ -64,6 +64,7 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.btnPausePlay = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.btnBingMaps = new System.Windows.Forms.Button();
             this.panelMain.SuspendLayout();
             this.panelChoose.SuspendLayout();
             this.panelKML.SuspendLayout();
@@ -114,9 +115,9 @@
             this.btnOpenGoogleEarth.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOpenGoogleEarth.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnOpenGoogleEarth.Image = global::AgOpenGPS.Properties.Resources.GoogleEarth;
-            this.btnOpenGoogleEarth.Location = new System.Drawing.Point(211, 19);
+            this.btnOpenGoogleEarth.Location = new System.Drawing.Point(190, 20);
             this.btnOpenGoogleEarth.Name = "btnOpenGoogleEarth";
-            this.btnOpenGoogleEarth.Size = new System.Drawing.Size(72, 68);
+            this.btnOpenGoogleEarth.Size = new System.Drawing.Size(70, 70);
             this.btnOpenGoogleEarth.TabIndex = 213;
             this.btnOpenGoogleEarth.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnOpenGoogleEarth.UseVisualStyleBackColor = true;
@@ -180,9 +181,9 @@
             this.btnCancel.Font = new System.Drawing.Font("Tahoma", 14.25F);
             this.btnCancel.Image = global::AgOpenGPS.Properties.Resources.OK64;
             this.btnCancel.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnCancel.Location = new System.Drawing.Point(447, 19);
+            this.btnCancel.Location = new System.Drawing.Point(460, 20);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(93, 68);
+            this.btnCancel.Size = new System.Drawing.Size(70, 70);
             this.btnCancel.TabIndex = 206;
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnReturn_Click);
@@ -194,9 +195,9 @@
             this.btnDeleteAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDeleteAll.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnDeleteAll.Image = global::AgOpenGPS.Properties.Resources.BoundaryDeleteAll;
-            this.btnDeleteAll.Location = new System.Drawing.Point(103, 19);
+            this.btnDeleteAll.Location = new System.Drawing.Point(100, 20);
             this.btnDeleteAll.Name = "btnDeleteAll";
-            this.btnDeleteAll.Size = new System.Drawing.Size(72, 68);
+            this.btnDeleteAll.Size = new System.Drawing.Size(70, 70);
             this.btnDeleteAll.TabIndex = 100;
             this.btnDeleteAll.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnDeleteAll.UseVisualStyleBackColor = true;
@@ -209,9 +210,9 @@
             this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDelete.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnDelete.Image = global::AgOpenGPS.Properties.Resources.BoundaryDelete;
-            this.btnDelete.Location = new System.Drawing.Point(15, 19);
+            this.btnDelete.Location = new System.Drawing.Point(10, 20);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(72, 68);
+            this.btnDelete.Size = new System.Drawing.Size(70, 70);
             this.btnDelete.TabIndex = 65;
             this.btnDelete.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnDelete.UseVisualStyleBackColor = true;
@@ -221,6 +222,7 @@
             // panelMain
             // 
             this.panelMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(80)))));
+            this.panelMain.Controls.Add(this.btnBingMaps);
             this.panelMain.Controls.Add(this.tableLayoutPanel1);
             this.panelMain.Controls.Add(this.btnAdd);
             this.panelMain.Controls.Add(this.btnCancel);
@@ -262,9 +264,9 @@
             this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAdd.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAdd.Image = global::AgOpenGPS.Properties.Resources.AddNew;
-            this.btnAdd.Location = new System.Drawing.Point(317, 19);
+            this.btnAdd.Location = new System.Drawing.Point(370, 20);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(96, 68);
+            this.btnAdd.Size = new System.Drawing.Size(70, 70);
             this.btnAdd.TabIndex = 214;
             this.btnAdd.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnAdd.UseVisualStyleBackColor = true;
@@ -589,6 +591,21 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // btnBingMaps
+            // 
+            this.btnBingMaps.DialogResult = System.Windows.Forms.DialogResult.Yes;
+            this.btnBingMaps.FlatAppearance.BorderSize = 0;
+            this.btnBingMaps.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBingMaps.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBingMaps.Image = global::AgOpenGPS.Properties.Resources.bing;
+            this.btnBingMaps.Location = new System.Drawing.Point(280, 20);
+            this.btnBingMaps.Name = "btnBingMaps";
+            this.btnBingMaps.Size = new System.Drawing.Size(70, 70);
+            this.btnBingMaps.TabIndex = 218;
+            this.btnBingMaps.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnBingMaps.UseVisualStyleBackColor = true;
+            this.btnBingMaps.Click += new System.EventHandler(this.btnBingMaps_Click);
+            // 
             // FormBoundary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
@@ -660,5 +677,6 @@
         private System.Windows.Forms.Button btnPausePlay;
         private System.Windows.Forms.Button btnAddPoint;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btnBingMaps;
     }
 }

@@ -521,7 +521,7 @@ namespace AgOpenGPS
 
             if (keyData == (Keys.F))
             {
-                CloseCurrentJob();
+                CloseCurrentJob(false);
                 return true;    // indicate that you handled this keystroke
             }
 

@@ -624,6 +624,14 @@ namespace AgOpenGPS
             MessageBox.Show(gStr.hb_btnStop, gStr.gsHelp);
         }
 
+        private void btnBingMaps_Click(object sender, EventArgs e)
+        {
+            isClosing = true;
+            Close();
+            var form3 = new FormMap(mf);
+            form3.Show(mf);
+        }
+
         private void btnDriveOrExt_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
             MessageBox.Show(gStr.hb_btnDriveOrExt, gStr.gsHelp);

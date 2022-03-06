@@ -1720,23 +1720,32 @@ namespace AgOpenGPS
 
         private void toolStripBtnField_Click(object sender, EventArgs e)
         {
-            CloseCurrentJob();
+            CloseCurrentJob(false);
         }
 
-        private void CloseCurrentJob()
+        private bool CloseCurrentJob(bool closing)
         {
-            //bring up dialog if no job active, close job if one is
-
-            if (autoBtnState != btnStates.Off)
-            {
-                TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
-                return;
-            }
-
             //close the current job and ask how to or if to save
             if (isJobStarted)
             {
-                int choice = SaveOrNot(false);
+                if (autoBtnState != btnStates.Off)
+                {
+                    TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
+                    return true;
+                }
+
+                CloseTopMosts();
+
+                int choice = 0;
+                using (FormSaveOrNot form = new FormSaveOrNot(closing))
+                {
+                    DialogResult result = form.ShowDialog(this);
+
+                    if (result == DialogResult.Ignore) choice = 0;   //Ignore
+                    else if (result == DialogResult.OK) choice = 1;      //Save and Exit
+                    else if (result == DialogResult.Yes) choice = 2;      //Save As
+                    else choice = 0;  // oops something is really busted
+                }
 
                 if (choice > 0)
                 {
@@ -1755,8 +1764,9 @@ namespace AgOpenGPS
                     else
                         displayFieldName = gStr.gsNone;
                 }
+                else return true;
             }
-            //update GUI areas
+            return false;
         }
         private void toolStripBtnMakeBndContour_Click(object sender, EventArgs e)
         {

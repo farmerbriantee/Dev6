@@ -424,51 +424,13 @@ namespace AgOpenGPS
             //*************************************************************************            
         }
 
-
-        // Generates a random number within a range.       
-        public double RandomNumber(double min, double max)
-        {
-            return min + _random.NextDouble() * (max - min);
-        }
-
-        private readonly Random _random = new Random();
-
-
-        private void btnVideoHelpRecPath_Click(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(gStr.v_RecordedPathForm))
-                System.Diagnostics.Process.Start(gStr.v_RecordedPathForm);
-        }
-
         //form is closing so tidy up and save settings
         private void FormGPS_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (isJobStarted)
+            if (CloseCurrentJob(true))
             {
-                if (autoBtnState != btnStates.Off)
-                {
-                    TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
-                    e.Cancel = true;
-                    return;
-                }
-
-                int choice = SaveOrNot(true);
-
-                if (choice == 0)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-                //Save, return, cancel save
-                if (choice == 1)
-                {
-                    Settings.Default.setF_CurrentDir = currentFieldDirectory;
-                    Settings.Default.Save();
-
-                    FileSaveEverythingBeforeClosingField();
-
-                    displayFieldName = gStr.gsNone;
-                }
+                e.Cancel = true;
+                return;
             }
 
             SaveFormGPSWindowSettings();
@@ -537,7 +499,7 @@ namespace AgOpenGPS
                 Properties.Resources.z_Lift,Properties.Resources.z_SkyNight,Properties.Resources.z_SteerPointer,
                 Properties.Resources.z_SteerDot,GetTractorBrand(Settings.Default.setBrand_TBrand),Properties.Resources.z_QuestionMark,
                 Properties.Resources.z_FrontWheels,Get4WDBrandFront(Settings.Default.setBrand_WDBrand), Get4WDBrandRear(Settings.Default.setBrand_WDBrand),
-                GetHarvesterBrand(Settings.Default.setBrand_HBrand), Properties.Resources.z_LateralManual
+                GetHarvesterBrand(Settings.Default.setBrand_HBrand), Properties.Resources.z_LateralManual, Properties.Resources.z_bingMap
             };
 
             texture = new uint[oglTextures.Length];
@@ -699,22 +661,6 @@ namespace AgOpenGPS
             p_239.pgn[p_239.tram] = unchecked((byte)tram.controlByte);
 
             //out serial to autosteer module  //indivdual classes load the distance and heading deltas 
-        }
-
-        //dialog for requesting user to save or cancel
-        public int SaveOrNot(bool closing)
-        {
-            CloseTopMosts();
-
-            using (FormSaveOrNot form = new FormSaveOrNot(closing))
-            {
-                DialogResult result = form.ShowDialog(this);
-
-                if (result == DialogResult.Ignore) return 0;   //Ignore
-                if (result == DialogResult.OK) return 1;      //Save and Exit
-                if (result == DialogResult.Yes) return 2;      //Save As
-                return 0;  // oops something is really busted
-            }
         }
 
         //make the start picture disappear
@@ -1102,6 +1048,7 @@ namespace AgOpenGPS
 
             FixPanelsAndMenus();
             SetZoom();
+            worldGrid.isGeoMap = false;
         }
 
         //Does the logic to process section on off requests
@@ -1169,17 +1116,16 @@ namespace AgOpenGPS
         public void SetZoom()
         {
             //match grid to cam distance and redo perspective
-            if (camera.camSetDistance <= -20000) camera.gridZoom = 2000;
-            else if (camera.camSetDistance >= -20000 && camera.camSetDistance < -10000) camera.gridZoom = 2012 * 2;
-            else if (camera.camSetDistance >= -10000 && camera.camSetDistance < -5000) camera.gridZoom = 1006 * 2;
-            else if (camera.camSetDistance >= -5000 && camera.camSetDistance < -2000) camera.gridZoom = 503 * 2;
-            else if (camera.camSetDistance >= -2000 && camera.camSetDistance < -1000) camera.gridZoom = 201.2 * 2;
-            else if (camera.camSetDistance >= -1000 && camera.camSetDistance < -500) camera.gridZoom = 100.6 * 2;
-            else if (camera.camSetDistance >= -500 && camera.camSetDistance < -250) camera.gridZoom = 50.3 * 2;
-            else if (camera.camSetDistance >= -250 && camera.camSetDistance < -150) camera.gridZoom = 25.15 * 2;
-            else if (camera.camSetDistance >= -150 && camera.camSetDistance < -50) camera.gridZoom = 10.06 * 2;
-            else if (camera.camSetDistance >= -50 && camera.camSetDistance < -1) camera.gridZoom = 5.03 * 2;
-            //1.216 2.532
+            if (camera.camSetDistance > -50) camera.gridZoom = 10;
+            else if (camera.camSetDistance > -150) camera.gridZoom = 20;
+            else if (camera.camSetDistance > -250) camera.gridZoom = 40;
+            else if (camera.camSetDistance > -500) camera.gridZoom = 80;
+            else if (camera.camSetDistance > -1000) camera.gridZoom = 160;
+            else if (camera.camSetDistance > -2000) camera.gridZoom = 320;
+            else if (camera.camSetDistance > -5000) camera.gridZoom = 640;
+            else if (camera.camSetDistance > -10000) camera.gridZoom = 1280;
+            else if (camera.camSetDistance > -20000) camera.gridZoom = 2560;
+
             oglMain_Resize(null, null);
         }
 
