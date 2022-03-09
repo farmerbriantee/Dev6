@@ -33,7 +33,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\AgOpenGPS_v6\</OutputPath>
+    <OutputPath>..\..\..\AgOpenGPS_v5\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -83,6 +83,12 @@
     </Compile>
     <Compile Include="Forms\FormCommSaver.designer.cs">
       <DependentUpon>FormCommSaver.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormCommTool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormCommTool.Designer.cs">
+      <DependentUpon>FormCommTool.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\FormCommSetGPS.cs">
       <SubType>Form</SubType>
@@ -160,6 +166,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormCommSaver.resx">
       <DependentUpon>FormCommSaver.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormCommTool.resx">
+      <DependentUpon>FormCommTool.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormCommSetGPS.resx">
       <DependentUpon>FormCommSetGPS.cs</DependentUpon>

@@ -263,6 +263,11 @@ namespace AgIO
                                 SendModule1Port(data, data.Length);
                                 break;
                             }
+                        case 0xEB: //235 machine steer - out machine Steer port
+                            {
+                                SendModule3Port(data, data.Length);
+                                break;
+                            }
                     }
                 }
             }
@@ -381,21 +386,36 @@ namespace AgIO
 
         private void ReceiveFromUDP(int port, byte[] data)
         {
-            if (data[0] == 0x80 && data[1] == 0x81)
+            if (port != 10000)
             {
-                //module return via udp sent to AOG
-                SendToLoopBackMessageAOG(data);
+                if (data[0] == 0x80 && data[1] == 0x81)
+                {
+                    //module return via udp sent to AOG
+                    SendToLoopBackMessageAOG(data);
 
-                //module data also sent to VR
-                SendToLoopBackMessageVR(data);
+                    //module data also sent to VR
+                    SendToLoopBackMessageVR(data);
+                }
+                //$ = 36 G=71 P=80 K=75
+                //Panda
+                else if (data[0] == 36 && (data[1] == 71 || data[1] == 80 || data[1] == 75))
+                {
+                    //if (timerSim.Enabled) DisableSim();
+                    traffic.cntrGPSIn += data.Length;
+                    rawBuffer += Encoding.ASCII.GetString(data);
+                    ParseNMEA(ref rawBuffer);
+                }
             }
-
-            else if (data[0] == 36 && (data[1] == 71 || data[1] == 80))
+            //GGA
+            else
             {
-                //if (timerSim.Enabled) DisableSim();
-                traffic.cntrGPSIn += data.Length;
-                rawBuffer += Encoding.ASCII.GetString(data);
-                ParseNMEA(ref rawBuffer);
+                //GGA or Panda
+                if (data[0] == 36 && (data[1] == 71 || data[1] == 80))
+                {
+                    traffic.cntrGPS2In += data.Length;
+                    rawBuffer2 += Encoding.ASCII.GetString(data);
+                    ParseNMEA2(ref rawBuffer2);
+                }
             }
 
             traffic.cntrUDPIn += data.Length;
@@ -439,6 +459,7 @@ namespace AgIO
                 //MessageBoxIcon.Error);
             }
         }
+
         private void ReceiveDataUDPAsync(IAsyncResult asyncResult)
         {
             try

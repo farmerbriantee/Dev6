@@ -22,6 +22,7 @@ namespace AgIO
         }
 
         public StringBuilder logNMEASentence = new StringBuilder();
+        public StringBuilder logNMEASentence2 = new StringBuilder();
 
         public bool isKeyboardOn = true;
 
@@ -52,6 +53,7 @@ namespace AgIO
             isSendNMEAToUDP = Properties.Settings.Default.setUDP_isSendNMEAToUDP;
 
             lblGPS1Comm.Text = "---";
+            lblGPS2Comm.Text = "---";
             lblIMUComm.Text = "---";
             lblMod1Comm.Text = "---";
             lblMod2Comm.Text = "---";
@@ -65,6 +67,26 @@ namespace AgIO
             {
                 OpenGPSPort();
                 if (spGPS.IsOpen) lblGPS1Comm.Text = portNameGPS;
+            }
+
+            //set baud and port from last time run
+            baudRateGPS2 = Settings.Default.setPort_baudRateGPS2;
+            portNameGPS2 = Settings.Default.setPort_portNameGPS2;
+            wasGPS2ConnectedLastRun = Settings.Default.setPort_wasGPS2Connected;
+            if (wasGPS2ConnectedLastRun)
+            {
+                OpenGPS2Port();
+                if (spGPS2.IsOpen) lblGPS2Comm.Text = portNameGPS2;
+            }
+
+            // set baud and port for rtcm from last time run
+            baudRateRtcm = Settings.Default.setPort_baudRateRtcm;
+            portNameRtcm = Settings.Default.setPort_portNameRtcm;
+            wasRtcmConnectedLastRun = Settings.Default.setPort_wasRtcmConnected;
+            
+            if (wasRtcmConnectedLastRun)
+            {
+                OpenRtcmPort();
             }
 
             //Open IMU
@@ -188,6 +210,11 @@ namespace AgIO
                         writer.Write(logNMEASentence.ToString());
                     }
                     logNMEASentence.Clear();
+                    using (StreamWriter writer = new StreamWriter("zAgIO_Tool_log.txt", true))
+                    {
+                        writer.Write(logNMEASentence2.ToString());
+                    }
+                    logNMEASentence2.Clear();
                 }
 
                 lastSecond = secondsSinceStart;
@@ -249,7 +276,7 @@ namespace AgIO
 
         private void btnBringUpCommSettings_Click(object sender, EventArgs e)
         {
-            SettingsCommunicationGPS();
+            SettingsCommunicationGPSTool();
         }
 
         private void btnUDP_Click(object sender, EventArgs e)
@@ -276,6 +303,11 @@ namespace AgIO
         {
             Close();
         }
+        private void btnToolSteer_Click(object sender, EventArgs e)
+        {
+            SettingsCommunicationGPSTool();
+        }
+
 
         public void ConfigureNTRIP()
         {
@@ -391,6 +423,7 @@ namespace AgIO
         }
 
         public bool isLogNMEA;
+
         private void cboxLogNMEA_CheckedChanged(object sender, EventArgs e)
         {
             isLogNMEA = cboxLogNMEA.Checked;
@@ -398,6 +431,15 @@ namespace AgIO
 
         private void FormLoop_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Properties.Settings.Default.setPort_wasGPSConnected = wasGPSConnectedLastRun;
+            Properties.Settings.Default.setPort_wasGPS2Connected = wasGPS2ConnectedLastRun;
+            Properties.Settings.Default.setPort_wasModule3Connected = wasModule3ConnectedLastRun;
+            Properties.Settings.Default.setPort_wasModule2Connected = wasModule2ConnectedLastRun;
+            Properties.Settings.Default.setPort_wasModule1Connected = wasModule1ConnectedLastRun;
+            Properties.Settings.Default.setPort_wasIMUConnected = wasIMUConnectedLastRun;
+            Properties.Settings.Default.setPort_wasRtcmConnected = wasRtcmConnectedLastRun;
+            Properties.Settings.Default.Save();
+
             if (recvFromAOGLoopBackSocket != null)
             {
                 try
@@ -445,6 +487,9 @@ namespace AgIO
 
             lblFromGPS.Text = traffic.cntrGPSIn == 0 ? "--" : (traffic.cntrGPSIn).ToString();
             lblToGPS.Text = traffic.cntrGPSOut == 0 ? "--" : (traffic.cntrGPSOut).ToString();
+
+            lblFromGPS2.Text = traffic.cntrGPS2In == 0 ? "--" : (traffic.cntrGPS2In).ToString();
+            lblToGPS2.Text = traffic.cntrGPS2Out == 0 ? "--" : (traffic.cntrGPS2Out).ToString();
 
             lblFromModule1.Text = traffic.cntrModule1In == 0 ? "--" : (traffic.cntrModule1In).ToString();
             lblToModule1.Text = traffic.cntrModule1Out == 0 ? "--" : (traffic.cntrModule1Out).ToString();

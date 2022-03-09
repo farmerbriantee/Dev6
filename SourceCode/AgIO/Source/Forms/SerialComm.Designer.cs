@@ -14,22 +14,25 @@ namespace AgIO
         private int totalHeaderByteCount = 5;
 
         public static string portNameGPS = "***";
-        public static int baudRateGPS = 4800;
+        public  static int baudRateGPS = 4800;
 
-        public static string portNameGPS2 = "***";
-        public static int baudRateGPS2 = 4800;
+        public  static string portNameGPS2 = "***";
+        public  static int baudRateGPS2 = 4800;
 
-        public static string portNameIMU = "***";
-        public static int baudRateIMU = 38400;
+        public  static string portNameRtcm = "***";
+        public  static int baudRateRtcm = 4800;
 
-        public static string portNameModule1 = "***";
-        public static int baudRateModule1 = 38400;
+        public  static string portNameIMU = "***";
+        public  static int baudRateIMU = 38400;
 
-        public static string portNameModule2 = "***";
-        public static int baudRateModule2 = 38400;
+        public  static string portNameModule1 = "***";
+        public  static int baudRateModule1 = 38400;
 
-        public static string portNameModule3 = "***";
-        public static int baudRateModule3 = 38400;
+        public  static string portNameModule2 = "***";
+        public  static int baudRateModule2 = 38400;
+
+        public  static string portNameModule3 = "***";
+        public  static int baudRateModule3 = 38400;
 
         //used to decide to autoconnect section arduino this run
         public string recvGPSSentence = "GPS";
@@ -40,22 +43,28 @@ namespace AgIO
         public string recvModule3Sentence = "Module 3";
 
         public bool isGPSCommOpen = false;
+        public bool isGPSCommToolOpen = false;
 
         public byte checksumSent = 0;
         public byte checksumRecd = 0;
 
         //used to decide to autoconnect autosteer arduino this run
         public bool wasGPSConnectedLastRun = false;
+        public bool wasGPS2ConnectedLastRun = false;
         public bool wasModule3ConnectedLastRun = false;
         public bool wasModule2ConnectedLastRun = false;
         public bool wasModule1ConnectedLastRun = false;
         public bool wasIMUConnectedLastRun = false;
+        public bool wasRtcmConnectedLastRun = false;
 
         //serial port gps is connected to
         public SerialPort spGPS = new SerialPort(portNameGPS, baudRateGPS, Parity.None, 8, StopBits.One);
 
         //serial port gps2 is connected to
         public SerialPort spGPS2 = new SerialPort(portNameGPS2, baudRateGPS2, Parity.None, 8, StopBits.One);
+
+        //serial port gps is connected to
+        public SerialPort spRtcm = new SerialPort(portNameRtcm, baudRateRtcm, Parity.None, 8, StopBits.One);
 
         //serial port Arduino is connected to
         public SerialPort spIMU = new SerialPort(portNameIMU, baudRateIMU, Parity.None, 8, StopBits.One);
@@ -163,10 +172,10 @@ namespace AgIO
                 }
 
                 Properties.Settings.Default.setPort_wasIMUConnected = false;
+                wasIMUConnectedLastRun = false;
                 Properties.Settings.Default.Save();
 
                 spIMU.Dispose();
-                wasIMUConnectedLastRun = false;
             }
 
             else
@@ -939,7 +948,13 @@ namespace AgIO
         {
             try
             {
-                if (spGPS.IsOpen)
+                if (spRtcm.IsOpen)
+                {
+                    spRtcm.Write(data, 0, data.Length);
+                    traffic.cntrGPSOut += data.Length;
+                }
+
+                else if (spGPS.IsOpen)
                 {
                     spGPS.Write(data, 0, data.Length);
                     traffic.cntrGPSOut += data.Length;
@@ -950,6 +965,7 @@ namespace AgIO
             }
 
         }
+
         public void OpenGPSPort()
         {
 
@@ -982,6 +998,7 @@ namespace AgIO
                 Properties.Settings.Default.setPort_portNameGPS = portNameGPS;
                 Properties.Settings.Default.setPort_baudRateGPS = baudRateGPS;
                 Properties.Settings.Default.setPort_wasGPSConnected = true;
+                wasGPSConnectedLastRun = true;
                 Properties.Settings.Default.Save();
                 lblGPS1Comm.Text = portNameGPS;
                 wasGPSConnectedLastRun = true;
@@ -991,7 +1008,7 @@ namespace AgIO
         {
             //if (sp.IsOpen)
             {
-                //spGPS.DataReceived -= sp_DataReceivedGPS;
+                spGPS.DataReceived -= sp_DataReceivedGPS;
                 try { spGPS.Close(); }
                 catch (Exception e)
                 {
@@ -1006,7 +1023,9 @@ namespace AgIO
                 spGPS.Dispose();
             }
             lblGPS1Comm.Text = "---";
-            wasGPSConnectedLastRun = false;
+            Properties.Settings.Default.setPort_wasGPSConnected = false;
+            wasGPSConnectedLastRun=false;
+            Properties.Settings.Default.Save();
 
         }
 
@@ -1043,10 +1062,12 @@ namespace AgIO
         //called by the GPS2 delegate every time a chunk is rec'd
         private void ReceiveGPS2Port(string sentence)
         {
-            SendToLoopBackMessageAOG(sentence);
-            traffic.cntrGPS2In += sentence.Length;
-            recvGPS2Sentence = sentence;
+            rawBuffer2 += sentence;
+            ParseNMEA2(ref rawBuffer2);
 
+            //SendToLoopBackMessageAOG(sentence);
+            traffic.cntrGPS2In += sentence.Length;
+            if (isGPSCommToolOpen) recvGPS2Sentence = sentence;
         }
         public void SendGPS2Port(byte[] data)
         {
@@ -1067,17 +1088,6 @@ namespace AgIO
         {
             //close it first
             CloseGPS2Port();
-
-            //if (spGPS2.IsOpen)
-            //{
-            //    //simulatorOnToolStripMenuItem.Checked = false;
-            //    //panelSim.Visible = false;
-            //    //timerSim.Enabled = false;
-
-            //    //Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
-            //    //Settings.Default.Save();
-            //}
-
 
             if (!spGPS2.IsOpen)
             {
@@ -1100,7 +1110,10 @@ namespace AgIO
 
                 Properties.Settings.Default.setPort_portNameGPS2 = portNameGPS2;
                 Properties.Settings.Default.setPort_baudRateGPS2 = baudRateGPS2;
+                Properties.Settings.Default.setPort_wasGPS2Connected = true;  
+                wasGPS2ConnectedLastRun = true;
                 Properties.Settings.Default.Save();
+                lblGPS2Comm.Text = portNameGPS2;
             }
         }
         public void CloseGPS2Port()
@@ -1120,6 +1133,9 @@ namespace AgIO
                 //stripPortGPS2.ForeColor = Color.ForestGreen;
                 //stripOnlineGPS2.Value = 1;
                 spGPS2.Dispose();
+                lblGPS2Comm.Text = "---";
+                Properties.Settings.Default.setPort_wasGPSConnected = false;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -1140,5 +1156,54 @@ namespace AgIO
         }
         #endregion //--------------------------------------------------------
 
+        public void OpenRtcmPort()
+        {
+            if (spRtcm.IsOpen)
+            {
+                //close it first
+                CloseRtcmPort();
+            }
+
+            if (!spRtcm.IsOpen)
+            {
+                spRtcm.PortName = portNameRtcm;
+                spRtcm.BaudRate = baudRateRtcm;
+                spRtcm.WriteTimeout = 1000;
+            }
+
+            try { spRtcm.Open(); }
+            catch (Exception)
+            {
+            }
+
+            if (spRtcm.IsOpen)
+            {
+                //discard any stuff in the buffers
+                spRtcm.DiscardOutBuffer();
+                spRtcm.DiscardInBuffer();
+
+                Properties.Settings.Default.setPort_portNameRtcm = portNameRtcm;
+                Properties.Settings.Default.setPort_baudRateRtcm = baudRateRtcm;
+                Properties.Settings.Default.setPort_wasRtcmConnected = true;
+                wasRtcmConnectedLastRun = true;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public void CloseRtcmPort()
+        {
+            {
+                try { spRtcm.Close(); }
+                catch (Exception e)
+                {
+                    //WriteErrorLog("Closing GPS Port" + e.ToString());
+                    MessageBox.Show(e.Message, "Connection already terminated?");
+                }
+            }
+
+            Properties.Settings.Default.setPort_wasRtcmConnected = false;
+            wasRtcmConnectedLastRun = false;
+            Properties.Settings.Default.Save();
+        }
     }//end class
 }//end namespace

@@ -253,6 +253,7 @@ namespace AgIO
             if (toUDP_Port == 0)
             {
                 SendGPSPort(data);
+                SendGPS2Port(data);
             }
 
             //send out UDP Port
