@@ -214,18 +214,6 @@
     <Compile Include="Forms\Inputs\FormKeyboard.Designer.cs">
       <DependentUpon>FormKeyboard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Pickers\FormDrivePicker.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Pickers\FormDrivePicker.Designer.cs">
-      <DependentUpon>FormDrivePicker.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Pickers\FormRecordPicker.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Pickers\FormRecordPicker.Designer.cs">
-      <DependentUpon>FormRecordPicker.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\FormHeadland.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -532,12 +520,6 @@
     <EmbeddedResource Include="Forms\Inputs\FormKeyboard.resx">
       <DependentUpon>FormKeyboard.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Pickers\FormDrivePicker.resx">
-      <DependentUpon>FormDrivePicker.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Pickers\FormRecordPicker.resx">
-      <DependentUpon>FormRecordPicker.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormHeadland.resx">
       <DependentUpon>FormHeadland.cs</DependentUpon>
     </EmbeddedResource>
@@ -546,6 +528,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Pickers\FormFilePicker.resx">
       <DependentUpon>FormFilePicker.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Inputs\FormNumeric.resx">
       <DependentUpon>FormNumeric.cs</DependentUpon>

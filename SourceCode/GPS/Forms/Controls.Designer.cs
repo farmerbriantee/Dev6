@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using AgOpenGPS.Forms;
-using AgOpenGPS.Forms.Pickers;
 using AgOpenGPS.Properties;
 using Microsoft.Win32;
 
@@ -1956,7 +1955,7 @@ namespace AgOpenGPS
             btnResumePath.Image = Properties.Resources.pathResumeStart;
             gyd.currentPositonIndex = 0;
 
-            using (FormRecordPicker form = new FormRecordPicker(this))
+            using (FormFilePicker form = new FormFilePicker(this, 2, ""))
             {
                 form.ShowDialog(this);
             }

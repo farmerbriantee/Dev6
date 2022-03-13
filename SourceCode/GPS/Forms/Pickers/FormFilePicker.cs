@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,39 +9,100 @@ namespace AgOpenGPS
 {
     public partial class FormFilePicker : Form
     {
-        private readonly FormGPS mf = null;
-
-        private int order;
+        private readonly FormGPS mf;
 
         private readonly List<string> fileList = new List<string>();
-        private bool opening = true;
+        private ListViewColumnSorter lvwColumnSorter;
+        private byte mode = 0;
 
-        public FormFilePicker(Form callingForm)
+        public FormFilePicker(Form callingForm, byte Idx, string _fileList)
         {
             //get copy of the calling main form
             mf = callingForm as FormGPS;
 
-            InitializeComponent();
-            btnByDistance.Text = gStr.gsSort;
-            btnOpenExistingLv.Text = gStr.gsUseSelected;
-        }
+            mode = Idx;
 
-        private void FormFilePicker_Load(object sender, EventArgs e)
-        {
-            order = 0;
-            timer1.Enabled = true;
-            LoadList();
-            opening = false;
+            InitializeComponent();
+            btnOpenExistingLv.Text = gStr.gsUseSelected;
+            
+            ColumnHeader chName = new ColumnHeader();
+
+            if (Idx == 0)
+            {
+                ColumnHeader chDistance = new ColumnHeader();
+                ColumnHeader chArea = new ColumnHeader();
+
+                chName.Text = "Field Name";
+                chName.Width = 680;
+
+                chDistance.Text = "Distance";
+                chDistance.Width = 140;
+
+                chArea.Text = "Area";
+                chArea.Width = 140;
+
+                lvLines.Columns.AddRange(new ColumnHeader[] { chName, chDistance, chArea });
+
+                LoadList();
+            }
+            else if (Idx == 1)
+            {
+                lvLines.Columns.AddRange(new ColumnHeader[] { chName });
+
+                chName.Text = "Field Name";
+                chName.Width = 960;
+
+
+                string[] fileList = _fileList.Split(',');
+                for (int i = 0; i < fileList.Length; i++)
+                {
+                    lvLines.Items.Add(new ListViewItem(fileList[i]));
+                }
+            }
+            else if (Idx == 2)
+            {
+                btnDeleteField.Image = Properties.Resources.Trash;
+                btnReturn.Image = Properties.Resources.SwitchOff;
+
+                lvLines.Columns.AddRange(new ColumnHeader[] { chName });
+
+                chName.Text = "Record Name";
+                chName.Width = 960;
+
+                string fieldDir = mf.fieldsDirectory + mf.currentFieldDirectory;
+
+                string[] files = Directory.GetFiles(fieldDir);
+
+                // Here we use the filename of all .rec files in the current field dir.
+                // The path and postfix is stripped off.
+
+                foreach (string file in files)
+                {
+                    if (file.EndsWith(".rec"))
+                    {
+                        string recordName = file.Replace(".rec", "").Replace(fieldDir, "").Replace("\\", "");
+                        lvLines.Items.Add(new ListViewItem(recordName));
+                    }
+                }
+
+                if (lvLines.Items.Count == 0)
+                {
+                    MessageBox.Show("No Recorded Paths", "Create A Path First",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Close();
+                }
+
+            }
+
+            lvwColumnSorter = new ListViewColumnSorter();
+            lvLines.ListViewItemSorter = lvwColumnSorter;
         }
 
         private void LoadList()
         {
-            fileList.Clear();
-
             string[] dirs = Directory.GetDirectories(mf.fieldsDirectory);
 
-
-            if (opening && (dirs == null || dirs.Length < 1))
+            if (dirs == null || dirs.Length < 1)
             {
                 mf.TimedMessageBox(2000, gStr.gsCreateNewField, gStr.gsFileError);
                 Close();
@@ -193,14 +255,12 @@ namespace AgOpenGPS
                 filename = dir + "\\Field.txt";
             }
 
-            if (opening && (fileList == null || fileList.Count < 1))
+            if (fileList == null || fileList.Count < 3)
             {
                 mf.TimedMessageBox(2000, gStr.gsNoFieldsFound, gStr.gsCreateNewField);
                 Close();
                 return;
             }
-
-            lvLines.Items.Clear();
 
             for (int i = 0; i < fileList.Count; i += 3)
             {
@@ -208,18 +268,7 @@ namespace AgOpenGPS
                 lvLines.Items.Add(new ListViewItem(fieldNames));
             }
 
-            if (lvLines.Items.Count > 0)
-            {
-                this.chName.Text = "Field Name";
-                this.chName.Width = 680;
-
-                this.chDistance.Text = "Distance";
-                this.chDistance.Width = 140;
-
-                this.chArea.Text = "Area";
-                this.chArea.Width = 140;
-            }
-            else if (opening)
+            if (lvLines.Items.Count == 0)
             {
                 mf.TimedMessageBox(2000, gStr.gsNoFieldsFound, gStr.gsCreateNewField);
                 Close();
@@ -227,105 +276,102 @@ namespace AgOpenGPS
             }
         }
 
-        private void btnByDistance_Click(object sender, EventArgs e)
-        {
-            lvLines.Items.Clear();
-            order += 1;
-            if (order == 3) order = 0;
-
-
-            for (int i = 0; i < fileList.Count; i += 3)
-            {
-                if (order == 0)
-                {
-                    string[] fieldNames = { fileList[i], fileList[i + 1], fileList[i + 2] };
-                    lvLines.Items.Add(new ListViewItem(fieldNames));
-                }
-                else if (order == 1)
-                {
-                    string[] fieldNames = { fileList[i + 1], fileList[i], fileList[i + 2] };
-                    lvLines.Items.Add(new ListViewItem(fieldNames));
-                }
-                else
-                {
-                    string[] fieldNames = { fileList[i + 2], fileList[i], fileList[i + 1] };
-                    lvLines.Items.Add(new ListViewItem(fieldNames));
-                }
-            }
-
-            if (lvLines.Items.Count > 0)
-            {
-                if (order == 0)
-                {
-                    this.chName.Text = "Field Name";
-                    this.chName.Width = 680;
-
-                    this.chDistance.Text = "Distance";
-                    this.chDistance.Width = 140;
-
-                    this.chArea.Text = "Area";
-                    this.chArea.Width = 140;
-                }
-                else if (order == 1)
-                {
-                    this.chName.Text = "Distance";
-                    this.chName.Width = 140;
-
-                    this.chDistance.Text = "Field Name";
-                    this.chDistance.Width = 680;
-
-                    this.chArea.Text = "Area";
-                    this.chArea.Width = 140;
-                }
-                else
-                {
-                    this.chName.Text = "Area";
-                    this.chName.Width = 140;
-
-                    this.chDistance.Text = "Field Name";
-                    this.chDistance.Width = 680;
-
-                    this.chArea.Text = "Distance";
-                    this.chArea.Width = 140;
-                }
-            }
-        }
-
         private void btnOpenExistingLv_Click(object sender, EventArgs e)
         {
-            int count = lvLines.SelectedItems.Count;
-            if (count > 0)
+            if (lvLines.SelectedItems.Count > 0)
             {
-                if (lvLines.SelectedItems[0].SubItems[0].Text == "Error" ||
-                    lvLines.SelectedItems[0].SubItems[1].Text == "Error" ||
-                    lvLines.SelectedItems[0].SubItems[2].Text == "Error")
+                if (mode == 2)
                 {
-                    MessageBox.Show("This Field is Damaged, Please Delete \r\n ALREADY TOLD YOU THAT :)", gStr.gsFileError,
-                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    int count = lvLines.SelectedItems.Count;
+                    if (count > 0)
+                    {
+                        string selectedRecordPath = mf.fieldsDirectory + mf.currentFieldDirectory + "\\" + lvLines.SelectedItems[0].SubItems[0].Text + ".rec";
 
+                        // Copy the selected record file to the original record name inside the field dir:
+                        // ( this will load the last selected path automatically when this field is opened again)
+                        File.Copy(selectedRecordPath, mf.fieldsDirectory + mf.currentFieldDirectory + "\\RecPath.txt", true);
+                        // and load the selected path into the recPath object:
+                        string line;
+                        if (File.Exists(selectedRecordPath))
+                        {
+                            using (StreamReader reader = new StreamReader(selectedRecordPath))
+                            {
+                                try
+                                {
+                                    //read header
+                                    line = reader.ReadLine();
+                                    line = reader.ReadLine();
+                                    int numPoints = int.Parse(line);
+                                    mf.gyd.recList.Clear();
+
+                                    while (!reader.EndOfStream)
+                                    {
+                                        for (int v = 0; v < numPoints; v++)
+                                        {
+                                            line = reader.ReadLine();
+                                            string[] words = line.Split(',');
+                                            CRecPathPt point = new CRecPathPt(
+                                                double.Parse(words[0], CultureInfo.InvariantCulture),
+                                                double.Parse(words[1], CultureInfo.InvariantCulture),
+                                                double.Parse(words[2], CultureInfo.InvariantCulture),
+                                                double.Parse(words[3], CultureInfo.InvariantCulture),
+                                                bool.Parse(words[4]));
+
+                                            //add the point
+                                            mf.gyd.recList.Add(point);
+                                        }
+                                    }
+                                }
+
+                                catch (Exception ex)
+                                {
+                                    var form = new FormTimedMessage(2000, gStr.gsRecordedPathFileIsCorrupt, gStr.gsButFieldIsLoaded);
+                                    form.Show(this);
+                                    mf.WriteErrorLog("Load Recorded Path" + ex.ToString());
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    if (order == 0) mf.filePickerFileAndDirectory = (mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[0].Text + "\\Field.txt");
-                    else mf.filePickerFileAndDirectory = (mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[1].Text + "\\Field.txt");
-                    Close();
+                    if (lvLines.SelectedItems[0].SubItems[1].Text == "Error" || lvLines.SelectedItems[0].SubItems[2].Text == "Error")
+                    {
+                        MessageBox.Show("This Field is Damaged, Please Delete \r\n ALREADY TOLD YOU THAT :)", gStr.gsFileError,
+                                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        mf.filePickerFileAndDirectory = mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[0].Text + "\\Field.txt";
+                        Close();
+                    }
                 }
             }
         }
 
-        private void btnDeleteAB_Click(object sender, EventArgs e)
+        private void btnReturn_Click(object sender, EventArgs e)
         {
-            mf.filePickerFileAndDirectory = "";
+            if (mode == 2)
+            {
+                mf.gyd.StopDrivingRecordedPath();
+                mf.gyd.recList.Clear();
+                mf.FileSaveRecPath();
+                mf.panelDrag.Visible = false;
+                Close();
+            }
+            else
+                mf.filePickerFileAndDirectory = "";
         }
 
         private void btnDeleteField_Click(object sender, EventArgs e)
         {
-            int count = lvLines.SelectedItems.Count;
-            string dir2Delete;
-            if (count > 0)
+            if (lvLines.SelectedItems.Count > 0)
             {
-                if (order == 0) dir2Delete = (mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[0].Text);
-                else dir2Delete = (mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[1].Text);
+                string selectedRecord = lvLines.SelectedItems[0].SubItems[0].Text;
+                string dir2Delete = mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[0].Text;
+                if (mode == 2)
+                    dir2Delete = mf.fieldsDirectory + mf.currentFieldDirectory + "\\" + selectedRecord + ".rec";
+
 
                 DialogResult result3 = MessageBox.Show(
                     dir2Delete,
@@ -335,13 +381,140 @@ namespace AgOpenGPS
                     MessageBoxDefaultButton.Button2);
                 if (result3 == DialogResult.Yes)
                 {
-                    System.IO.Directory.Delete(dir2Delete, true);
-                }
-                else return;
-            }
-            else return;
+                    if (mode == 2)
+                        File.Delete(dir2Delete);
+                    else
+                        Directory.Delete(dir2Delete, true);
 
-            LoadList();
+                    lvLines.Items.Remove(lvLines.SelectedItems[0]);
+                }
+            }
+        }
+
+        public class ListViewColumnSorter : IComparer
+        {
+            /// <summary>
+            /// Specifies the column to be sorted
+            /// </summary>
+            private int ColumnToSort;
+
+            /// <summary>
+            /// Specifies the order in which to sort (i.e. 'Ascending').
+            /// </summary>
+            private SortOrder OrderOfSort;
+
+            /// <summary>
+            /// Case insensitive comparer object
+            /// </summary>
+            private CaseInsensitiveComparer ObjectCompare;
+
+            /// <summary>
+            /// Class constructor. Initializes various elements
+            /// </summary>
+            public ListViewColumnSorter()
+            {
+                // Initialize the column to '0'
+                ColumnToSort = 0;
+
+                // Initialize the sort order to 'none'
+                OrderOfSort = SortOrder.None;
+
+                // Initialize the CaseInsensitiveComparer object
+                ObjectCompare = new CaseInsensitiveComparer();
+            }
+
+            /// <summary>
+            /// This method is inherited from the IComparer interface. It compares the two objects passed using a case insensitive comparison.
+            /// </summary>
+            /// <param name="x">First object to be compared</param>
+            /// <param name="y">Second object to be compared</param>
+            /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
+            public int Compare(object x, object y)
+            {
+                int compareResult;
+                ListViewItem listviewX, listviewY;
+
+                // Cast the objects to be compared to ListViewItem objects
+                listviewX = (ListViewItem)x;
+                listviewY = (ListViewItem)y;
+
+                // Compare the two items
+                compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+
+                // Calculate correct return value based on object comparison
+                if (OrderOfSort == SortOrder.Ascending)
+                {
+                    // Ascending sort is selected, return normal result of compare operation
+                    return compareResult;
+                }
+                else if (OrderOfSort == SortOrder.Descending)
+                {
+                    // Descending sort is selected, return negative result of compare operation
+                    return (-compareResult);
+                }
+                else
+                {
+                    // Return '0' to indicate they are equal
+                    return 0;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
+            /// </summary>
+            public int SortColumn
+            {
+                set
+                {
+                    ColumnToSort = value;
+                }
+                get
+                {
+                    return ColumnToSort;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
+            /// </summary>
+            public SortOrder Order
+            {
+                set
+                {
+                    OrderOfSort = value;
+                }
+                get
+                {
+                    return OrderOfSort;
+                }
+            }
+
+        }
+
+        private void lvLines_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            // Determine if clicked column is already the column that is being sorted.
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            this.lvLines.Sort();
         }
     }
 }

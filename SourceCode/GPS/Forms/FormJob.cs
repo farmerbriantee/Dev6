@@ -70,7 +70,7 @@ namespace AgOpenGPS
         {
             mf.filePickerFileAndDirectory = "";
 
-            using (FormFilePicker form = new FormFilePicker(mf))
+            using (FormFilePicker form = new FormFilePicker(mf, 0, ""))
             {
                 //returns full field.txt file dir name
                 if (form.ShowDialog(this) == DialogResult.Yes)
@@ -150,7 +150,7 @@ namespace AgOpenGPS
 
                 if (numFields > 1)
                 {
-                    using (FormDrivePicker form = new FormDrivePicker(mf, infieldList))
+                    using (FormFilePicker form = new FormFilePicker(mf, 1, infieldList))
                     {
                         //returns full field.txt file dir name
                         if (form.ShowDialog(this) == DialogResult.Yes)
