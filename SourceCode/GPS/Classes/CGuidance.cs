@@ -13,7 +13,8 @@ namespace AgOpenGPS
 
         //the list of points to drive on
         public List<vec3> curList = new List<vec3>();
-
+        public List<List<vec3>> sideGuideLines = new List<List<vec3>>();
+        
         public bool isBtnABLineOn, isBtnCurveOn, isContourBtnOn, isLocked = false;
 
         private int currentLocationIndexA, currentLocationIndexB, backSpacing = 30;
