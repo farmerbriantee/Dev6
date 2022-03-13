@@ -59,29 +59,6 @@ namespace AgOpenGPS
 
         private void btnTool_Click(object sender, EventArgs e)
         {
-            if (mf.isJobStarted)
-            {
-                if (mf.autoBtnState == FormGPS.btnStates.Auto)
-                    mf.btnSectionOffAutoOn.PerformClick();
-
-                if (mf.autoBtnState == FormGPS.btnStates.On)
-                    mf.btnManualOffOn.PerformClick();
-            }
-
-            //turn section buttons all OFF
-            for (int j = 0; j < FormGPS.MAXSECTIONS; j++)
-            {
-                mf.section[j].manBtnState = FormGPS.btnStates.On;
-            }
-
-            //fix auto button
-            mf.autoBtnState = FormGPS.btnStates.Off;
-            mf.btnManualOffOn.Image = Properties.Resources.ManualOff;
-            mf.btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
-
-            //Update the button colors and text
-            mf.ManualAllBtnsUpdate();
-
             ShowSubMenu(panelToolSubMenu, btnTool);
             //tab1.SelectedTab = tabSummary;
             UpdateVehicleListView();

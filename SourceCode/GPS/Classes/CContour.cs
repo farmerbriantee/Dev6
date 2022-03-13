@@ -96,7 +96,7 @@ namespace AgOpenGPS
         public void ResetContour()
         {
             creatingContour = null;
-            curList.Clear();
+            //curList.Clear();
 
             for (int i = curveArr.Count - 1; i >= 0; i--)
             {

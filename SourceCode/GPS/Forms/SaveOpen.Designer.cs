@@ -258,9 +258,6 @@ namespace AgOpenGPS
         {
             if (!File.Exists(fileAndDirectory)) return;
 
-            //close the existing job and reset everything
-            this.JobClose();
-
             //and open a new job
             this.JobNew();
 

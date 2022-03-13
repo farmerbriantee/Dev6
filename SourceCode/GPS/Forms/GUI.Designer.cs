@@ -13,6 +13,8 @@ using System.IO;
 
 namespace AgOpenGPS
 {
+    public enum btnStates { Off, Auto, On, Remote }
+
     public partial class FormGPS
     {
         //colors for sections and field background
@@ -45,7 +47,6 @@ namespace AgOpenGPS
         public bool isUTurnOn = true, isLateralOn = true;
 
         //master Manual and Auto, 3 states possible
-        public enum btnStates { Off, Auto, On }
         public btnStates autoBtnState = btnStates.Off;
 
         public int[] customColorsList = new int[16];
@@ -602,88 +603,30 @@ namespace AgOpenGPS
         //line up section On Off Auto buttons based on how many there are
         public void LineUpManualBtns()
         {
-            int oglCenter = 0;
-
-            oglCenter = statusStripLeft.Width + oglMain.Width / 2;
-
-            int top = 130;
-
-            int buttonMaxWidth = 400, buttonHeight = 25;
-
-
-            if ((Height - oglMain.Height) < 80) //max size - buttons hid
-            {
-                top = Height - 70;
-                if (panelSim.Visible == true)
-                {
-                    top -= 30;
-                    panelSim.Top = Height - 60;
-                }
-            }
-            else //buttons exposed
-            {
-                top = Height - 130;
-                if (panelSim.Visible == true)
-                {
-                    top -= 30;
-                    panelSim.Top = Height - 120;
-                }
-            }
-
-            //if (!isJobStarted) top = Height - 40;
-
-            btnSection1Man.Top = btnSection2Man.Top = btnSection3Man.Top = 
-            btnSection4Man.Top = btnSection5Man.Top = btnSection6Man.Top =
-            btnSection7Man.Top = btnSection8Man.Top = btnSection9Man.Top =
-            btnSection10Man.Top = btnSection11Man.Top = btnSection12Man.Top =
-            btnSection13Man.Top = btnSection14Man.Top =  btnSection15Man.Top =
-            btnSection16Man.Top = top;
+            int top = oglMain.Height - 31;
 
             int oglButtonWidth = oglMain.Width * 3 / 4;
-
             int buttonWidth = oglButtonWidth / tool.numOfSections;
-            if (buttonWidth > buttonMaxWidth) buttonWidth = buttonMaxWidth;
+            if (buttonWidth > 400) buttonWidth = 400;
 
-            btnSection1Man.Size = btnSection2Man.Size = btnSection3Man.Size = 
-            btnSection4Man.Size = btnSection5Man.Size = btnSection6Man.Size = 
-            btnSection7Man.Size = btnSection8Man.Size = btnSection9Man.Size = 
-            btnSection10Man.Size = btnSection11Man.Size = btnSection12Man.Size = 
-            btnSection13Man.Size = btnSection14Man.Size = btnSection15Man.Size = 
-            btnSection16Man.Size = new System.Drawing.Size(buttonWidth, buttonHeight);
+            Size size = new System.Drawing.Size(buttonWidth, 25);
+            int Left = (75 + oglMain.Width / 2) - (tool.numOfSections * size.Width) / 2;
+            
+            if (panelSim.Visible == true)
+            {
+                panelSim.Top = oglMain.Height + 4;
+                panelSim.Left = 75 + oglMain.Width / 2 - 300;
+                panelSim.Width = 600;
+            }
 
-            btnSection1Man.Left = (oglCenter) - (tool.numOfSections * btnSection1Man.Size.Width) / 2;
-            btnSection2Man.Left = btnSection1Man.Left + btnSection1Man.Size.Width;
-            btnSection3Man.Left = btnSection2Man.Left + btnSection1Man.Size.Width;
-            btnSection4Man.Left = btnSection3Man.Left + btnSection1Man.Size.Width;
-            btnSection5Man.Left = btnSection4Man.Left + btnSection1Man.Size.Width;
-            btnSection6Man.Left = btnSection5Man.Left + btnSection1Man.Size.Width;
-            btnSection7Man.Left = btnSection6Man.Left + btnSection1Man.Size.Width;
-            btnSection8Man.Left = btnSection7Man.Left + btnSection1Man.Size.Width;
-            btnSection9Man.Left = btnSection8Man.Left + btnSection1Man.Size.Width;
-            btnSection10Man.Left = btnSection9Man.Left + btnSection1Man.Size.Width;
-            btnSection11Man.Left = btnSection10Man.Left + btnSection1Man.Size.Width;
-            btnSection12Man.Left = btnSection11Man.Left + btnSection1Man.Size.Width;
-            btnSection13Man.Left = btnSection12Man.Left + btnSection1Man.Size.Width;
-            btnSection14Man.Left = btnSection13Man.Left + btnSection1Man.Size.Width;
-            btnSection15Man.Left = btnSection14Man.Left + btnSection1Man.Size.Width;
-            btnSection16Man.Left = btnSection15Man.Left + btnSection1Man.Size.Width;
-
-            btnSection1Man.Visible = tool.numOfSections > 0;
-            btnSection2Man.Visible = tool.numOfSections > 1;
-            btnSection3Man.Visible = tool.numOfSections > 2;
-            btnSection4Man.Visible = tool.numOfSections > 3;
-            btnSection5Man.Visible = tool.numOfSections > 4;
-            btnSection6Man.Visible = tool.numOfSections > 5;
-            btnSection7Man.Visible = tool.numOfSections > 6;
-            btnSection8Man.Visible = tool.numOfSections > 7;
-            btnSection9Man.Visible = tool.numOfSections > 8;
-            btnSection10Man.Visible = tool.numOfSections > 9;
-            btnSection11Man.Visible = tool.numOfSections > 10;
-            btnSection12Man.Visible = tool.numOfSections > 11;
-            btnSection13Man.Visible = tool.numOfSections > 12;
-            btnSection14Man.Visible = tool.numOfSections > 13;
-            btnSection15Man.Visible = tool.numOfSections > 14;
-            btnSection16Man.Visible = tool.numOfSections > 15;
+            //turn section buttons all On
+            for (int j = 0; j < MAXSECTIONS; j++)
+            {
+                section[j].button.Top = top;
+                section[j].button.Left = Left + size.Width * j;
+                section[j].button.Size = size;
+                section[j].button.Visible = tool.numOfSections > j;
+            }
         }
 
         public void SaveFormGPSWindowSettings()
@@ -750,78 +693,6 @@ namespace AgOpenGPS
                 return (" " +  gStr.gsN_West + " ");
             }
             return (" ?? ");
-        }
-
-        //force all the buttons same according to two main buttons
-        public void ManualAllBtnsUpdate()
-        {
-            ManualBtnUpdate(0, btnSection1Man);
-            ManualBtnUpdate(1, btnSection2Man);
-            ManualBtnUpdate(2, btnSection3Man);
-            ManualBtnUpdate(3, btnSection4Man);
-            ManualBtnUpdate(4, btnSection5Man);
-            ManualBtnUpdate(5, btnSection6Man);
-            ManualBtnUpdate(6, btnSection7Man);
-            ManualBtnUpdate(7, btnSection8Man);
-            ManualBtnUpdate(8, btnSection9Man);
-            ManualBtnUpdate(9, btnSection10Man);
-            ManualBtnUpdate(10, btnSection11Man);
-            ManualBtnUpdate(11, btnSection12Man);
-            ManualBtnUpdate(12, btnSection13Man);
-            ManualBtnUpdate(13, btnSection14Man);
-            ManualBtnUpdate(14, btnSection15Man);
-            ManualBtnUpdate(15, btnSection16Man);
-
-        }
-        //update individual btn based on state after push
-
-        private void ManualBtnUpdate(int sectNumber, Button btn)
-        {
-            switch (section[sectNumber].manBtnState)
-            {
-                case btnStates.Off:
-                    section[sectNumber].manBtnState = btnStates.Auto;
-                    if (isDay)
-                    {
-                        btn.BackColor = Color.Lime;
-                        btn.ForeColor = Color.Black;
-                    }
-                    else
-                    {
-                        btn.BackColor = Color.ForestGreen;
-                        btn.ForeColor = Color.White;
-                    }
-                    break;
-            
-
-                case btnStates.Auto:
-                    section[sectNumber].manBtnState = btnStates.On;
-                    if (isDay)
-                    {
-                        btn.BackColor = Color.Yellow;
-                        btn.ForeColor = Color.Black;
-                    }
-                    else
-                    {
-                        btn.BackColor = Color.DarkGoldenrod;
-                        btn.ForeColor = Color.White;
-                    }
-                    break;
-
-                case btnStates.On:
-                    section[sectNumber].manBtnState = btnStates.Off;
-                    if (isDay)
-                    {
-                        btn.ForeColor = Color.Black;
-                        btn.BackColor = Color.Red;
-                    }
-                    else
-                    {
-                        btn.BackColor = Color.Crimson;
-                        btn.ForeColor = Color.White;
-                    }
-                    break;
-            }
         }
 
         //Mouse Clicks 

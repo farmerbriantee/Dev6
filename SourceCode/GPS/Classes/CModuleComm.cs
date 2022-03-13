@@ -65,17 +65,17 @@
                 {
                     if (isWorkSwitchManual)
                     {
-                        if (mf.autoBtnState != FormGPS.btnStates.On)
+                        if (mf.autoBtnState != btnStates.On)
                             mf.btnManualOffOn.PerformClick();
                     }
-                    else if (mf.autoBtnState != FormGPS.btnStates.Auto)
+                    else if (mf.autoBtnState != btnStates.Auto)
                         mf.btnSectionOffAutoOn.PerformClick();
                 }
                 else//Checks both on-screen buttons, performs click if button is not off
                 {
-                    if (mf.autoBtnState == FormGPS.btnStates.Auto)
+                    if (mf.autoBtnState == btnStates.Auto)
                         mf.btnSectionOffAutoOn.PerformClick();
-                    if (mf.autoBtnState == FormGPS.btnStates.On)
+                    if (mf.autoBtnState == btnStates.On)
                         mf.btnManualOffOn.PerformClick();
                 }
             }

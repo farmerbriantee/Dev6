@@ -307,21 +307,7 @@ namespace AgOpenGPS
 
         private void tabTSections_Enter(object sender, EventArgs e)
         {
-            //turn section buttons all OFF
-            for (int j = 0; j < FormGPS.MAXSECTIONS; j++)
-            {
-                mf.section[j].manBtnState = FormGPS.btnStates.On;
-            }
-
             cboxSectionResponse.Checked = Properties.Vehicle.Default.setSection_isFast;
-
-            //fix auto button
-            mf.autoBtnState = FormGPS.btnStates.Off;
-            mf.btnManualOffOn.Image = Properties.Resources.ManualOff;
-            mf.btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
-
-            //Update the button colors and text
-            mf.ManualAllBtnsUpdate();
 
             nudCutoffSpeed.Value = (decimal)Properties.Vehicle.Default.setVehicle_slowSpeedCutoff;
 
@@ -380,6 +366,21 @@ namespace AgOpenGPS
             Properties.Vehicle.Default.setSection_position16 = sectionPosition16;
             Properties.Vehicle.Default.setSection_position17 = sectionPosition17;
 
+            if (Properties.Vehicle.Default.setVehicle_toolWidth != mf.tool.toolWidth || mf.tool.numOfSections != numberOfSections)
+            {
+                Properties.Vehicle.Default.setVehicle_toolWidth = mf.tool.toolWidth;
+
+                //turn section buttons all OFF
+                for (int j = 0; j < FormGPS.MAXSECTIONS; j++)
+                {
+                    mf.section[j].sectionOnRequest = false;
+                    mf.section[j].isSectionOn = false;
+                    if (mf.section[j].isMappingOn)
+                        mf.section[j].TurnMappingOff();
+                    mf.section[j].UpdateButton(btnStates.Off);
+                }
+            }
+
             if (mf.tool.numOfSections != numberOfSections)
             {
                 mf.tool.numOfSections = numberOfSections;
@@ -396,8 +397,6 @@ namespace AgOpenGPS
 
             mf.tram.isOuter = ((int)(mf.tram.tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
 
-
-            Properties.Vehicle.Default.setVehicle_toolWidth = mf.tool.toolWidth;
             Properties.Vehicle.Default.setSection_isFast = cboxSectionResponse.Checked;
 
             Properties.Vehicle.Default.Save();

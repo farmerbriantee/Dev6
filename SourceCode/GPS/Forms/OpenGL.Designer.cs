@@ -423,17 +423,17 @@ namespace AgOpenGPS
 
             for (int j = 0; j < tool.numOfSections; j++)
             {
-                if (section[j].manBtnState == btnStates.On)
+                if (section[j].sectionState == btnStates.On)
                 {
                     section[j].sectionOnRequest = true;
                 }
-                else if (section[j].manBtnState == btnStates.Off)
+                else if (section[j].sectionState == btnStates.Off)
                 {
                     section[j].sectionOnRequest = false;
                     if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
                     isSuperSectionAllowedOn &= section[j].mappingOffTimer > 1;
                 }
-                else if (section[j].manBtnState == btnStates.Auto)
+                else if (section[j].sectionState == btnStates.Auto)
                 {
                     double speeddif = (tool.toolFarRightSpeed - tool.toolFarLeftSpeed) / tool.rpWidth;
 
@@ -745,7 +745,7 @@ namespace AgOpenGPS
             GL.Rotate(glm.toDegrees(toolPos.heading), 0, 0, 1);
 
             //translate to that spot in the world
-            GL.Translate(-toolPos.easting, -toolPos.northing, 0);
+            GL.Translate(-toolPos.easting - Math.Cos(toolPos.heading) * tool.toolOffset, -toolPos.northing - Math.Sin(toolPos.heading) * tool.toolOffset, 0);
 
             GL.Color3((byte)0, (byte)252, (byte)0);
             GL.Begin(PrimitiveType.TriangleStrip);

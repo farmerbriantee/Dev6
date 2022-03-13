@@ -1017,7 +1017,7 @@ namespace AgOpenGPS
             {
                 if (section[j].isMappingOn)
                 {
-                    section[j].AddMappingPoint(j);
+                    section[j].AddMappingPoint();
                     sectionCounter++;
                 }
             }
@@ -1213,274 +1213,47 @@ namespace AgOpenGPS
                     mc.ssP[mc.swMain] = mc.ss[mc.swMain];
                 }  //Main or Rate SW
 
+                int set = 1;
+                int idx1 = mc.swOnGr0;
+                int idx2 = mc.swOffGr0;
 
-                if (mc.ss[mc.swOnGr0] != 0)
+                for (int j = 0; j < tool.numOfSections; j++)
                 {
-                    // ON Signal from Arduino 
-                    if ((mc.ss[mc.swOnGr0] & 128) == 128 & tool.numOfSections > 7)
+                    if (j == 8)
                     {
-                        if (section[7].manBtnState != btnStates.Auto) section[7].manBtnState = btnStates.Auto;
-                        btnSection8Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr0] & 64) == 64 & tool.numOfSections > 6)
-                    {
-                        if (section[6].manBtnState != btnStates.Auto) section[6].manBtnState = btnStates.Auto;
-                        btnSection7Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr0] & 32) == 32 & tool.numOfSections > 5)
-                    {
-                        if (section[5].manBtnState != btnStates.Auto) section[5].manBtnState = btnStates.Auto;
-                        btnSection6Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr0] & 16) == 16 & tool.numOfSections > 4)
-                    {
-                        if (section[4].manBtnState != btnStates.Auto) section[4].manBtnState = btnStates.Auto;
-                        btnSection5Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr0] & 8) == 8 & tool.numOfSections > 3)
-                    {
-                        if (section[3].manBtnState != btnStates.Auto) section[3].manBtnState = btnStates.Auto;
-                        btnSection4Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr0] & 4) == 4 & tool.numOfSections > 2)
-                    {
-                        if (section[2].manBtnState != btnStates.Auto) section[2].manBtnState = btnStates.Auto;
-                        btnSection3Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr0] & 2) == 2 & tool.numOfSections > 1)
-                    {
-                        if (section[1].manBtnState != btnStates.Auto) section[1].manBtnState = btnStates.Auto;
-                        btnSection2Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr0] & 1) == 1)
-                    {
-                        if (section[0].manBtnState != btnStates.Auto) section[0].manBtnState = btnStates.Auto;
-                        btnSection1Man.PerformClick();
-                    }
-                    mc.ssP[mc.swOnGr0] = mc.ss[mc.swOnGr0];
-                } //if swONLo != 0 
-                else { if (mc.ssP[mc.swOnGr0] != 0) { mc.ssP[mc.swOnGr0] = 0; } }
-
-                if (mc.ss[mc.swOnGr1] != 0)
-                {
-                    // sections ON signal from Arduino  
-                    if ((mc.ss[mc.swOnGr1] & 128) == 128 & tool.numOfSections > 15)
-                    {
-                        if (section[15].manBtnState != btnStates.Auto) section[15].manBtnState = btnStates.Auto;
-                        btnSection16Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr1] & 64) == 64 & tool.numOfSections > 14)
-                    {
-                        if (section[14].manBtnState != btnStates.Auto) section[14].manBtnState = btnStates.Auto;
-                        btnSection15Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr1] & 32) == 32 & tool.numOfSections > 13)
-                    {
-                        if (section[13].manBtnState != btnStates.Auto) section[13].manBtnState = btnStates.Auto;
-                        btnSection14Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr1] & 16) == 16 & tool.numOfSections > 12)
-                    {
-                        if (section[12].manBtnState != btnStates.Auto) section[12].manBtnState = btnStates.Auto;
-                        btnSection13Man.PerformClick();
+                        set = 1;
+                        idx1 = mc.swOnGr1;
+                        idx2 = mc.swOffGr1;
                     }
 
-                    if ((mc.ss[mc.swOnGr1] & 8) == 8 & tool.numOfSections > 11)
-                    {
-                        if (section[11].manBtnState != btnStates.Auto) section[11].manBtnState = btnStates.Auto;
-                        btnSection12Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr1] & 4) == 4 & tool.numOfSections > 10)
-                    {
-                        if (section[10].manBtnState != btnStates.Auto) section[10].manBtnState = btnStates.Auto;
-                        btnSection11Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr1] & 2) == 2 & tool.numOfSections > 9)
-                    {
-                        if (section[9].manBtnState != btnStates.Auto) section[9].manBtnState = btnStates.Auto;
-                        btnSection10Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOnGr1] & 1) == 1 & tool.numOfSections > 8)
-                    {
-                        if (section[8].manBtnState != btnStates.Auto) section[8].manBtnState = btnStates.Auto;
-                        btnSection9Man.PerformClick();
-                    }
-                    mc.ssP[mc.swOnGr1] = mc.ss[mc.swOnGr1];
-                } //if swONHi != 0   
-                else { if (mc.ssP[mc.swOnGr1] != 0) { mc.ssP[mc.swOnGr1] = 0; } }
+                    //do nothing if bit isn't set [only works fully when BBBBB is deleted]
+                    btnStates status = section[j].sectionState;
 
-                // Switches have changed
-                if (mc.ss[mc.swOffGr0] != mc.ssP[mc.swOffGr0])
-                {
-                    //if Main = Auto then change section to Auto if Off signal from Arduino stopped
-                    if (autoBtnState == btnStates.Auto)
+                    if ((mc.ss[idx1] & set) == set)
                     {
-                        if (((mc.ssP[mc.swOffGr0] & 128) == 128) & ((mc.ss[mc.swOffGr0] & 128) != 128) & (section[7].manBtnState == btnStates.Off))
-                        {
-                            btnSection8Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr0] & 64) == 64) & ((mc.ss[mc.swOffGr0] & 64) != 64) & (section[6].manBtnState == btnStates.Off))
-                        {
-                            btnSection7Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr0] & 32) == 32) & ((mc.ss[mc.swOffGr0] & 32) != 32) & (section[5].manBtnState == btnStates.Off))
-                        {
-                            btnSection6Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr0] & 16) == 16) & ((mc.ss[mc.swOffGr0] & 16) != 16) & (section[4].manBtnState == btnStates.Off))
-                        {
-                            btnSection5Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr0] & 8) == 8) & ((mc.ss[mc.swOffGr0] & 8) != 8) & (section[3].manBtnState == btnStates.Off))
-                        {
-                            btnSection4Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr0] & 4) == 4) & ((mc.ss[mc.swOffGr0] & 4) != 4) & (section[2].manBtnState == btnStates.Off))
-                        {
-                            btnSection3Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr0] & 2) == 2) & ((mc.ss[mc.swOffGr0] & 2) != 2) & (section[1].manBtnState == btnStates.Off))
-                        {
-                            btnSection2Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr0] & 1) == 1) & ((mc.ss[mc.swOffGr0] & 1) != 1) & (section[0].manBtnState == btnStates.Off))
-                        {
-                            btnSection1Man.PerformClick();
-                        }
+                        if (autoBtnState == btnStates.Auto && (mc.ss[idx2] & set) == set)//AAAAA
+                            status = btnStates.Auto;//not sure if we want to force on when auto is off!
+                        else if (autoBtnState != btnStates.Off)
+                            status = btnStates.On;
+                        else
+                            status = btnStates.Off;
                     }
-                    mc.ssP[mc.swOffGr0] = mc.ss[mc.swOffGr0];
+                    else if ((mc.ss[idx2] & set) == set)
+                        status = btnStates.Off;
+                    else if ((mc.ss[idx2] & set) != (mc.ssP[idx2] & set) && status == btnStates.Off)//BBBBB
+                        status = btnStates.Auto;//should change to AAAAA (Both on [so that it doesnt change when you send 0])
+
+                    set <<= 1;
+
+                    section[j].UpdateButton(status);
                 }
 
-                if (mc.ss[mc.swOffGr1] != mc.ssP[mc.swOffGr1])
-                {
-                    //if Main = Auto then change section to Auto if Off signal from Arduino stopped
-                    if (autoBtnState == btnStates.Auto)
-                    {
-                        if (((mc.ssP[mc.swOffGr1] & 128) == 128) & ((mc.ss[mc.swOffGr1] & 128) != 128) & (section[15].manBtnState == btnStates.Off))
-                        { btnSection16Man.PerformClick(); }
+                //only needed for BBBBB
+                mc.ssP[mc.swOffGr0] = mc.ss[mc.swOffGr0];
+                mc.ssP[mc.swOffGr1] = mc.ss[mc.swOffGr1];
 
-                        if (((mc.ssP[mc.swOffGr1] & 64) == 64) & ((mc.ss[mc.swOffGr1] & 64) != 64) & (section[14].manBtnState == btnStates.Off))
-                        { btnSection15Man.PerformClick(); }
-
-                        if (((mc.ssP[mc.swOffGr1] & 32) == 32) & ((mc.ss[mc.swOffGr1] & 32) != 32) & (section[13].manBtnState == btnStates.Off))
-                        { btnSection14Man.PerformClick(); }
-
-                        if (((mc.ssP[mc.swOffGr1] & 16) == 16) & ((mc.ss[mc.swOffGr1] & 16) != 16) & (section[12].manBtnState == btnStates.Off))
-                        { btnSection13Man.PerformClick(); }
-
-
-                        if (((mc.ssP[mc.swOffGr1] & 8) == 8) & ((mc.ss[mc.swOffGr1] & 8) != 8) & (section[11].manBtnState == btnStates.Off))
-                        {
-                            btnSection12Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr1] & 4) == 4) & ((mc.ss[mc.swOffGr1] & 4) != 4) & (section[10].manBtnState == btnStates.Off))
-                        {
-                            btnSection11Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr1] & 2) == 2) & ((mc.ss[mc.swOffGr1] & 2) != 2) & (section[9].manBtnState == btnStates.Off))
-                        {
-                            btnSection10Man.PerformClick();
-                        }
-                        if (((mc.ssP[mc.swOffGr1] & 1) == 1) & ((mc.ss[mc.swOffGr1] & 1) != 1) & (section[8].manBtnState == btnStates.Off))
-                        {
-                            btnSection9Man.PerformClick();
-                        }
-                    }
-                    mc.ssP[mc.swOffGr1] = mc.ss[mc.swOffGr1];
-                }
-
-                // OFF Signal from Arduino
-                if (mc.ss[mc.swOffGr0] != 0)
-                {
-                    //if section SW in Arduino is switched to OFF; check always, if switch is locked to off GUI should not change
-                    if ((mc.ss[mc.swOffGr0] & 128) == 128 & section[7].manBtnState != btnStates.Off)
-                    {
-                        section[7].manBtnState = btnStates.On;
-                        btnSection8Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr0] & 64) == 64 & section[6].manBtnState != btnStates.Off)
-                    {
-                        section[6].manBtnState = btnStates.On;
-                        btnSection7Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr0] & 32) == 32 & section[5].manBtnState != btnStates.Off)
-                    {
-                        section[5].manBtnState = btnStates.On;
-                        btnSection6Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr0] & 16) == 16 & section[4].manBtnState != btnStates.Off)
-                    {
-                        section[4].manBtnState = btnStates.On;
-                        btnSection5Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr0] & 8) == 8 & section[3].manBtnState != btnStates.Off)
-                    {
-                        section[3].manBtnState = btnStates.On;
-                        btnSection4Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr0] & 4) == 4 & section[2].manBtnState != btnStates.Off)
-                    {
-                        section[2].manBtnState = btnStates.On;
-                        btnSection3Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr0] & 2) == 2 & section[1].manBtnState != btnStates.Off)
-                    {
-                        section[1].manBtnState = btnStates.On;
-                        btnSection2Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr0] & 1) == 1 & section[0].manBtnState != btnStates.Off)
-                    {
-                        section[0].manBtnState = btnStates.On;
-                        btnSection1Man.PerformClick();
-                    }
-                } // if swOFFLo !=0
-                if (mc.ss[mc.swOffGr1] != 0)
-                {
-                    //if section SW in Arduino is switched to OFF; check always, if switch is locked to off GUI should not change
-                    if ((mc.ss[mc.swOffGr1] & 128) == 128 & section[15].manBtnState != btnStates.Off)
-                    {
-                        section[15].manBtnState = btnStates.On;
-                        btnSection16Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr1] & 64) == 64 & section[14].manBtnState != btnStates.Off)
-                    {
-                        section[14].manBtnState = btnStates.On;
-                        btnSection15Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr1] & 32) == 32 & section[13].manBtnState != btnStates.Off)
-                    {
-                        section[13].manBtnState = btnStates.On;
-                        btnSection14Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr1] & 16) == 16 & section[12].manBtnState != btnStates.Off)
-                    {
-                        section[12].manBtnState = btnStates.On;
-                        btnSection13Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr1] & 8) == 8 & section[11].manBtnState != btnStates.Off)
-                    {
-                        section[11].manBtnState = btnStates.On;
-                        btnSection12Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr1] & 4) == 4 & section[10].manBtnState != btnStates.Off)
-                    {
-                        section[10].manBtnState = btnStates.On;
-                        btnSection11Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr1] & 2) == 2 & section[9].manBtnState != btnStates.Off)
-                    {
-                        section[9].manBtnState = btnStates.On;
-                        btnSection10Man.PerformClick();
-                    }
-                    if ((mc.ss[mc.swOffGr1] & 1) == 1 & section[8].manBtnState != btnStates.Off)
-                    {
-                        section[8].manBtnState = btnStates.On;
-                        btnSection9Man.PerformClick();
-                    }
-                } // if swOFFHi !=0
             }//if serial or udp port open
         }
-
 
         //the start of first few frames to initialize entire program
         private void InitializeFirstFewGPSPositions()
