@@ -57,7 +57,7 @@ namespace AgOpenGPS
 
             if (currentLine != null && currentLine.curvePts.Count > 0)
             {
-                using (FormNumeric form = new FormNumeric(0, 360, Math.Round(glm.toDegrees(currentLine.curvePts[0].heading), 5)))
+                using (FormNumeric form = new FormNumeric(0, 360, Math.Round(glm.toDegrees(currentLine.curvePts[0].heading), 5), 5))
                 {
                     if (form.ShowDialog(this) == DialogResult.OK)
                     {

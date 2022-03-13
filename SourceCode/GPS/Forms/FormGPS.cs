@@ -678,7 +678,7 @@ namespace AgOpenGPS
             sender.BackColor = Color.Red;
             sender.Value = Math.Round(sender.Value, sender.DecimalPlaces);
 
-            using (FormNumeric form = new FormNumeric((double)sender.Minimum, (double)sender.Maximum, (double)sender.Value))
+            using (FormNumeric form = new FormNumeric((double)sender.Minimum, (double)sender.Maximum, (double)sender.Value, 2))
             {
                 DialogResult result = form.ShowDialog(owner);
                 if (result == DialogResult.OK)

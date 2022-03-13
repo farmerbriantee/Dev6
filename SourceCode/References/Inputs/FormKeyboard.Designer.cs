@@ -29,41 +29,35 @@
         private void InitializeComponent()
         {
             this.keyboardString = new System.Windows.Forms.TextBox();
-            this.keyboard1 = new Keypad.Keyboard();
             this.SuspendLayout();
             // 
             // keyboardString
             // 
-            this.keyboardString.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.keyboardString.Location = new System.Drawing.Point(98, 1);
+            this.keyboardString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.keyboardString.Font = new System.Drawing.Font("Tahoma", 33.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.keyboardString.Location = new System.Drawing.Point(82, 9);
             this.keyboardString.Name = "keyboardString";
-            this.keyboardString.Size = new System.Drawing.Size(751, 46);
+            this.keyboardString.Size = new System.Drawing.Size(698, 62);
             this.keyboardString.TabIndex = 0;
-            // 
-            // keyboard1
-            // 
-            this.keyboard1.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.keyboard1.Location = new System.Drawing.Point(-1, 52);
-            this.keyboard1.Margin = new System.Windows.Forms.Padding(4);
-            this.keyboard1.Name = "keyboard1";
-            this.keyboard1.Size = new System.Drawing.Size(929, 475);
-            this.keyboard1.TabIndex = 2;
-            this.keyboard1.ButtonPressed += new System.Windows.Forms.KeyPressEventHandler(this.RegisterKeyboard1_ButtonPressed);
             // 
             // FormKeyboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.ClientSize = new System.Drawing.Size(932, 530);
+            this.ClientSize = new System.Drawing.Size(862, 208);
             this.ControlBox = false;
-            this.Controls.Add(this.keyboard1);
             this.Controls.Add(this.keyboardString);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Location = new System.Drawing.Point(250, 250);
             this.Name = "FormKeyboard";
             this.Text = "Keyboard";
-            this.Load += new System.EventHandler(this.FormKeyboard_Load);
+            this.Activated += new System.EventHandler(this.FormKeyboard_Activated);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormKeyboard_KeyUpDown);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.FormNumeric_KeyPress);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.FormKeyboard_KeyUpDown);
+            this.MouseEnter += new System.EventHandler(this.FormKeyboard_MouseEnter);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -72,6 +66,5 @@
         #endregion
 
         private System.Windows.Forms.TextBox keyboardString;
-        private Keypad.Keyboard keyboard1;
     }
 }

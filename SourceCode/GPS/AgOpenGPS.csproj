@@ -82,10 +82,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\References\Control.Draggable.dll</HintPath>
     </Reference>
-    <Reference Include="Keypad, Version=5.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\References\Keypad.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="OpenTK, Version=1.2.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
@@ -117,6 +113,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\References\Inputs\FormKeyboard.cs">
+      <Link>Forms\Inputs\FormKeyboard.cs</Link>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\References\Inputs\FormKeyboard.Designer.cs">
+      <Link>Forms\Inputs\FormKeyboard.Designer.cs</Link>
+      <DependentUpon>FormKeyboard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\References\Inputs\FormNumeric.cs">
+      <Link>Forms\Inputs\FormNumeric.cs</Link>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\References\Inputs\FormNumeric.Designer.cs">
+      <Link>Forms\Inputs\FormNumeric.Designer.cs</Link>
+      <DependentUpon>FormNumeric.cs</DependentUpon>
+    </Compile>
     <Compile Include="Classes\CExtensionMethods.cs" />
     <Compile Include="Classes\CBoundary.cs" />
     <Compile Include="Classes\CGuidance.cs" />
@@ -157,6 +169,14 @@
     <Compile Include="Forms\FormFieldKML.Designer.cs">
       <DependentUpon>FormFieldKML.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="..\References\Inputs\FormKeyboard.resx">
+      <Link>Forms\Inputs\FormKeyboard.resx</Link>
+      <DependentUpon>FormKeyboard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\References\Inputs\FormNumeric.resx">
+      <Link>Forms\Inputs\FormNumeric.resx</Link>
+      <DependentUpon>FormNumeric.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormMap.resx">
       <DependentUpon>FormMap.cs</DependentUpon>
     </EmbeddedResource>
@@ -208,12 +228,6 @@
     <Compile Include="Forms\Form_First.Designer.cs">
       <DependentUpon>Form_First.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Inputs\FormKeyboard.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Inputs\FormKeyboard.Designer.cs">
-      <DependentUpon>FormKeyboard.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\FormHeadland.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -231,12 +245,6 @@
     </Compile>
     <Compile Include="Forms\Pickers\FormFilePicker.Designer.cs">
       <DependentUpon>FormFilePicker.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Inputs\FormNumeric.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Inputs\FormNumeric.Designer.cs">
-      <DependentUpon>FormNumeric.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Guidance\FormMakeBndCon.cs">
       <SubType>Form</SubType>
@@ -517,9 +525,6 @@
     <EmbeddedResource Include="Forms\Form_First.resx">
       <DependentUpon>Form_First.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Inputs\FormKeyboard.resx">
-      <DependentUpon>FormKeyboard.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormHeadland.resx">
       <DependentUpon>FormHeadland.cs</DependentUpon>
     </EmbeddedResource>
@@ -529,9 +534,6 @@
     <EmbeddedResource Include="Forms\Pickers\FormFilePicker.resx">
       <DependentUpon>FormFilePicker.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Inputs\FormNumeric.resx">
-      <DependentUpon>FormNumeric.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Guidance\FormMakeBndCon.resx">
       <DependentUpon>FormMakeBndCon.cs</DependentUpon>
