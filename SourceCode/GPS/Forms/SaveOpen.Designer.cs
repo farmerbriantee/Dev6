@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Globalization;
 using System.Xml;
 using System.Text;
+using OpenTK.Graphics.OpenGL;
 
 namespace AgOpenGPS
 {
     public partial class FormGPS
     {
+        //list of the list of patch data individual triangles for that entire section activity
+        public List<Polyline> patchList = new List<Polyline>();
+
         //list of the list of patch data individual triangles for field sections
-        public List<List<vec3>> patchSaveList = new List<List<vec3>>();
+        public List<List<vec2>> patchSaveList = new List<List<vec2>>();
 
         //list of the list of patch data individual triangles for contour tracking
         public List<List<vec3>> contourSaveList = new List<List<vec3>>();
@@ -358,7 +361,6 @@ namespace AgOpenGPS
                     {
                         fd.workedAreaTotal = 0;
                         fd.distanceUser = 0;
-                        vec3 vecFix = new vec3();
 
                         //read header
                         while (!reader.EndOfStream)
@@ -371,36 +373,45 @@ namespace AgOpenGPS
                             }
                             int verts = int.Parse(line);
 
-                            section[0].triangleList = new List<vec3>();
-                            section[0].triangleList.Capacity = verts + 1;
-
-                            section[0].patchList.Add(section[0].triangleList);
-
+                            Polyline New = new Polyline();
 
                             for (int v = 0; v < verts; v++)
                             {
                                 line = reader.ReadLine();
                                 string[] words = line.Split(',');
-                                vecFix.easting = double.Parse(words[0], CultureInfo.InvariantCulture);
-                                vecFix.northing = double.Parse(words[1], CultureInfo.InvariantCulture);
-                                vecFix.heading = double.Parse(words[2], CultureInfo.InvariantCulture);
-                                section[0].triangleList.Add(vecFix);
+
+                                New.points.Add(new vec2(double.Parse(words[0], CultureInfo.InvariantCulture),
+                                    double.Parse(words[1], CultureInfo.InvariantCulture)));
+
+                                if (v == 0)
+                                {
+                                    if (words.Length == 4)
+                                    {
+                                        New.points.Add(new vec2(double.Parse(words[2], CultureInfo.InvariantCulture),
+                                            int.Parse(words[3], CultureInfo.InvariantCulture)));
+                                    }
+                                    else
+                                    {
+                                        New.points.Add(new vec2(double.Parse(words[2], CultureInfo.InvariantCulture), 0));
+                                    }
+                                }
                             }
 
                             //calculate area of this patch - AbsoluteValue of (Ax(By-Cy) + Bx(Cy-Ay) + Cx(Ay-By)/2)
-                            verts -= 2;
+                            verts -= 3;
                             if (verts >= 2)
                             {
-                                for (int j = 1; j < verts; j++)
+                                for (int j = 2; j < verts; j++)
                                 {
                                     double temp = 0;
-                                    temp = section[0].triangleList[j].easting * (section[0].triangleList[j + 1].northing - section[0].triangleList[j + 2].northing) +
-                                              section[0].triangleList[j + 1].easting * (section[0].triangleList[j + 2].northing - section[0].triangleList[j].northing) +
-                                                  section[0].triangleList[j + 2].easting * (section[0].triangleList[j].northing - section[0].triangleList[j + 1].northing);
+                                    temp = New.points[j].easting * (New.points[j + 1].northing - New.points[j + 2].northing) +
+                                              New.points[j + 1].easting * (New.points[j + 2].northing - New.points[j].northing) +
+                                                  New.points[j + 2].easting * (New.points[j].northing - New.points[j + 1].northing);
 
                                     fd.workedAreaTotal += Math.Abs((temp * 0.5));
                                 }
                             }
+                            patchList.Add(New);
                         }
                     }
                     catch (Exception e)
@@ -657,6 +668,7 @@ namespace AgOpenGPS
                                             double.Parse(words[0], CultureInfo.InvariantCulture),
                                             double.Parse(words[1], CultureInfo.InvariantCulture)));
                                     }
+                                    bnd.bndList[k].hdLine.loop = true;
                                 }
                             }
                         }
@@ -702,60 +714,83 @@ namespace AgOpenGPS
                         //read header
                         line = reader.ReadLine();//$Tram
 
-                        //outer track of boundary tram
-                        line = reader.ReadLine();
-                        if (line != null)
+                        if (!reader.EndOfStream)
                         {
-                            int numPoints = int.Parse(line);
-
-                            if (numPoints > 0)
-                            {
-                                //load the line
-                                for (int i = 0; i < numPoints; i++)
-                                {
-                                    line = reader.ReadLine();
-                                    string[] words = line.Split(',');
-                                    vec2 vecPt = new vec2(
-                                    double.Parse(words[0], CultureInfo.InvariantCulture),
-                                    double.Parse(words[1], CultureInfo.InvariantCulture));
-
-                                    tram.tramBndOuterArr.Add(vecPt);
-                                }
-                                tram.displayMode = 1;
-                            }
-
-                            //inner track of boundary tram
                             line = reader.ReadLine();
-                            numPoints = int.Parse(line);
+                            int tramBoundaryCount = int.Parse(line);
 
-                            if (numPoints > 0)
-                            {
-                                //load the line
-                                for (int i = 0; i < numPoints; i++)
-                                {
-                                    line = reader.ReadLine();
-                                    string[] words = line.Split(',');
-                                    vec2 vecPt = new vec2(
-                                    double.Parse(words[0], CultureInfo.InvariantCulture),
-                                    double.Parse(words[1], CultureInfo.InvariantCulture));
-
-                                    tram.tramBndInnerArr.Add(vecPt);
-                                }
-                            }
-
-                            if (!reader.EndOfStream)
+                            for (int i = 0; i < tramBoundaryCount; i++)
                             {
                                 line = reader.ReadLine();
-                                int numLines = int.Parse(line);
-
-                                for (int k = 0; k < numLines; k++)
+                                int numPolyLines = int.Parse(line);
+                                if (numPolyLines > 0)
                                 {
+                                    List<Polyline> BoundaryArr = new List<Polyline>();
+                                    for (int j = 0; j < numPolyLines; j++)
+                                    {
+                                        line = reader.ReadLine();
+                                        int numPoints = int.Parse(line);
+
+                                        if (numPoints > 0)
+                                        {
+                                            Polyline tramArr = new Polyline();
+
+                                            line = reader.ReadLine();
+                                            tramArr.loop = bool.Parse(line);
+
+                                            for (int k = 0; k < numPoints; k++)
+                                            {
+                                                line = reader.ReadLine();
+                                                string[] words = line.Split(',');
+                                                vec2 vecPt = new vec2(
+                                                double.Parse(words[0], CultureInfo.InvariantCulture),
+                                                double.Parse(words[1], CultureInfo.InvariantCulture));
+
+                                                tramArr.points.Add(vecPt);
+                                            }
+
+                                            List<vec2> Left = tramArr.points.OffsetPolyline(tram.halfWheelTrack, true);
+                                            List<vec2> Right = tramArr.points.OffsetPolyline(-tram.halfWheelTrack, true);
+
+                                            if (Left.Count > 1)
+                                            {
+                                                if (tramArr.BufferPoints == int.MinValue) GL.GenBuffers(1, out tramArr.BufferPoints);
+                                                GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferPoints);
+                                                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Left.Count * 16), Left.ToArray(), BufferUsageHint.DynamicDraw);
+
+                                                tramArr.BufferPointsCnt = Left.Count;
+                                            }
+                                            if (Right.Count > 1)
+                                            {
+                                                if (tramArr.BufferIndex == int.MinValue) GL.GenBuffers(1, out tramArr.BufferIndex);
+                                                GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferIndex);
+                                                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Right.Count * 16), Right.ToArray(), BufferUsageHint.DynamicDraw);
+
+                                                tramArr.BufferIndexCnt = Right.Count;
+                                            }
+                                            BoundaryArr.Add(tramArr);
+                                        }
+                                    }
+                                    tram.tramBoundary.Add(BoundaryArr);
+                                }
+                            }
+                        }
+
+                        if (!reader.EndOfStream)
+                        {
+                            line = reader.ReadLine();
+                            int numLines = int.Parse(line);
+
+                            for (int k = 0; k < numLines; k++)
+                            {
+                                line = reader.ReadLine();
+                                int numPoints = int.Parse(line);
+                                if (numPoints > 0)
+                                {
+                                    Polyline tramArr = new Polyline();
+
                                     line = reader.ReadLine();
-                                    numPoints = int.Parse(line);
-
-                                    tram.tramArr = new List<vec2>();
-                                    tram.tramList.Add(tram.tramArr);
-
+                                    tramArr.loop = bool.Parse(line);
                                     for (int i = 0; i < numPoints; i++)
                                     {
                                         line = reader.ReadLine();
@@ -764,8 +799,30 @@ namespace AgOpenGPS
                                         double.Parse(words[0], CultureInfo.InvariantCulture),
                                         double.Parse(words[1], CultureInfo.InvariantCulture));
 
-                                        tram.tramArr.Add(vecPt);
+                                        tramArr.points.Add(vecPt);
                                     }
+
+                                    List<vec2> Left = tramArr.points.OffsetPolyline(tram.halfWheelTrack, false);
+                                    List<vec2> Right = tramArr.points.OffsetPolyline(-tram.halfWheelTrack, false);
+
+                                    if (Left.Count > 1)
+                                    {
+                                        if (tramArr.BufferPoints == int.MinValue) GL.GenBuffers(1, out tramArr.BufferPoints);
+                                        GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferPoints);
+                                        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Left.Count * 16), Left.ToArray(), BufferUsageHint.DynamicDraw);
+
+                                        tramArr.BufferPointsCnt = Left.Count;
+                                    }
+                                    if (Right.Count > 1)
+                                    {
+                                        if (tramArr.BufferIndex == int.MinValue) GL.GenBuffers(1, out tramArr.BufferIndex);
+                                        GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferIndex);
+                                        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Right.Count * 16), Right.ToArray(), BufferUsageHint.DynamicDraw);
+
+                                        tramArr.BufferIndexCnt = Right.Count;
+                                    }
+
+                                    tram.tramList.Add(tramArr);
                                 }
                             }
                         }
@@ -926,7 +983,7 @@ namespace AgOpenGPS
         public void FileSaveSections()
         {
             //make sure there is something to save
-            if (patchSaveList.Count() > 0)
+            if (patchSaveList.Count > 0)
             {
                 //Append the current list to the field file
                 using (StreamWriter writer = new StreamWriter((fieldsDirectory + currentFieldDirectory + "\\Sections.txt"), true))
@@ -934,13 +991,20 @@ namespace AgOpenGPS
                     //for each patch, write out the list of triangles to the file
                     foreach (var triList in patchSaveList)
                     {
-                        int count2 = triList.Count();
-                        writer.WriteLine(count2.ToString(CultureInfo.InvariantCulture));
+                        int count2 = triList.Count;
+                        writer.WriteLine((count2 - 1).ToString(CultureInfo.InvariantCulture));
 
-                        for (int i = 0; i < count2; i++)
-                            writer.WriteLine((Math.Round(triList[i].easting,3)).ToString(CultureInfo.InvariantCulture) +
-                                "," + (Math.Round(triList[i].northing,3)).ToString(CultureInfo.InvariantCulture) +
-                                 "," + (Math.Round(triList[i].heading, 3)).ToString(CultureInfo.InvariantCulture));
+                        if (count2 > 1)
+                        {
+                            writer.WriteLine((Math.Round(triList[0].easting, 3)).ToString(CultureInfo.InvariantCulture) +
+                                "," + (Math.Round(triList[0].northing, 3)).ToString(CultureInfo.InvariantCulture) +
+                                 "," + (Math.Round(triList[1].easting, 3)).ToString(CultureInfo.InvariantCulture) + "," + ((int)triList[1].northing).ToString(CultureInfo.InvariantCulture));
+
+                            for (int i = 2; i < count2; i++)
+                                writer.WriteLine((Math.Round(triList[i].easting, 3)).ToString(CultureInfo.InvariantCulture) +
+                                    "," + (Math.Round(triList[i].northing, 3)).ToString(CultureInfo.InvariantCulture) +
+                                     ",0");
+                        }
                     }
                 }
 
@@ -1026,7 +1090,7 @@ namespace AgOpenGPS
             //64.697,0.168,-21.654,0 - east, heading, north, altitude
 
             //make sure there is something to save
-            if (contourSaveList.Count() > 0)
+            if (contourSaveList.Count > 0)
             {
                 //Append the current list to the field file
                 using (StreamWriter writer = new StreamWriter((fieldsDirectory + currentFieldDirectory + "\\Contour.txt"), true))
@@ -1098,38 +1162,33 @@ namespace AgOpenGPS
             {
                 writer.WriteLine("$Tram");
 
-                if (tram.tramBndOuterArr.Count > 0)
+                writer.WriteLine(tram.tramBoundary.Count.ToString(CultureInfo.InvariantCulture));
+                for (int i = 0; i < tram.tramBoundary.Count; i++)
                 {
-                    //outer track of outer boundary tram
-                    writer.WriteLine(tram.tramBndOuterArr.Count.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteLine(tram.tramBoundary[i].Count.ToString(CultureInfo.InvariantCulture));
 
-                    for (int i = 0; i < tram.tramBndOuterArr.Count; i++)
+                    for (int j = 0; j < tram.tramBoundary[i].Count; j++)
                     {
-                        writer.WriteLine(Math.Round(tram.tramBndOuterArr[i].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                            Math.Round(tram.tramBndOuterArr[i].northing, 3).ToString(CultureInfo.InvariantCulture));
-                    }
+                        writer.WriteLine(tram.tramBoundary[i][j].points.Count.ToString(CultureInfo.InvariantCulture));
+                        writer.WriteLine(tram.tramBoundary[i][j].loop.ToString(CultureInfo.InvariantCulture));
 
-                    //inner track of outer boundary tram
-                    writer.WriteLine(tram.tramBndInnerArr.Count.ToString(CultureInfo.InvariantCulture));
-
-                    for (int i = 0; i < tram.tramBndInnerArr.Count; i++)
-                    {
-                        writer.WriteLine(Math.Round(tram.tramBndInnerArr[i].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                            Math.Round(tram.tramBndInnerArr[i].northing, 3).ToString(CultureInfo.InvariantCulture));
+                        for (int h = 0; h < tram.tramBoundary[i][j].points.Count; h++)
+                        {
+                            writer.WriteLine(Math.Round(tram.tramBoundary[i][j].points[h].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
+                                Math.Round(tram.tramBoundary[i][j].points[h].northing, 3).ToString(CultureInfo.InvariantCulture));
+                        }
                     }
                 }
 
-                if (tram.tramList.Count > 0)
+                writer.WriteLine(tram.tramList.Count.ToString(CultureInfo.InvariantCulture));
+                for (int i = 0; i < tram.tramList.Count; i++)
                 {
-                    writer.WriteLine(tram.tramList.Count.ToString(CultureInfo.InvariantCulture));
-                    for (int i = 0; i < tram.tramList.Count; i++)
+                    writer.WriteLine(tram.tramList[i].points.Count.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteLine(tram.tramList[i].loop.ToString(CultureInfo.InvariantCulture));
+                    for (int h = 0; h < tram.tramList[i].points.Count; h++)
                     {
-                        writer.WriteLine(tram.tramList[i].Count.ToString(CultureInfo.InvariantCulture));
-                        for (int h = 0; h < tram.tramList[i].Count; h++)
-                        {
-                            writer.WriteLine(Math.Round(tram.tramList[i][h].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                Math.Round(tram.tramList[i][h].northing, 3).ToString(CultureInfo.InvariantCulture));
-                        }
+                        writer.WriteLine(Math.Round(tram.tramList[i].points[h].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
+                            Math.Round(tram.tramList[i].points[h].northing, 3).ToString(CultureInfo.InvariantCulture));
                     }
                 }
             }
@@ -1780,67 +1839,60 @@ namespace AgOpenGPS
             string secPts = "";
             int cntr = 0;
 
-            for (int j = 0; j < tool.numSuperSection; j++)
+            //for every new chunk of patch
+            foreach (Polyline triList in patchList)
             {
-                int patches = section[j].patchList.Count;
-
-                if (patches > 0)
+                if (triList.points.Count > 4)
                 {
-                    //for every new chunk of patch
-                    foreach (var triList in section[j].patchList)
+                    kml.WriteStartElement("Placemark");
+                    kml.WriteElementString("name", "Sections_" + cntr.ToString());
+                    cntr++;
+                    
+                    string collor = "F0" + ((byte)(triList.points[1].easting)).ToString("X2") +
+                        ((byte)(triList.points[0].northing)).ToString("X2") + ((byte)(triList.points[0].easting)).ToString("X2");
+
+                    //lineStyle
+                    kml.WriteStartElement("Style");
+
+                    kml.WriteStartElement("LineStyle");
+                    kml.WriteElementString("color", collor);
+                    //kml.WriteElementString("width", "6");
+                    kml.WriteEndElement(); // <LineStyle>
+
+                    kml.WriteStartElement("PolyStyle");
+                    kml.WriteElementString("color", collor);
+                    kml.WriteEndElement(); // <PloyStyle>
+                    kml.WriteEndElement(); //Style
+
+                    kml.WriteStartElement("Polygon");
+                    kml.WriteElementString("tessellate", "1");
+                    kml.WriteStartElement("outerBoundaryIs");
+                    kml.WriteStartElement("LinearRing");
+
+                    //coords
+                    kml.WriteStartElement("coordinates");
+                    secPts = "";
+                    for (int i = 1; i < triList.points.Count; i += 2)
                     {
-                        if (triList.Count > 0)
-                        {
-                            kml.WriteStartElement("Placemark");
-                            kml.WriteElementString("name", "Sections_" + cntr.ToString());
-                            cntr++;
-
-                            string collor = "F0" + ((byte)(triList[0].heading)).ToString("X2") +
-                                ((byte)(triList[0].northing)).ToString("X2") + ((byte)(triList[0].easting)).ToString("X2");
-
-                            //lineStyle
-                            kml.WriteStartElement("Style");
-
-                            kml.WriteStartElement("LineStyle");
-                            kml.WriteElementString("color", collor);
-                            //kml.WriteElementString("width", "6");
-                            kml.WriteEndElement(); // <LineStyle>
-                            
-                            kml.WriteStartElement("PolyStyle");
-                            kml.WriteElementString("color", collor);
-                            kml.WriteEndElement(); // <PloyStyle>
-                            kml.WriteEndElement(); //Style
-
-                            kml.WriteStartElement("Polygon");
-                            kml.WriteElementString("tessellate", "1");
-                            kml.WriteStartElement("outerBoundaryIs");
-                            kml.WriteStartElement("LinearRing");
-                            
-                            //coords
-                            kml.WriteStartElement("coordinates");
-                            secPts = "";
-                            for (int i = 1; i < triList.Count; i += 2)
-                            {
-                                secPts += pn.GetLocalToWSG84_KML(triList[i].easting, triList[i].northing);
-                            }
-                            for (int i = triList.Count - 1; i > 1; i -= 2)
-                            {
-                                secPts += pn.GetLocalToWSG84_KML(triList[i].easting, triList[i].northing);
-                            }
-                            secPts += pn.GetLocalToWSG84_KML(triList[1].easting, triList[1].northing);
-
-                            kml.WriteRaw(secPts);
-                            kml.WriteEndElement(); // <coordinates>
-
-                            kml.WriteEndElement(); // <LinearRing>
-                            kml.WriteEndElement(); // <outerBoundaryIs>
-                            kml.WriteEndElement(); // <Polygon>
-
-                            kml.WriteEndElement(); // <Placemark>
-                        }
+                        secPts += pn.GetLocalToWSG84_KML(triList.points[i].easting, triList.points[i].northing);
                     }
+                    for (int i = triList.points.Count - 1; i > 1; i -= 2)
+                    {
+                        secPts += pn.GetLocalToWSG84_KML(triList.points[i].easting, triList.points[i].northing);
+                    }
+                    secPts += pn.GetLocalToWSG84_KML(triList.points[1].easting, triList.points[1].northing);
+
+                    kml.WriteRaw(secPts);
+                    kml.WriteEndElement(); // <coordinates>
+
+                    kml.WriteEndElement(); // <LinearRing>
+                    kml.WriteEndElement(); // <outerBoundaryIs>
+                    kml.WriteEndElement(); // <Polygon>
+
+                    kml.WriteEndElement(); // <Placemark>
                 }
             }
+
             kml.WriteEndElement(); // <Folder>
             //End of sections
 

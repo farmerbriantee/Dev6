@@ -20,13 +20,19 @@ namespace AgOpenGPS
         public bool isDrawRightSide = true, isOkToAddPoints = false;
 
 
-
-
         public CBoundary(FormGPS _f)
         {
             mf = _f;
             isHeadlandOn = false;
             isSectionControlledByHeadland = Properties.Settings.Default.setHeadland_isSectionControlled;
+        }
+
+        public void RemoveHandles(int idx)
+        {
+            bndList[idx].hdLine.RemoveHandle();
+            bndList[idx].fenceLine.RemoveHandle();
+            bndList[idx].turnLine.RemoveHandle();
+            mf.bnd.bndList.RemoveAt(idx);
         }
 
         public void DrawFenceLines()
@@ -89,7 +95,7 @@ namespace AgOpenGPS
         {
             for (int j = 0; j < bndList.Count; j++)
             {
-                bndList[j].turnLine.points.Clear();
+                bndList[j].turnLine.RemoveHandle();
                 bndList[j].turnLine = bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? mf.gyd.uturnDistanceFromBoundary : -mf.gyd.uturnDistanceFromBoundary, true, -1, -1, true);
             }
         }

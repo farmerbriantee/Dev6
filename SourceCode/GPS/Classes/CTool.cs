@@ -187,19 +187,16 @@ namespace AgOpenGPS
 
                 //lookahead section on
                 GL.Color3(0.20f, 0.7f, 0.2f);
-                GL.Vertex3(mf.tool.toolFarLeftPosition, mf.tool.toolFarLeftSpeed * mf.tool.lookAheadOnSetting + trailingTool, 0);
-                GL.Vertex3(mf.tool.toolFarRightPosition, mf.tool.toolFarRightSpeed * mf.tool.lookAheadOnSetting + trailingTool, 0);
+                DrawLookAheadLine(mf.tool.lookAheadOnSetting, mf.tool.lookAheadOnSetting, trailingTool);
 
                 //lookahead section off
                 GL.Color3(0.70f, 0.2f, 0.2f);
-                GL.Vertex3(mf.tool.toolFarLeftPosition, mf.tool.toolFarLeftSpeed * mf.tool.lookAheadOffSetting + trailingTool, 0);
-                GL.Vertex3(mf.tool.toolFarRightPosition, mf.tool.toolFarRightSpeed * mf.tool.lookAheadOffSetting + trailingTool, 0);
+                DrawLookAheadLine(mf.tool.lookAheadOffSetting, mf.tool.lookAheadOffSetting, trailingTool);
 
                 if (mf.vehicle.isHydLiftOn)
                 {
                     GL.Color3(0.70f, 0.2f, 0.72f);
-                    GL.Vertex3(mf.tool.toolFarLeftPosition, (mf.vehicle.hydLiftLookAheadDistanceLeft * 0.1) + trailingTool, 0);
-                    GL.Vertex3(mf.tool.toolFarRightPosition, (mf.vehicle.hydLiftLookAheadDistanceRight * 0.1) + trailingTool, 0);
+                    DrawLookAheadLine(mf.vehicle.hydLiftLookAheadTime, mf.vehicle.hydLiftLookAheadTime, trailingTool);
                 }
 
                 GL.End();
@@ -291,6 +288,33 @@ namespace AgOpenGPS
                 }
             }
             GL.PopMatrix();
+        }
+
+        public void DrawLookAheadLine(double leftLookAhead, double rightLookAhead, double trailingTool)
+        {
+            leftLookAhead *= mf.tool.toolFarLeftSpeed;
+            rightLookAhead *= mf.tool.toolFarRightSpeed;
+
+            if (leftLookAhead > 0 && rightLookAhead > 0)
+            {
+                GL.Vertex3(mf.tool.toolFarLeftPosition, leftLookAhead + trailingTool, 0);
+                GL.Vertex3(mf.tool.toolFarRightPosition, rightLookAhead + trailingTool, 0);
+            }
+            else
+            {
+                double mOn = (rightLookAhead - leftLookAhead) / toolWidth;
+
+                if (mf.tool.toolFarLeftSpeed > 0)
+                {
+                    GL.Vertex3(toolFarLeftPosition, leftLookAhead + trailingTool, 0);
+                    GL.Vertex3(toolFarLeftPosition - leftLookAhead / mOn, trailingTool, 0);
+                }
+                else if (rightLookAhead > 0)
+                {
+                    GL.Vertex3(toolFarRightPosition, rightLookAhead + trailingTool, 0);
+                    GL.Vertex3(toolFarRightPosition - rightLookAhead / mOn, trailingTool, 0);
+                }
+            }
         }
     }
 }

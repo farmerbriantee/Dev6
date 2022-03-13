@@ -1021,23 +1021,24 @@ namespace AgOpenGPS
             flagPts.RemoveAt(flagNumberPicked - 1);
             flagNumberPicked = 0;
         }
+
         public void EnableYouTurnButtons()
         {
-            gyd.ResetYouTurn();
+            gyd.ResetCreatedYouTurn();
 
             gyd.isYouTurnBtnOn = false;
             btnAutoYouTurn.Enabled = true;
 
             btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
         }
+
         public void DisableYouTurnButtons()
         {
-
             //btnAutoYouTurn.Enabled = false;
 
             gyd.isYouTurnBtnOn = false;
             btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
-            gyd.ResetYouTurn();
+            gyd.ResetCreatedYouTurn();
         }
 
         private void ShowNoGPSWarning()

@@ -302,7 +302,7 @@ namespace AgOpenGPS
             }
 
             //new direction so reset where to put turn diagnostic
-            gyd.ResetCreatedYouTurn();
+            gyd.ResetYouTurn();
 
             if (isAutoSteerBtnOn)
             {
@@ -326,6 +326,7 @@ namespace AgOpenGPS
                 }
             }
         }
+
         private void btnAutoYouTurn_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -334,8 +335,6 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            
-            gyd.isTurnCreationTooClose = false;
 
             if (bnd.bndList.Count == 0)
             {
@@ -343,11 +342,12 @@ namespace AgOpenGPS
                 return;
             }
 
+            gyd.ResetYouTurn();
+
+            p_239.pgn[p_239.uturn] = 0;
+
             if (!gyd.isYouTurnBtnOn)
             {
-                //new direction so reset where to put turn diagnostic
-                gyd.ResetCreatedYouTurn();
-
                 if (gyd.isBtnABLineOn || gyd.isBtnCurveOn)
                 {
                     if (!isAutoSteerBtnOn) btnAutoSteer.PerformClick();
@@ -355,26 +355,15 @@ namespace AgOpenGPS
                 else return;
 
                 gyd.isYouTurnBtnOn = true;
-                gyd.isTurnCreationTooClose = false;
-                gyd.isTurnCreationNotCrossingError = false;
-                gyd.ResetYouTurn();
-                p_239.pgn[p_239.uturn] = 0;
                 btnAutoYouTurn.Image = Properties.Resources.Youturn80;
             }
             else
             {
-                gyd.isYouTurnBtnOn = false;
                 gyd.rowSkipsWidth = Properties.Vehicle.Default.set_youSkipWidth;
                 gyd.Set_Alternate_skips();
 
+                gyd.isYouTurnBtnOn = false;
                 btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
-                gyd.ResetYouTurn();
-
-                //new direction so reset where to put turn diagnostic
-                gyd.ResetCreatedYouTurn();
-
-                //mc.autoSteerData[mc.sdX] = 0;
-                p_239.pgn[p_239.uturn] = 0;
             }
         }
 
@@ -1485,9 +1474,14 @@ namespace AgOpenGPS
                         for (int j = 0; j < MAXSECTIONS; j++)
                         {
                             //clean out the lists
-                            section[j].patchList.Clear();
                             section[j].triangleList.Clear();
                         }
+
+                        for (int j = 0; j < patchList.Count; j++)
+                        {
+                            patchList[j].RemoveHandle();
+                        }
+                        patchList.Clear();
                         patchSaveList.Clear();
 
                         FileCreateContour();
@@ -1728,7 +1722,7 @@ namespace AgOpenGPS
             //close the current job and ask how to or if to save
             if (isJobStarted)
             {
-                if (autoBtnState != btnStates.Off)
+                if (!panelSim.Visible && autoBtnState != btnStates.Off)
                 {
                     TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
                     return true;
@@ -2082,7 +2076,7 @@ namespace AgOpenGPS
 
         public void FixTramModeButton()
         {
-            if (tram.tramList.Count > 0 || tram.tramBndOuterArr.Count > 0)
+            if (tram.tramList.Count > 0 || tram.tramBoundary.Count > 0)
                 btnTramDisplayMode.Visible = true;
             else btnTramDisplayMode.Visible = false;
 

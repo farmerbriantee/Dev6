@@ -554,7 +554,15 @@ namespace AgOpenGPS
             GL.Vertex3(mf.pivotAxlePos.easting, mf.pivotAxlePos.northing, 0.0);
             GL.End();
 
-            if (isDrawSections) DrawSections();
+            if (isDrawSections)
+            {
+                GL.Color3(0.0, 0.0, 0.352);
+
+                foreach (Polyline triList in mf.patchList)
+                {
+                    triList.DrawPolyLine(DrawType.TriangleStrip);
+                }
+            }
 
             //draw the line building graphics
             if (start != -1)
@@ -585,15 +593,17 @@ namespace AgOpenGPS
                     GL.Disable(EnableCap.LineStipple);
                 else
                 {
-                    GL.LineStipple(1, 0x7070);
+                    GL.Enable(EnableCap.LineStipple);
                     GL.LineStipple(1, 0x7070);
                 }
 
                 GL.LineWidth(2);
                 if (mf.gyd.curveArr[i].mode.HasFlag(Mode.AB))
                     GL.Color3(1.0f, 0.0f, 0.0f);
-                else
+                else if (mf.gyd.curveArr[i].mode.HasFlag(Mode.Curve))
                     GL.Color3(0.0f, 1.0f, 0.0f);
+                else
+                    continue;
 
                 if (mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
                     GL.Begin(PrimitiveType.LineLoop);
@@ -603,12 +613,12 @@ namespace AgOpenGPS
                 for (int j = 0; j < mf.gyd.curveArr[i].curvePts.Count; j++)
                 {
                     vec3 item = mf.gyd.curveArr[i].curvePts[j];
-                    if (j == 0)
+                    if (j == 0 && !mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
                         GL.Vertex3(item.easting - (Math.Sin(item.heading) * mf.gyd.abLength), item.northing - (Math.Cos(item.heading) * mf.gyd.abLength), 0);
 
                     GL.Vertex3(item.easting, item.northing, 0);
 
-                    if (j == mf.gyd.curveArr[i].curvePts.Count - 1)
+                    if (j == mf.gyd.curveArr[i].curvePts.Count - 1 && !mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
                         GL.Vertex3(item.easting + (Math.Sin(item.heading) * mf.gyd.abLength), item.northing + (Math.Cos(item.heading) * mf.gyd.abLength), 0);
                 }
 
@@ -649,51 +659,6 @@ namespace AgOpenGPS
             Matrix4 mat = Matrix4.CreateOrthographic((float)mf.maxFieldDistance, (float)mf.maxFieldDistance, -1.0f, 1.0f);
             GL.LoadMatrix(ref mat);
             GL.MatrixMode(MatrixMode.Modelview);
-        }
-
-        private void DrawSections()
-        {
-            int cnt, step, patchCount;
-            int mipmap = 8;
-
-            GL.Color3(0.0, 0.0, 0.352);
-
-            //draw patches j= # of sections
-            for (int j = 0; j < mf.tool.numSuperSection; j++)
-            {
-                //every time the section turns off and on is a new patch
-                patchCount = mf.section[j].patchList.Count;
-
-                if (patchCount > 0)
-                {
-                    //for every new chunk of patch
-                    foreach (System.Collections.Generic.List<vec3> triList in mf.section[j].patchList)
-                    {
-                        //draw the triangle in each triangle strip
-                        GL.Begin(PrimitiveType.TriangleStrip);
-                        cnt = triList.Count;
-
-                        //if large enough patch and camera zoomed out, fake mipmap the patches, skip triangles
-                        if (cnt >= (mipmap))
-                        {
-                            step = mipmap;
-                            for (int i = 1; i < cnt; i += step)
-                            {
-                                GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
-                                GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
-
-                                //too small to mipmap it
-                                if (cnt - i <= (mipmap + 2))
-                                    step = 0;
-                            }
-                        }
-
-                        else { for (int i = 1; i < cnt; i++) GL.Vertex3(triList[i].easting, triList[i].northing, 0); }
-                        GL.End();
-
-                    }
-                }
-            } //end of section patches
         }
 
         //add extensons

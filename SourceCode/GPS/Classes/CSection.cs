@@ -15,10 +15,7 @@ namespace AgOpenGPS
         private readonly FormGPS mf;
 
         //list of patch data individual triangles
-        public List<vec3> triangleList = new List<vec3>();
-
-        //list of the list of patch data individual triangles for that entire section activity
-        public List<List<vec3>> patchList = new List<List<vec3>>();
+        public List<vec2> triangleList = new List<vec2>();
 
         //is this section on or off
         public bool isSectionOn = false;
@@ -65,7 +62,6 @@ namespace AgOpenGPS
         {
             //constructor
             mf = _f;
-            patchList.Capacity = 16;
         }
 
         public void TurnMappingOn(int j)
@@ -79,32 +75,30 @@ namespace AgOpenGPS
                 isMappingOn = true;
 
                 //starting a new patch chunk so create a new triangle list
-                triangleList = new List<vec3>(32);
+                triangleList = new List<vec2>();
 
                 if (!mf.tool.isMultiColoredSections)
                 {
-                    vec3 colur = new vec3(mf.sectionColor.R, mf.sectionColor.G, mf.sectionColor.B);
-                    triangleList.Add(colur);
+                    triangleList.Add(new vec2(mf.sectionColor.R, mf.sectionColor.G));
+                    triangleList.Add(new vec2(mf.sectionColor.B, j));
                 }
                 else
                 {
-                    vec3 collor = new vec3(mf.tool.secColors[j].R, mf.tool.secColors[j].G, mf.tool.secColors[j].B);
-                    triangleList.Add(collor);
+                    triangleList.Add(new vec2(mf.tool.secColors[j].R, mf.tool.secColors[j].G));
+                    triangleList.Add(new vec2(mf.tool.secColors[j].B, j));
                 }
 
                 //left side of triangle
-                vec3 point = new vec3(leftPoint.easting, leftPoint.northing, 0);
-                triangleList.Add(point);
+                triangleList.Add(new vec2(leftPoint.easting, leftPoint.northing));
 
                 //Right side of triangle
-                point = new vec3(rightPoint.easting, rightPoint.northing, 0);
-                triangleList.Add(point);
+                triangleList.Add(new vec2(rightPoint.easting, rightPoint.northing));
             }
         }
 
-        public void TurnMappingOff()
+        public void TurnMappingOff(int j)
         {
-            AddMappingPoint(0);
+            AddMappingPoint(j);
 
             isMappingOn = false;
             numTriangles = 0;
@@ -113,7 +107,7 @@ namespace AgOpenGPS
             {
                 //save the triangle list in a patch list to add to saving file
                 mf.patchSaveList.Add(triangleList);
-                patchList.Add(triangleList);
+                mf.patchList.Add(new Polyline { points = triangleList });
             }
             else
                 triangleList.Clear();
@@ -125,17 +119,11 @@ namespace AgOpenGPS
         public void AddMappingPoint(int j)
         {
             //add two triangles for next step.
-            //left side
-            vec3 point = new vec3(leftPoint.easting, leftPoint.northing, 0);
+            //add left point to List
+            triangleList.Add(new vec2(leftPoint.easting, leftPoint.northing));
 
-            //add the point to List
-            triangleList.Add(point);
-
-            //Right side
-            vec3 point2 = new vec3(rightPoint.easting, rightPoint.northing, 0);
-
-            //add the point to the list
-            triangleList.Add(point2);
+            //add right point to the list
+            triangleList.Add(new vec2(rightPoint.easting, rightPoint.northing));
 
             //count the triangle pairs
             numTriangles++;
@@ -174,19 +162,25 @@ namespace AgOpenGPS
 
                 //save the cutoff patch to be saved later
                 mf.patchSaveList.Add(triangleList);
-                patchList.Add(triangleList);
+                mf.patchList.Add(new Polyline { points = triangleList });
 
-                triangleList = new List<vec3>(32);
+                triangleList = new List<vec2>();
 
                 //Add Patch colour
                 if (!mf.tool.isMultiColoredSections)
-                    triangleList.Add(new vec3(mf.sectionColor.R, mf.sectionColor.G, mf.sectionColor.B));
+                {
+                    triangleList.Add(new vec2(mf.sectionColor.R, mf.sectionColor.G));
+                    triangleList.Add(new vec2(mf.sectionColor.B, j));
+                }
                 else
-                    triangleList.Add(new vec3(mf.tool.secColors[j].R, mf.tool.secColors[j].G, mf.tool.secColors[j].B));
+                {
+                    triangleList.Add(new vec2(mf.tool.secColors[j].R, mf.tool.secColors[j].G));
+                    triangleList.Add(new vec2(mf.tool.secColors[j].B, j));
+                }
 
                 //add the points to List, yes its more points, but breaks up patches for culling
-                triangleList.Add(point);
-                triangleList.Add(point2);
+                triangleList.Add(new vec2(leftPoint.easting, leftPoint.northing));
+                triangleList.Add(new vec2(rightPoint.easting, rightPoint.northing));
             }
         }
     }

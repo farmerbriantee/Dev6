@@ -23,8 +23,8 @@ namespace AgOpenGPS
                     isLocked = false;
                     return;
                 }
-
-                CalculateSteerAngle(pivot, steer, isYouTurnTriggered ? ytList : curList);
+                
+                CalculateSteerAngle(pivot, steer, isYouTurnTriggered ? ytList : curList, currentGuidanceLine.mode.HasFlag(Mode.Boundary) && !isYouTurnTriggered);
             }
         }
 
@@ -335,10 +335,9 @@ namespace AgOpenGPS
 
                         buildList.Add(arr[cnt - 2]);
                         buildList.Add(arr[cnt - 1]);
-
-                        buildList.CalculateHeadings(false);
                     }
                 }
+                buildList.CalculateHeadings(false);
             }
             return buildList;
         }

@@ -50,22 +50,17 @@ namespace AgOpenGPS
 
         private void FormHeadland_FormClosing(object sender, FormClosingEventArgs e)
         {
-            mf.bnd.bndList[0].hdLine.points.Clear();
-
             if (isSaving)
             {
+                mf.bnd.bndList[0].hdLine.RemoveHandle();
                 //does headland control sections
                 mf.bnd.isSectionControlledByHeadland = cboxIsSectionControlled.Checked;
                 Properties.Settings.Default.setHeadland_isSectionControlled = cboxIsSectionControlled.Checked;
                 Properties.Settings.Default.Save();
 
-                for (int i = 0; i < headLineTemplate.points.Count; i++)
-                {
-                    mf.bnd.bndList[0].hdLine.points.Add(new vec2(headLineTemplate.points[i].easting, headLineTemplate.points[i].northing));
-                }
+                mf.bnd.bndList[0].hdLine = headLineTemplate;
+                mf.FileSaveHeadland();
             }
-
-            mf.FileSaveHeadland();
         }
 
         private void BuildHeadLineTemplateFromBoundary(bool fromHd = false)

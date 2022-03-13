@@ -206,9 +206,7 @@ namespace AgOpenGPS
                 btnDelete.Enabled = false;
 
                 if (mf.bnd.bndList.Count > fenceSelected)
-                {
-                    mf.bnd.bndList.RemoveAt(fenceSelected);
-                }
+                    mf.bnd.RemoveHandles(fenceSelected);
                 fenceSelected = -1;
 
                 mf.FileSaveBoundary();
@@ -224,7 +222,10 @@ namespace AgOpenGPS
         private void ResetAllBoundary()
         {
             fenceSelected = -1;
-            mf.bnd.bndList.Clear();
+
+            for (int i = mf.bnd.bndList.Count - 1; i >= 0; i--)
+                mf.bnd.RemoveHandles(i);
+            
             mf.FileSaveBoundary();
             tableLayoutPanel1.Controls.Clear();
             tableLayoutPanel1.RowStyles.Clear();

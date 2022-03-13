@@ -73,52 +73,13 @@ namespace AgOpenGPS
             ytList.Capacity = 128;
         }
 
-        public void CalculateSteerAngle(vec3 pivot, vec3 steer, List<vec3> curList)
+        public void CalculateSteerAngle(vec3 pivot, vec3 steer, List<vec3> curList, bool looped)
         {
             bool completeYouTurn = !isYouTurnTriggered;
 
             if (curList.Count > 1)
             {
-                int cc = 0, dd;
-                double minDistA = double.MaxValue;
-                double minDistB = double.MaxValue;
-
-                for (int j = 0; j < curList.Count; j += 10)
-                {
-                    double dist = glm.DistanceSquared(pivot, curList[j]);
-
-                    if (dist < minDistA)
-                    {
-                        minDistA = dist;
-                        cc = j;
-                    }
-                }
-
-                minDistA = double.MaxValue;
-
-                dd = cc + 7; if (dd > curList.Count) dd = curList.Count;
-                cc -= 7; if (cc < 0) cc = 0;
-
-                for (int j = cc; j < dd; j++)
-                {
-                    double dist = glm.DistanceSquared(pivot, curList[j]);
-
-                    if (dist < minDistA)
-                    {
-                        minDistB = minDistA;
-                        pB = pA;
-                        minDistA = dist;
-                        pA = j;
-                    }
-                    else if (dist < minDistB)
-                    {
-                        minDistB = dist;
-                        pB = j;
-                    }
-                }
-
-                //just need to make sure the points continue ascending or heading switches all over the place
-                if (pA > pB) { int C = pA; pA = pB; pB = C; }
+                pivot.GetCurrentSegment(curList, 0, looped, out pA, out pB);
 
                 //return and reset if too far away or end of the line
                 if (pB > curList.Count - 2)
@@ -169,43 +130,8 @@ namespace AgOpenGPS
                 if (mf.isStanleyUsed)
                 {
                     #region Stanley
-                    minDistA = minDistB = double.MaxValue;
 
-                    if (isYouTurnTriggered || isHeadingSameWay)
-                    {
-                        cc = pA;
-                        dd = cc + 12;
-                        if (dd > curList.Count)
-                            dd = curList.Count;
-                    }
-                    else
-                    {
-                        dd = pB + 1;
-                        cc = dd - 12;
-                        if (cc < 0)
-                            cc = 0;
-                    }
-
-                    //find the closest 2 points to current close call
-                    for (int j = cc; j < dd; j++)
-                    {
-                        double dist = glm.DistanceSquared(steer, curList[j]);
-                        if (dist < minDistA)
-                        {
-                            minDistB = minDistA;
-                            sB = sA;
-                            minDistA = dist;
-                            sA = j;
-                        }
-                        else if (dist < minDistB)
-                        {
-                            minDistB = dist;
-                            sB = j;
-                        }
-                    }
-
-                    //just need to make sure the points continue ascending or heading switches all over the place
-                    if (sA > sB) { int C = sA; sA = sB; sB = C; }
+                    steer.GetCurrentSegment(curList, pA, looped, out sA, out sB);
 
                     if (isYouTurnTriggered)
                     {
@@ -218,7 +144,7 @@ namespace AgOpenGPS
                         sB = sA + 1;
 
                         //return and reset if too far away or end of the line
-                        if (sB >= curList.Count - 8 || minDistA > 16)
+                        if (sB >= curList.Count - 8)
                         {
                             completeYouTurn = true;
                         }

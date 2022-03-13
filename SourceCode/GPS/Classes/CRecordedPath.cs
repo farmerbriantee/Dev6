@@ -88,7 +88,7 @@ namespace AgOpenGPS
                 //set a speed of 10 kmh
                 mf.sim.stepDistance = 2.77778;
 
-                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList);
+                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList, false);
 
                 //check if close to recorded path
                 if (curList.Count - pB < 8)
@@ -154,7 +154,7 @@ namespace AgOpenGPS
                 mf.sim.stepDistance = 2.77778;
 
                 //StanleyDubinsPath(shuttleListCount);
-                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList);
+                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList, false);
             }
         }
 

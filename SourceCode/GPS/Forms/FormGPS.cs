@@ -910,7 +910,8 @@ namespace AgOpenGPS
             oglZoom.SendToBack();
 
             //clean all the lines
-            bnd.bndList.Clear();
+            for (int i = bnd.bndList.Count - 1; i >= 0; i--)
+                bnd.RemoveHandles(i);
 
             FieldMenuButtonEnableDisable(false);
 
@@ -963,12 +964,17 @@ namespace AgOpenGPS
             btnSection14Man.BackColor = Color.Silver;
             btnSection15Man.BackColor = Color.Silver;
             btnSection16Man.BackColor = Color.Silver;
+            
+            for (int j = 0; j < patchList.Count; j++)
+            {
+                patchList[j].RemoveHandle();
+            }
+            patchList.Clear();
 
             //clear the section lists
             for (int j = 0; j < MAXSECTIONS; j++)
             {
                 //clean out the lists
-                section[j].patchList.Clear();
                 section[j].triangleList.Clear();
             }
 
@@ -1006,9 +1012,17 @@ namespace AgOpenGPS
 
             //clean up tram
             tram.displayMode = 0;
+
+            for (int j = 0; j < tram.tramList.Count; j++)
+                tram.tramList[j].RemoveHandle();
             tram.tramList.Clear();
-            tram.tramBndInnerArr.Clear();
-            tram.tramBndOuterArr.Clear();
+
+            for (int i = 0; i < tram.tramBoundary.Count; i++)
+            {
+                for (int j = 0; j < tram.tramBoundary[i].Count; j++)
+                    tram.tramBoundary[i][j].RemoveHandle();
+            }
+            tram.tramBoundary.Clear();
 
             //clear out contour and Lists
             btnContour.Enabled = false;
@@ -1083,7 +1097,7 @@ namespace AgOpenGPS
                 {
                     section[j].mappingOnTimer = 2;
                     if (section[j].isMappingOn)
-                        section[j].TurnMappingOff();
+                        section[j].TurnMappingOff(j);
                 }
                 if (section[j].mappingOnTimer > 0 && section[j].mappingOffTimer > 1)
                 {
@@ -1098,7 +1112,7 @@ namespace AgOpenGPS
                     {
                         section[j].mappingOnTimer = 0;
                         if (section[j].isMappingOn)
-                            section[j].TurnMappingOff();
+                            section[j].TurnMappingOff(j);
                     }
                 }
             }
@@ -1109,7 +1123,7 @@ namespace AgOpenGPS
                     section[tool.numOfSections].TurnMappingOn(0);
             }
             else if (section[tool.numOfSections].isMappingOn)
-                section[tool.numOfSections].TurnMappingOff();
+                section[tool.numOfSections].TurnMappingOff(tool.numOfSections);
         }
 
         //take the distance from object and convert to camera data
@@ -1134,12 +1148,6 @@ namespace AgOpenGPS
         {
             //turn off contour line if on
             gyd.StopContourLine();
-
-            //turn off all the sections
-            for (int j = 0; j < tool.numOfSections + 1; j++)
-            {
-                if (section[j].isMappingOn) section[j].TurnMappingOff();
-            }
 
             //FileSaveHeadland();
             FileSaveBoundary();

@@ -795,11 +795,7 @@ namespace AgOpenGPS
         //something went seriously wrong so reset everything
         public void ResetYouTurn()
         {
-            //fix you turn
-            isYouTurnTriggered = false;
-            ytList.Clear();
-            ResetCreatedYouTurn();
-            mf.sounds.isBoundAlarming = false;
+            CompleteYouTurn();
             isTurnCreationTooClose = false;
             isTurnCreationNotCrossingError = false;
             TurnCreationWidthError = false;

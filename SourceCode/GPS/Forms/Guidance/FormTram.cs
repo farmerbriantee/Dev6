@@ -63,7 +63,7 @@ namespace AgOpenGPS
         {
             if (Dist != 0)
                 mf.gyd.MoveGuidanceLine(mf.gyd.currentGuidanceLine, Dist);
-            mf.tram.BuildTram(mf.gyd.currentCurveLine);
+            mf.tram.BuildTram();
         }
 
         private void FormTram_FormClosing(object sender, FormClosingEventArgs e)
@@ -87,10 +87,16 @@ namespace AgOpenGPS
             }
             else
             {
-                mf.tram.tramArr.Clear();
+                for (int j = 0; j < mf.tram.tramList.Count; j++)
+                    mf.tram.tramList[j].RemoveHandle();
                 mf.tram.tramList.Clear();
-                mf.tram.tramBndOuterArr.Clear();
-                mf.tram.tramBndInnerArr.Clear();
+
+                for (int i = 0; i < mf.tram.tramBoundary.Count; i++)
+                {
+                    for (int j = 0; j < mf.tram.tramBoundary[i].Count; j++)
+                        mf.tram.tramBoundary[i][j].RemoveHandle();
+                }
+                mf.tram.tramBoundary.Clear();
 
                 mf.tram.displayMode = 0;
             }

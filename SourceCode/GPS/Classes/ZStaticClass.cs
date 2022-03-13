@@ -4,52 +4,113 @@ using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
-    public enum DrawType { LineStrip, LineLoop, Points, Tram, Triangles };
+    public enum DrawType { LineStrip, LineLoop, Points, Tram, Triangles, TriangleStrip };
 
     public class Polyline
     {
         public List<vec2> points = new List<vec2>(128);
-        public List<int> indexer = new List<int>();
-        public bool loop;
+        public bool ResetPoints, ResetIndexer, loop;
+        public int BufferPoints = int.MinValue, BufferIndex = int.MinValue, BufferPointsCnt = 0, BufferIndexCnt = 0;
 
         public void DrawPolyLine(DrawType type)
         {
             if (points.Count > 0)
             {
-                if (type == DrawType.Triangles)
+                if (type == DrawType.Tram)
                 {
-                    GL.Begin(PrimitiveType.Triangles);
-                    if (indexer.Count != (points.Count -2) * 3)
-                        indexer = points.TriangulatePolygon();
-
-                    for (int i = 0; i < indexer.Count; i++)
+                    if (BufferPoints != int.MinValue)
                     {
-                        GL.Vertex3(points[indexer[i]].easting, points[indexer[i]].northing, 0);
+                        GL.BindBuffer(BufferTarget.ArrayBuffer, BufferPoints);
+                        GL.VertexPointer(2, VertexPointerType.Double, 16, IntPtr.Zero);
+                        GL.EnableClientState(ArrayCap.VertexArray);
+                        if (loop)
+                            GL.DrawArrays(PrimitiveType.LineLoop, 0, BufferPointsCnt);
+                        else
+                            GL.DrawArrays(PrimitiveType.LineStrip, 0, BufferPointsCnt);
                     }
 
-                    GL.End();
+                    if (BufferIndex != int.MinValue)
+                    {
+                        GL.BindBuffer(BufferTarget.ArrayBuffer, BufferIndex);
+                        GL.VertexPointer(2, VertexPointerType.Double, 16, IntPtr.Zero);
+                        GL.EnableClientState(ArrayCap.VertexArray);
+                        if (loop)
+                            GL.DrawArrays(PrimitiveType.LineLoop, 0, BufferIndexCnt);
+                        else
+                            GL.DrawArrays(PrimitiveType.LineStrip, 0, BufferIndexCnt);
+                    }
                 }
                 else
                 {
-                    if (type == DrawType.Points)
-                        GL.Begin(PrimitiveType.Points);
-                    else if (type == DrawType.LineLoop)
-                        GL.Begin(PrimitiveType.LineLoop);
-                    else
-                        GL.Begin(PrimitiveType.LineStrip);
-
-                    for (int i = 0; i < points.Count; i++)
+                    if (type == DrawType.Triangles && (BufferIndex == int.MinValue || ResetIndexer))
                     {
-                        GL.Vertex3(points[i].easting, points[i].northing, 0);
+                        List<int> Indexer = points.TriangulatePolygon();
+
+                        if (BufferIndex == int.MinValue) GL.GenBuffers(1, out BufferIndex);
+                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, BufferIndex);
+                        GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(Indexer.Count * 4), Indexer.ToArray(), BufferUsageHint.StaticDraw);
+
+                        BufferIndexCnt = Indexer.Count;
+                        ResetIndexer = false;
                     }
-                    GL.End();
+                    else if (BufferPoints == int.MinValue || ResetPoints)
+                    {
+                        if (BufferPoints == int.MinValue) GL.GenBuffers(1, out BufferPoints);
+                        GL.BindBuffer(BufferTarget.ArrayBuffer, BufferPoints);
+                        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(points.Count * 16), points.ToArray(), BufferUsageHint.StaticDraw);
+                        BufferPointsCnt = points.Count;
+                        ResetPoints = false;
+                    }
+
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, BufferPoints);
+                    GL.VertexPointer(2, VertexPointerType.Double, 0, IntPtr.Zero);
+                    GL.EnableClientState(ArrayCap.VertexArray);
+
+                    if (type == DrawType.Triangles)
+                    {
+                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, BufferIndex);
+                        GL.DrawElements(PrimitiveType.Triangles, BufferIndexCnt, DrawElementsType.UnsignedInt, IntPtr.Zero);
+                    }
+                    else if (type == DrawType.TriangleStrip)
+                    {
+                        GL.DrawArrays(PrimitiveType.TriangleStrip, 2, BufferPointsCnt - 2);
+                    }
+                    else if (type == DrawType.Points)
+                        GL.DrawArrays(PrimitiveType.Points, 0, BufferPointsCnt);
+                    else if (loop)
+                        GL.DrawArrays(PrimitiveType.LineLoop, 0, BufferPointsCnt);
+                    else
+                        GL.DrawArrays(PrimitiveType.LineStrip, 0, BufferPointsCnt);
                 }
             }
         }
 
-        public void Clear()
+        public void RemoveHandle()
         {
-            points.Clear();
+            if (BufferPoints != int.MinValue)
+            {
+                try
+                {
+                    if (GL.IsBuffer(BufferPoints))
+                        GL.DeleteBuffer(BufferPoints);
+                    BufferPoints = int.MinValue;
+                }
+                catch
+                {
+                }
+            }
+            if (BufferIndex != int.MinValue)
+            {
+                try
+                {
+                    if (GL.IsBuffer(BufferIndex))
+                        GL.DeleteBuffer(BufferIndex);
+                    BufferIndex = int.MinValue;
+                }
+                catch
+                {
+                }
+            }
         }
     }
 
@@ -57,36 +118,40 @@ namespace AgOpenGPS
     {
         public static void CalculateHeadings(this List<vec3> points, bool loop)
         {
-            //to calc heading based on next and previous points to give an average heading.
-            int cnt = points.Count;
-            vec3[] arr = new vec3[cnt];
-            cnt--;
-            points.CopyTo(arr);
-            points.Clear();
-
-            vec3 pt3 = arr[0];
-
-            if (loop)
+            if (points.Count > 0)
             {
-                //first point needs last, first, second points
-                pt3.heading = Math.Atan2(arr[1].easting - arr[cnt].easting, arr[1].northing - arr[cnt].northing);
+                //to calc heading based on next and previous points to give an average heading.
+                int cnt = points.Count;
+                vec3[] arr = new vec3[cnt];
+                cnt--;
+                points.CopyTo(arr);
+                points.Clear();
+
+                vec3 pt3 = arr[0];
+
+                if (loop)
+                    pt3.heading = Math.Atan2(arr[1].easting - arr[cnt].easting, arr[1].northing - arr[cnt].northing);
+                else
+                    pt3.heading = Math.Atan2(arr[1].easting - arr[0].easting, arr[1].northing - arr[0].northing);
+
                 if (pt3.heading < 0) pt3.heading += glm.twoPI;
                 points.Add(pt3);
-            }
-            //middle points
-            for (int i = 1; i < cnt; i++)
-            {
-                pt3 = arr[i];
-                pt3.heading = Math.Atan2(arr[i + 1].easting - arr[i - 1].easting, arr[i + 1].northing - arr[i - 1].northing);
-                if (pt3.heading < 0) pt3.heading += glm.twoPI;
-                points.Add(pt3);
-            }
 
-            if (loop)
-            {
-                //last and first point
+                //middle points
+                for (int i = 1; i < cnt; i++)
+                {
+                    pt3 = arr[i];
+                    pt3.heading = Math.Atan2(arr[i + 1].easting - arr[i - 1].easting, arr[i + 1].northing - arr[i - 1].northing);
+                    if (pt3.heading < 0) pt3.heading += glm.twoPI;
+                    points.Add(pt3);
+                }
+
                 pt3 = arr[cnt];
-                pt3.heading = Math.Atan2(arr[0].easting - arr[cnt - 1].easting, arr[0].northing - arr[cnt - 1].northing);
+                if (loop)
+                    pt3.heading = Math.Atan2(arr[0].easting - arr[cnt - 1].easting, arr[0].northing - arr[cnt - 1].northing);
+                else
+                    pt3.heading = Math.Atan2(arr[cnt].easting - arr[cnt - 1].easting, arr[cnt].northing - arr[cnt - 1].northing);
+
                 if (pt3.heading < 0) pt3.heading += glm.twoPI;
                 points.Add(pt3);
             }
@@ -244,7 +309,7 @@ namespace AgOpenGPS
                             {
                                 if (Time > 0.0 && Time < 1.0 && Time2 > 0.0 && Time2 < 1.0)
                                     OffsetPoints.Add(Crossing);
-                                else if (!Loop || (Distance > 0) == (sinA > 0.0))
+                                else if ((Distance > 0) == (sinA > 0.0))
                                     OffsetPoints.Add(Crossing);
                                 else
                                 {
@@ -264,6 +329,14 @@ namespace AgOpenGPS
         }
 
         public static vec2 GetProportionPoint(this vec3 point, double segment, double length, double dx, double dy)
+        {
+            double factor = segment / length;
+            if (double.IsNaN(factor))
+                factor = 0;
+            return new vec2(point.easting - dy * factor, point.northing - dx * factor);
+        }
+
+        public static vec2 GetProportionPoint(this vec2 point, double segment, double length, double dx, double dy)
         {
             double factor = segment / length;
             if (double.IsNaN(factor))
@@ -438,6 +511,182 @@ namespace AgOpenGPS
                     var pointX = circlePoint.northing + Math.Cos(startAngle + sign * (j + 1) * degreeFactor) * (reverse ? Radius2 : Radius);
                     var pointY = circlePoint.easting + Math.Sin(startAngle + sign * (j + 1) * degreeFactor) * (reverse ? Radius2 : Radius);
                     points[j] = new vec3(pointY, pointX, 0);
+                }
+
+                Points.InsertRange(B + 1, points);
+                if (Count2 != int.MaxValue)
+                    Count2 += pointsCount;
+                B += points.Length;
+            }
+        }
+
+        public static void CalculateRoundedCorner(this List<vec2> Points, double Radius, double Radius2, bool Loop, double MaxAngle, int Count1 = 0, int Count2 = int.MaxValue)
+        {
+            double tt = Math.Min(Math.Asin(0.5 / Radius), Math.Asin(0.5 / Radius2));
+            if (!double.IsNaN(tt)) MaxAngle = Math.Min(tt, MaxAngle);
+
+            vec2 tt3;
+            int A, B, C, oldA, OldC;
+            bool reverse = false;
+
+            for (B = Count1; B < Points.Count && B < Count2; B++)
+            {
+                if (!Loop && (B == 0 || B + 1 == Points.Count)) continue;
+                A = (B == 0) ? Points.Count - 1 : B - 1;
+                C = (B + 1 == Points.Count) ? 0 : B + 1;
+                bool stop = false;
+                double dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0, angle, segment = 0, length1 = 0, length2 = 0;
+                while (true)
+                {
+                    tt3 = Points[B];
+                    if (GetLineIntersection(Points[A], Points[(A + 1).Clamp(Points.Count)], Points[C], Points[(C - 1).Clamp(Points.Count)], out vec2 Crossing, out double Time, out _, true))
+                    {
+                        if (Time > -100 && Time < 100)
+                            tt3 = Crossing;
+                    }
+
+                    dx1 = tt3.northing - Points[A].northing;
+                    dy1 = tt3.easting - Points[A].easting;
+                    dx2 = tt3.northing - Points[C].northing;
+                    dy2 = tt3.easting - Points[C].easting;
+
+                    angle = Math.Atan2(dy1, dx1) - Math.Atan2(dy2, dx2);
+
+                    if (angle < 0) angle += glm.twoPI;
+                    if (angle > glm.twoPI) angle -= glm.twoPI;
+                    angle /= 2;
+
+                    double Tan = Math.Abs(Math.Tan(angle));
+
+                    angle = Math.Abs(angle);
+
+                    if ((angle > glm.PIBy2 - MaxAngle && angle < glm.PIBy2 + MaxAngle) || (angle > Math.PI - MaxAngle && angle < Math.PI + MaxAngle))
+                    {
+                        if (C - A > 2)//Check why this is somethimes wrong!
+                        {
+                            while (C - 1 > A)
+                            {
+                                C = C == 0 ? Points.Count - 1 : C - 1;
+                                Points.RemoveAt(C);
+                            }
+                        }
+                        stop = true;
+                        break;
+                    }
+
+                    reverse = angle > glm.PIBy2;
+
+                    segment = (reverse ? Radius2 : Radius) / Tan;
+
+                    length1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
+                    length2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+                    oldA = A;
+                    OldC = C;
+                    if (segment > length1)
+                    {
+                        if (Loop || (!Loop && A > 0)) A = (A == 0) ? Points.Count - 1 : A - 1;
+
+                        if (A == C)
+                        {
+                            stop = true;
+                            break;
+                        }
+                    }
+                    if (segment > length2)
+                    {
+                        if (Loop || (!Loop && C < Points.Count - 1)) C = (C + 1 == Points.Count) ? 0 : C + 1;
+                        if (C == A)
+                        {
+                            stop = true;
+                            break;
+                        }
+                    }
+                    else if (segment < length1)
+                    {
+                        Points[B] = tt3;
+                        break;
+                    }
+
+                    if (oldA == A && OldC == C)
+                    {
+                        stop = true;
+                        break;
+                    }
+                }
+                if (stop) continue;
+
+                bool Looping = (A > C);
+                while (C - 1 > A || Looping)
+                {
+                    if (C == 0)
+                    {
+                        if (A == Points.Count - 1) break;
+                        Looping = false;
+                    }
+
+                    C = C == 0 ? Points.Count - 1 : C - 1;
+
+                    if (A > C) A--;
+
+                    Points.RemoveAt(C);
+                    if (Count2 != int.MaxValue)
+                        Count2--;
+                }
+
+
+                B = A > B ? -1 : A;
+
+                vec2 p1Cross = tt3.GetProportionPoint(segment, length1, dx1, dy1);
+                vec2 p2Cross = tt3.GetProportionPoint(segment, length2, dx2, dy2);
+
+                if (reverse)
+                {
+                    vec2 test = p1Cross;
+                    p1Cross = p2Cross;
+                    p2Cross = test;
+                }
+
+                double dx = tt3.northing * 2 - p1Cross.northing - p2Cross.northing;
+                double dy = tt3.easting * 2 - p1Cross.easting - p2Cross.easting;
+                if (dx1 == 0 && dy1 == 0 || dx2 == 0 && dy2 == 0 || dx == 0 && dy == 0) continue;
+
+                double L = Math.Sqrt(dx * dx + dy * dy);
+                double d = Math.Sqrt(segment * segment + (reverse ? Radius2 : Radius) * (reverse ? Radius2 : Radius));
+                vec2 circlePoint = tt3.GetProportionPoint(d, L, dx, dy);
+
+                double startAngle = Math.Atan2(p1Cross.easting - circlePoint.easting, p1Cross.northing - circlePoint.northing);
+                double endAngle = Math.Atan2(p2Cross.easting - circlePoint.easting, p2Cross.northing - circlePoint.northing);
+
+                if (startAngle < 0) startAngle += glm.twoPI;
+                if (endAngle < 0) endAngle += glm.twoPI;
+
+
+                double sweepAngle;
+
+                if (((glm.twoPI - endAngle + startAngle) % glm.twoPI) < ((glm.twoPI - startAngle + endAngle) % glm.twoPI))
+                    sweepAngle = (glm.twoPI - endAngle + startAngle) % glm.twoPI;
+                else
+                    sweepAngle = (glm.twoPI - startAngle + endAngle) % glm.twoPI;
+
+                int sign = Math.Sign(sweepAngle);
+
+                if (reverse)
+                {
+                    sign = -sign;
+                    startAngle = endAngle;
+                }
+
+                int pointsCount = (int)Math.Round(Math.Abs(sweepAngle / MaxAngle));
+
+                double degreeFactor = sweepAngle / pointsCount;
+
+                vec2[] points = new vec2[pointsCount];
+
+                for (int j = 0; j < pointsCount; ++j)
+                {
+                    var pointX = circlePoint.northing + Math.Cos(startAngle + sign * (j + 1) * degreeFactor) * (reverse ? Radius2 : Radius);
+                    var pointY = circlePoint.easting + Math.Sin(startAngle + sign * (j + 1) * degreeFactor) * (reverse ? Radius2 : Radius);
+                    points[j] = new vec2(pointY, pointX);
                 }
 
                 Points.InsertRange(B + 1, points);
@@ -992,6 +1241,37 @@ namespace AgOpenGPS
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
+        public static double FindDistanceToSegment(this vec3 pt, vec3 p1, vec3 p2)
+        {
+            double dx = p2.northing - p1.northing;
+            double dy = p2.easting - p1.easting;
+            if (dx == 0 && dy == 0)
+            {
+                dx = pt.northing - p1.northing;
+                dy = pt.easting - p1.easting;
+                return Math.Sqrt(dx * dx + dy * dy);
+            }
+
+            double Time = ((pt.northing - p1.northing) * dx + (pt.easting - p1.easting) * dy) / (dx * dx + dy * dy);
+
+            if (Time < 0)
+            {
+                dx = pt.northing - p1.northing;
+                dy = pt.easting - p1.easting;
+            }
+            else if (Time > 1)
+            {
+                dx = pt.northing - p2.northing;
+                dy = pt.easting - p2.easting;
+            }
+            else
+            {
+                dx = pt.northing - (p1.northing + Time * dx);
+                dy = pt.easting - (p1.easting + Time * dy);
+            }
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
         public static bool isInFront(this vec3 point, vec3 a, vec3 b, vec3 c)
         {
             double Dx1 = b.northing - c.northing;
@@ -1013,6 +1293,60 @@ namespace AgOpenGPS
             return ((ss.northing - b.northing) * (point.easting - b.easting) - (ss.easting - b.easting) * (point.northing - b.northing)) > 0;
         }
 
+        public static void GetCurrentSegment(this vec3 Point, List<vec3> curList, int Start, bool loop, out int AA, out int BB, int maxlimit = int.MaxValue)
+        {
+            AA = -1;
+            BB = -1;
+            double minDistA = double.MaxValue;
+
+            int A = (Start - 1).Clamp(curList.Count);
+            int C = (Start + 1).Clamp(curList.Count);
+            int D = Start;
+
+            bool Prev = (!loop && Start == 0) || Point.isInFront(curList[A], curList[Start], curList[C]);
+            int count = Prev ? 1 : -1;
+
+            for (int B = (Start + count).Clamp(curList.Count); B > D || B < D || loop; B += count)
+            {
+                if (B <= -1)
+                {
+                    if (loop && count < 0)
+                        B = curList.Count;
+                    else
+                        break;
+
+                    loop = false;
+                    continue;
+                }
+                else if (B >= curList.Count || B >= maxlimit)
+                {
+                    if (loop && count > 0)
+                        B = -1;
+                    else
+                        break;
+                    loop = false;
+                    continue;
+                }
+
+                A = (B - 1).Clamp(curList.Count);
+                C = (B + 1).Clamp(curList.Count);
+
+                bool second = (!loop && B == curList.Count - 1) ? count > 0 : Point.isInFront(curList[C], curList[B], curList[A]);
+
+                if (count > 0 == Prev && Prev == second)
+                {
+                    double dist2 = count > 0 ? Point.FindDistanceToSegment(curList[A], curList[B]) : Point.FindDistanceToSegment(curList[B], curList[C]);
+
+                    if (dist2 < minDistA)
+                    {
+                        minDistA = dist2;
+                        AA = count > 0 ? A : B;
+                        BB = count > 0 ? B : C;
+                    }
+                }
+                Prev = !second;
+            }
+        }
 
         public static double CalculateAverageHeadings(this List<vec2> curvePts)
         {
