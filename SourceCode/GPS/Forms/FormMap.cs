@@ -236,16 +236,12 @@ namespace AgOpenGPS
                 }
 
                 New.CalculateFenceArea();
-
-
                 mf.bnd.bndList.Add(New);
-                mf.fd.UpdateFieldBoundaryGUIAreas();
 
                 //turn lines made from boundaries
-                mf.CalculateMinMax();
                 mf.FileSaveBoundary();
+                mf.CalculateMinMax();
                 mf.bnd.BuildTurnLines();
-                mf.btnABDraw.Visible = true;
             }
 
             //clean up line
@@ -280,8 +276,7 @@ namespace AgOpenGPS
 
                 mf.FileSaveBoundary();
                 mf.bnd.BuildTurnLines();
-                mf.fd.UpdateFieldBoundaryGUIAreas();
-                mf.btnABDraw.Visible = false;
+                mf.CalculateMinMax();
                 //clean up line
                 mapControl.Markers.Clear();
                 bingLine.Clear();

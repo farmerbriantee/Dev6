@@ -24,29 +24,15 @@ namespace AgOpenGPS
                 return;
             }
 
-            gyd.isContourBtnOn = !gyd.isContourBtnOn;
-            btnContour.Image = gyd.isContourBtnOn ? Properties.Resources.ContourOn : Properties.Resources.ContourOff;
-
-            if (gyd.isContourBtnOn)
+            Form f = Application.OpenForms["FormABLine"];
+            if (f != null)
             {
-                btnCycleLines.Image = Properties.Resources.ColorLocked;
-                //turn off youturn...
-                DisableYouTurnButtons();
-                guidanceLookAheadTime = 0.5;
+                f.Close();
             }
 
-            else
-            {
-                if (gyd.isBtnABLineOn || gyd.isBtnCurveOn)
-                {
-                    EnableYouTurnButtons();
-                    gyd.isValid = false;
-                }
-
-                btnCycleLines.Image = Properties.Resources.ABLineCycle;
-                guidanceLookAheadTime = Properties.Settings.Default.setAS_guidanceLookAheadTime;
-            }
+            SetGuidanceMode(gyd.CurrentGMode == Mode.Contour ? Mode.None : Mode.Contour);
         }
+
         private void btnCurve_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -55,49 +41,26 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            
-            //check if window already exists, return if true
-            Form f = Application.OpenForms["FormABLine"];
 
+            Form f = Application.OpenForms["FormABLine"];
             if (f != null)
             {
-                f.Focus();
-                return;
+                f.Close();
             }
 
-            //if contour is on, turn it off
-            if (gyd.isContourBtnOn)
-                btnContour.PerformClick();
-
-            if (panelDrag.Visible)
+            if (gyd.CurrentGMode != Mode.Curve)
             {
-                panelDrag.Visible = false;
-                gyd.recList.Clear();
-                gyd.StopDrivingRecordedPath();
-            }
+                SetGuidanceMode(Mode.Curve);
 
-            //change image to reflect on off
-            btnABLine.Image = Properties.Resources.ABLineOff;
-            gyd.isBtnABLineOn = false;
-
-            if (gyd.isBtnCurveOn == false && gyd.currentCurveLine != null)
-            {
-                gyd.isValid = false;
-                gyd.moveDistance = 0;
                 gyd.currentGuidanceLine = gyd.currentCurveLine;
-                //display the curve
-                EnableYouTurnButtons();
-                btnCurve.Image = Properties.Resources.CurveOn;
-                gyd.isBtnCurveOn = true;
-                return;
+                if (gyd.currentGuidanceLine != null)
+                    return;
             }
-
-            gyd.isBtnCurveOn = true;
-            btnCurve.Image = Properties.Resources.CurveOn;
 
             Form form = new FormABLine(this, false);
             form.Show(this);
         }
+
         private void btnABLine_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -107,63 +70,78 @@ namespace AgOpenGPS
                 return;
             }
 
-            //invalidate line
-            gyd.isValid = false;
-
-            Form af = Application.OpenForms["FormABLine"];
-
-            if (af != null)
+            Form f = Application.OpenForms["FormABLine"];
+            if (f != null)
             {
-                af.Close();
-                return;
+                f.Close();
             }
 
-            //if contour is on, turn it off
-            if (gyd.isContourBtnOn)
-                btnContour.PerformClick();
-
-            if (panelDrag.Visible)
+            if (gyd.CurrentGMode != Mode.AB)
             {
-                panelDrag.Visible = false;
-                gyd.recList.Clear();
-                gyd.StopDrivingRecordedPath();
-            }
+                SetGuidanceMode(Mode.AB);
 
-            gyd.isBtnCurveOn = false;
-            btnCurve.Image = Properties.Resources.CurveOff;
-
-            //if there is a line in memory, just use it.
-            if (gyd.isBtnABLineOn == false && gyd.currentABLine != null)
-            {
-                gyd.isValid = false;
-                gyd.moveDistance = 0;
                 gyd.currentGuidanceLine = gyd.currentABLine;
-                EnableYouTurnButtons();
-                btnABLine.Image = Properties.Resources.ABLineOn;
-                gyd.isBtnABLineOn = true;
-                return;
+                if (gyd.currentGuidanceLine != null)
+                    return;
             }
-
-            //Bring up the form
-            gyd.isBtnABLineOn = true;
-            btnABLine.Image = Properties.Resources.ABLineOn;
 
             var form = new FormABLine(this, true);
-                form.Show(this);
+            form.Show(this);
+        }
+
+        public void SetGuidanceMode(Mode newmode)
+        {
+            gyd.isValid = false;
+            gyd.moveDistance = 0;
+            gyd.currentGuidanceLine = null;
+
+            panelDrag.Visible = newmode == Mode.RecPath;
+            if (gyd.CurrentGMode == Mode.RecPath)
+                gyd.StopDrivingRecordedPath();
+
+            setBtnAutoSteer(false);
+
+            btnContour.Image = newmode == Mode.Contour ? Properties.Resources.ContourOn : Properties.Resources.ContourOff;
+            btnCycleLines.Image = newmode == Mode.Contour ? Properties.Resources.ColorLocked : Properties.Resources.ABLineCycle;
+            btnCurve.Image = newmode == Mode.Curve ? Properties.Resources.CurveOn : Properties.Resources.CurveOff;
+            btnABLine.Image = newmode == Mode.AB ? Properties.Resources.ABLineOn : Properties.Resources.ABLineOff;
+
+            btnAutoSteer.Enabled = newmode != Mode.None;
+            
+            if (newmode == Mode.Curve || newmode == Mode.AB)
+            {
+                if (!btnEditAB.Visible)
+                {
+                    btnEditAB.Visible = true;
+                    btnSnapToPivot.Visible = true;
+                    cboxpRowWidth.Visible = true;
+                    btnYouSkipEnable.Visible = true;
+                    btnAutoYouTurn.Enabled = true;
+                }
+            }
+            else if (btnEditAB.Visible)
+            {
+                btnEditAB.Visible = false;
+                btnSnapToPivot.Visible = false;
+                cboxpRowWidth.Visible = false;
+                btnYouSkipEnable.Visible = false;
+                btnAutoYouTurn.Enabled = false;
+            }
+
+            gyd.CurrentGMode = newmode;
         }
 
         private void btnCycleLines_Click(object sender, EventArgs e)
         {
             if (isTT)
             {
-                if (!gyd.isContourBtnOn)
-                    MessageBox.Show(gStr.h_btnCycleLines, gStr.gsHelp);
-                else
+                if (gyd.CurrentGMode == Mode.Contour)
                     MessageBox.Show(gStr.h_btnLockToContour, gStr.gsHelp);
-
+                else
+                    MessageBox.Show(gStr.h_btnCycleLines, gStr.gsHelp);
                 ResetHelpBtn();
             }
-            else if (gyd.isContourBtnOn)
+            else if (gyd.CurrentGMode == Mode.Contour)
             {
                 if (gyd.curList.Count > 5) gyd.isLocked = !gyd.isLocked;
             }
@@ -173,9 +151,7 @@ namespace AgOpenGPS
                 gyd.moveDistance = 0;
                 gyd.ResetYouTurn();
 
-                Mode mode = gyd.isBtnABLineOn ? Mode.AB : Mode.Curve;
-
-                bool found = !(gyd.currentGuidanceLine.mode.HasFlag(mode));
+                bool found = !(gyd.currentGuidanceLine.mode.HasFlag(gyd.CurrentGMode));
                 bool loop = true;
                 for (int i = 0; i < gyd.curveArr.Count || loop; i++)
                 {
@@ -188,10 +164,8 @@ namespace AgOpenGPS
                     }
                     if (gyd.currentGuidanceLine.Name == gyd.curveArr[i].Name)
                         found = true;
-                    else if (found && gyd.curveArr[i].mode.HasFlag(mode))
+                    else if (found && gyd.curveArr[i].mode.HasFlag(gyd.CurrentGMode))
                     {
-                        gyd.isValid = false;
-                        gyd.moveDistance = 0;
                         gyd.currentGuidanceLine = new CGuidanceLine(gyd.curveArr[i]);
 
                         if (gyd.currentGuidanceLine.mode.HasFlag(Mode.AB))
@@ -205,8 +179,6 @@ namespace AgOpenGPS
                 }
                 if (!found)
                 {
-                    gyd.isValid = false;
-                    gyd.moveDistance = 0;
                     gyd.currentGuidanceLine = null;
                     lblCurveLineName.Text = string.Empty;
                 }
@@ -223,26 +195,9 @@ namespace AgOpenGPS
                 return;
             }
             
-            System.Media.SystemSounds.Asterisk.Play();
-
-            if (autoBtnState == btnStates.On)
-            {
-                autoBtnState = btnStates.Off;
-                btnManualOffOn.Image = Properties.Resources.ManualOff;
-            }
-            else
-            {
-                autoBtnState = btnStates.On;
-                btnManualOffOn.Image = Properties.Resources.ManualOn;
-                btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
-            }
-
-            //turn all the sections allowed and update to ON!! Auto changes to ON
-            for (int j = 0; j < tool.numOfSections; j++)
-            {
-                section[j].UpdateButton(autoBtnState);
-            }
+            setSectionBtnState(autoBtnState == btnStates.On ? btnStates.Off : btnStates.On);
         }
+
         private void btnSectionOffAutoOn_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -251,27 +206,31 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            
-            System.Media.SystemSounds.Exclamation.Play();
 
-            if (autoBtnState == btnStates.Auto)
-            {
-                autoBtnState = btnStates.Off;
-                btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
-            }
-            else
-            {
-                autoBtnState = btnStates.Auto;
-                btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOn;
-                btnManualOffOn.Image = Properties.Resources.ManualOff;
-            }
+            setSectionBtnState(autoBtnState == btnStates.Auto ? btnStates.Off : btnStates.Auto);
+        }
 
-            //turn section buttons all OFF or Auto if SectionAuto was on or off
-            for (int j = 0; j < tool.numOfSections; j++)
+        public void setSectionBtnState(btnStates status)
+        {
+            if (!isJobStarted) status = btnStates.Off;
+
+            if (autoBtnState != status)
             {
-                section[j].UpdateButton(autoBtnState);
+                if (status == btnStates.On || (autoBtnState == btnStates.On && status == btnStates.Off))
+                    System.Media.SystemSounds.Asterisk.Play();
+                else if (status == btnStates.Auto || (autoBtnState == btnStates.Auto && status == btnStates.Off))
+                    System.Media.SystemSounds.Exclamation.Play();
+
+                autoBtnState = status;
+                btnManualOffOn.Image = status == btnStates.On ? Properties.Resources.ManualOn : Properties.Resources.ManualOff;
+                btnSectionOffAutoOn.Image = status == btnStates.Auto ? Properties.Resources.SectionMasterOn : Properties.Resources.SectionMasterOff;
+
+                //set sections buttons to status
+                for (int j = 0; j < tool.numOfSections; j++)
+                    section[j].UpdateButton(status);
             }
         }
+
         private void btnAutoSteer_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -283,26 +242,26 @@ namespace AgOpenGPS
 
             //new direction so reset where to put turn diagnostic
             gyd.ResetYouTurn();
+            setBtnAutoSteer(!isAutoSteerBtnOn);
+        }
 
-            if (isAutoSteerBtnOn)
+        public void setBtnAutoSteer(bool status)
+        {
+            if (gyd.CurrentGMode == Mode.None) status = false;
+            if (status != isAutoSteerBtnOn)
             {
-                isAutoSteerBtnOn = false;
-                btnAutoSteer.Image = Properties.Resources.AutoSteerOff;
-                if (gyd.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
-                if (sounds.isSteerSoundOn) sounds.sndAutoSteerOff.Play();
-            }
-            else
-            {
-                if (gyd.isBtnABLineOn || gyd.isContourBtnOn || gyd.isBtnCurveOn)
+                isAutoSteerBtnOn = status;
+                btnAutoSteer.Image = status ? Properties.Resources.AutoSteerOn : Properties.Resources.AutoSteerOff;
+
+                if (!isAutoSteerBtnOn && gyd.isYouTurnBtnOn)
+                    btnAutoYouTurn.PerformClick();
+
+                if (sounds.isSteerSoundOn)
                 {
-                    isAutoSteerBtnOn = true;
-                    btnAutoSteer.Image = Properties.Resources.AutoSteerOn;
-                    if (sounds.isSteerSoundOn) sounds.sndAutoSteerOn.Play();
-                }
-                else
-                {
-                    var form = new FormTimedMessage(2000,(gStr.gsNoGuidanceLines),(gStr.gsTurnOnContourOrMakeABLine));
-                    form.Show(this);
+                    if (status)
+                        sounds.sndAutoSteerOn.Play();
+                    else
+                        sounds.sndAutoSteerOff.Play();
                 }
             }
         }
@@ -328,11 +287,8 @@ namespace AgOpenGPS
 
             if (!gyd.isYouTurnBtnOn)
             {
-                if (gyd.isBtnABLineOn || gyd.isBtnCurveOn)
-                {
-                    if (!isAutoSteerBtnOn) btnAutoSteer.PerformClick();
-                }
-                else return;
+                if (!isAutoSteerBtnOn)
+                    setBtnAutoSteer(true);
 
                 gyd.isYouTurnBtnOn = true;
                 btnAutoYouTurn.Image = Properties.Resources.Youturn80;
@@ -1072,33 +1028,18 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (gyd.isContourBtnOn)
-            {
-                var form = new FormTimedMessage(2000, (gStr.gsContourOn), ("Turn Off Contour"));
-                form.Show(this);
-                return;
-            }
-
             if (bnd.bndList.Count == 0)
             {
                 TimedMessageBox(2000, gStr.gsNoBoundary, gStr.gsCreateABoundaryFirst);
                 return;
             }
 
-            GetAB();
-        }
-        public void GetAB()
-        {
-            if (gyd.isContourBtnOn) 
-                btnContour.PerformClick();
-
             using (var form = new FormABDraw(this))
             {
                 form.ShowDialog(this);
-                gyd.moveDistance = 0;
-                gyd.moveDistance = 0;
             }
         }
+
         private void btnYouSkipEnable_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -1384,32 +1325,12 @@ namespace AgOpenGPS
         //The zoom tilt buttons
         private void btnZoomIn_MouseDown(object sender, MouseEventArgs e)
         {
-            //if (isTT)
-            //{
-            //    MessageBox.Show(gStr.btnZoomIn, gStr.gsHelp);
-            //    isTT = false;
-            //    return;
-            //}
-            if (camera.zoomValue <= 20)
-            { if ((camera.zoomValue -= camera.zoomValue * 0.1) < 3.0) camera.zoomValue = 3.0; }
-            else { if ((camera.zoomValue -= camera.zoomValue * 0.05) < 3.0) camera.zoomValue = 3.0; }
-            camera.camSetDistance = camera.zoomValue * camera.zoomValue * -1;
-            SetZoom();
+            SetZoom(-2.5);
             navPanelCounter = 2;
         }
         private void btnZoomOut_MouseDown(object sender, MouseEventArgs e)
         {
-            //if (isTT)
-            //{
-            //    MessageBox.Show(gStr.btnZoomOut, gStr.gsHelp);
-            //    isTT = false;
-            //    return;
-            //}
-            if (camera.zoomValue <= 20) camera.zoomValue += camera.zoomValue * 0.1;
-            else camera.zoomValue += camera.zoomValue * 0.05;
-            if (camera.zoomValue > 220) camera.zoomValue = 220;
-            camera.camSetDistance = camera.zoomValue * camera.zoomValue * -1;
-            SetZoom();
+            SetZoom(2.5);
             navPanelCounter = 2;
         }
         private void btnpTiltUp_MouseDown(object sender, MouseEventArgs e)
@@ -1538,9 +1459,7 @@ namespace AgOpenGPS
         }
         private void tramLinesMenuField_Click(object sender, EventArgs e)
         {
-            if (gyd.isContourBtnOn) btnContour.PerformClick(); 
-
-            if (gyd.currentGuidanceLine != null)
+            if ((gyd.CurrentGMode == Mode.AB || gyd.CurrentGMode == Mode.Curve) && gyd.currentGuidanceLine != null)
             {
                 Form form97 = new FormTram(this);
                 form97.Show(this);
@@ -1566,7 +1485,7 @@ namespace AgOpenGPS
         }
         public void GetHeadland()
         {
-            using (var form = new FormHeadland (this))
+            using (var form = new FormHeadland(this))
             {
                 form.ShowDialog(this);
             }
@@ -1588,7 +1507,6 @@ namespace AgOpenGPS
                 btnHydLift.Image = Properties.Resources.HydraulicLiftOff;
                 btnHydLift.Visible = false;
             }
-            SetZoom();
         }
 
         private void boundariesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1604,29 +1522,6 @@ namespace AgOpenGPS
         //Recorded Path
         private void btnPathGoStop_Click(object sender, EventArgs e)
         {
-            #region Turn off Guidance
-            //if contour is on, turn it off
-            if (gyd.isContourBtnOn) btnContour.PerformClick();
-            if (gyd.isYouTurnBtnOn) btnAutoYouTurn.PerformClick();
-            if (isAutoSteerBtnOn) btnAutoSteer.PerformClick();
-
-            DisableYouTurnButtons();
-
-            //if ABLine isn't set, turn off the YouTurn
-            if (gyd.currentGuidanceLine != null)
-            {
-                gyd.isValid = false;
-                gyd.moveDistance = 0;
-                gyd.currentGuidanceLine = null;
-
-                //change image to reflect on off
-                btnABLine.Image = Properties.Resources.ABLineOff;
-                gyd.isBtnABLineOn = false;
-                gyd.isBtnCurveOn = false;
-                btnCurve.Image = Properties.Resources.CurveOff;
-            }
-            #endregion
-
             //already running?
             if (gyd.isDrivingRecordedPath)
             {
@@ -1678,8 +1573,6 @@ namespace AgOpenGPS
                         FileSaveRecPath();
                         FileSaveRecPath(filename);
                     }
-                    else
-                        gyd.recList.Clear();
                 }                
             }
             else if (isJobStarted)
@@ -1730,46 +1623,7 @@ namespace AgOpenGPS
 
         private void recordedPathStripMenu_Click(object sender, EventArgs e)
         {
-            if (isJobStarted)
-            {
-                if (panelDrag.Visible)
-                {
-                    panelDrag.Visible = false;
-                    gyd.recList.Clear();
-                    gyd.StopDrivingRecordedPath();
-                }
-                else
-                {
-                    FileLoadRecPath();  
-                    panelDrag.Visible = true;
-                }
-
-                gyd.isValid = false;
-            }
-            else
-            {
-             TimedMessageBox(3000, gStr.gsFieldNotOpen, gStr.gsStartNewField); 
-            }
-        }
-
-        #endregion
-
-        #region OpenGL Window context Menu and functions
-        private void contextMenuStripOpenGL_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            //dont bring up menu if no flag selected
-            if (flagNumberPicked == 0) e.Cancel = true;
-        }
-        private void googleEarthOpenGLContextMenu_Click(object sender, EventArgs e)
-        {
-            if (isJobStarted)
-            {
-                //save new copy of kml with selected flag and view in GoogleEarth
-                FileSaveSingleFlagKML(flagNumberPicked);
-
-                //Process.Start(@"C:\Program Files (x86)\Google\Google Earth\client\googleearth", workingDirectory + currentFieldDirectory + "\\Flags.KML");
-                Process.Start(fieldsDirectory + currentFieldDirectory + "\\Flag.KML");
-            }
+            SetGuidanceMode(gyd.CurrentGMode == Mode.RecPath ? Mode.None : Mode.RecPath);
         }
 
         #endregion

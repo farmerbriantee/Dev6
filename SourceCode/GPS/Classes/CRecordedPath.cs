@@ -114,9 +114,7 @@ namespace AgOpenGPS
                 {
                     mf.sim.stepDistance = recList[currentPositonIndex].speed / 3.6;
 
-                    //section control - only if different click the button
-                    bool autoBtn = (mf.autoBtnState == btnStates.Auto);
-                    if (autoBtn != recList[currentPositonIndex].autoBtnState) mf.btnSectionOffAutoOn.PerformClick();
+                    mf.setSectionBtnState(recList[currentPositonIndex].autoBtnState ? btnStates.Auto : btnStates.Off);
                 }
                 else
                 {

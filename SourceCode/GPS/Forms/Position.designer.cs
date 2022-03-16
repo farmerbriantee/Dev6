@@ -967,7 +967,7 @@ namespace AgOpenGPS
 
             //finally fixed distance for making a curve line
             if (!gyd.isOkToAddDesPoints) sectionTriggerStepDistance = sectionTriggerStepDistance + 0.2;
-            if (gyd.isContourBtnOn) sectionTriggerStepDistance *=0.5;
+            if (gyd.CurrentGMode == Mode.Contour) sectionTriggerStepDistance *= 0.5;
 
             //precalc the sin and cos of heading * -1
             sinSectionHeading = Math.Sin(-toolPos.heading);
@@ -1021,10 +1021,10 @@ namespace AgOpenGPS
                     sectionCounter++;
                 }
             }
-            if (sectionCounter == 0 || (gyd.currentGuidanceLine != null && !gyd.isContourBtnOn && isAutoSteerBtnOn))
-                gyd.StopContourLine();
-            else
+            if (sectionCounter > 0 && (!isAutoSteerBtnOn || gyd.CurrentGMode == Mode.Contour))
                 gyd.AddPoint(pivotAxlePos);
+            else
+                gyd.StopContourLine();
         }
 
         //calculate the extreme tool left, right velocities, each section lookahead, and whether or not its going backwards
@@ -1198,16 +1198,14 @@ namespace AgOpenGPS
                     if ((mc.ss[mc.swMain] & 1) == 1)
                     {
                         //set butto off and then press it = ON
-                        autoBtnState = btnStates.Off;
-                        btnSectionOffAutoOn.PerformClick();
+                        setSectionBtnState(btnStates.On);
                     } // if Main SW ON
 
                     //if Main SW in Arduino is pressed OFF
                     if ((mc.ss[mc.swMain] & 2) == 2)
                     {
                         //set button on and then press it = OFF
-                        autoBtnState = btnStates.Auto;
-                        btnSectionOffAutoOn.PerformClick();
+                        setSectionBtnState(btnStates.Off);
                     } // if Main SW OFF
 
                     mc.ssP[mc.swMain] = mc.ss[mc.swMain];
@@ -1313,8 +1311,6 @@ namespace AgOpenGPS
 
                     //set display accordingly
                     isDayTime = (DateTime.Now.Ticks < sunset.Ticks && DateTime.Now.Ticks > sunrise.Ticks);
-
-                    SetZoom();
                 }
                 return;
             }

@@ -211,6 +211,8 @@ namespace AgOpenGPS
         /// </summary>
         public CGuidance gyd;
 
+        public ShapeFile shape;
+
         #endregion // Class Props and instances
 
         // Constructor, Initializes a new instance of the "FormGPS" class.
@@ -312,6 +314,8 @@ namespace AgOpenGPS
 
             //sounds class
             sounds = new CSound();
+
+            shape = new ShapeFile(this);
         }
 
         //Initialize items before the form Loads or is visible
@@ -324,10 +328,6 @@ namespace AgOpenGPS
 
             //boundaryToolStripBtn.Enabled = false;
             FieldMenuButtonEnableDisable(false);
-
-            oglMain.Left = 75;
-            oglMain.Width = this.Width - statusStripLeft.Width - 84;
-
 
             timer2.Enabled = true;
             //panel1.BringToFront();
@@ -466,7 +466,7 @@ namespace AgOpenGPS
         private void FormGPS_Resize(object sender, EventArgs e)
         {
             FixPanelsAndMenus();
-            if (isGPSPositionInitialized) SetZoom();
+            if (isGPSPositionInitialized) SetZoom(0);
         }
 
         // Load Bitmaps And Convert To Textures
@@ -606,17 +606,6 @@ namespace AgOpenGPS
                 bitmap4WDRear = Resources.z_4WDRearAoG;
 
             return bitmap4WDRear;
-        }
-
-        public void SwapDirection()
-        {
-            if (!gyd.isYouTurnTriggered)
-            {
-                gyd.isYouTurnRight = !gyd.isYouTurnRight;
-                gyd.ResetCreatedYouTurn();
-            }
-            else if (gyd.isYouTurnBtnOn)
-                btnAutoYouTurn.PerformClick();
         }
 
         private void BuildMachineByte()
@@ -812,20 +801,16 @@ namespace AgOpenGPS
                 section[j].SetButtonStatus(true);
             }
 
-            btnABLine.Enabled = true;
-            btnContour.Enabled = true;
-            btnCurve.Enabled = true;
-            btnCycleLines.Image = Properties.Resources.ABLineCycle;
-            btnCycleLines.Enabled = true;
-
-            btnAutoSteer.Enabled = true;
-
-            DisableYouTurnButtons();
-            btnFlag.Enabled = true;
-
             FieldMenuButtonEnableDisable(true);
             FixPanelsAndMenus();
-            SetZoom();
+
+            if (Debugger.IsAttached && Directory.Exists(fieldsDirectory + currentFieldDirectory))
+            {
+                foreach (string file in Directory.GetFiles(fieldsDirectory + currentFieldDirectory, "*.shp", SearchOption.AllDirectories))
+                {
+                    shape.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
+                }
+            }
         }
 
         public void FieldMenuButtonEnableDisable(bool isOn)
@@ -834,24 +819,19 @@ namespace AgOpenGPS
             boundariesToolStripMenuItem.Enabled = isOn;
             headlandToolStripMenuItem.Enabled = isOn;
             deleteContourPathsToolStripMenuItem.Enabled = isOn;
+            deleteAppliedAreaToolStripMenuItem.Enabled = isOn;
             tramLinesMenuField.Enabled = isOn;
             recordedPathStripMenu.Enabled = isOn;
+            toolStripMenuItem9.Visible = isOn;
             btnABDraw.Enabled = isOn;
             btnFlag.Visible = isOn;
 
             panelRight.Visible = isOn;
             panelAB.Visible = isOn;
 
-            menustripLanguage.Enabled = isOn;
+            menustripLanguage.Enabled = !isOn;
 
             lblFieldStatus.Visible = isOn;
-            //lblFieldDataTopField.Visible = isOn;
-            //lblFieldDataTopDone.Visible = isOn;
-            //lblFieldDataTopRemain.Visible = isOn;
-
-            btnSnapToPivot.Visible = false;
-            cboxpRowWidth.Visible = false;
-            btnYouSkipEnable.Visible = false;
         }
 
         //close the current job
@@ -899,9 +879,7 @@ namespace AgOpenGPS
             }
 
             //fix auto button
-            autoBtnState = btnStates.Off;
-            btnManualOffOn.Image = Properties.Resources.ManualOff;
-            btnSectionOffAutoOn.Image = Properties.Resources.SectionMasterOff;
+            setSectionBtnState(btnStates.Off);
 
             for (int j = 0; j < patchList.Count; j++)
             {
@@ -912,9 +890,7 @@ namespace AgOpenGPS
             //clear the flags
             flagPts.Clear();
 
-            gyd.isValid = false;
-            gyd.moveDistance = 0;
-            gyd.currentGuidanceLine = null;
+            SetGuidanceMode(Mode.None);
             gyd.currentCurveLine = null;
             gyd.currentABLine = null;
 
@@ -923,23 +899,11 @@ namespace AgOpenGPS
             gyd.creatingContour = null;
             gyd.curList.Clear();
             gyd.curveArr.Clear();
-            gyd.recList.Clear();
-            gyd.StopDrivingRecordedPath();
-            panelDrag.Visible = false;
+
             gyd.resumeState = 0;
             btnResumePath.Image = Resources.pathResumeStart;
             gyd.currentPositonIndex = 0;
 
-
-            //ABLine
-            btnABLine.Enabled = false;
-            btnABLine.Image = Properties.Resources.ABLineOff;
-            gyd.isBtnABLineOn = false;
-
-            //curve line
-            btnCurve.Enabled = false;
-            btnCurve.Image = Properties.Resources.CurveOff;
-            gyd.isBtnCurveOn = false;
 
             //clean up tram
             tram.displayMode = 0;
@@ -955,32 +919,7 @@ namespace AgOpenGPS
             }
             tram.tramBoundary.Clear();
 
-            //clear out contour and Lists
-            btnContour.Enabled = false;
-            //btnContourPriority.Enabled = false;
-            btnSnapToPivot.Image = Properties.Resources.SnapToPivot;
             contourSaveList.Clear();
-
-            gyd.isContourBtnOn = false;
-            btnContour.Image = Properties.Resources.ContourOff;
-
-            btnCycleLines.Image = Properties.Resources.ABLineCycle;
-            btnCycleLines.Enabled = false;
-
-            //AutoSteer
-            btnAutoSteer.Enabled = false;
-            isAutoSteerBtnOn = false;
-            btnAutoSteer.Image = Properties.Resources.AutoSteerOff;
-
-            //auto YouTurn shutdown
-            gyd.isYouTurnBtnOn = false;
-            btnAutoYouTurn.Image = Properties.Resources.YouTurnNo;
-            btnAutoYouTurn.Enabled = false;
-
-            btnABDraw.Visible = false;
-
-            gyd.ResetYouTurn();
-            DisableYouTurnButtons();
 
             //reset acre and distance counters
             fd.workedAreaTotal = 0;
@@ -992,8 +931,10 @@ namespace AgOpenGPS
             FixTramModeButton();
 
             FixPanelsAndMenus();
-            SetZoom();
+
             worldGrid.isGeoMap = false;
+
+            shape.Polygons.Clear();
         }
 
         //Does the logic to process section on off requests
@@ -1058,8 +999,15 @@ namespace AgOpenGPS
         }
 
         //take the distance from object and convert to camera data
-        public void SetZoom()
+        public void SetZoom(double Delta)
         {
+            camera.zoomValue += Delta * camera.zoomValue * (camera.zoomValue <= 20 ? 0.04 : 0.02);
+
+            if (camera.zoomValue > 220) camera.zoomValue = 220;
+            if (camera.zoomValue < 6.0) camera.zoomValue = 3.0;
+
+            camera.camSetDistance = camera.zoomValue * camera.zoomValue * -1;
+
             //match grid to cam distance and redo perspective
             if (camera.camSetDistance > -50) camera.gridZoom = 10;
             else if (camera.camSetDistance > -150) camera.gridZoom = 20;

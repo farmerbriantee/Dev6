@@ -391,13 +391,7 @@ namespace AgOpenGPS
                         mf.gyd.currentCurveLine = null;
 
                     if (mf.gyd.currentGuidanceLine?.Name == mf.gyd.curveArr[idx].Name)
-                    {
-                        mf.gyd.isValid = false;
-                        mf.gyd.moveDistance = 0;
-                        mf.gyd.currentGuidanceLine = null;
-                        if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
-                        if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
-                    }
+                        mf.SetGuidanceMode(Mode.None);
 
                     mf.gyd.curveArr.RemoveAt(idx);
                     lvLines.SelectedItems[0].Remove();
@@ -424,34 +418,24 @@ namespace AgOpenGPS
                 int idx = lvLines.Items[lvLines.SelectedIndices[0]].ImageIndex;
                 if (idx > -1)
                 {
+                    mf.SetGuidanceMode(ModeAB ? Mode.AB : Mode.Curve);
+
                     mf.gyd.currentGuidanceLine = new CGuidanceLine(mf.gyd.curveArr[idx]);
 
                     if (ModeAB)
                         mf.gyd.currentABLine = mf.gyd.currentGuidanceLine;
                     else
                         mf.gyd.currentCurveLine = mf.gyd.currentGuidanceLine;
-
-                    mf.EnableYouTurnButtons();
                 }
             }
             else
             {
                 if (ModeAB)
-                {
-                    mf.btnABLine.Image = Properties.Resources.ABLineOff;
-                    mf.gyd.isBtnABLineOn = false;
-                    mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = null;
-                }
+                    mf.gyd.currentABLine = null;
                 else
-                {
-                    mf.gyd.isBtnCurveOn = false;
-                    mf.btnCurve.Image = Properties.Resources.CurveOff;
-                    mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = null;
-                }
-
-                mf.DisableYouTurnButtons();
-                if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
-                if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
+                    mf.gyd.currentCurveLine = null;
+                
+                mf.SetGuidanceMode(Mode.None);
             }
         }
 

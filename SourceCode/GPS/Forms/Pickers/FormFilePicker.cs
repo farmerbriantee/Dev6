@@ -89,7 +89,6 @@ namespace AgOpenGPS
                 {
                     MessageBox.Show("No Recorded Paths", "Create A Path First",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Close();
                 }
 
             }
@@ -354,7 +353,6 @@ namespace AgOpenGPS
             if (mode == 2)
             {
                 mf.gyd.StopDrivingRecordedPath();
-                mf.gyd.recList.Clear();
                 mf.FileSaveRecPath();
                 mf.panelDrag.Visible = false;
                 Close();

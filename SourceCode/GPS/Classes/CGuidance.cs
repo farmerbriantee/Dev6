@@ -15,11 +15,11 @@ namespace AgOpenGPS
         public List<vec3> curList = new List<vec3>();
         public List<List<vec3>> sideGuideLines = new List<List<vec3>>();
         
-        public bool isBtnABLineOn, isBtnCurveOn, isContourBtnOn, isLocked = false;
+        public Mode CurrentGMode = Mode.None;
 
         private int currentLocationIndexA, currentLocationIndexB, backSpacing = 30;
 
-        public bool isValid, isOkToAddDesPoints;
+        public bool isValid, isOkToAddDesPoints, isLocked = false;
         public double lastSecond = 0, lastSecondSearch = 0, moveDistance, CurrentHeading;
 
         public double abLength;
@@ -86,7 +86,7 @@ namespace AgOpenGPS
                 if (pB > curList.Count - 2)
                     completeYouTurn = true;
 
-                if (isContourBtnOn)
+                if (CurrentGMode == Mode.Contour)
                 {
                     if (isLocked && (pA < 1 || pB > curList.Count - 2))
                     {
@@ -165,7 +165,7 @@ namespace AgOpenGPS
                     double lineHeading;
                     if (isYouTurnTriggered)
                         lineHeading = curList[sA].heading;
-                    else if (isBtnCurveOn || isBtnABLineOn)
+                    else if (CurrentGMode == Mode.Curve || CurrentGMode == Mode.AB)
                         lineHeading = isHeadingSameWay ? curList[sB].heading : curList[sA].heading;
                     else//contour
                     {
@@ -173,7 +173,7 @@ namespace AgOpenGPS
                         if (lineHeading < 0) lineHeading += glm.twoPI;
                     }
 
-                    if (!isYouTurnTriggered && (isBtnCurveOn || isBtnABLineOn))
+                    if (!isYouTurnTriggered && (CurrentGMode == Mode.Curve || CurrentGMode == Mode.AB))
                         distanceFromCurrentLineSteer -= inty;
 
                     if (isYouTurnTriggered || isHeadingSameWay)
@@ -209,9 +209,9 @@ namespace AgOpenGPS
 
                     xTrackSteerCorrection = (xTrackSteerCorrection * 0.5) + XTEc * 0.5;
 
-                    steerAngle = glm.toDegrees((((!isYouTurnTriggered || isContourBtnOn) ? XTEc : xTrackSteerCorrection) + steerHeadingError) * -1.0);
+                    steerAngle = glm.toDegrees((((!isYouTurnTriggered || CurrentGMode == Mode.Contour) ? XTEc : xTrackSteerCorrection) + steerHeadingError) * -1.0);
 
-                    if (!isYouTurnTriggered && (isBtnCurveOn || isBtnABLineOn))
+                    if (!isYouTurnTriggered && (CurrentGMode == Mode.Curve || CurrentGMode == Mode.AB))
                     {
                         if (Math.Abs(distanceFromCurrentLineSteer) > 0.5) steerAngle *= 0.5;
                         else steerAngle *= (1 - Math.Abs(distanceFromCurrentLineSteer));
@@ -278,7 +278,7 @@ namespace AgOpenGPS
                             //if over the line heading wrong way, rapidly decrease integral
                             if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
                             {
-                                inty += pivotDistError * mf.vehicle.purePursuitIntegralGain * (isContourBtnOn ? -0.06 : -0.04);
+                                inty += pivotDistError * mf.vehicle.purePursuitIntegralGain * (CurrentGMode == Mode.Contour ? -0.06 : -0.04);
                             }
                             else
                             {
@@ -365,7 +365,7 @@ namespace AgOpenGPS
 
                     if (!isYouTurnTriggered)
                     {
-                        if (isBtnABLineOn)
+                        if (CurrentGMode == Mode.AB)
                         {
                             if (mf.isAngVelGuidance)
                             {
@@ -578,7 +578,7 @@ namespace AgOpenGPS
         }
     }
 
-    public enum Mode { AB = 2, Curve = 4, Contour = 8, Boundary = 16 };//, Heading, Circle, Spiral
+    public enum Mode { None = 0, AB = 2, Curve = 4, Contour = 8, Boundary = 16, RecPath = 32 };//, Heading, Circle, Spiral
 
     public class CGuidanceLine
     {

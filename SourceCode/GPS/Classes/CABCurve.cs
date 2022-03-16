@@ -8,11 +8,11 @@ namespace AgOpenGPS
     {
         public void GetCurrentGuidanceLine(vec3 pivot, vec3 steer)
         {
-            if (isDrivingRecordedPath)
+            if (CurrentGMode == Mode.RecPath)
                 UpdatePosition();
             else
             {
-                if (isContourBtnOn)
+                if (CurrentGMode == Mode.Contour)
                     FindCurrentContourLine(pivot);
 
                 if (currentGuidanceLine != null)
@@ -386,14 +386,14 @@ namespace AgOpenGPS
         {
             GL.LineWidth(lineWidth);
 
-            if (mf.panelDrag.Visible && recList.Count > 0)
+            if (CurrentGMode == Mode.RecPath && recList.Count > 0)
             {
                 GL.Color3(0.98f, 0.92f, 0.460f);
                 GL.Begin(PrimitiveType.LineStrip);
                 for (int h = 0; h < recList.Count; h++) GL.Vertex3(recList[h].easting, recList[h].northing, 0);
                 GL.End();
 
-                if (!isRecordOn)
+                if (!isRecordOn && currentPositonIndex < recList.Count)
                 {
                     //Draw lookahead Point
                     GL.PointSize(16.0f);

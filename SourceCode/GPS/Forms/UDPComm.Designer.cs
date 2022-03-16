@@ -527,21 +527,9 @@ namespace AgOpenGPS
 
             if (keyData == (Keys.A)) //autosteer button on off
             {
-                btnAutoSteer.PerformClick();
+                setBtnAutoSteer(!isAutoSteerBtnOn);
                 return true;    // indicate that you handled this keystroke
             }
-
-            //if (keyData == (Keys.S)) //open the steer chart
-            //{
-            //    toolstripAutoSteerConfig.PerformClick();
-            //    return true;    // indicate that you handled this keystroke
-            //}
-
-            //if (keyData == (Keys.S)) //open the steer chart
-            //{
-            //    btnSnapToPivot.PerformClick();
-            //    return true;    // indicate that you handled this keystroke
-            //}
 
             if (keyData == (Keys.C)) //open the steer chart
             {
@@ -549,31 +537,13 @@ namespace AgOpenGPS
                 return true;    // indicate that you handled this keystroke
             }
 
-            if (keyData == (Keys.V)) //open the vehicle Settings
-            {
-                //lblHz.Per.PerformClick();
-                return true;    // indicate that you handled this keystroke
-            }
-
-            if (keyData == (Keys.NumPad1)) //auto section on off
+            if (keyData == (Keys.NumPad1) || keyData == (Keys.N)) //auto section on off
             {
                 btnSectionOffAutoOn.PerformClick();
                 return true;    // indicate that you handled this keystroke
             }
 
-            if (keyData == (Keys.N)) //auto section on off
-            {
-                btnSectionOffAutoOn.PerformClick();
-                return true;    // indicate that you handled this keystroke
-            }
-
-            if (keyData == (Keys.NumPad0)) //auto section on off
-            {
-                btnManualOffOn.PerformClick();
-                return true;    // indicate that you handled this keystroke
-            }
-
-            if (keyData == (Keys.M)) //auto section on off
+            if (keyData == (Keys.NumPad0) || keyData == (Keys.M)) //auto section on off
             {
                 btnManualOffOn.PerformClick();
                 return true;    // indicate that you handled this keystroke

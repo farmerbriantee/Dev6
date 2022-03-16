@@ -630,7 +630,6 @@ namespace AgOpenGPS
 
             CalculateMinMax();
             bnd.BuildTurnLines();
-            if (bnd.bndList.Count > 0) btnABDraw.Visible = true;
 
             // Headland  -------------------------------------------------------------------------------------------------
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Headland.txt";
@@ -867,11 +866,7 @@ namespace AgOpenGPS
                                 gyd.recList.Add(point);
                             }
                         }
-
-                        //if (gyd.recList.Count > 0) panelDrag.Visible = true;
-                        //else panelDrag.Visible = false;
                     }
-
                     catch (Exception e)
                     {
                         var form = new FormTimedMessage(2000, gStr.gsRecordedPathFileIsCorrupt, gStr.gsButFieldIsLoaded);
@@ -880,8 +875,6 @@ namespace AgOpenGPS
                     }
                 }
             }
-
-
         }//end of open file
 
         //creates the field file when starting new field
@@ -1270,56 +1263,6 @@ namespace AgOpenGPS
                             Math.Round(gyd.recList[j].heading, 3).ToString(CultureInfo.InvariantCulture) + "," +
                             Math.Round(gyd.recList[j].speed, 1).ToString(CultureInfo.InvariantCulture) + "," +
                             (gyd.recList[j].autoBtnState).ToString());
-
-                    //Clear list
-                    //recPath.recList.Clear();
-                }
-            }
-        }
-
-        //load Recpath.txt
-        public void FileLoadRecPath()
-        {
-            string line;
-            //Recorded Path
-            string fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\RecPath.txt";
-            if (File.Exists(fileAndDirectory))
-            {
-                using (StreamReader reader = new StreamReader(fileAndDirectory))
-                {
-                    try
-                    {
-                        //read header
-                        line = reader.ReadLine();
-                        line = reader.ReadLine();
-                        int numPoints = int.Parse(line);
-                        gyd.recList.Clear();
-
-                        while (!reader.EndOfStream)
-                        {
-                            for (int v = 0; v < numPoints; v++)
-                            {
-                                line = reader.ReadLine();
-                                string[] words = line.Split(',');
-                                CRecPathPt point = new CRecPathPt(
-                                    double.Parse(words[0], CultureInfo.InvariantCulture),
-                                    double.Parse(words[1], CultureInfo.InvariantCulture),
-                                    double.Parse(words[2], CultureInfo.InvariantCulture),
-                                    double.Parse(words[3], CultureInfo.InvariantCulture),
-                                    bool.Parse(words[4]));
-
-                                //add the point
-                                gyd.recList.Add(point);
-                            }
-                        }
-                    }
-
-                    catch (Exception e)
-                    {
-                        var form = new FormTimedMessage(2000, gStr.gsRecordedPathFileIsCorrupt, gStr.gsButFieldIsLoaded);
-                        form.Show(this);
-                        WriteErrorLog("Load Recorded Path" + e.ToString());
-                    }
                 }
             }
         }

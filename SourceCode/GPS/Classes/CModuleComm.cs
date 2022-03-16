@@ -51,8 +51,7 @@
             {
                 oldsteerSwitchHigh = steerSwitchHigh;
                 //steerSwith is active low
-                if (steerSwitchHigh == mf.isAutoSteerBtnOn)
-                    mf.btnAutoSteer.PerformClick();
+                mf.setBtnAutoSteer(!steerSwitchHigh);
             }
 
             if (isSteerControlsManual) workSwitchHigh = steerSwitchHigh;
@@ -62,22 +61,9 @@
                 oldWorkSwitchHigh = workSwitchHigh;
 
                 if (workSwitchHigh != isWorkSwitchActiveLow)
-                {
-                    if (isWorkSwitchManual)
-                    {
-                        if (mf.autoBtnState != btnStates.On)
-                            mf.btnManualOffOn.PerformClick();
-                    }
-                    else if (mf.autoBtnState != btnStates.Auto)
-                        mf.btnSectionOffAutoOn.PerformClick();
-                }
+                    mf.setSectionBtnState(isWorkSwitchManual ? btnStates.On : btnStates.Auto);
                 else//Checks both on-screen buttons, performs click if button is not off
-                {
-                    if (mf.autoBtnState == btnStates.Auto)
-                        mf.btnSectionOffAutoOn.PerformClick();
-                    if (mf.autoBtnState == btnStates.On)
-                        mf.btnManualOffOn.PerformClick();
-                }
+                    mf.setSectionBtnState(btnStates.Off);
             }
         }
     }

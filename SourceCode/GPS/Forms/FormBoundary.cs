@@ -225,7 +225,7 @@ namespace AgOpenGPS
 
             for (int i = mf.bnd.bndList.Count - 1; i >= 0; i--)
                 mf.bnd.RemoveHandles(i);
-            
+
             mf.FileSaveBoundary();
             tableLayoutPanel1.Controls.Clear();
             tableLayoutPanel1.RowStyles.Clear();
@@ -394,7 +394,6 @@ namespace AgOpenGPS
                         mf.FileSaveBoundary();
                         mf.CalculateMinMax();
                         mf.bnd.BuildTurnLines();
-                        mf.btnABDraw.Visible = true;
                         UpdateChart();
                     }
                     catch (Exception)
@@ -489,8 +488,6 @@ namespace AgOpenGPS
                 mf.CalculateMinMax();
                 mf.FileSaveBoundary();
                 mf.bnd.BuildTurnLines();
-                //mf.hd.BuildSingleSpaceHeadLines();
-                mf.btnABDraw.Visible = true;
             }
 
             //stop it all for adding

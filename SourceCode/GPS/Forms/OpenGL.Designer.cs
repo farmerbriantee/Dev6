@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL;
 using System.Windows.Forms;
 using System.Text;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace AgOpenGPS
 {
@@ -35,7 +36,7 @@ namespace AgOpenGPS
             GL.ClearColor(0.27f, 0.4f, 0.7f, 1.0f);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.CullFace(CullFaceMode.Back);
-            SetZoom();
+            SetZoom(0);
             tmrWatchdog.Enabled = true;
         }
 
@@ -227,6 +228,29 @@ namespace AgOpenGPS
                 GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
                 GL.Color3(1, 1, 1);
 
+                Color colorBlack = Color.FromArgb(0x78000000);
+                for (int i = 0; i < shape.Polygons.Count; i++)
+                {
+                    GL.Color4(shape.Polygons[i].color);
+                    for (int j = 0; j < shape.Polygons[i].Parts.Count; j++)
+                    {
+                        GL.Begin(PrimitiveType.Polygon);
+                        for (int k = 0; k < shape.Polygons[i].Parts[j].Length; k++)
+                        {
+                            GL.Vertex3(shape.Polygons[i].Parts[j][k].easting, shape.Polygons[i].Parts[j][k].northing, 0);
+                        }
+                        GL.End();
+
+                        GL.Color4(colorBlack);
+                        GL.Begin(PrimitiveType.LineLoop);
+                        for (int k = 0; k < shape.Polygons[i].Parts[j].Length; k++)
+                        {
+                            GL.Vertex3(shape.Polygons[i].Parts[j][k].easting, shape.Polygons[i].Parts[j][k].northing, 0);
+                        }
+                        GL.End();
+                    }
+                }
+
                 if (bnd.bndList.Count > 0)
                 {
                     //draw Boundaries
@@ -235,7 +259,7 @@ namespace AgOpenGPS
                     GL.LineWidth(gyd.lineWidth);
 
                     //draw the turnLines
-                    if (gyd.isYouTurnBtnOn && !gyd.isContourBtnOn)
+                    if (gyd.isYouTurnBtnOn)
                     {
                         GL.Color3(0.3555f, 0.6232f, 0.20f);
                         for (int i = 0; i < bnd.bndList.Count; i++)
@@ -339,7 +363,7 @@ namespace AgOpenGPS
 
                 if (bnd.bndList.Count > 0 && gyd.isYouTurnBtnOn) DrawUTurnBtn();
 
-                if (isAutoSteerBtnOn && !gyd.isContourBtnOn) DrawManUTurnBtn();
+                if (isAutoSteerBtnOn && (gyd.CurrentGMode == Mode.AB || gyd.CurrentGMode == Mode.Curve)) DrawManUTurnBtn();
 
                 //if (isCompassOn) DrawCompass();
                 DrawCompassText();
@@ -357,7 +381,8 @@ namespace AgOpenGPS
                     if (pn.fixQuality != 4)
                     {
                         DrawLostRTK();
-                        if (isRTK_KillAutosteer && isAutoSteerBtnOn) btnAutoSteer.PerformClick();
+                        if (isRTK_KillAutosteer && isAutoSteerBtnOn)
+                            setBtnAutoSteer(false);
                     }
                 }
 
@@ -1658,7 +1683,7 @@ namespace AgOpenGPS
             GL.Color3(0.9752f, 0.62f, 0.325f);
             if (timerSim.Enabled) font.DrawText(-110, oglMain.Height - 130, "Simulator On", 1);
 
-            if (gyd.isContourBtnOn && gyd.isLocked && isFlashOnOff)
+            if (gyd.CurrentGMode == Mode.Contour && gyd.isLocked && isFlashOnOff)
             {
                 GL.Color3(0.9652f, 0.752f, 0.75f);
                 font.DrawText(-center - 100, oglMain.Height / 2.3, "Locked", 1);
@@ -1946,7 +1971,7 @@ namespace AgOpenGPS
         //determine mins maxs of patches and whole field.
         public void CalculateMinMax()
         {
-
+            btnABDraw.Visible = bnd.bndList.Count > 0;
             minFieldX = 9999999; minFieldY = 9999999;
             maxFieldX = -9999999; maxFieldY = -9999999;
 

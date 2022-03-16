@@ -132,6 +132,7 @@
     <Compile Include="Classes\CExtensionMethods.cs" />
     <Compile Include="Classes\CBoundary.cs" />
     <Compile Include="Classes\CGuidance.cs" />
+    <Compile Include="Classes\CShapeFile.cs" />
     <Compile Include="Classes\ZStaticClass.cs" />
     <Compile Include="Classes\CRecordedPath.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>

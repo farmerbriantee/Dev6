@@ -57,14 +57,8 @@ namespace AgOpenGPS
             {
                 mf.gyd.currentABLine = null;
 
-                if (mf.gyd.isBtnABLineOn)
-                {
-                    if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
-                    if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
-
-                    mf.gyd.isBtnABLineOn = false;
-                    mf.btnABLine.Image = Properties.Resources.ABLineOff;
-                }
+                if (mf.gyd.CurrentGMode == Mode.AB)
+                    mf.SetGuidanceMode(Mode.None);
             }
             mf.FileSaveABLines();
 
@@ -75,14 +69,8 @@ namespace AgOpenGPS
             {
                 mf.gyd.currentCurveLine = null;
 
-                if (mf.gyd.isBtnCurveOn)
-                {
-                    if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
-                    if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
-
-                    mf.gyd.isBtnCurveOn = false;
-                    mf.btnCurve.Image = Properties.Resources.CurveOff;
-                }
+                if (mf.gyd.CurrentGMode == Mode.Curve)
+                    mf.SetGuidanceMode(Mode.None);
             }
             mf.FileSaveCurveLines();
         }
@@ -223,15 +211,8 @@ namespace AgOpenGPS
                 if (mf.gyd.currentCurveLine?.Name == selectedCurveLine.Name)
                     mf.gyd.currentCurveLine = null;
                 if (mf.gyd.currentGuidanceLine?.Name == selectedCurveLine.Name)
-                {
-                    mf.gyd.isValid = false;
-                    mf.gyd.moveDistance = 0;
-                    mf.gyd.currentGuidanceLine = null;
+                    mf.SetGuidanceMode(Mode.None);
 
-                    if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
-                    if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
-                    if (mf.gyd.isBtnCurveOn) mf.btnCurve.PerformClick();
-                }
                 mf.gyd.curveArr.Remove(selectedCurveLine);
 
                 selectedCurveLine = null;
@@ -248,15 +229,8 @@ namespace AgOpenGPS
                 if (mf.gyd.currentABLine?.Name == selectedABLine.Name)
                     mf.gyd.currentABLine = null;
                 if (mf.gyd.currentGuidanceLine?.Name == selectedABLine.Name)
-                {
-                    mf.gyd.isValid = false;
-                    mf.gyd.moveDistance = 0;
-                    mf.gyd.currentGuidanceLine = mf.gyd.currentABLine = null;
+                    mf.SetGuidanceMode(Mode.None);
 
-                    if (mf.isAutoSteerBtnOn) mf.btnAutoSteer.PerformClick();
-                    if (mf.gyd.isYouTurnBtnOn) mf.btnAutoYouTurn.PerformClick();
-                    if (mf.gyd.isBtnABLineOn) mf.btnABLine.PerformClick();
-                }
                 mf.gyd.curveArr.Remove(selectedABLine);
 
                 selectedABLine = null;

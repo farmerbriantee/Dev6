@@ -106,12 +106,6 @@ namespace AgOpenGPS
         /*
         private void MakeDubinsLineFromPivotToFlag()
         {
-            //if (mf.ABLine.isBtnABLineOn)
-            //{
-            //    mf.ABLine.isBtnABLineOn = false;
-            //    mf.btnABLine.Image = Properties.Resources.ABLineOff;
-            //}
-
             CDubins.turningRadius = mf.vehicle.minTurningRadius * 3.0;
             CDubins dubPath = new CDubins();
 

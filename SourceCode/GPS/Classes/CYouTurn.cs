@@ -805,6 +805,7 @@ namespace AgOpenGPS
         {
             youTurnPhase = -2;
             ytList.Clear();
+            OffsetList.Clear();
         }
 
         public void BuildManualYouLateral(bool isTurnRight)
@@ -816,7 +817,7 @@ namespace AgOpenGPS
         }
 
         //build the points and path of youturn to be scaled and transformed
-        public void BuildManualYouTurn(bool isTurnRight, bool isTurnButtonTriggered)
+        public void BuildManualYouTurn(bool isTurnRight)
         {
             isYouTurnTriggered = true;
             SwapYouTurn = true;
