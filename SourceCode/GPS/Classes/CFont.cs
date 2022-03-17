@@ -30,13 +30,13 @@ namespace AgOpenGPS
         {
             GL.PushMatrix();
             {
-                size *= -mf.camera.camSetDistance;
+                size *= -mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.8) / 800;
 
                 //2d
-                if (mf.camera.camPitch > -58)
+                if (mf.worldManager.camPitch > -58)
                 {
-                    if (!mf.camera.camFollowing)
+                    if (!mf.worldManager.camFollowing)
                     {
                         GL.Rotate(mf.camHeading, 0, 0, 1);
                         y *= 1.2;
@@ -51,7 +51,7 @@ namespace AgOpenGPS
                 //3d
                 else
                 {
-                    if (!mf.camera.camFollowing)
+                    if (!mf.worldManager.camFollowing)
                     {
                         GL.Rotate(90, 1, 0, 0);
                         GL.Rotate(mf.camHeading, 0, 1, 0);
@@ -60,7 +60,7 @@ namespace AgOpenGPS
                     }
                     else
                     {
-                        GL.Rotate(-mf.camera.camPitch, 1, 0, 0);
+                        GL.Rotate(-mf.worldManager.camPitch, 1, 0, 0);
                         y *= 0.3;
                     }
                 }
@@ -113,19 +113,19 @@ namespace AgOpenGPS
 
             GL.Translate(x1, y1, 0);
 
-            if (mf.camera.camPitch < -45)
+            if (mf.worldManager.camPitch < -45)
             {
                 GL.Rotate(90, 1, 0, 0);
-                if (mf.camera.camFollowing) GL.Rotate(-mf.camHeading, 0, 1, 0);
-                size = -mf.camera.camSetDistance;
+                if (mf.worldManager.camFollowing) GL.Rotate(-mf.camHeading, 0, 1, 0);
+                size = -mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.8);
                 size /= 800;
             }
 
             else
             {
-                if (mf.camera.camFollowing) GL.Rotate(-mf.camHeading, 0, 0, 1);
-                size = -mf.camera.camSetDistance;
+                if (mf.worldManager.camFollowing) GL.Rotate(-mf.camHeading, 0, 0, 1);
+                size = -mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.85);
                 size /= 1000;
             }

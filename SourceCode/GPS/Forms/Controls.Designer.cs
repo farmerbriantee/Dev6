@@ -1275,8 +1275,8 @@ namespace AgOpenGPS
                 return;
             }
 
-            camera.camFollowing = true;
-            camera.camPitch = 0;
+            worldManager.camFollowing = true;
+            worldManager.camPitch = 0;
             navPanelCounter = 2;
         }
 
@@ -1288,8 +1288,8 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            camera.camFollowing = true;
-            camera.camPitch = -60;
+            worldManager.camFollowing = true;
+            worldManager.camPitch = -60;
             navPanelCounter = 2;
         }
 
@@ -1301,8 +1301,8 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            camera.camFollowing = false;
-            camera.camPitch = 0;
+            worldManager.camFollowing = false;
+            worldManager.camPitch = 0;
             navPanelCounter = 2;
         }
 
@@ -1314,8 +1314,8 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            camera.camPitch = -60;
-            camera.camFollowing = false;
+            worldManager.camPitch = -60;
+            worldManager.camFollowing = false;
             navPanelCounter = 2;
         }
 
@@ -1350,8 +1350,8 @@ namespace AgOpenGPS
             //    isTT = false;
             //    return;
             //}
-            camera.camPitch -= ((camera.camPitch * 0.012) - 1);
-            if (camera.camPitch > -40) camera.camPitch = 0;
+            worldManager.camPitch -= ((worldManager.camPitch * 0.012) - 1);
+            if (worldManager.camPitch > -40) worldManager.camPitch = 0;
             navPanelCounter = 2;
         }
         private void btnpTiltDown_MouseDown(object sender, MouseEventArgs e)
@@ -1362,9 +1362,9 @@ namespace AgOpenGPS
             //    isTT = false;
             //    return;
             //}
-            if (camera.camPitch > -40) camera.camPitch = -40;
-            camera.camPitch += ((camera.camPitch * 0.012) - 1);
-            if (camera.camPitch < -80) camera.camPitch = -80;
+            if (worldManager.camPitch > -40) worldManager.camPitch = -40;
+            worldManager.camPitch += ((worldManager.camPitch * 0.012) - 1);
+            if (worldManager.camPitch < -80) worldManager.camPitch = -80;
             navPanelCounter = 2;
         }
 

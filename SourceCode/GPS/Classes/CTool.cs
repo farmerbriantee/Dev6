@@ -204,7 +204,7 @@ namespace AgOpenGPS
             //draw the sections
             GL.LineWidth(2);
 
-            double hite = mf.camera.camSetDistance / -150;
+            double hite = mf.worldManager.camSetDistance / -150;
             if (hite > 0.7) hite = 0.7;
             if (hite < 0.5) hite = 0.5;
 
@@ -266,7 +266,7 @@ namespace AgOpenGPS
             //tram Dots
             if (mf.tram.displayMode != 0)
             {
-                if (mf.camera.camSetDistance > -200)
+                if (mf.worldManager.camSetDistance > -200)
                 {
                     GL.PointSize(8);
 

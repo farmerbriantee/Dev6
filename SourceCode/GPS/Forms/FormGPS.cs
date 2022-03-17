@@ -127,14 +127,9 @@ namespace AgOpenGPS
         public bool isGPSSentencesOn = false, isKeepOffsetsOn = false;
 
         /// <summary>
-        /// create the scene camera
+        /// create the world manager
         /// </summary>
-        public CCamera camera = new CCamera();
-
-        /// <summary>
-        /// create world grid
-        /// </summary>
-        public CWorldGrid worldGrid;
+        public CWorldManager worldManager;
 
         /// <summary>
         /// The NMEA class that decodes it
@@ -264,7 +259,7 @@ namespace AgOpenGPS
             //SetupStructSizes();
 
             //create the world grid
-            worldGrid = new CWorldGrid(this);
+            worldManager = new CWorldManager(this);
 
             //our vehicle made with gl object and pointer of mainform
             vehicle = new CVehicle(this);
@@ -932,7 +927,7 @@ namespace AgOpenGPS
 
             FixPanelsAndMenus();
 
-            worldGrid.isGeoMap = false;
+            worldManager.isGeoMap = false;
 
             shape.Polygons.Clear();
         }
@@ -1001,23 +996,23 @@ namespace AgOpenGPS
         //take the distance from object and convert to camera data
         public void SetZoom(double Delta)
         {
-            camera.zoomValue += Delta * camera.zoomValue * (camera.zoomValue <= 20 ? 0.04 : 0.02);
+            worldManager.zoomValue += Delta * worldManager.zoomValue * (worldManager.zoomValue <= 20 ? 0.04 : 0.02);
 
-            if (camera.zoomValue > 220) camera.zoomValue = 220;
-            if (camera.zoomValue < 6.0) camera.zoomValue = 6.0;
+            if (worldManager.zoomValue > 220) worldManager.zoomValue = 220;
+            if (worldManager.zoomValue < 6.0) worldManager.zoomValue = 6.0;
 
-            camera.camSetDistance = camera.zoomValue * camera.zoomValue * -1;
+            worldManager.camSetDistance = worldManager.zoomValue * worldManager.zoomValue * -1;
 
             //match grid to cam distance and redo perspective
-            if (camera.camSetDistance > -50) camera.gridZoom = 10;
-            else if (camera.camSetDistance > -150) camera.gridZoom = 20;
-            else if (camera.camSetDistance > -250) camera.gridZoom = 40;
-            else if (camera.camSetDistance > -500) camera.gridZoom = 80;
-            else if (camera.camSetDistance > -1000) camera.gridZoom = 160;
-            else if (camera.camSetDistance > -2000) camera.gridZoom = 320;
-            else if (camera.camSetDistance > -5000) camera.gridZoom = 640;
-            else if (camera.camSetDistance > -10000) camera.gridZoom = 1280;
-            else if (camera.camSetDistance > -20000) camera.gridZoom = 2560;
+            if (worldManager.camSetDistance > -50) worldManager.gridZoom = 10;
+            else if (worldManager.camSetDistance > -150) worldManager.gridZoom = 20;
+            else if (worldManager.camSetDistance > -250) worldManager.gridZoom = 40;
+            else if (worldManager.camSetDistance > -500) worldManager.gridZoom = 80;
+            else if (worldManager.camSetDistance > -1000) worldManager.gridZoom = 160;
+            else if (worldManager.camSetDistance > -2000) worldManager.gridZoom = 320;
+            else if (worldManager.camSetDistance > -5000) worldManager.gridZoom = 640;
+            else if (worldManager.camSetDistance > -10000) worldManager.gridZoom = 1280;
+            else if (worldManager.camSetDistance > -20000) worldManager.gridZoom = 2560;
 
             oglMain_Resize(null, null);
         }

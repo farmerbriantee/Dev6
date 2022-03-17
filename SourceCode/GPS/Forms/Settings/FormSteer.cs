@@ -244,14 +244,14 @@ namespace AgOpenGPS
             if (actAng > 0)
             {
                 if (actAng > 49) actAng = 49;
-                CExtensionMethods.SetProgressNoAnimation(pbarRight, (int)actAng);
+                SetProgressNoAnimation(pbarRight, (int)actAng);
                 pbarLeft.Value = 0;
             }
             else
             {
                 if (actAng < -49) actAng = -49;
                 pbarRight.Value = 0;
-                CExtensionMethods.SetProgressNoAnimation(pbarLeft, (int)-actAng);
+                SetProgressNoAnimation(pbarLeft, (int)-actAng);
             }
 
             lblSteerAngle.Text = mf.SetSteerAngle;
@@ -293,9 +293,32 @@ namespace AgOpenGPS
             if (mf.mc.sensorData != -1)
             {
                 if (mf.mc.sensorData < 0 || mf.mc.sensorData > 255) mf.mc.sensorData = 0;
-                CExtensionMethods.SetProgressNoAnimation(pbarSensor, mf.mc.sensorData);
+                SetProgressNoAnimation(pbarSensor, mf.mc.sensorData);
                 lblPercentFS.Text = ((int)((double)mf.mc.sensorData * 0.3921568627)).ToString() + "%";
             }
+        }
+
+        /// <summary>
+        /// Sets the progress bar value, without using 'Windows Aero' animation.
+        /// This is to work around a known WinForms issue where the progress bar 
+        /// is slow to update. 
+        /// </summary>
+        public void SetProgressNoAnimation(ProgressBar pb, int value)
+        {
+            // To get around the progressive animation, we need to move the 
+            // progress bar backwards.
+            if (value == pb.Maximum)
+            {
+                // Special case as value can't be set greater than Maximum.
+                pb.Maximum = value + 1;     // Temporarily Increase Maximum
+                pb.Value = value + 1;       // Move past
+                pb.Maximum = value;         // Reset maximum
+            }
+            else
+            {
+                pb.Value = value + 1;       // Move past
+            }
+            pb.Value = value;               // Move to correct value
         }
 
         private void FormSteer_FormClosing(object sender, FormClosingEventArgs e)

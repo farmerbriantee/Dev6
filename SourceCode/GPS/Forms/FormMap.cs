@@ -50,7 +50,7 @@ namespace AgOpenGPS
 
             mapControl.Invalidate();
             
-            if (mf.worldGrid.isGeoMap)
+            if (mf.worldManager.isGeoMap)
             {
                 btnN.Enabled = true;
                 btnE.Enabled = true;
@@ -69,7 +69,7 @@ namespace AgOpenGPS
                 btnGray.Visible = false;
             }
 
-            if (mf.worldGrid.isGeoMap) cboxDrawMap.Image = Properties.Resources.MappingOn;
+            if (mf.worldManager.isGeoMap) cboxDrawMap.Image = Properties.Resources.MappingOn;
             else cboxDrawMap.Image = Properties.Resources.MappingOff;
         }
 
@@ -335,7 +335,7 @@ namespace AgOpenGPS
             {
                 cboxDrawMap.Image = Properties.Resources.MappingOff;
                 ResetMapGrid();
-                mf.worldGrid.isGeoMap = false;
+                mf.worldManager.isGeoMap = false;
                 btnN.Enabled = false;
                 btnE.Enabled = false;
                 btnS.Enabled = false;
@@ -357,7 +357,7 @@ namespace AgOpenGPS
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, 9729);
             }
 
-            mf.worldGrid.isGeoMap = false;
+            mf.worldManager.isGeoMap = false;
 
             bingLine.Clear();
             mapControl.Markers.Clear();
@@ -367,26 +367,26 @@ namespace AgOpenGPS
 
         private void btnN_Click(object sender, EventArgs e)
         {
-            mf.worldGrid.northingMaxGeo += 0.2;
-            mf.worldGrid.northingMinGeo += 0.2;
+            mf.worldManager.northingMaxGeo += 0.2;
+            mf.worldManager.northingMinGeo += 0.2;
         }
 
         private void btnS_Click(object sender, EventArgs e)
         {
-            mf.worldGrid.northingMaxGeo -= 0.2;
-            mf.worldGrid.northingMinGeo -= 0.2;
+            mf.worldManager.northingMaxGeo -= 0.2;
+            mf.worldManager.northingMinGeo -= 0.2;
         }
 
         private void btnE_Click(object sender, EventArgs e)
         {
-            mf.worldGrid.eastingMaxGeo += 0.2;
-            mf.worldGrid.eastingMinGeo += 0.2;
+            mf.worldManager.eastingMaxGeo += 0.2;
+            mf.worldManager.eastingMinGeo += 0.2;
         }
 
         private void btnW_Click(object sender, EventArgs e)
         {
-            mf.worldGrid.eastingMaxGeo -= 0.2;
-            mf.worldGrid.eastingMinGeo -= 0.2;
+            mf.worldManager.eastingMaxGeo -= 0.2;
+            mf.worldManager.eastingMinGeo -= 0.2;
         }
 
         private void btnGray_Click(object sender, EventArgs e)
@@ -401,21 +401,21 @@ namespace AgOpenGPS
             //mapControl.Markers.Clear();
             //mapControl.Invalidate();
 
-            mf.worldGrid.isGeoMap = true;
+            mf.worldManager.isGeoMap = true;
 
             CornerPoint geoRef = mapControl.TopLeftCorner;
             mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out double nor, out double eas);
-            if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldGrid.isGeoMap = false;
-            mf.worldGrid.northingMaxGeo = nor;
-            mf.worldGrid.eastingMinGeo = eas;
+            if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldManager.isGeoMap = false;
+            mf.worldManager.northingMaxGeo = nor;
+            mf.worldManager.eastingMinGeo = eas;
 
             geoRef = mapControl.BottomRightCorner;
             mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out nor, out eas);
-            if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldGrid.isGeoMap = false;
-            mf.worldGrid.northingMinGeo = nor;
-            mf.worldGrid.eastingMaxGeo = eas;
+            if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldManager.isGeoMap = false;
+            mf.worldManager.northingMinGeo = nor;
+            mf.worldManager.eastingMaxGeo = eas;
 
-            if (!mf.worldGrid.isGeoMap)
+            if (!mf.worldManager.isGeoMap)
             {
                 mf.TimedMessageBox(2000, "Map Error", "Map Too Large");
                 ResetMapGrid();
@@ -435,7 +435,7 @@ namespace AgOpenGPS
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bitmapData.Width, bitmapData.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bitmapData.Scan0);
             bitmap.UnlockBits(bitmapData);
 
-            if (mf.worldGrid.isGeoMap) cboxDrawMap.Image = Properties.Resources.MappingOn;
+            if (mf.worldManager.isGeoMap) cboxDrawMap.Image = Properties.Resources.MappingOn;
             
             isColorMap = !isColorMap;
 

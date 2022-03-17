@@ -101,7 +101,7 @@ namespace AgOpenGPS
                 displayUpdateThreeSecondCounter = threeSeconds;
 
                 //check to make sure the grid is big enough
-                worldGrid.checkZoomWorldGrid(pn.fix.northing, pn.fix.easting);
+                worldManager.checkZoomWorldGrid(pn.fix.northing, pn.fix.easting);
 
                 if (panelNavigation.Visible)
                     lblHz.Text = fixUpdateHz + " ~ " + (frameTime.ToString("N1")) + " " + FixQuality;
@@ -340,7 +340,7 @@ namespace AgOpenGPS
 
             isSkyOn = Settings.Default.setMenu_isSkyOn;
             isTextureOn = Settings.Default.setDisplay_isTextureOn;
-            worldGrid.isGridOn = Settings.Default.setMenu_isGridOn;
+            worldManager.isGridOn = Settings.Default.setMenu_isGridOn;
             isSpeedoOn = Settings.Default.setMenu_isSpeedoOn;
             isAutoDayNight = Settings.Default.setDisplay_isAutoDayNight;
             isSideGuideLines = Settings.Default.setMenu_isSideGuideLines;
@@ -576,8 +576,8 @@ namespace AgOpenGPS
                 Settings.Default.setWindow_Size = RestoreBounds.Size;
             }
 
-            Settings.Default.setDisplay_camPitch = camera.camPitch;
-            Properties.Settings.Default.setDisplay_camZoom = camera.zoomValue;
+            Settings.Default.setDisplay_camPitch = worldManager.camPitch;
+            Properties.Settings.Default.setDisplay_camZoom = worldManager.zoomValue;
 
             Settings.Default.setF_UserTotalArea = fd.workedAreaTotalUser;
 

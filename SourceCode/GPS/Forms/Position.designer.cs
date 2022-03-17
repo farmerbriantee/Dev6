@@ -426,7 +426,7 @@ namespace AgOpenGPS
                         if (camDelta > glm.twoPI) camDelta -= glm.twoPI;
                         else if (camDelta < -glm.twoPI) camDelta += glm.twoPI;
 
-                        smoothCamHeading -= camDelta * camera.camSmoothFactor;
+                        smoothCamHeading -= camDelta * worldManager.camSmoothFactor;
 
                         if (smoothCamHeading > glm.twoPI) smoothCamHeading -= glm.twoPI;
                         else if (smoothCamHeading < -glm.twoPI) smoothCamHeading += glm.twoPI;
@@ -599,7 +599,7 @@ namespace AgOpenGPS
                         if (camDelta > glm.twoPI) camDelta -= glm.twoPI;
                         else if (camDelta < -glm.twoPI) camDelta += glm.twoPI;
 
-                        smoothCamHeading -= camDelta * camera.camSmoothFactor;
+                        smoothCamHeading -= camDelta * worldManager.camSmoothFactor;
 
                         if (smoothCamHeading > glm.twoPI) smoothCamHeading -= glm.twoPI;
                         else if (smoothCamHeading < -glm.twoPI) smoothCamHeading += glm.twoPI;
@@ -1184,73 +1184,6 @@ namespace AgOpenGPS
                 if (tool.lookAheadDistanceOffPixelsRight < -maxLookAhead)
                     tool.lookAheadDistanceOffPixelsRight = -maxLookAhead;
             }
-        }
-
-        private void DoRemoteSwitches()
-        {
-            //MTZ8302 Feb 2020 
-            if (isJobStarted)
-            {
-                //MainSW was used
-                if (mc.ss[mc.swMain] != mc.ssP[mc.swMain])
-                {
-                    //Main SW pressed
-                    if ((mc.ss[mc.swMain] & 1) == 1)
-                    {
-                        //set butto off and then press it = ON
-                        setSectionBtnState(btnStates.On);
-                    } // if Main SW ON
-
-                    //if Main SW in Arduino is pressed OFF
-                    if ((mc.ss[mc.swMain] & 2) == 2)
-                    {
-                        //set button on and then press it = OFF
-                        setSectionBtnState(btnStates.Off);
-                    } // if Main SW OFF
-
-                    mc.ssP[mc.swMain] = mc.ss[mc.swMain];
-                }  //Main or Rate SW
-
-                int set = 1;
-                int idx1 = mc.swOnGr0;
-                int idx2 = mc.swOffGr0;
-
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    if (j == 8)
-                    {
-                        set = 1;
-                        idx1 = mc.swOnGr1;
-                        idx2 = mc.swOffGr1;
-                    }
-
-                    //do nothing if bit isn't set [only works fully when BBBBB is deleted]
-                    btnStates status = section[j].sectionState;
-
-                    if ((mc.ss[idx1] & set) == set)
-                    {
-                        if (autoBtnState == btnStates.Auto && (mc.ss[idx2] & set) == set)//AAAAA
-                            status = btnStates.Auto;//not sure if we want to force on when auto is off!
-                        else if (autoBtnState != btnStates.Off)
-                            status = btnStates.On;
-                        else
-                            status = btnStates.Off;
-                    }
-                    else if ((mc.ss[idx2] & set) == set)
-                        status = btnStates.Off;
-                    else if ((mc.ss[idx2] & set) != (mc.ssP[idx2] & set) && status == btnStates.Off)//BBBBB
-                        status = btnStates.Auto;//should change to AAAAA (Both on [so that it doesnt change when you send 0])
-
-                    set <<= 1;
-
-                    section[j].UpdateButton(status);
-                }
-
-                //only needed for BBBBB
-                mc.ssP[mc.swOffGr0] = mc.ss[mc.swOffGr0];
-                mc.ssP[mc.swOffGr1] = mc.ss[mc.swOffGr1];
-
-            }//if serial or udp port open
         }
 
         //the start of first few frames to initialize entire program

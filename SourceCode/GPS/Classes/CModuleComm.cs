@@ -10,18 +10,18 @@
 
         // ---- Section control switches to AOG  ---------------------------------------------------------
         //PGN - 32736 - 127.249 0x7FF9
-        public byte[] ss = new byte[9];
-        public byte[] ssP = new byte[9];
+        public byte[] ssP = new byte[3];
+
         public int
             swHeader = 0,
-            swMain = 1,
-            swReserve = 2,
-            swReserve2 = 3,
-            swNumSections = 4,
-            swOnGr0 = 5,
-            swOffGr0 = 6,
-            swOnGr1 = 7,
-            swOffGr1 = 8;
+            swMain = 5,
+            swReserve = 6,
+            swReserve2 = 7,
+            swNumSections = 8,
+            swOnGr0 = 9,
+            swOffGr0 = 10,
+            swOnGr1 = 11,
+            swOffGr1 = 12;
 
         public int pwmDisplay = 0;
         public double actualSteerAngleDegrees = 0;

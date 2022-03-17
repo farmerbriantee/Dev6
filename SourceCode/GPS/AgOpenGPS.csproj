@@ -129,7 +129,6 @@
       <Link>Forms\Inputs\FormNumeric.Designer.cs</Link>
       <DependentUpon>FormNumeric.cs</DependentUpon>
     </Compile>
-    <Compile Include="Classes\CExtensionMethods.cs" />
     <Compile Include="Classes\CBoundary.cs" />
     <Compile Include="Classes\CGuidance.cs" />
     <Compile Include="Classes\CShapeFile.cs" />
@@ -142,7 +141,9 @@
     <Compile Include="Classes\CSunTimes.cs" />
     <Compile Include="Classes\CFieldData.cs" />
     <Compile Include="Classes\CBoundaryList.cs" />
-    <Compile Include="Classes\CDubins.cs" />
+    <Compile Include="Classes\CDubins.cs">
+		<DependentUpon>CGuidance.cs</DependentUpon>
+	</Compile>
     <Compile Include="Classes\CAHRS.cs" />
     <Compile Include="Classes\CABCurve.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
@@ -154,7 +155,6 @@
       <DependentUpon>CGuidance.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\CFlag.cs" />
-    <Compile Include="Classes\CCamera.cs" />
     <Compile Include="Classes\CContour.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
     </Compile>
@@ -162,7 +162,7 @@
     <Compile Include="Classes\CNMEA.cs" />
     <Compile Include="Classes\CSection.cs" />
     <Compile Include="Classes\CVehicle.cs" />
-    <Compile Include="Classes\CWorldGrid.cs" />
+    <Compile Include="Classes\CWorldManager.cs" />
     <Compile Include="Classes\CTool.cs" />
     <Compile Include="Forms\FormFieldKML.cs">
       <SubType>Form</SubType>

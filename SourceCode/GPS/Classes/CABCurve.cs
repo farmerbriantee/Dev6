@@ -472,7 +472,7 @@ namespace AgOpenGPS
 
                 if (curList.Count > 1)
                 {
-                    if (mf.isSideGuideLines && mf.camera.camSetDistance > mf.tool.toolWidth * -120)
+                    if (mf.isSideGuideLines && mf.worldManager.camSetDistance > mf.tool.toolWidth * -120)
                     {
                         GL.Color3(0.756f, 0.7650f, 0.7650f);
                         GL.Enable(EnableCap.LineStipple);
@@ -509,7 +509,7 @@ namespace AgOpenGPS
                         GL.End();
                     }
 
-                    if (!mf.isStanleyUsed && mf.camera.camSetDistance > -200)
+                    if (!mf.isStanleyUsed && mf.worldManager.camSetDistance > -200)
                     {
                         /*
                         if (ppRadius < 150 && ppRadius > -150)
@@ -626,6 +626,3 @@ namespace AgOpenGPS
         }
     }
 }
-
-
-

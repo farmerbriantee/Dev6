@@ -6,9 +6,16 @@ using System.Drawing;
 
 namespace AgOpenGPS
 {
-    public class CWorldGrid
+    public class CWorldManager
     {
         private readonly FormGPS mf;
+
+        public double camPitch;
+        public double camSetDistance = -75;
+        public double gridZoom;
+        public double zoomValue = 15;
+        public bool camFollowing;
+        public double camSmoothFactor;
 
         public double northingMax;
         public double eastingMaxGeo;
@@ -27,9 +34,32 @@ namespace AgOpenGPS
         public bool isGridOn;
         public bool isGeoMap;
 
-        public CWorldGrid(FormGPS _f)
+        public CWorldManager(FormGPS _f)
         {
             mf = _f;
+
+            //get the pitch of camera from settings
+            camPitch = Properties.Settings.Default.setDisplay_camPitch;
+            zoomValue = Properties.Settings.Default.setDisplay_camZoom;
+            camFollowing = true;
+            camSmoothFactor = (Properties.Settings.Default.setDisplay_camSmooth * 0.004) + 0.2;
+        }
+
+        public void SetWorldPerspective(double camPosX, double camPosY, double camYaw)
+        {
+            //back the camera up
+            GL.Translate(0.0, 0.0, camSetDistance * 0.5);
+
+            //rotate the camera down to look at fix
+            GL.Rotate(camPitch, 1.0, 0.0, 0.0);
+
+            //following game style or N fixed cam
+            if (camFollowing)
+                GL.Rotate(camYaw, 0.0, 0.0, 1.0);
+
+            GL.Translate(-camPosX, -camPosY, 0.0);
+
+            DrawFieldSurface();
         }
 
         public void DrawFieldSurface()
@@ -41,11 +71,11 @@ namespace AgOpenGPS
             if (mf.isTextureOn)
             {
                 //adjust bitmap zoom based on cam zoom
-                if (mf.camera.zoomValue > 100) Count = 4;
-                else if (mf.camera.zoomValue > 80) Count = 8;
-                else if (mf.camera.zoomValue > 50) Count = 16;
-                else if (mf.camera.zoomValue > 20) Count = 32;
-                else if (mf.camera.zoomValue > 10) Count = 64;
+                if (zoomValue > 100) Count = 4;
+                else if (zoomValue > 80) Count = 8;
+                else if (zoomValue > 50) Count = 16;
+                else if (zoomValue > 20) Count = 32;
+                else if (zoomValue > 10) Count = 64;
                 else Count = 128;
 
                 GL.Color3(field.R, field.G, field.B);
@@ -74,7 +104,7 @@ namespace AgOpenGPS
                 GL.End();
             }
 
-            if (isGeoMap && mf.camera.zoomValue > 15)
+            if (isGeoMap && zoomValue > 15)
             {
                 GL.BindTexture(TextureTarget.Texture2D, mf.texture[20]);
                 GL.Begin(PrimitiveType.TriangleStrip);
@@ -92,7 +122,7 @@ namespace AgOpenGPS
 
             GL.Disable(EnableCap.Texture2D);
             ////if grid is on draw it
-            if (isGridOn) DrawWorldGrid(mf.camera.gridZoom);
+            if (isGridOn) DrawWorldGrid(gridZoom);
         }
 
         public void DrawWorldGrid(double _gridZoom)

@@ -261,9 +261,68 @@ namespace AgOpenGPS
                             if (data.Length != 14)
                                 break;
 
-                            Buffer.BlockCopy(data, 5, mc.ss, 1, 8);
+                            //MTZ8302 Feb 2020 
+                            if (isJobStarted)
+                            {
+                                //MainSW was used
+                                if (data[mc.swMain] != mc.ssP[0])
+                                {
+                                    //Main SW pressed
+                                    if ((data[mc.swMain] & 1) == 1)
+                                    {
+                                        setSectionBtnState(btnStates.On);
+                                    } // if Main SW ON
+                                    //if Main SW in Arduino is pressed OFF
+                                    if ((data[mc.swMain] & 2) == 2)
+                                    {
+                                        setSectionBtnState(btnStates.Off);
+                                    } // if Main SW OFF
 
-                            DoRemoteSwitches();
+                                    mc.ssP[0] = data[mc.swMain];
+                                }  //Main or Rate SW
+
+                                int set = 1;
+                                int idx1 = mc.swOnGr0;
+                                int idx2 = mc.swOffGr0;
+                                int idx3 = 1;
+
+                                for (int j = 0; j < tool.numOfSections; j++)
+                                {
+                                    if (j == 8)
+                                    {
+                                        set = 1;
+                                        idx1 = mc.swOnGr1;
+                                        idx2 = mc.swOffGr1;
+                                        idx3 = 2;
+                                    }
+
+                                    //do nothing if bit isn't set [only works fully when BBBBB is deleted]
+                                    btnStates status = section[j].sectionState;
+
+                                    if ((data[idx1] & set) == set)
+                                    {
+                                        if (autoBtnState == btnStates.Auto && (data[idx2] & set) == set)//AAAAA
+                                            status = btnStates.Auto;//not sure if we want to force on when auto is off!
+                                        else if (autoBtnState != btnStates.Off)
+                                            status = btnStates.On;
+                                        else
+                                            status = btnStates.Off;
+                                    }
+                                    else if ((data[idx2] & set) == set)
+                                        status = btnStates.Off;
+                                    else if ((data[idx2] & set) != (mc.ssP[idx3] & set) && status == btnStates.Off)//BBBBB
+                                        status = btnStates.Auto;//should change to AAAAA (Both on [so that it doesnt change when you send 0])
+
+                                    set <<= 1;
+
+                                    section[j].UpdateButton(status);
+                                }
+
+                                //only needed for BBBBB
+                                mc.ssP[1] = data[mc.swOffGr0];
+                                mc.ssP[2] = data[mc.swOffGr1];
+
+                            }//if serial or udp port open
 
                             break;
                         }

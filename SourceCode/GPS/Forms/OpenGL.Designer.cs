@@ -47,7 +47,7 @@ namespace AgOpenGPS
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
             GL.Viewport(0, 0, oglMain.Width, oglMain.Height);
-            Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView(fovy, oglMain.AspectRatio, 1.0f, (float)(camDistanceFactor * camera.camSetDistance));
+            Matrix4 mat = Matrix4.CreatePerspectiveFieldOfView(fovy, oglMain.AspectRatio, 1.0f, (float)(camDistanceFactor * worldManager.camSetDistance));
             GL.LoadMatrix(ref mat);
             GL.MatrixMode(MatrixMode.Modelview);
         }
@@ -145,10 +145,7 @@ namespace AgOpenGPS
                 GL.LoadIdentity();
 
                 //position the camera
-                camera.SetWorldCam(pivotAxlePos.easting, pivotAxlePos.northing, camHeading);
-
-
-                worldGrid.DrawFieldSurface();
+                worldManager.SetWorldPerspective(pivotAxlePos.easting, pivotAxlePos.northing, camHeading);
 
                 //the bounding box of the camera for cullling.
                 CalcFrustum();
@@ -219,7 +216,7 @@ namespace AgOpenGPS
 
                 if (tram.displayMode != 0)
                 {
-                    if (camera.camSetDistance > -250) GL.LineWidth(4);
+                    if (worldManager.camSetDistance > -250) GL.LineWidth(4);
                     else GL.LineWidth(2);
                     GL.Color4(0.30f, 0.93692f, 0.7520f, 0.3);
                     tram.DrawTram();
@@ -477,7 +474,7 @@ namespace AgOpenGPS
                     {
                         if (Needsupdate)
                         {
-                            UpdateBackBuffer(rpHeight, rpHeight2, false);
+                            UpdateBackBuffer(rpHeight, rpHeight2, false, false);
                             Needsupdate = false;
                         }
                         //calculate the slope
@@ -569,89 +566,13 @@ namespace AgOpenGPS
                 }
             }
             section[tool.numOfSections].sectionOnRequest = isSuperSectionAllowedOn;
-            /*
-            if (!Needsupdate && DrawBackBuffer)
-            {
-                total = grnPixelsLength;
-                outside = 0;
-                ininner = 0;
-                infield = 0;
-                inhead0 = 0;
-                inhead1 = 0;
-                tramcnt = 0;
-                section0x = 0;
-                section1x = 0;
-                section2x = 0;
-                section3x = 0;
-                section4x = 0;
-                section5x = 0;
-                section6x = 0;
-                section7x = 0;
-                section8x = 0;
-                section9x = 0;
-                section10x = 0;
-                section11x = 0;
-                unknown = 0;
-
-                for (int a = 0; a < grnPixelsLength; a++)
-                {
-                    int dfdf = grnPixels[a];
-                    int tt4 = grnPixels[a] % 5;
-                    if (grnPixels[a] < 13 || grnPixels[a] > 252)
-                    {
-                        unknown++;
-                    }
-                    else
-                    {
-                        if ((grnPixels[a] % 20 >= 0 && grnPixels[a] % 20 < 8) || (grnPixels[a] % 20 > 12 && grnPixels[a] % 20 < 20))
-                            tramcnt++;
-
-                        if (tt4 == 0)
-                            infield++;
-                        else if (tt4 == 1)
-                            ininner++;
-                        else if (tt4 == 2)
-                            outside++;
-                        else if (tt4 == 3)
-                            inhead1++;
-                        else if (tt4 == 4)
-                            inhead0++;
-
-                        if (grnPixels[a] > 232)
-                            section0x++;
-                        else if (grnPixels[a] > 212)
-                            section1x++;
-                        else if (grnPixels[a] > 192)
-                            section2x++;
-                        else if (grnPixels[a] > 172)
-                            section3x++;
-                        else if (grnPixels[a] > 152)
-                            section4x++;
-                        else if (grnPixels[a] > 132)
-                            section5x++;
-                        else if (grnPixels[a] > 112)
-                            section6x++;
-                        else if (grnPixels[a] > 92)
-                            section7x++;
-                        else if (grnPixels[a] > 72)
-                            section8x++;
-                        else if (grnPixels[a] > 52)
-                            section9x++;
-                        else if (grnPixels[a] > 32)
-                            section10x++;
-                        else if (grnPixels[a] > 12)
-                            section11x++;
-                    }
-                }
-            }
-            */
 
             tram.controlByte = 0;
             if (tram.displayMode != 0 && isTramOnBackBuffer)
             {
                 int offset = 0;
                 if (Needsupdate)
-                    UpdateBackBuffer(1, 0, true);
+                    UpdateBackBuffer(1, 0, true, false);
 
                 else if (rpHeight2 > 0 || rpHeight + rpHeight2 < 1)
                     GL.ReadPixels(tool.rpXPosition, 10, tool.rpWidth, 1, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
@@ -755,7 +676,7 @@ namespace AgOpenGPS
             //this is the end of the "frame". Now we wait for next NMEA sentence with a valid fix. 
         }
 
-        private void UpdateBackBuffer(int rpHeight, int rpHeight2, bool tramOnly)
+        private void UpdateBackBuffer(int rpHeight, int rpHeight2, bool tramOnly, bool Test, double X = double.NaN, double Y = double.NaN)
         {
             oglBack.MakeCurrent();
 
@@ -765,23 +686,37 @@ namespace AgOpenGPS
 
             GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
             GL.LoadIdentity();// Reset The View
+            if (!Test)
+            {
+                //rotate camera so heading matched fix heading in the world
+                GL.Rotate(glm.toDegrees(toolPos.heading), 0, 0, 1);
 
-            //rotate camera so heading matched fix heading in the world
-            GL.Rotate(glm.toDegrees(toolPos.heading), 0, 0, 1);
+                //translate to that spot in the world
+                GL.Translate(-toolPos.easting - Math.Cos(toolPos.heading) * tool.toolOffset, -toolPos.northing - Math.Sin(toolPos.heading) * tool.toolOffset, 0);
 
-            //translate to that spot in the world
-            GL.Translate(-toolPos.easting - Math.Cos(toolPos.heading) * tool.toolOffset, -toolPos.northing - Math.Sin(toolPos.heading) * tool.toolOffset, 0);
+                GL.Color3((byte)0, (byte)252, (byte)0);
+                GL.Begin(PrimitiveType.TriangleStrip);
 
-            GL.Color3((byte)0, (byte)252, (byte)0);
-            GL.Begin(PrimitiveType.TriangleStrip);
+                GL.Vertex3(toolPos.easting - 200, toolPos.northing - 200, 0);
+                GL.Vertex3(toolPos.easting + 200, toolPos.northing - 200, 0);
+                GL.Vertex3(toolPos.easting - 200, toolPos.northing + 200, 0);
+                GL.Vertex3(toolPos.easting + 200, toolPos.northing + 200, 0);
 
-            GL.Vertex3(toolPos.easting - 200, toolPos.northing - 200, 0);
-            GL.Vertex3(toolPos.easting + 200, toolPos.northing - 200, 0);
-            GL.Vertex3(toolPos.easting - 200, toolPos.northing + 200, 0);
-            GL.Vertex3(toolPos.easting + 200, toolPos.northing + 200, 0);
+                GL.End();
+            }
+            else
+            {
+                //translate to that spot in the world
+                GL.Translate(-X, -Y, 0);
 
-            GL.End();
-
+                GL.Color3((byte)0, (byte)252, (byte)0);
+                GL.Begin(PrimitiveType.TriangleStrip);
+                GL.Vertex3(X - 200, Y - 200, 0);
+                GL.Vertex3(X + 200, Y - 200, 0);
+                GL.Vertex3(X - 200, Y + 200, 0);
+                GL.Vertex3(X + 200, Y + 200, 0);
+                GL.End();
+            }
 
             if (!tramOnly)
             {
@@ -860,9 +795,11 @@ namespace AgOpenGPS
             
             //finish it up - we need to read the ram of video card
             GL.Flush();
-
-            //read the whole block of pixels up to max lookahead, one read only
-            GL.ReadPixels(tool.rpXPosition, 10 + rpHeight2, tool.rpWidth, rpHeight - rpHeight2, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
+            if (!Test)
+                //read the whole block of pixels up to max lookahead, one read only
+                GL.ReadPixels(tool.rpXPosition, 10 + rpHeight2, tool.rpWidth, rpHeight - rpHeight2, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
+            else
+                GL.ReadPixels(0, 0, 500, 300, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, grnPixels);
 
             //Outside        = 252
             //inside inner   = 251
@@ -908,114 +845,98 @@ namespace AgOpenGPS
 
         private void oglZoom_Paint(object sender, PaintEventArgs e)
         {
-
             if (isJobStarted)
             {
-                //GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
-                //GL.LoadIdentity();                  // Reset The View
+                if (Debugger.IsAttached && false)
+                {
+                    double total = grnPixels.Length;
+                    double outside = 0;
+                    double ininner = 0;
+                    double infield = 0;
+                    double inhead0 = 0;
+                    double inhead1 = 0;
+                    double tramcnt = 0;
+                    double section0x = 0;
+                    double section1x = 0;
+                    double section2x = 0;
+                    double section3x = 0;
+                    double section4x = 0;
+                    double section5x = 0;
+                    double section6x = 0;
+                    double section7x = 0;
+                    double section8x = 0;
+                    double section9x = 0;
+                    double section10x = 0;
+                    double section11x = 0;
+                    double unknown = 0;
 
-                //CalculateMinMax();
-                ////back the camera up
-                //GL.Translate(0, 0, -maxFieldDistance);
-                //GL.Enable(EnableCap.Blend);
+                    for (double X = minFieldX; X <= maxFieldX + 25; X += 50)
+                    {
+                        for (double Y = minFieldY; Y <= maxFieldY + 15; Y+=30)
+                        {
+                            UpdateBackBuffer(0, 0, false, true, X, Y);
 
-                ////translate to that spot in the world 
-                //GL.Translate(-fieldCenterX, -fieldCenterY, 0);
+                            total += grnPixels.Length;
+                            for (int a = 0; a < grnPixels.Length; a++)
+                            {
+                                int dfdf = grnPixels[a];
+                                int tt4 = grnPixels[a] % 5;
+                                if (grnPixels[a] < 13 || grnPixels[a] > 252)
+                                {
+                                    unknown++;
+                                }
+                                else
+                                {
+                                    if ((grnPixels[a] % 20 >= 0 && grnPixels[a] % 20 < 8) || (grnPixels[a] % 20 > 12 && grnPixels[a] % 20 < 20))
+                                        tramcnt++;
 
-                //GL.Color4(0.5, 0.5, 0.5, 0.5);
-                ////draw patches j= # of sections
-                //int count2;
+                                    if (tt4 == 0)
+                                        infield++;
+                                    else if (tt4 == 1)
+                                        ininner++;
+                                    else if (tt4 == 2)
+                                        outside++;
+                                    else if (tt4 == 3)
+                                        inhead1++;
+                                    else if (tt4 == 4)
+                                        inhead0++;
 
-                //for (int j = 0; j < tool.numSuperSection; j++)
-                //{
-                //    //every time the section turns off and on is a new patch
-                //    int patchCount = section[j].patchList.Count;
+                                    if (grnPixels[a] > 232)
+                                        section0x++;
+                                    else if (grnPixels[a] > 212)
+                                        section1x++;
+                                    else if (grnPixels[a] > 192)
+                                        section2x++;
+                                    else if (grnPixels[a] > 172)
+                                        section3x++;
+                                    else if (grnPixels[a] > 152)
+                                        section4x++;
+                                    else if (grnPixels[a] > 132)
+                                        section5x++;
+                                    else if (grnPixels[a] > 112)
+                                        section6x++;
+                                    else if (grnPixels[a] > 92)
+                                        section7x++;
+                                    else if (grnPixels[a] > 72)
+                                        section8x++;
+                                    else if (grnPixels[a] > 52)
+                                        section9x++;
+                                    else if (grnPixels[a] > 32)
+                                        section10x++;
+                                    else if (grnPixels[a] > 12)
+                                        section11x++;
+                                }
+                            }
+                        }
+                    }
 
-                //    if (patchCount > 0)
-                //    {
-                //        //for every new chunk of patch
-                //        foreach (var triList in section[j].patchList)
-                //        {
-                //            //draw the triangle in each triangle strip
-                //            GL.Begin(PrimitiveType.TriangleStrip);
-                //            count2 = triList.Count;
-                //            //int mipmap = 2;
+                    double total2 = section1x + section2x + section3x + section4x + section5x + section6x + section7x + section8x + section9x + section10x + section11x;
+                    double total3 = section2x + section3x * 2 + section4x * 3 + section5x * 4 + section6x * 5 + section7x * 6 + section8x * 7 + section9x * 8 + section10x * 9 + section11x * 10;
+                    double totalinfield = infield + inhead1 + inhead0;
 
-                //            ////if large enough patch and camera zoomed out, fake mipmap the patches, skip triangles
-                //            //if (count2 >= (mipmap))
-                //            //{
-                //            //    int step = mipmap;
-                //            //    for (int i = 0; i < count2; i += step)
-                //            //    {
-                //            //        GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
-                //            //        GL.Vertex3(triList[i].easting, triList[i].northing, 0); i++;
-
-                //            //        //too small to mipmap it
-                //            //        if (count2 - i <= (mipmap + 2))
-                //            //            step = 0;
-                //            //    }
-                //            //}
-
-                //            //else 
-                //            //{
-                //            for (int i = 1; i < count2; i++) GL.Vertex3(triList[i].easting, triList[i].northing, 0);
-                //            //}
-                //            GL.End();
-
-                //        }
-                //    }
-                //} //end of section patches
-
-                //GL.Flush();
-
-                //int grnHeight = oglZoom.Height;
-                //int grnWidth = oglZoom.Width;
-                //byte[] overPix = new byte[grnHeight * grnWidth + 1];
-
-                //GL.ReadPixels(0, 0, grnWidth, grnWidth, OpenTK.Graphics.OpenGL.PixelFormat.Green, PixelType.UnsignedByte, overPix);
-
-                //int once = 0;
-                //int twice = 0;
-                //int more = 0;
-                //int level = 0;
-                //double total = 0;
-                //double total2 = 0;
-
-                ////50, 96, 112                
-                //for (int i = 0; i < grnHeight * grnWidth; i++)
-                //{
-
-                //    if (overPix[i] > 105)
-                //    {
-                //        more++;
-                //        level = overPix[i];
-                //    }
-                //    else if (overPix[i] > 85)
-                //    {
-                //        twice++;
-                //        level = overPix[i];
-                //    }
-                //    else if (overPix[i] > 50)
-                //    {
-                //        once++;
-                //    }
-                //}
-                //total = once + twice + more;
-                //total2 = total + twice + more + more;
-
-                //if (total2 > 0)
-                //{
-                //    fd.actualAreaCovered = (total / total2 * fd.workedAreaTotal);
-                //    fd.overlapPercent = Math.Round(((1 - total / total2) * 100), 2);
-                //}
-                //else
-                //{
-                //    fd.actualAreaCovered = fd.overlapPercent = 0;
-                //}
-
-                ////GL.Flush();
-                ////oglZoom.MakeCurrent();
-                ////oglZoom.SwapBuffers();
+                    fd.actualAreaCovered = (total2 / totalinfield);
+                    fd.overlapPercent = Math.Round(((total3 / total2) * 100), 2);
+                }
 
                 if (oglZoom.Width != 400)
                 {
@@ -1307,7 +1228,7 @@ namespace AgOpenGPS
             if (flagNumberPicked != 0)
             {
                 ////draw the box around flag
-                double offSet = (camera.zoomValue * camera.zoomValue * 0.01);
+                double offSet = (worldManager.zoomValue * worldManager.zoomValue * 0.01);
                 GL.LineWidth(4);
                 GL.Color3(0.980f, 0.0f, 0.980f);
                 GL.Begin(PrimitiveType.LineLoop);
@@ -1571,10 +1492,10 @@ namespace AgOpenGPS
         {
             //GL.Translate(0, 0, 0.9);
             ////draw the background when in 3D
-            if (camera.camPitch < -52)
+            if (worldManager.camPitch < -52)
             {
                 //-10 to -32 (top) is camera pitch range. Set skybox to line up with horizon 
-                double hite = (camera.camPitch + 66) * -0.025;
+                double hite = (worldManager.camPitch + 66) * -0.025;
 
                 //the background
                 double winLeftPos = -(double)oglMain.Width / 2;

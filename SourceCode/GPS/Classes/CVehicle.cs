@@ -401,7 +401,7 @@ namespace AgOpenGPS
 
             }
 
-            if (mf.camera.camSetDistance > -75 && mf.isFirstHeadingSet)
+            if (mf.worldManager.camSetDistance > -75 && mf.isFirstHeadingSet)
             {
                 //GL.Color3(1.25f, 1.20f, 0.0f);
                 //draw the bright antenna dot
@@ -439,14 +439,14 @@ namespace AgOpenGPS
             }
             GL.LineWidth(1);
 
-            if (mf.camera.camSetDistance < -500)
+            if (mf.worldManager.camSetDistance < -500)
             {
                 GL.Color4(0.5f, 0.5f, 1.2f, 0.25);
                 double theta = glm.twoPI / 20;
                 double c = Math.Cos(theta);//precalculate the sine and cosine
                 double s = Math.Sin(theta);
 
-                double x = mf.camera.camSetDistance * -.015;//we start at angle = 0
+                double x = mf.worldManager.camSetDistance * -.015;//we start at angle = 0
                 double y = 0;
                 GL.LineWidth(1);
                 GL.Begin(PrimitiveType.TriangleFan);
