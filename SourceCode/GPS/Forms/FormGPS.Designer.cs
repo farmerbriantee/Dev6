@@ -46,6 +46,7 @@
             this.menuLanguageUkranian = new System.Windows.Forms.ToolStripMenuItem();
             this.menuLanguageRussian = new System.Windows.Forms.ToolStripMenuItem();
             this.menuLanguageTest = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuLanguageTurkish = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.setWorkingDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
@@ -225,7 +226,8 @@
             this.menuLanguageSlovak,
             this.menuLanguageUkranian,
             this.menuLanguageRussian,
-            this.menuLanguageTest});
+            this.menuLanguageTest,
+            this.menuLanguageTurkish});
             this.menustripLanguage.Name = "menustripLanguage";
             this.menustripLanguage.Size = new System.Drawing.Size(319, 40);
             this.menustripLanguage.Text = "Language";
@@ -319,6 +321,14 @@
             this.menuLanguageTest.Size = new System.Drawing.Size(372, 40);
             this.menuLanguageTest.Text = "Test";
             this.menuLanguageTest.Click += new System.EventHandler(this.menuLanguageTest_Click);
+            // 
+            // menuLanguageTurkish
+            // 
+            this.menuLanguageTurkish.CheckOnClick = true;
+            this.menuLanguageTurkish.Name = "menuLanguageTurkish";
+            this.menuLanguageTurkish.Size = new System.Drawing.Size(372, 40);
+            this.menuLanguageTurkish.Text = "Turkish (Türk)";
+            this.menuLanguageTurkish.Click += new System.EventHandler(this.menuLanguageTurkish_Click);
             // 
             // toolStripSeparator11
             // 
@@ -690,8 +700,8 @@
             // 
             // oglMain
             // 
-            this.oglMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.oglMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.oglMain.BackColor = System.Drawing.Color.Black;
             this.oglMain.CausesValidation = false;
@@ -2014,5 +2024,6 @@
         public System.Windows.Forms.Button btnResumePath;
         private System.Windows.Forms.Button btnAutoSteerConfig;
         public System.Windows.Forms.TableLayoutPanel panelRight;
+        private System.Windows.Forms.ToolStripMenuItem menuLanguageTurkish;
     }
 }

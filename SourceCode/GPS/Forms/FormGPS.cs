@@ -1004,7 +1004,7 @@ namespace AgOpenGPS
             camera.zoomValue += Delta * camera.zoomValue * (camera.zoomValue <= 20 ? 0.04 : 0.02);
 
             if (camera.zoomValue > 220) camera.zoomValue = 220;
-            if (camera.zoomValue < 6.0) camera.zoomValue = 3.0;
+            if (camera.zoomValue < 6.0) camera.zoomValue = 6.0;
 
             camera.camSetDistance = camera.zoomValue * camera.zoomValue * -1;
 
