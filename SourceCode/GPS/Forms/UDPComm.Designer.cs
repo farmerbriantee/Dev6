@@ -457,6 +457,11 @@ namespace AgOpenGPS
 
             switch (m.Msg)
             {
+                case 0x0083:
+                    if (m.WParam.ToInt32() == 1)
+                        return;
+                    else break;
+
                 case 0x0084/*NCHITTEST*/ :
                     base.WndProc(ref m);
 

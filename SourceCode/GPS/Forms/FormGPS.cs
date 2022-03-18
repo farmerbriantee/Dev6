@@ -316,6 +316,7 @@ namespace AgOpenGPS
         //Initialize items before the form Loads or is visible
         private void FormGPS_Load(object sender, EventArgs e)
         {
+            this.FormBorderStyle = FormBorderStyle.Sizable;
             this.MouseWheel += ZoomByMouseWheel;
 
             //start udp server is required
