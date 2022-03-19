@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AgOpenGPS
@@ -160,10 +154,10 @@ namespace AgOpenGPS
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageTrailing;
             }
 
-            double dis = (Math.Abs(Properties.Vehicle.Default.setVehicle_hitchLength) * mf.m2InchOrCm);
-            nudDrawbarLength.Value = (decimal)(Math.Abs(Properties.Vehicle.Default.setVehicle_hitchLength)*mf.m2InchOrCm);
-            nudTrailingHitchLength.Value = (decimal)(Math.Abs(Properties.Vehicle.Default.setTool_toolTrailingHitchLength) * mf.m2InchOrCm);
-            nudTankHitch.Value = (decimal)(Math.Abs(Properties.Vehicle.Default.setVehicle_tankTrailingHitchLength) * mf.m2InchOrCm);
+            double dis = (Math.Abs(Properties.Vehicle.Default.setVehicle_hitchLength) * mf.mToUser);
+            nudDrawbarLength.Value = (decimal)(Math.Abs(Properties.Vehicle.Default.setVehicle_hitchLength)*mf.mToUser);
+            nudTrailingHitchLength.Value = (decimal)(Math.Abs(Properties.Vehicle.Default.setTool_toolTrailingHitchLength) * mf.mToUser);
+            nudTankHitch.Value = (decimal)(Math.Abs(Properties.Vehicle.Default.setVehicle_tankTrailingHitchLength) * mf.mToUser);
         }
 
         private void tabTHitch_Leave(object sender, EventArgs e)
@@ -176,7 +170,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                mf.tool.hitchLength = (double)nudDrawbarLength.Value * mf.inchOrCm2m;
+                mf.tool.hitchLength = (double)nudDrawbarLength.Value * mf.userToM;
                 if (!Properties.Vehicle.Default.setTool_isToolFront)
                 {
                     mf.tool.hitchLength *= -1;
@@ -189,7 +183,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                mf.tool.toolTankTrailingHitchLength = (double)nudTankHitch.Value * -mf.inchOrCm2m;
+                mf.tool.toolTankTrailingHitchLength = (double)nudTankHitch.Value * -mf.userToM;
                 Properties.Vehicle.Default.setVehicle_tankTrailingHitchLength = mf.tool.toolTankTrailingHitchLength;
 
             }
@@ -199,7 +193,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                mf.tool.toolTrailingHitchLength = (double)nudTrailingHitchLength.Value * -mf.inchOrCm2m;
+                mf.tool.toolTrailingHitchLength = (double)nudTrailingHitchLength.Value * -mf.userToM;
                 Properties.Vehicle.Default.setTool_toolTrailingHitchLength = mf.tool.toolTrailingHitchLength;
 
             }
@@ -215,8 +209,8 @@ namespace AgOpenGPS
             nudLookAhead.Value =    (decimal)Properties.Vehicle.Default.setVehicle_toolLookAheadOn;
             nudLookAheadOff.Value = (decimal)Properties.Vehicle.Default.setVehicle_toolLookAheadOff;
             nudTurnOffDelay.Value = (decimal)Properties.Vehicle.Default.setVehicle_toolOffDelay;
-            nudOffset.Value =       (int)(Properties.Vehicle.Default.setVehicle_toolOffset*mf.m2InchOrCm);
-            nudOverlap.Value =      (int)(Properties.Vehicle.Default.setVehicle_toolOverlap*mf.m2InchOrCm);
+            nudOffset.Value =       (int)(Properties.Vehicle.Default.setVehicle_toolOffset*mf.mToUser);
+            nudOverlap.Value =      (int)(Properties.Vehicle.Default.setVehicle_toolOverlap*mf.mToUser);
         }
 
         private void tabTSettings_Leave(object sender, EventArgs e)
@@ -288,7 +282,7 @@ namespace AgOpenGPS
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
                 Properties.Vehicle.Default.setVehicle_toolOverlap = mf.tool.toolOverlap 
-                    = (double)nudOverlap.Value * mf.inchOrCm2m;
+                    = (double)nudOverlap.Value * mf.userToM;
             }
         }
 
@@ -297,7 +291,7 @@ namespace AgOpenGPS
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
                 Properties.Vehicle.Default.setVehicle_toolOffset = mf.tool.toolOffset 
-                    = (double)nudOffset.Value * mf.inchOrCm2m;
+                    = (double)nudOffset.Value * mf.userToM;
             }
         }
 
@@ -319,24 +313,24 @@ namespace AgOpenGPS
 
 
             defaultSectionWidth = Properties.Vehicle.Default.setTool_defaultSectionWidth;
-            nudDefaultSectionWidth.Value = (int)(defaultSectionWidth * mf.m2InchOrCm);
+            nudDefaultSectionWidth.Value = (int)(defaultSectionWidth * mf.mToUser);
 
-            nudSection1.Value = Math.Abs((Properties.Vehicle.Default.setSection_position2 - Properties.Vehicle.Default.setSection_position1) * (decimal)mf.m2InchOrCm);
-            nudSection2.Value = Math.Abs((Properties.Vehicle.Default.setSection_position3 - Properties.Vehicle.Default.setSection_position2) * (decimal)mf.m2InchOrCm);
-            nudSection3.Value = Math.Abs((Properties.Vehicle.Default.setSection_position4 - Properties.Vehicle.Default.setSection_position3) * (decimal)mf.m2InchOrCm);
-            nudSection4.Value = Math.Abs((Properties.Vehicle.Default.setSection_position5 - Properties.Vehicle.Default.setSection_position4) * (decimal)mf.m2InchOrCm);
-            nudSection5.Value = Math.Abs((Properties.Vehicle.Default.setSection_position6 - Properties.Vehicle.Default.setSection_position5) * (decimal)mf.m2InchOrCm);
-            nudSection6.Value = Math.Abs((Properties.Vehicle.Default.setSection_position7 - Properties.Vehicle.Default.setSection_position6) * (decimal)mf.m2InchOrCm);
-            nudSection7.Value = Math.Abs((Properties.Vehicle.Default.setSection_position8 - Properties.Vehicle.Default.setSection_position7) * (decimal)mf.m2InchOrCm);
-            nudSection8.Value = Math.Abs((Properties.Vehicle.Default.setSection_position9 - Properties.Vehicle.Default.setSection_position8) * (decimal)mf.m2InchOrCm);
-            nudSection9.Value = Math.Abs((Properties.Vehicle.Default.setSection_position10 - Properties.Vehicle.Default.setSection_position9) * (decimal)mf.m2InchOrCm);
-            nudSection10.Value = Math.Abs((Properties.Vehicle.Default.setSection_position11 - Properties.Vehicle.Default.setSection_position10) * (decimal)mf.m2InchOrCm);
-            nudSection11.Value = Math.Abs((Properties.Vehicle.Default.setSection_position12 - Properties.Vehicle.Default.setSection_position11) * (decimal)mf.m2InchOrCm);
-            nudSection12.Value = Math.Abs((Properties.Vehicle.Default.setSection_position13 - Properties.Vehicle.Default.setSection_position12) * (decimal)mf.m2InchOrCm);
-            nudSection13.Value = Math.Abs((Properties.Vehicle.Default.setSection_position14 - Properties.Vehicle.Default.setSection_position13) * (decimal)mf.m2InchOrCm);
-            nudSection14.Value = Math.Abs((Properties.Vehicle.Default.setSection_position15 - Properties.Vehicle.Default.setSection_position14) * (decimal)mf.m2InchOrCm);
-            nudSection15.Value = Math.Abs((Properties.Vehicle.Default.setSection_position16 - Properties.Vehicle.Default.setSection_position15) * (decimal)mf.m2InchOrCm);
-            nudSection16.Value = Math.Abs((Properties.Vehicle.Default.setSection_position17 - Properties.Vehicle.Default.setSection_position16) * (decimal)mf.m2InchOrCm);
+            nudSection1.Value = Math.Abs((Properties.Vehicle.Default.setSection_position2 - Properties.Vehicle.Default.setSection_position1) * (decimal)mf.mToUser);
+            nudSection2.Value = Math.Abs((Properties.Vehicle.Default.setSection_position3 - Properties.Vehicle.Default.setSection_position2) * (decimal)mf.mToUser);
+            nudSection3.Value = Math.Abs((Properties.Vehicle.Default.setSection_position4 - Properties.Vehicle.Default.setSection_position3) * (decimal)mf.mToUser);
+            nudSection4.Value = Math.Abs((Properties.Vehicle.Default.setSection_position5 - Properties.Vehicle.Default.setSection_position4) * (decimal)mf.mToUser);
+            nudSection5.Value = Math.Abs((Properties.Vehicle.Default.setSection_position6 - Properties.Vehicle.Default.setSection_position5) * (decimal)mf.mToUser);
+            nudSection6.Value = Math.Abs((Properties.Vehicle.Default.setSection_position7 - Properties.Vehicle.Default.setSection_position6) * (decimal)mf.mToUser);
+            nudSection7.Value = Math.Abs((Properties.Vehicle.Default.setSection_position8 - Properties.Vehicle.Default.setSection_position7) * (decimal)mf.mToUser);
+            nudSection8.Value = Math.Abs((Properties.Vehicle.Default.setSection_position9 - Properties.Vehicle.Default.setSection_position8) * (decimal)mf.mToUser);
+            nudSection9.Value = Math.Abs((Properties.Vehicle.Default.setSection_position10 - Properties.Vehicle.Default.setSection_position9) * (decimal)mf.mToUser);
+            nudSection10.Value = Math.Abs((Properties.Vehicle.Default.setSection_position11 - Properties.Vehicle.Default.setSection_position10) * (decimal)mf.mToUser);
+            nudSection11.Value = Math.Abs((Properties.Vehicle.Default.setSection_position12 - Properties.Vehicle.Default.setSection_position11) * (decimal)mf.mToUser);
+            nudSection12.Value = Math.Abs((Properties.Vehicle.Default.setSection_position13 - Properties.Vehicle.Default.setSection_position12) * (decimal)mf.mToUser);
+            nudSection13.Value = Math.Abs((Properties.Vehicle.Default.setSection_position14 - Properties.Vehicle.Default.setSection_position13) * (decimal)mf.mToUser);
+            nudSection14.Value = Math.Abs((Properties.Vehicle.Default.setSection_position15 - Properties.Vehicle.Default.setSection_position14) * (decimal)mf.mToUser);
+            nudSection15.Value = Math.Abs((Properties.Vehicle.Default.setSection_position16 - Properties.Vehicle.Default.setSection_position15) * (decimal)mf.mToUser);
+            nudSection16.Value = Math.Abs((Properties.Vehicle.Default.setSection_position17 - Properties.Vehicle.Default.setSection_position16) * (decimal)mf.mToUser);
 
             //based on number of sections and values update the page before displaying
             UpdateSpinners();
@@ -406,7 +400,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                defaultSectionWidth = (double)nudDefaultSectionWidth.Value * mf.inchOrCm2m;
+                defaultSectionWidth = (double)nudDefaultSectionWidth.Value * mf.userToM;
                 Properties.Vehicle.Default.setTool_defaultSectionWidth = defaultSectionWidth;
             }
         }
@@ -882,7 +876,7 @@ namespace AgOpenGPS
         {
             if (mf.isMetric)
             {
-                lblSecTotalWidthMeters.Text = Convert.ToDouble(lblVehicleToolWidth.Text) + " cm";
+                lblSecTotalWidthMeters.Text = Convert.ToDouble(lblVehicleToolWidth.Text) + mf.unitsInCm;
             }
             else
             {
@@ -899,22 +893,22 @@ namespace AgOpenGPS
             int i = numberOfSections;
 
             //convert to meters spinner value
-            sectionWidth1  = nudSection1.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth2  = nudSection2.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth3  = nudSection3.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth4  = nudSection4.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth5  = nudSection5.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth6  = nudSection6.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth7  = nudSection7.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth8  = nudSection8.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth9  = nudSection9.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth10 = nudSection10.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth11 = nudSection11.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth12 = nudSection12.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth13 = nudSection13.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth14 = nudSection14.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth15 = nudSection15.Value * (decimal)mf.inchOrCm2m;
-            sectionWidth16 = nudSection16.Value * (decimal)mf.inchOrCm2m;
+            sectionWidth1  = nudSection1.Value * (decimal)mf.userToM;
+            sectionWidth2  = nudSection2.Value * (decimal)mf.userToM;
+            sectionWidth3  = nudSection3.Value * (decimal)mf.userToM;
+            sectionWidth4  = nudSection4.Value * (decimal)mf.userToM;
+            sectionWidth5  = nudSection5.Value * (decimal)mf.userToM;
+            sectionWidth6  = nudSection6.Value * (decimal)mf.userToM;
+            sectionWidth7  = nudSection7.Value * (decimal)mf.userToM;
+            sectionWidth8  = nudSection8.Value * (decimal)mf.userToM;
+            sectionWidth9  = nudSection9.Value * (decimal)mf.userToM;
+            sectionWidth10 = nudSection10.Value * (decimal)mf.userToM;
+            sectionWidth11 = nudSection11.Value * (decimal)mf.userToM;
+            sectionWidth12 = nudSection12.Value * (decimal)mf.userToM;
+            sectionWidth13 = nudSection13.Value * (decimal)mf.userToM;
+            sectionWidth14 = nudSection14.Value * (decimal)mf.userToM;
+            sectionWidth15 = nudSection15.Value * (decimal)mf.userToM;
+            sectionWidth16 = nudSection16.Value * (decimal)mf.userToM;
 
             switch (i)
             {

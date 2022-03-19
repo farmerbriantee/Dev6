@@ -85,7 +85,7 @@ namespace AgOpenGPS
             mPerDegreeLon = 111412.84 * Math.Cos(Lat * 0.01745329251994329576923690766743) - 93.5 * Math.Cos(3.0 * Lat * 0.01745329251994329576923690766743) + 0.118 * Math.Cos(5.0 * Lat * 0.01745329251994329576923690766743);
             double Lon = (Easting / mPerDegreeLon) + lonStart;
 
-            return Lon.ToString("N7", CultureInfo.InvariantCulture) + ',' + Lat.ToString("N7", CultureInfo.InvariantCulture) + ",0 ";
+            return Lon.ToString("0.0000000") + ',' + Lat.ToString("0.0000000") + ",0 ";
         }
     }
 }

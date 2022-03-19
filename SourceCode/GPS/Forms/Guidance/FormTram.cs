@@ -17,8 +17,8 @@ namespace AgOpenGPS
 
             this.Text = gStr.gsTramLines;
             label3.Text = gStr.gsPasses;
-            label2.Text = ((int)(0.1 * mf.m2InchOrCm)).ToString() + mf.unitsInCm;
-            lblTramWidth.Text = (mf.tram.tramWidth * mf.m2FtOrM).ToString("N2") + mf.unitsFtM;
+            label2.Text = ((int)(0.1 * mf.mToUser)).ToString() + mf.unitsInCm;
+            lblTramWidth.Text = (mf.tram.tramWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
 
             nudPasses.Controls[0].Enabled = false;
         }
@@ -28,10 +28,10 @@ namespace AgOpenGPS
             nudPasses.Value = Properties.Settings.Default.setTram_passes;
             nudPasses.ValueChanged += nudPasses_ValueChanged;
 
-            lblTrack.Text = (mf.vehicle.trackWidth * mf.m2FtOrM).ToString("N2") + mf.unitsFtM;
+            lblTrack.Text = (mf.vehicle.trackWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
 
             mf.tool.halfToolWidth = (mf.tool.toolWidth - mf.tool.toolOverlap) / 2.0;
-            lblToolWidthHalf.Text = (mf.tool.halfToolWidth * mf.m2FtOrM).ToString("N2") + mf.unitsFtM;
+            lblToolWidthHalf.Text = (mf.tool.halfToolWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
 
             mf.panelRight.Enabled = false;
 

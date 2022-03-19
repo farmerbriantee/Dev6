@@ -799,17 +799,55 @@ namespace AgOpenGPS
             oglMain.MakeCurrent();
             oglMain.Refresh();
 
+            if (isAutoDayNight && dayNightCounter > 600)//10 minutes
+            {
+                dayNightCounter = 1;
+
+                if (sunrise.Date != DateTime.Today)
+                {
+                    IsBetweenSunriseSunset(pn.latitude, pn.longitude);
+                }
+
+                isDayTime = (DateTime.Now.Ticks < sunset.Ticks && DateTime.Now.Ticks > sunrise.Ticks);
+
+                if (isDayTime != isDay)
+                {
+                    isDay = !isDayTime;
+                    SwapDayNightMode();
+                }
+            }
+
+            //if a minute has elapsed save the field in case of crash and to be able to resume            
+            if (isJobStarted && secondsCounter > 30 && sentenceCounter < 20)
+            {
+                secondsCounter = 1;
+                tmrWatchdog.Enabled = false;
+
+                //don't save if no gps
+                if (isJobStarted)
+                {
+                    //auto save the field patches, contours accumulated so far
+                    FileSaveSections();
+                    FileSaveContour();
+
+                    //NMEA log file
+                    if (isLogElevation) FileSaveElevation();
+                    //FileSaveFieldKML();
+                }
+                //go see if data ready for draw and position updates
+                tmrWatchdog.Enabled = true;
+            }
+
             //end of UppdateFixPosition
             swFrame.Stop();
 
             //stop the timer and calc how long it took to do calcs and draw
-            frameTimeRough = (double)swFrame.ElapsedTicks / (double)System.Diagnostics.Stopwatch.Frequency * 1000;
+            double frameTimeRough = (double)swFrame.ElapsedTicks / (double)System.Diagnostics.Stopwatch.Frequency * 1000;
 
             if (frameTimeRough > 30) frameTimeRough = 30;
             frameTime = frameTime * 0.99 + frameTimeRough * 0.01;
         }
 
-        double frameTimeRough = 3;
         private void TheRest()
         {
             //positions and headings 
@@ -827,8 +865,8 @@ namespace AgOpenGPS
                 AddSectionOrContourPathPoints();
 
                 //grab fix and elevation
-                if (isLogElevation) sbFix.Append(pn.fix.easting.ToString("N2") + "," + pn.fix.northing.ToString("N2") + ","
-                                                    + pn.altitude.ToString("N2") + ","
+                if (isLogElevation) sbFix.Append(pn.fix.easting.ToString("0.00") + "," + pn.fix.northing.ToString("0.00") + ","
+                                                    + pn.altitude.ToString("0.00") + ","
                                                     + pn.latitude + "," + pn.longitude + "\r\n");
             }
 
@@ -983,8 +1021,8 @@ namespace AgOpenGPS
 
             //build the boundary line
             bnd.bndBeingMadePts.Add(new vec2(
-                pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)),
-                pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset))));
+                pivotAxlePos.easting + (Math.Cos(pivotAxlePos.heading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset)),
+                pivotAxlePos.northing - (Math.Sin(pivotAxlePos.heading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset))));
         }
 
         //add the points for section, contour line points, Area Calc feature
@@ -1216,9 +1254,6 @@ namespace AgOpenGPS
                 prevFix.easting = pn.fix.easting;
                 prevFix.northing = pn.fix.northing;
 
-                //run once and return
-                isFirstFixPositionSet = true;
-
                 return;
             }
 
@@ -1231,20 +1266,14 @@ namespace AgOpenGPS
                 {
                     isGPSPositionInitialized = true;
                     lastReverseFix = pn.fix;
+                    dayNightCounter = 601;
                 }
+                else
+                    dayNightCounter = 1;
 
                 //in radians
                 fixHeading = 0;
                 toolPos.heading = fixHeading;
-
-                //send out initial zero settings
-                if (isGPSPositionInitialized)
-                {
-                    IsBetweenSunriseSunset(pn.latitude, pn.longitude);
-
-                    //set display accordingly
-                    isDayTime = (DateTime.Now.Ticks < sunset.Ticks && DateTime.Now.Ticks > sunrise.Ticks);
-                }
                 return;
             }
         }

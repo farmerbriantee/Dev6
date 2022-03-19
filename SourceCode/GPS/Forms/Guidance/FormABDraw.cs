@@ -38,8 +38,8 @@ namespace AgOpenGPS
 
         private void FormABDraw_Load(object sender, EventArgs e)
         {
-            nudDistance.Value = (decimal)Math.Round(mf.tool.toolWidth * mf.m2InchOrCm * 0.5, 0);
-            label6.Text = Math.Round(mf.tool.toolWidth * mf.m2InchOrCm, 0).ToString();
+            nudDistance.Value = (decimal)Math.Round(mf.tool.toolWidth * mf.mToUser * 0.5, 0);
+            label6.Text = Math.Round(mf.tool.toolWidth * mf.mToUser, 0).ToString();
 
             FixLabelsCurve();
 
@@ -340,7 +340,7 @@ namespace AgOpenGPS
         private void btnMakeBoundaryCurve_Click(object sender, EventArgs e)
         {
             //outside point
-            double moveDist = (double)nudDistance.Value * mf.inchOrCm2m;
+            double moveDist = (double)nudDistance.Value * mf.userToM;
 
             Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, true, -1, -1, true);
 
@@ -395,7 +395,7 @@ namespace AgOpenGPS
         {
             btnCancelTouch.Enabled = false;
 
-            double moveDist = (double)nudDistance.Value * mf.inchOrCm2m;
+            double moveDist = (double)nudDistance.Value * mf.userToM;
 
             Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, false, start, end, false);
 
@@ -479,7 +479,7 @@ namespace AgOpenGPS
                 mf.bnd.bndList[0].fenceLine.points[end].northing - mf.bnd.bndList[0].fenceLine.points[start].northing);
             if (abHead < 0) abHead += glm.twoPI;
 
-            double offset = (double)nudDistance.Value * mf.inchOrCm2m;
+            double offset = (double)nudDistance.Value * mf.userToM;
 
             double headingCalc = abHead + glm.PIBy2;
 

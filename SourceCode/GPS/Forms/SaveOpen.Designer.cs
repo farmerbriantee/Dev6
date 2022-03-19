@@ -1860,7 +1860,7 @@ namespace AgOpenGPS
 
                 pn.ConvertLocalToWGS84(bnd.bndList[bndNum].fenceLine.points[i].northing, bnd.bndList[bndNum].fenceLine.points[i].easting, out lat, out lon);
 
-                sb.Append(lon.ToString("N7", CultureInfo.InvariantCulture) + ',' + lat.ToString("N7", CultureInfo.InvariantCulture) + ",0 ");
+                sb.Append(lon.ToString("0.0000000") + ',' + lat.ToString("0.0000000") + ",0 ");
             }
             return sb.ToString();
         }

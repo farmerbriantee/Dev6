@@ -31,15 +31,15 @@ namespace AgOpenGPS
         private void DrawChart()
         {
             {
-                roll = (mf.correctionDistanceGraph*20).ToString("N2");
-                east = (mf.pn.fix.easting * 20).ToString("N2");
-                ost = (mf.uncorrectedEastingGraph * 20).ToString("N2");
+                roll = (mf.correctionDistanceGraph*20).ToString("0.00");
+                east = (mf.pn.fix.easting * 20).ToString("0.00");
+                ost = (mf.uncorrectedEastingGraph * 20).ToString("0.00");
 
-                if (!isPole) roll = ((mf.correctionDistanceGraph + mf.uncorrectedEastingGraph) * 20).ToString("N2");
+                if (!isPole) roll = ((mf.correctionDistanceGraph + mf.uncorrectedEastingGraph) * 20).ToString("0.00");
 
-                lblCorrectionDistance.Text = (mf.correctionDistanceGraph).ToString("N2"); ;
-                lblEast.Text = (mf.pn.fix.easting).ToString("N2"); ;
-                lblOst.Text = (mf.uncorrectedEastingGraph).ToString("N2");
+                lblCorrectionDistance.Text = (mf.correctionDistanceGraph).ToString("0.00"); ;
+                lblEast.Text = (mf.pn.fix.easting).ToString("0.00"); ;
+                lblOst.Text = (mf.uncorrectedEastingGraph).ToString("0.00");
                 lblRollDegrees.Text = (mf.RollInDegrees);
                 lblEastOnGraph.Text = ((int)(mf.pn.fix.easting * 100)).ToString();
             }

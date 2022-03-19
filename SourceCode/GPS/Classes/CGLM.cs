@@ -99,43 +99,7 @@ namespace AgOpenGPS
 
         //Regex file expression
         public const string fileRegex = "(^(PRN|AUX|NUL|CON|COM[1-9]|LPT[1-9]|(\\.+)$)(\\..*)?$)|(([\\x00-\\x1f\\\\?*:\";‌​|/<>])+)|([\\.]+)";
-
-        //inches to meters
-        public const double in2m = 0.0254;
-
-        //meters to inches
-        public const double m2in = 39.3701;
-
-        //meters to feet
-        public const double m2ft = 3.28084;
-
-        //feet to meters
-        public const double ft2m = 0.3048;
-
-        //Hectare to Acres
-        public const double ha2ac = 2.47105;
-
-        //Acres to Hectare
-        public const double ac2ha = 0.404686;
-
-        //Meters to Acres
-        public const double m2ac = 0.000247105;
-
-        //Meters to Hectare
-        public const double m2ha = 0.0001;
-
-        // liters per hectare to us gal per acre
-        public const double galAc2Lha = 9.35396;
-
-        //us gal per acre to liters per hectare
-        public const double LHa2galAc = 0.106907;
-
-        //Liters to Gallons
-        public const double L2Gal = 0.264172;
-
-        //Gallons to Liters
-        public const double Gal2L = 3.785412534258;
-
+        
         //the pi's
         public const double twoPI = 6.28318530717958647692;
 

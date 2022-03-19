@@ -145,10 +145,10 @@ namespace AgOpenGPS
 
                                 if (isLogNMEA)
                                     pn.logNMEASentence.Append(
-                                        DateTime.UtcNow.ToString("mm:ss.ff",CultureInfo.InvariantCulture)+ " " +
-                                        Lat.ToString("N7") + " " + Lon.ToString("N7") + " " + 
-                                        pn.speed.ToString("N1") + " " +
-                                        pn.headingTrueDual.ToString("N1") + "\r\n"
+                                        DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " " +
+                                        Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
+                                        pn.speed.ToString("0.0") + " " +
+                                        pn.headingTrueDual.ToString("0.0") + "\r\n"
                                         );
 
                                 UpdateFixPosition();
@@ -181,8 +181,8 @@ namespace AgOpenGPS
                             //if (isLogNMEA)
                             //    pn.logNMEASentence.Append(
                             //        DateTime.UtcNow.ToString("HH:mm:ss.ff", CultureInfo.InvariantCulture) + " IMU " +
-                            //        Math.Round(ahrs.imuRoll, 1).ToString("N1") + " " +
-                            //        Math.Round(ahrs.imuHeading, 1).ToString("N1") + 
+                            //        ahrs.imuRoll.ToString("0.0") + " " +
+                            //        ahrs.imuHeading.ToString("0.0") + 
                             //        "\r\n"
                             //        );
                             break;
@@ -238,9 +238,9 @@ namespace AgOpenGPS
                             if (isLogNMEA)
                                 pn.logNMEASentence.Append(
                                     DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " AS " +
-                                    //Lat.ToString("N7") + " " + Lon.ToString("N7") + " " +
-                                    //pn.speed.ToString("N1") + " " + Math.Round(ahrs.imuRoll, 1).ToString("N1") + " " +
-                                    mc.actualSteerAngleDegrees.ToString("N1") + "\r\n"
+                                    //Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
+                                    //pn.speed.ToString("0.0") + " " + ahrs.imuRoll.ToString("0.0") + " " +
+                                    mc.actualSteerAngleDegrees.ToString("0.0") + "\r\n"
                                     );
 
                             break;
@@ -378,7 +378,6 @@ namespace AgOpenGPS
             return;
         }
 
-
         private void ReceiveAppData(IAsyncResult asyncResult)
         {
             try
@@ -500,16 +499,6 @@ namespace AgOpenGPS
                     return;
             }
             base.WndProc(ref m);
-        }
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                //drop shadow
-                CreateParams cp = base.CreateParams;
-                cp.Style |= 0x20000; // <--- use 0x20000
-                return cp;
-            }
         }
 
         #region keystrokes

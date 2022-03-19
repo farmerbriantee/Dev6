@@ -174,7 +174,7 @@ namespace AgOpenGPS
         private void tabDRoll_Enter(object sender, EventArgs e)
         {
             //Roll
-            lblRollZeroOffset.Text = ((double)Properties.Settings.Default.setIMU_rollZero).ToString("N2");
+            lblRollZeroOffset.Text = ((double)Properties.Settings.Default.setIMU_rollZero).ToString("0.00");
             hsbarRollFilter.Value = (int)(Properties.Settings.Default.setIMU_rollFilter * 100);
             cboxDataInvertRoll.Checked = Properties.Settings.Default.setIMU_invertRoll;
         }
@@ -202,7 +202,7 @@ namespace AgOpenGPS
             {
                 mf.ahrs.imuRoll += mf.ahrs.rollZero;
                 mf.ahrs.rollZero = mf.ahrs.imuRoll;
-                lblRollZeroOffset.Text = (mf.ahrs.rollZero).ToString("N2");
+                lblRollZeroOffset.Text = (mf.ahrs.rollZero).ToString("0.00");
             }
             else
             {

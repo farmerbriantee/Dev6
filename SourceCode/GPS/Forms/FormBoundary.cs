@@ -136,20 +136,10 @@ namespace AgOpenGPS
                     //d.BackColor = Color.Transparent;
                 }
 
-                if (mf.isMetric)
-                {
-                    int length = (mf.bnd.bndList[i].area * 0.0001).ToString("0").Length;
-                    if (length > 10) length = 10;
-                    if (length < 3) length = 3;
-                    b.Text = (mf.bnd.bndList[i].area * 0.0001).ToString("0.########".Substring(0, 11 - length)) + " Ha";
-                }
-                else
-                {
-                    int length = (mf.bnd.bndList[i].area * 0.000247105).ToString("0").Length;
-                    if (length > 10) length = 10;
-                    if (length < 3) length = 3;
-                    b.Text = (mf.bnd.bndList[i].area * 0.000247105).ToString("0.########".Substring(0, 11 - length)) + " Ac";
-                }
+                int length = (mf.bnd.bndList[i].area * mf.m2ToUser).ToString("0").Length;
+                if (length > 10) length = 10;
+                if (length < 3) length = 3;
+                b.Text = (mf.bnd.bndList[i].area * mf.m2ToUser).ToString("0.########".Substring(0, 11 - length)) + mf.unitsHaAc;
 
                 if (i == fenceSelected)
                 {
@@ -543,14 +533,7 @@ namespace AgOpenGPS
                 area = Math.Abs(area / 2);
             }
 
-            if (mf.isMetric)
-            {
-                lblArea.Text = Math.Round(area * 0.0001, 2) + " Ha";
-            }
-            else
-            {
-                lblArea.Text = Math.Round(area * 0.000247105, 2) + " Acre";
-            }
+            lblArea.Text = Math.Round(area * mf.m2ToUser, 2) + mf.unitsHaAc;
             lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
         }
 

@@ -16,7 +16,7 @@ namespace AgOpenGPS
         private const float fovy = 0.7f, camDistanceFactor = -4.0f;
 
         private int mouseX = 0, mouseY = 0;
-        private int zoomUpdateCounter = 0;
+        private bool updateZoomWindow = false;
         private int steerModuleConnectedCounter = 0;
 
         //data buffer for pixels read from off screen buffer
@@ -36,8 +36,6 @@ namespace AgOpenGPS
             GL.ClearColor(0.27f, 0.4f, 0.7f, 1.0f);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.CullFace(CullFaceMode.Back);
-            SetZoom(0);
-            tmrWatchdog.Enabled = true;
         }
 
         //oglMain needs a resize
@@ -295,8 +293,8 @@ namespace AgOpenGPS
                     GL.Begin(PrimitiveType.LineStrip);
 
                     GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
-                    GL.Vertex3(pivotAxlePos.easting + (Math.Sin(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)),
-                              pivotAxlePos.northing + (Math.Cos(pivotAxlePos.heading - glm.PIBy2) * (bnd.isDrawRightSide ? -bnd.createBndOffset : bnd.createBndOffset)), 0);
+                    GL.Vertex3(pivotAxlePos.easting + (Math.Cos(pivotAxlePos.heading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset)),
+                              pivotAxlePos.northing - (Math.Sin(pivotAxlePos.heading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset)), 0);
                     GL.Vertex3(bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].easting, bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].northing, 0);
 
                     GL.End();
@@ -403,13 +401,10 @@ namespace AgOpenGPS
                 if (leftMouseDownOnOpenGL) MakeFlagMark();
 
                 //draw the zoom window
-                if (isJobStarted && oglZoom.Width != 400)
+                if (updateZoomWindow && isJobStarted && oglZoom.Width != 400)
                 {
-                    if (threeSeconds != zoomUpdateCounter)
-                    {
-                        zoomUpdateCounter = threeSeconds;
-                        oglZoom.Refresh();
-                    }
+                    oglZoom.Refresh();
+                    updateZoomWindow = false;
                 }
             }
         }
@@ -625,55 +620,6 @@ namespace AgOpenGPS
 
             //send the byte out to section machines
             BuildMachineByte();
-
-            //if a minute has elapsed save the field in case of crash and to be able to resume            
-            if (minuteCounter > 30 && sentenceCounter < 20)
-            {
-                tmrWatchdog.Enabled = false;
-
-                //don't save if no gps
-                if (isJobStarted)
-                {
-                    //auto save the field patches, contours accumulated so far
-                    FileSaveSections();
-                    FileSaveContour();
-
-                    //NMEA log file
-                    if (isLogElevation) FileSaveElevation();
-                    //FileSaveFieldKML();
-                }
-
-                if (isAutoDayNight && tenMinuteCounter > 600)
-                {
-                    tenMinuteCounter = 0;
-                    isDayTime = (DateTime.Now.Ticks < sunset.Ticks && DateTime.Now.Ticks > sunrise.Ticks);
-
-                    if (isDayTime != isDay)
-                    {
-                        isDay = isDayTime;
-                        isDay = !isDay;
-                        SwapDayNightMode();
-                    }
-
-                    if (sunrise.Date != DateTime.Today)
-                    {
-                        IsBetweenSunriseSunset(pn.latitude, pn.longitude);
-
-                        //set display accordingly
-                        isDayTime = (DateTime.Now.Ticks < sunset.Ticks && DateTime.Now.Ticks > sunrise.Ticks);                    
-                    }
-                }
-
-                //if its the next day, calc sunrise sunset for next day
-                minuteCounter = 0;
-
-                //set saving flag off
-                isSavingFile = false;
-
-                //go see if data ready for draw and position updates
-                tmrWatchdog.Enabled = true;
-            }
-            //this is the end of the "frame". Now we wait for next NMEA sentence with a valid fix. 
         }
 
         private void UpdateBackBuffer(int rpHeight, int rpHeight2, bool tramOnly, bool Test, double X = double.NaN, double Y = double.NaN)
@@ -1062,28 +1008,16 @@ namespace AgOpenGPS
             GL.End();
             GL.Disable(EnableCap.Texture2D);
             // Done Building Triangle Strip
-            if (isMetric)
+            if (!gyd.isYouTurnTriggered)
             {
-                if (!gyd.isYouTurnTriggered)
-                {
-                    font.DrawText(-30 + two3, 80, DistPivotM);
-                }
+                if (distancePivotToTurnLine > 0)
+                    font.DrawText(-30 + two3, 80, (distancePivotToTurnLine * mToUserBig).ToString("0") + unitsFtM);
                 else
-                {
-                    font.DrawText(-30 + two3, 80, (gyd.totalUTurnLength - gyd.onA).ToString("N0") + " m");
-                }
+                    font.DrawText(-30 + two3, 80, "--");
             }
             else
             {
-
-                if (!gyd.isYouTurnTriggered)
-                {
-                    font.DrawText(-40 + two3, 80, DistPivotFt);
-                }
-                else
-                {
-                    font.DrawText(-40 + two3, 80, (glm.m2ft * (gyd.totalUTurnLength - gyd.onA)).ToString("N0") + " ft");
-                }
+                font.DrawText(-30 + two3, 80, ((gyd.totalUTurnLength - gyd.onA) * mToUserBig).ToString("0") + unitsFtM);
             }
         }
 
@@ -1360,8 +1294,6 @@ namespace AgOpenGPS
 
         private void DrawLightBarText()
         {
-            GL.Disable(EnableCap.DepthTest);
-
             if (guidanceLineDistanceOff != 32000)
             {
                 double avgPivotDistance = avgPivDistance * (isMetric ? 0.1 : 0.03937);
@@ -1372,12 +1304,12 @@ namespace AgOpenGPS
                 if (avgPivotDistance > 0.0)
                 {
                     GL.Color3(0.9752f, 0.50f, 0.3f);
-                    hede = "< " + (Math.Abs(avgPivotDistance)).ToString("N0");
+                    hede = "< " + (Math.Abs(avgPivotDistance)).ToString("0");
                 }
                 else
                 {
                     GL.Color3(0.50f, 0.952f, 0.3f);
-                    hede = (Math.Abs(avgPivotDistance)).ToString("N0") + " >";
+                    hede = (Math.Abs(avgPivotDistance)).ToString("0") + " >";
                 }
 
                 int center = -(int)(((double)(hede.Length) * 0.5) * 16);
@@ -1419,7 +1351,7 @@ namespace AgOpenGPS
             GL.Vertex2(wiid - 10, 15);
             GL.End();
 
-            string head = Math.Round(ahrs.imuRoll, 1).ToString();
+            string head = ahrs.imuRoll.ToString("0.0");
             int center = -(int)(((head.Length) * 6));
 
             font.DrawText(center, 0, head, 0.8);
@@ -1571,17 +1503,17 @@ namespace AgOpenGPS
 
             GL.Color3(0.9752f, 0.952f, 0.93f);
 
-            font.DrawText(center+10, 20, (fixHeading * 57.2957795).ToString("N1"), 1);
+            font.DrawText(center+10, 20, (fixHeading * 57.2957795).ToString("0.0"), 1);
 
             if (ahrs.imuHeading != 99999)
             {
                 if (!isSuperSlow) GL.Color3(0.98f, 0.972f, 0.59903f);
                 else GL.Color3(0.298f, 0.972f, 0.99903f);
 
-                font.DrawText(center, 55, "Fix:" + (gpsHeading * 57.2957795).ToString("N1"), 0.8);
-                font.DrawText(center, 80, "IMU:" + Math.Round(ahrs.imuHeading, 1).ToString(), 0.8);
-                //font.DrawText(center, 110, "R:" + Math.Round(ahrs.imuRoll, 1).ToString(), 0.8);
-                //font.DrawText(center, 135, "Y:" + Math.Round(ahrs.imuYawRate, 1).ToString(), 0.8);
+                font.DrawText(center, 55, "Fix:" + (gpsHeading * 57.2957795).ToString("0.0"), 0.8);
+                font.DrawText(center, 80, "IMU:" + ahrs.imuHeading.ToString("0.0"), 0.8);
+                //font.DrawText(center, 110, "R:" + ahrs.imuRoll.ToString("0.0"), 0.8);
+                //font.DrawText(center, 135, "Y:" + ahrs.imuYawRate.ToString("0.0"), 0.8);
             }
 
             if (isAngVelGuidance)
@@ -1726,18 +1658,9 @@ namespace AgOpenGPS
             GL.BindTexture(TextureTarget.Texture2D, texture[8]);        // Select Our Texture
 
             double angle = 0;
-            if (isMetric)
-            {
-                double aveSpd = Math.Abs(avgSpeed);
-                if (aveSpd > 20) aveSpd = 20;
-                angle = (aveSpd - 10) * 15;
-            }
-            else
-            {
-                double aveSpd = Math.Abs(avgSpeed*0.62137);
-                if (aveSpd > 20) aveSpd = 20;
-                angle = (aveSpd - 10) * 15;
-            }
+            double aveSpd = Math.Abs(avgSpeed * KMHToUser);
+            if (aveSpd > 20) aveSpd = 20;
+            angle = (aveSpd - 10) * 15;
 
             if (pn.speed > -0.1) GL.Color3(0.850f, 0.950f, 0.30f);
             else GL.Color3(0.952f, 0.0f, 0.0f);
@@ -1765,7 +1688,7 @@ namespace AgOpenGPS
         private void DrawAge()
         {
             GL.Color3(0.9752f, 0.52f, 0.0f);
-            font.DrawText(oglMain.Width / 4, 60, "Age:" + pn.age.ToString("N1"), 1.5);
+            font.DrawText(oglMain.Width / 4, 60, "Age:" + pn.age.ToString("0.0"), 1.5);
         }
 
         private void CalcFrustum()
@@ -1969,67 +1892,33 @@ namespace AgOpenGPS
         private void DrawFieldText()
         {
             StringBuilder sb = new StringBuilder();
-            if (isMetric)
+            if (bnd.bndList.Count > 0)
             {
-                if (bnd.bndList.Count > 0)
-                {
-                    sb.Clear();
-                    sb.Append(((fd.workedAreaTotal - fd.actualAreaCovered) * glm.m2ha).ToString("N3"));
-                    sb.Append("Ha ");
-                    sb.Append(fd.overlapPercent.ToString("N2"));
-                    sb.Append("%  ");
-                    sb.Append((fd.areaBoundaryOuterLessInner * glm.m2ha).ToString("N2"));
-                    sb.Append("-");
-                    sb.Append((fd.actualAreaCovered * glm.m2ha).ToString("N2"));
-                    sb.Append(" = ");
-                    sb.Append(((fd.areaBoundaryOuterLessInner - fd.actualAreaCovered) * glm.m2ha).ToString("N2"));
-                    sb.Append("Ha  ");
-                    sb.Append(fd.TimeTillFinished);
-                    GL.Color3(0.95, 0.95, 0.95);
-                    font.DrawText(-sb.Length * 7, oglMain.Height - 32, sb.ToString());
-                }
-                else
-                {
-                    sb.Clear();
-                    //sb.Append("Overlap ");
-                    sb.Append(fd.overlapPercent.ToString("N3"));
-                    sb.Append("%   ");
-                    sb.Append((fd.actualAreaCovered * glm.m2ha).ToString("N3"));
-                    sb.Append("Ha");
-                    GL.Color3(0.95, 0.95, 0.95);
-                    font.DrawText(0, oglMain.Height - 32, sb.ToString());
-                }
+                sb.Clear();
+                sb.Append(((fd.workedAreaTotal - fd.actualAreaCovered) * m2ToUser).ToString("0.000"));
+                sb.Append(unitsHaAc + " ");
+                sb.Append(fd.overlapPercent.ToString("0.00"));
+                sb.Append("%  ");
+                sb.Append((fd.areaBoundaryOuterLessInner * m2ToUser).ToString("0.00"));
+                sb.Append("-");
+                sb.Append((fd.actualAreaCovered * m2ToUser).ToString("0.00"));
+                sb.Append(" = ");
+                sb.Append(((fd.areaBoundaryOuterLessInner - fd.actualAreaCovered) * m2ToUser).ToString("0.00"));
+                sb.Append(unitsHaAc + "  ");
+                sb.Append(fd.TimeTillFinished);
+                GL.Color3(0.95, 0.95, 0.95);
+                font.DrawText(-sb.Length * 7, oglMain.Height - 32, sb.ToString());
             }
             else
             {
-                if (bnd.bndList.Count > 0)
-                {
-                    sb.Clear();
-                    sb.Append(((fd.workedAreaTotal - fd.actualAreaCovered) * glm.m2ac).ToString("N3"));
-                    sb.Append("Ac ");
-                    sb.Append(fd.overlapPercent.ToString("N2"));
-                    sb.Append("%  ");
-                    sb.Append((fd.areaBoundaryOuterLessInner * glm.m2ac).ToString("N2"));
-                    sb.Append("-");
-                    sb.Append((fd.actualAreaCovered * glm.m2ac).ToString("N2"));
-                    sb.Append(" = ");
-                    sb.Append(((fd.areaBoundaryOuterLessInner - fd.actualAreaCovered) * glm.m2ac).ToString("N2"));
-                    sb.Append("Ac  ");
-                    sb.Append(fd.TimeTillFinished);
-                    GL.Color3(0.95, 0.95, 0.95);
-                    font.DrawText(-sb.Length * 7, oglMain.Height - 32, sb.ToString());
-                }
-                else
-                {
-                    sb.Clear();
-                    //sb.Append("Overlap ");
-                    sb.Append(fd.overlapPercent.ToString("N3"));
-                    sb.Append("%   ");
-                    sb.Append((fd.actualAreaCovered * glm.m2ac).ToString("N3"));
-                    sb.Append("Ac");
-                    GL.Color3(0.95, 0.95, 0.95);
-                    font.DrawText(0, oglMain.Height - 32, sb.ToString());
-                }
+                sb.Clear();
+                //sb.Append("Overlap ");
+                sb.Append(fd.overlapPercent.ToString("0.000"));
+                sb.Append("%   ");
+                sb.Append((fd.actualAreaCovered * m2ToUser).ToString("0.000"));
+                sb.Append(unitsHaAc);
+                GL.Color3(0.95, 0.95, 0.95);
+                font.DrawText(0, oglMain.Height - 32, sb.ToString());
             }
         }
     }

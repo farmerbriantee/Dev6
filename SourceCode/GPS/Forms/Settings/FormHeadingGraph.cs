@@ -32,13 +32,13 @@ namespace AgOpenGPS
         private void DrawChart()
         {
             {
-                dataSteerAngle = (glm.toDegrees(mf.gpsHeading)).ToString("N1");
-                dataPWM = (glm.toDegrees(mf.imuCorrected)).ToString("N1");
+                dataSteerAngle = (glm.toDegrees(mf.gpsHeading)).ToString("0.0");
+                dataPWM = (glm.toDegrees(mf.imuCorrected)).ToString("0.0");
 
                 lblSteerAng.Text = dataSteerAngle;
                 lblPWM.Text = dataPWM;
 
-                lblDiff.Text = (glm.toDegrees(mf.gpsHeading - mf.imuCorrected)).ToString("N2");
+                lblDiff.Text = (glm.toDegrees(mf.gpsHeading - mf.imuCorrected)).ToString("0.00");
 
                 roll = lblDiff.Text;
                 zero = "0";

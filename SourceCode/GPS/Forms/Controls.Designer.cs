@@ -2,7 +2,9 @@
 
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using AgOpenGPS.Forms;
 using AgOpenGPS.Properties;
@@ -94,6 +96,7 @@ namespace AgOpenGPS
             gyd.isValid = false;
             gyd.moveDistance = 0;
             gyd.currentGuidanceLine = null;
+            gyd.curList = new System.Collections.Generic.List<vec3>();
 
             panelDrag.Visible = newmode == Mode.RecPath;
             if (gyd.CurrentGMode == Mode.RecPath)
@@ -103,6 +106,8 @@ namespace AgOpenGPS
 
             btnContour.Image = newmode == Mode.Contour ? Properties.Resources.ContourOn : Properties.Resources.ContourOff;
             btnCycleLines.Image = newmode == Mode.Contour ? Properties.Resources.ColorLocked : Properties.Resources.ABLineCycle;
+            btnCycleLines.Enabled = (newmode == Mode.Curve || newmode == Mode.AB || newmode == Mode.Contour);
+
             btnCurve.Image = newmode == Mode.Curve ? Properties.Resources.CurveOn : Properties.Resources.CurveOff;
             btnABLine.Image = newmode == Mode.AB ? Properties.Resources.ABLineOn : Properties.Resources.ABLineOff;
 
@@ -530,8 +535,15 @@ namespace AgOpenGPS
         private void btnMaximizeMainForm_Click(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Maximized)
+            {
+                Padding = new System.Windows.Forms.Padding(5,5,5,5);
                 this.WindowState = FormWindowState.Normal;
-            else this.WindowState = FormWindowState.Maximized;
+            }
+            else
+            {
+                Padding = new System.Windows.Forms.Padding(8, 8, 8, 8);
+                this.WindowState = FormWindowState.Maximized;
+            }
         }
 
         #endregion
@@ -654,7 +666,6 @@ namespace AgOpenGPS
                 Settings.Default.setMenu_isOGLZoomOn = 1;
                 Settings.Default.Save();
                 topFieldViewToolStripMenuItem.Checked = true;
-                oglZoom.Visible = true;
                 oglZoom.Width = 300;
                 oglZoom.Height = 300;
                 oglZoom.Left = 80;
@@ -746,66 +757,59 @@ namespace AgOpenGPS
         //Languages
         private void menuLanguageEnglish_Click(object sender, EventArgs e)
         {
-            SetLanguage("en", true);
+            SetLanguage("en");
         }
         private void menuLanguageDanish_Click(object sender, EventArgs e)
         {
-            SetLanguage("da", true);
+            SetLanguage("da");
         }
         private void menuLanguageTurkish_Click(object sender, EventArgs e)
         {
-            SetLanguage("tr", true);
+            SetLanguage("tr");
         }
         private void menuLanguageDeutsch_Click(object sender, EventArgs e)
         {
-            SetLanguage("de", true);
+            SetLanguage("de");
         }
         private void menuLanguageRussian_Click(object sender, EventArgs e)
         {
-            SetLanguage("ru", true);
+            SetLanguage("ru");
         }
         private void menuLanguageDutch_Click(object sender, EventArgs e)
         {
-            SetLanguage("nl", true);
+            SetLanguage("nl");
         }
         private void menuLanguageSpanish_Click(object sender, EventArgs e)
         {
-            SetLanguage("es", true);
+            SetLanguage("es");
         }
         private void menuLanguageFrench_Click(object sender, EventArgs e)
         {
-            SetLanguage("fr", true);
+            SetLanguage("fr");
         }
         private void menuLanguageItalian_Click(object sender, EventArgs e)
         {
-            SetLanguage("it", true);
+            SetLanguage("it");
         }
         private void menuLanguageUkranian_Click(object sender, EventArgs e)
         {
-            SetLanguage("uk", true);
+            SetLanguage("uk");
         }
         private void menuLanguageSlovak_Click(object sender, EventArgs e)
         {
-            SetLanguage("sk", true);
+            SetLanguage("sk");
         }
         private void menuLanguagesPolski_Click(object sender, EventArgs e)
         {
-            SetLanguage("pl", true);
+            SetLanguage("pl");
         }
         private void menuLanguageTest_Click(object sender, EventArgs e)
         {
-            SetLanguage("af", true);
+            SetLanguage("af");
         }
 
-        private void SetLanguage(string lang, bool Restart)
+        private void SetLanguage(string lang)
         {
-            if (Restart && isJobStarted)
-            {
-                var form = new FormTimedMessage(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
-                form.Show(this);
-                return;
-            }
-
             //reset them all to false
             menuLanguageEnglish.Checked = false;
             menuLanguageDeutsch.Checked = false;
@@ -892,11 +896,10 @@ namespace AgOpenGPS
             key.SetValue("Language", lang);
             key.Close();
 
-            if (Restart)
-            {
-                MessageBox.Show(gStr.gsProgramWillExitPleaseRestart);
-                System.Environment.Exit(1);
-            }
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(Properties.Settings.Default.setF_culture);
+            Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(Properties.Settings.Default.setF_culture);
+
+            SetGuiText();
         }
 
         #endregion
@@ -1158,6 +1161,14 @@ namespace AgOpenGPS
 
         #region Tools Menu
 
+        private void toolStripDropDownButton4_Click(object sender, EventArgs e)
+        {
+            Button btnSender = (Button)sender;
+            Point ptLowerLeft = new Point(btnSender.Width, 0);
+            ptLowerLeft = btnSender.PointToScreen(ptLowerLeft);
+            contextMenuStrip1.Show(ptLowerLeft);
+        }
+
         private void deleteContourPathsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //FileCreateContour();
@@ -1395,8 +1406,14 @@ namespace AgOpenGPS
                     }
                 }
             }
+            else
+            {
+                Button btnSender = (Button)sender;
+                Point ptLowerLeft = new Point(btnSender.Width, 0);
+                ptLowerLeft = btnSender.PointToScreen(ptLowerLeft);
+                contextMenuStrip2.Show(ptLowerLeft);
+            }
         }
-
         private void toolStripBtnField_Click(object sender, EventArgs e)
         {
             CloseCurrentJob(false);
@@ -1648,7 +1665,7 @@ namespace AgOpenGPS
         private void hsbarSteerAngle_Scroll(object sender, ScrollEventArgs e)
         {
             sim.steerAngleScrollBar = (hsbarSteerAngle.Value - 400) * 0.1;
-            btnResetSteerAngle.Text = sim.steerAngleScrollBar.ToString("N1");
+            btnResetSteerAngle.Text = sim.steerAngleScrollBar.ToString("0.0");
         }
         private void hsbarStepDistance_Scroll(object sender, ScrollEventArgs e)
         {
@@ -1658,7 +1675,7 @@ namespace AgOpenGPS
         {
             sim.steerAngleScrollBar = 0;
             hsbarSteerAngle.Value = 400;
-            btnResetSteerAngle.Text = sim.steerAngleScrollBar.ToString("N1");
+            btnResetSteerAngle.Text = sim.steerAngleScrollBar.ToString("0.0");
         }
         private void btnResetSim_Click(object sender, EventArgs e)
         {

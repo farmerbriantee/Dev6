@@ -37,7 +37,7 @@ namespace AgOpenGPS
             hsbarCountsPerDegree.Value = Properties.Settings.Default.setAS_countsPerDegree;
 
             lblCountsPerDegree.Text = hsbarCountsPerDegree.Value.ToString();
-            lblSteerAngleSensorZero.Text = (hsbarWasOffset.Value / (double)(hsbarCountsPerDegree.Value)).ToString("N2");
+            lblSteerAngleSensorZero.Text = (hsbarWasOffset.Value / (double)(hsbarCountsPerDegree.Value)).ToString("0.00");
 
             hsbarWasOffset.ValueChanged += hsbarSteerAngleSensorZero_ValueChanged;
             hsbarCountsPerDegree.ValueChanged += hsbarCountsPerDegree_ValueChanged;
@@ -223,7 +223,7 @@ namespace AgOpenGPS
                     diameter = dist;
                     cntr = 0;
                 }
-                lblDiameter.Text = diameter.ToString("N2") + " m";
+                lblDiameter.Text = diameter.ToString("0.00") + " m";
 
                 if (cntr > 9)
                 {
@@ -232,9 +232,9 @@ namespace AgOpenGPS
                     //steerAngleLeft = Math.Atan(mf.vehicle.wheelbase / (diameter / 2 ));
                     //steerAngleLeft = glm.toDegrees(steerAngleLeft);
 
-                    lblCalcSteerAngleInner.Text = steerAngleRight.ToString("N1") + "\u00B0";
-                    //lblCalcSteerAngleOuter.Text = steerAngleLeft.ToString("N1") + "\u00B0";
-                    lblDiameter.Text = diameter.ToString("N2") + " m";
+                    lblCalcSteerAngleInner.Text = steerAngleRight.ToString("0.0") + "\u00B0";
+                    //lblCalcSteerAngleOuter.Text = steerAngleLeft.ToString("0.0") + "\u00B0";
+                    lblDiameter.Text = diameter.ToString("0.00") + " m";
                     btnStartSA.Image = Properties.Resources.BoundaryRecord;
                     isSA = false;
                 }
@@ -255,10 +255,10 @@ namespace AgOpenGPS
             }
 
             lblSteerAngle.Text = mf.SetSteerAngle;
-            lblSteerAngleActual.Text = mf.mc.actualSteerAngleDegrees.ToString("N1") + "\u00B0";
+            lblSteerAngleActual.Text = mf.mc.actualSteerAngleDegrees.ToString("0.0") + "\u00B0";
             lblActualSteerAngleUpper.Text = lblSteerAngleActual.Text;
             double err = (mf.mc.actualSteerAngleDegrees - mf.guidanceLineSteerAngle * 0.01);
-            lblError.Text = Math.Abs(err).ToString("N1") + "\u00B0";
+            lblError.Text = Math.Abs(err).ToString("0.0") + "\u00B0";
             if (err > 0) lblError.ForeColor = Color.Red;
             else lblError.ForeColor = Color.DarkGreen;
 
@@ -403,14 +403,14 @@ namespace AgOpenGPS
         private void hsbarCountsPerDegree_ValueChanged(object sender, EventArgs e)
         {
             lblCountsPerDegree.Text = unchecked((byte)hsbarCountsPerDegree.Value).ToString();
-            lblSteerAngleSensorZero.Text = (hsbarWasOffset.Value / (double)(hsbarCountsPerDegree.Value)).ToString("N2");
+            lblSteerAngleSensorZero.Text = (hsbarWasOffset.Value / (double)(hsbarCountsPerDegree.Value)).ToString("0.00");
             toSend = true;
             counter = 0;
         }
 
         private void hsbarSteerAngleSensorZero_ValueChanged(object sender, EventArgs e)
         {
-            lblSteerAngleSensorZero.Text = (hsbarWasOffset.Value / (double)(hsbarCountsPerDegree.Value)).ToString("N2");
+            lblSteerAngleSensorZero.Text = (hsbarWasOffset.Value / (double)(hsbarCountsPerDegree.Value)).ToString("0.00");
             toSend = true;
             counter = 0;
         }
@@ -489,7 +489,7 @@ namespace AgOpenGPS
         {
             double deg = hsbarSideHillComp.Value;
             deg *= 0.01;
-            lblSideHillComp.Text = (deg.ToString("N2") + "\u00B0");
+            lblSideHillComp.Text = (deg.ToString("0.00") + "\u00B0");
             Properties.Settings.Default.setAS_sideHillComp = deg;
             mf.gyd.sideHillCompFactor = deg;
         }
@@ -529,11 +529,9 @@ namespace AgOpenGPS
         {
             pboxSendSteer.Visible = true;
 
-            if (sender is CheckBox)
+            if (sender is CheckBox checkbox)
             {
-                var checkbox = (CheckBox)sender;
-
-                if (checkbox.Name == "cboxEncoder" || checkbox.Name == "cboxPressureSensor" 
+                if (checkbox.Name == "cboxEncoder" || checkbox.Name == "cboxPressureSensor"
                     || checkbox.Name == "cboxCurrentSensor")
                 {
                     if (!checkbox.Checked)

@@ -82,7 +82,7 @@ namespace AgOpenGPS
 
         private void btnSetDistance_Click(object sender, EventArgs e)
         {
-            double width = (double)nudSetDistance.Value * mf.ftOrMtoM;
+            double width = (double)nudSetDistance.Value * mf.UserBigToM;
 
             headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, start, end, true);
 
@@ -94,12 +94,12 @@ namespace AgOpenGPS
 
         private void btnMakeFixedHeadland_Click(object sender, EventArgs e)
         {
-            double width = (double)nudDistance.Value * mf.ftOrMtoM;
+            double width = (double)nudDistance.Value * mf.UserBigToM;
 
             headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, -1, -1, true);
 
             totalHeadlandWidth += width;
-            lblHeadlandWidth.Text = (totalHeadlandWidth * mf.m2FtOrM).ToString("N2");
+            lblHeadlandWidth.Text = (totalHeadlandWidth * mf.mToUserBig).ToString("0.00");
 
             isSet = false;
             start = end = -1;
@@ -115,7 +115,7 @@ namespace AgOpenGPS
 
             headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, -1, -1, true);
 
-            lblHeadlandWidth.Text = (width * mf.m2FtOrM).ToString("N2");
+            lblHeadlandWidth.Text = (width * mf.mToUserBig).ToString("0.00");
             totalHeadlandWidth = width;
 
             oglSelf.Refresh();

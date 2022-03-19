@@ -64,7 +64,7 @@ namespace AgOpenGPS
         public bool isJobStarted = false, isAutoSteerBtnOn, isLidarBtnOn = true;
 
         //if we are saving a file
-        public bool isSavingFile = false, isLogNMEA = false, isLogElevation = false;
+        public bool isLogNMEA = false, isLogElevation = false;
 
         //texture holders
         public uint[] texture;
@@ -78,12 +78,6 @@ namespace AgOpenGPS
 
         public double secondsSinceStart;
 
-        //private readonly Stopwatch swDraw = new Stopwatch();
-        //swDraw.Reset();
-        //swDraw.Start();
-        //swDraw.Stop();
-        //label3.Text = ((double) swDraw.ElapsedTicks / (double) System.Diagnostics.Stopwatch.Frequency * 1000).ToString();
-
         //Time to do fix position update and draw routine
         public double frameTime = 0;
 
@@ -94,26 +88,23 @@ namespace AgOpenGPS
         private double HzTime = 5;
 
         //For field saving in background
-        private int minuteCounter = 1;
-        private int tenMinuteCounter = 1;
+        private int secondsCounter = 1;
+        private int dayNightCounter = 1;
 
         //whether or not to use Stanley control
         public bool isStanleyUsed = true;
 
-        //used to update the screen status bar etc
-        private int displayUpdateHalfSecondCounter = 0, displayUpdateOneSecondCounter = 0, displayUpdateOneFifthCounter = 0, displayUpdateThreeSecondCounter = 0;
-
-        private int threeSecondCounter = 0, threeSeconds = 0;
-        private int oneSecondCounter = 0, oneSecond = 0;
-        private int oneHalfSecondCounter = 0, oneHalfSecond = 0;
-        private int oneFifthSecondCounter = 0, oneFifthSecond = 0;
+        private int threeSecondCounter = 0;
+        private int oneSecondCounter = 0;
+        private int oneHalfSecondCounter = 0;
 
         public int pbarSteer, pbarMachine, pbarUDP;
 
         public double nudNumber = 0;
 
-        public double m2InchOrCm, inchOrCm2m, m2FtOrM, ftOrMtoM, cm2CmOrIn, inOrCm2Cm;
-        public string unitsFtM, unitsInCm;
+        public double mToUser, userToM, mToUserBig, UserBigToM, cmToUser, userToCm, m2ToUser, KMHToUser;
+
+        public string unitsFtM, unitsInCm, unitsHaAc;
 
         //used by filePicker Form to return picked file and directory
         public string filePickerFileAndDirectory;
@@ -218,45 +209,11 @@ namespace AgOpenGPS
 
             CheckSettingsNotNull();
 
-
-            //ControlExtension.Draggable(panelSnap, true);
             ControlExtension.Draggable(oglZoom, true);
             ControlExtension.Draggable(panelDrag, true);
 
-            setWorkingDirectoryToolStripMenuItem.Text = gStr.gsDirectories;
-            enterSimCoordsToolStripMenuItem.Text = gStr.gsEnterSimCoords;
-            aboutToolStripMenuItem.Text = gStr.gsAbout;
-            menustripLanguage.Text = gStr.gsLanguage;
-
-
-            simulatorOnToolStripMenuItem.Text = gStr.gsSimulatorOn;
-
-            resetALLToolStripMenuItem.Text = gStr.gsResetAll;
-            colorsToolStripMenuItem1.Text = gStr.gsColors;
-            topFieldViewToolStripMenuItem.Text = gStr.gsTopFieldView;
-
-            resetEverythingToolStripMenuItem.Text = gStr.gsResetAllForSure;
-
-            steerChartStripMenu.Text = gStr.gsSteerChart;
-
-            //Tools Menu
-            //toolStripBtnMakeBndContour.Text = gStr.gsMakeBoundaryContours;
-            boundariesToolStripMenuItem.Text = gStr.gsBoundary;
-            headlandToolStripMenuItem.Text = gStr.gsHeadland;
-            deleteContourPathsToolStripMenuItem.Text = gStr.gsDeleteContourPaths;
-            deleteAppliedAreaToolStripMenuItem.Text = gStr.gsDeleteAppliedArea;
-            deleteForSureToolStripMenuItem.Text = gStr.gsAreYouSure;
-            webcamToolStrip.Text = gStr.gsWebCam;
-            //googleEarthFlagsToolStrip.Text = gStr.gsGoogleEarth;
-            offsetFixToolStrip.Text = gStr.gsOffsetFix;
-
-            btnChangeMappingColor.Text = Application.ProductVersion.ToString(CultureInfo.InvariantCulture);
-
             //time keeper
             secondsSinceStart = (DateTime.Now - Process.GetCurrentProcess().StartTime).TotalSeconds;
-
-            //build the gesture structures
-            //SetupStructSizes();
 
             //create the world grid
             worldManager = new CWorldManager(this);
@@ -295,9 +252,6 @@ namespace AgOpenGPS
             //fieldData all in one place
             fd = new CFieldData(this);
 
-            //start the stopwatch
-            //swFrame.Start();
-
             //instance of tram
             tram = new CTram(this);
 
@@ -316,22 +270,18 @@ namespace AgOpenGPS
         //Initialize items before the form Loads or is visible
         private void FormGPS_Load(object sender, EventArgs e)
         {
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.MouseWheel += ZoomByMouseWheel;
+            FormBorderStyle = FormBorderStyle.Sizable;
+            MouseWheel += ZoomByMouseWheel;
 
             //start udp server is required
             StartLoopbackServer();
 
-            //boundaryToolStripBtn.Enabled = false;
-            FieldMenuButtonEnableDisable(false);
-
-            timer2.Enabled = true;
-            //panel1.BringToFront();
             pictureboxStart.BringToFront();
             pictureboxStart.Dock = System.Windows.Forms.DockStyle.Fill;
+            tmrWatchdog.Enabled = true;
 
             //set the language to last used
-            SetLanguage(Settings.Default.setF_culture, false);
+            SetLanguage(Settings.Default.setF_culture);
 
             currentVersionStr = Application.ProductVersion.ToString(CultureInfo.InvariantCulture);
 
@@ -341,7 +291,6 @@ namespace AgOpenGPS
             inoV += int.Parse(fullVers[2], CultureInfo.InvariantCulture);
             inoVersionInt = inoV;
             inoVersionStr = inoV.ToString();
-
 
             if (Settings.Default.setF_workingDirectory == "Default")
                 baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AgOpenGPS\\";
@@ -357,45 +306,19 @@ namespace AgOpenGPS
             dir = Path.GetDirectoryName(vehiclesDirectory);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
 
-            //get the abLines directory, if not exist, create
-            dir = Path.GetDirectoryName(fieldsDirectory);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
-
             //make sure current field directory exists, null if not
             currentFieldDirectory = Settings.Default.setF_CurrentDir;
 
-            string curDir;
-            if (currentFieldDirectory != "")
-            {
-                curDir = fieldsDirectory + currentFieldDirectory + "//";
-                dir = Path.GetDirectoryName(curDir);
-                if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                {
-                    currentFieldDirectory = "";
-                    Settings.Default.setF_CurrentDir = "";
-                    Settings.Default.Save();
-                }
-            }
             // load all the gui elements in gui.designer.cs
             LoadSettings();
 
-            if (Settings.Default.setMenu_isOGLZoomOn == 1)
-                topFieldViewToolStripMenuItem.Checked = true;
-            else topFieldViewToolStripMenuItem.Checked = false;
-
-            oglZoom.Width = 400;
-            oglZoom.Height = 400;
-            oglZoom.Visible = true;
-            oglZoom.Left = 300;
-            oglZoom.Top = 80;
-
-            if (!topFieldViewToolStripMenuItem.Checked)
-            {
-                oglZoom.SendToBack();
-            }
-
             //nmea limiter
             udpWatch.Start();
+
+            Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            FixPanelsAndMenus();
+
+            this.Resize += new System.EventHandler(this.FormGPS_Resize);
 
             //********************************************************************
             //Start AgIO process
@@ -421,6 +344,37 @@ namespace AgOpenGPS
             //    }
             //}
             //*************************************************************************            
+        }
+
+        private void SetGuiText()
+        {
+            setWorkingDirectoryToolStripMenuItem.Text = gStr.gsDirectories;
+            enterSimCoordsToolStripMenuItem.Text = gStr.gsEnterSimCoords;
+            aboutToolStripMenuItem.Text = gStr.gsAbout;
+            menustripLanguage.Text = gStr.gsLanguage;
+
+            simulatorOnToolStripMenuItem.Text = gStr.gsSimulatorOn;
+
+            resetALLToolStripMenuItem.Text = gStr.gsResetAll;
+            colorsToolStripMenuItem1.Text = gStr.gsColors;
+            topFieldViewToolStripMenuItem.Text = gStr.gsTopFieldView;
+
+            resetEverythingToolStripMenuItem.Text = gStr.gsResetAllForSure;
+
+            steerChartStripMenu.Text = gStr.gsSteerChart;
+
+            //Tools Menu
+            //toolStripBtnMakeBndContour.Text = gStr.gsMakeBoundaryContours;
+            boundariesToolStripMenuItem.Text = gStr.gsBoundary;
+            headlandToolStripMenuItem.Text = gStr.gsHeadland;
+            deleteContourPathsToolStripMenuItem.Text = gStr.gsDeleteContourPaths;
+            deleteAppliedAreaToolStripMenuItem.Text = gStr.gsDeleteAppliedArea;
+            deleteForSureToolStripMenuItem.Text = gStr.gsAreYouSure;
+            webcamToolStrip.Text = gStr.gsWebCam;
+            //googleEarthFlagsToolStrip.Text = gStr.gsGoogleEarth;
+            offsetFixToolStrip.Text = gStr.gsOffsetFix;
+
+            btnChangeMappingColor.Text = Application.ProductVersion.ToString(CultureInfo.InvariantCulture);
         }
 
         //form is closing so tidy up and save settings
@@ -462,7 +416,6 @@ namespace AgOpenGPS
         private void FormGPS_Resize(object sender, EventArgs e)
         {
             FixPanelsAndMenus();
-            if (isGPSPositionInitialized) SetZoom(0);
         }
 
         // Load Bitmaps And Convert To Textures
@@ -651,16 +604,6 @@ namespace AgOpenGPS
             //out serial to autosteer module  //indivdual classes load the distance and heading deltas 
         }
 
-        //make the start picture disappear
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            this.Controls.Remove(pictureboxStart);
-            pictureboxStart.Dispose();
-            //panel1.SendToBack();
-            timer2.Enabled = false;
-            timer2.Dispose();
-        }
-
         public bool KeypadToNUD(NumericUpDown sender, Form owner)
         {
             sender.BackColor = Color.Red;
@@ -788,9 +731,7 @@ namespace AgOpenGPS
                 oglZoom.Height = 300;
             }
 
-            //SendSteerSettingsOutAutoSteerPort();
             isJobStarted = true;
-            startCounter = 0;
 
             for (int j = 0; j < MAXSECTIONS; j++)
             {
@@ -798,7 +739,6 @@ namespace AgOpenGPS
             }
 
             FieldMenuButtonEnableDisable(true);
-            FixPanelsAndMenus();
 
             if (Debugger.IsAttached && Directory.Exists(fieldsDirectory + currentFieldDirectory))
             {
@@ -811,23 +751,15 @@ namespace AgOpenGPS
 
         public void FieldMenuButtonEnableDisable(bool isOn)
         {
-            //toolStripBtnMakeBndContour.Enabled = isOn;
-            boundariesToolStripMenuItem.Enabled = isOn;
-            headlandToolStripMenuItem.Enabled = isOn;
             deleteContourPathsToolStripMenuItem.Enabled = isOn;
             deleteAppliedAreaToolStripMenuItem.Enabled = isOn;
-            tramLinesMenuField.Enabled = isOn;
-            recordedPathStripMenu.Enabled = isOn;
-            toolStripMenuItem9.Visible = isOn;
-            btnABDraw.Enabled = isOn;
-            btnFlag.Visible = isOn;
 
+            panelBottom.Visible = isOn;
             panelRight.Visible = isOn;
-            panelAB.Visible = isOn;
-
-            menustripLanguage.Enabled = !isOn;
 
             lblFieldStatus.Visible = isOn;
+
+            LineUpManualBtns();
         }
 
         //close the current job
@@ -925,8 +857,6 @@ namespace AgOpenGPS
 
             displayFieldName = gStr.gsNone;
             FixTramModeButton();
-
-            FixPanelsAndMenus();
 
             worldManager.isGeoMap = false;
 

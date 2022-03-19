@@ -6,7 +6,7 @@
         private readonly FormGPS mf;
 
         //Critical Safety Properties
-        public bool isOutOfBounds = true;
+        public bool isOutOfBounds = false;
 
         // ---- Section control switches to AOG  ---------------------------------------------------------
         //PGN - 32736 - 127.249 0x7FF9

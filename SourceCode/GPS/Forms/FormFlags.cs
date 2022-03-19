@@ -24,9 +24,9 @@ namespace AgOpenGPS
         {
             lblLatStart.Text = mf.flagPts[mf.flagNumberPicked - 1].latitude.ToString();
             lblLonStart.Text = mf.flagPts[mf.flagNumberPicked - 1].longitude.ToString();
-            lblEasting.Text = mf.flagPts[mf.flagNumberPicked - 1].easting.ToString("N2");
-            lblNorthing.Text = mf.flagPts[mf.flagNumberPicked - 1].northing.ToString("N2");
-            lblHeading.Text = glm.toDegrees(mf.flagPts[mf.flagNumberPicked - 1].heading).ToString("N2");
+            lblEasting.Text = mf.flagPts[mf.flagNumberPicked - 1].easting.ToString("0.00");
+            lblNorthing.Text = mf.flagPts[mf.flagNumberPicked - 1].northing.ToString("0.00");
+            lblHeading.Text = glm.toDegrees(mf.flagPts[mf.flagNumberPicked - 1].heading).ToString("0.00");
             lblFlagSelected.Text = mf.flagNumberPicked.ToString();
             tboxFlagNotes.Text = mf.flagPts[mf.flagNumberPicked - 1].notes;
         }
@@ -96,12 +96,8 @@ namespace AgOpenGPS
         {
             //MakeDubinsLineFromPivotToFlag();
             vec3 steerAxlePosRP = mf.pivotAxlePos;
-            if (mf.isMetric)
-                lblDistanceToFlag.Text = glm.Distance(steerAxlePosRP,
-                    mf.flagPts[mf.flagNumberPicked - 1].easting, mf.flagPts[mf.flagNumberPicked - 1].northing).ToString("N2") + " m";
-            else lblDistanceToFlag.Text = (glm.Distance(steerAxlePosRP,
-                mf.flagPts[mf.flagNumberPicked - 1].easting, mf.flagPts[mf.flagNumberPicked - 1].northing) * glm.m2ft).ToString("N2") + " m";
-
+            lblDistanceToFlag.Text = (glm.Distance(steerAxlePosRP,
+                mf.flagPts[mf.flagNumberPicked - 1].easting, mf.flagPts[mf.flagNumberPicked - 1].northing) * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
         }
         /*
         private void MakeDubinsLineFromPivotToFlag()

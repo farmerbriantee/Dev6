@@ -15,8 +15,6 @@ namespace AgOpenGPS
         //accumulated user distance
         public double distanceUser;
 
-        public double barPercent = 0;
-
         public double overlapPercent = 0;
 
         //Outside area minus inner boundaries areas (m)
@@ -28,81 +26,47 @@ namespace AgOpenGPS
         //Inner area of outer boundary(m)
         public double areaOuterBoundary;
 
-        //not really used - but if needed
-        public double userSquareMetersAlarm;
-
-        //Area inside Boundary less inside boundary areas
-        public string AreaBoundaryLessInnersHectares
-        {
-            get
-            {
-                if (areaBoundaryOuterLessInner < 404048) return (areaBoundaryOuterLessInner * glm.m2ha).ToString("N2") + " ha";
-                else return (areaBoundaryOuterLessInner * glm.m2ha).ToString("N1") + " ha";
-            }
-        }
-
-        public string AreaBoundaryLessInnersAcres
-        {
-            get
-            {
-                if ((areaBoundaryOuterLessInner) < 404048) return (areaBoundaryOuterLessInner * glm.m2ac).ToString("N2") + " ac";
-                else return (areaBoundaryOuterLessInner * glm.m2ac).ToString("N1") + " ac";
-            }
-        }
-
-        //USer tally string
-        public string WorkedUserHectares => (workedAreaTotalUser * glm.m2ha).ToString("N2");
-
-        //user tally string
-        public string WorkedUserAcres => (workedAreaTotalUser * glm.m2ac).ToString("N2");
-
-        //String of Area worked
-        public string WorkedAcres
-        {
-            get
-            {
-                if (workedAreaTotal < 404048) return (workedAreaTotal * 0.000247105).ToString("N2") + " ac";
-                else return (workedAreaTotal * 0.000247105).ToString("N1") + " ac";
-            }
-        }
-
-        public string WorkedHectares
-        {
-            get
-            {
-                if (workedAreaTotal < 99000) return (workedAreaTotal * 0.0001).ToString("N2") + " ha";
-                else return (workedAreaTotal * 0.0001).ToString("N1") + " ha";
-            }
-        }
-
-        //User Distance strings
-        public string DistanceUserMeters => Convert.ToString((ushort)distanceUser) + " m";
-
-        public string DistanceUserFeet => Convert.ToString((ushort)(distanceUser * glm.m2ft)) + " ft";
-
-        //remaining area to be worked
-        public string WorkedAreaRemainHectares => ((areaBoundaryOuterLessInner - workedAreaTotal) * glm.m2ha).ToString("N2") + " ha";
-
-        public string WorkedAreaRemainAcres => ((areaBoundaryOuterLessInner - workedAreaTotal) * glm.m2ac).ToString("N2") + " ac";
-
-        //overlap strings          
-
         public string WorkedAreaRemainPercentage
         {
             get
             {
                 if (areaBoundaryOuterLessInner > 10)
                 {
-                    barPercent = ((areaBoundaryOuterLessInner - workedAreaTotal) * 100 / areaBoundaryOuterLessInner);
-                    return barPercent.ToString("N1") + "%";
+                    return ((areaBoundaryOuterLessInner - workedAreaTotal) * 100 / areaBoundaryOuterLessInner).ToString("0.0") + "%";
                 }
                 else
                 {
-                    barPercent = 0;
                     return "0.00%";
                 }
             }
         }
+
+        public string BoundaryArea
+        {
+            get
+            {
+                double userBoundaryArea = areaBoundaryOuterLessInner * mf.m2ToUser;
+                return userBoundaryArea.ToString(userBoundaryArea < 9.995 ? "0.00" : "0.0") + mf.unitsHaAc;
+            }
+        }
+
+        public string WorkedAreaRemain
+        {
+            get
+            {
+                return ((areaBoundaryOuterLessInner - workedAreaTotal) * mf.m2ToUser).ToString("0.00") + mf.unitsHaAc;
+            }
+        }
+
+        public string WorkedArea
+        {
+            get
+            {
+                double userWorkedArea = workedAreaTotal * mf.m2ToUser;
+                return userWorkedArea.ToString(userWorkedArea < 9.995 ? "0.00" : "0.0") + mf.unitsHaAc;
+            }
+        }
+
 
         public string TimeTillFinished
         {
@@ -110,7 +74,7 @@ namespace AgOpenGPS
             {
                 if (mf.pn.speed > 2 && mf.tool.toolWidth > 0)
                 {
-                    TimeSpan timeSpan = TimeSpan.FromHours(((areaBoundaryOuterLessInner - workedAreaTotal) * glm.m2ha
+                    TimeSpan timeSpan = TimeSpan.FromHours(((areaBoundaryOuterLessInner - workedAreaTotal) * 0.0001
                         / (mf.tool.toolWidth * mf.pn.speed * 0.1)));
                     return timeSpan.Hours.ToString("00") + ":" + timeSpan.Minutes.ToString("00");
                 }
@@ -118,16 +82,12 @@ namespace AgOpenGPS
             }
         }
 
-        public string WorkRateHectares => (mf.tool.toolWidth * mf.pn.speed * 0.1).ToString("N1");
-        public string WorkRateAcres => (mf.tool.toolWidth * mf.pn.speed * 0.2471).ToString("N1");
-
         //constructor
         public CFieldData(FormGPS _f)
         {
             mf = _f;
             workedAreaTotal = 0;
             workedAreaTotalUser = 0;
-            userSquareMetersAlarm = 0;
         }
 
         public void UpdateFieldBoundaryGUIAreas()

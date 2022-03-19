@@ -144,7 +144,7 @@ namespace AgOpenGPS
                                 distance *= 100;
 
                                 fileList.Add(fieldDirectory);
-                                fileList.Add(Math.Round(distance, 3).ToString().PadLeft(10));
+                                fileList.Add(distance.ToString("0.000").PadLeft(10));
                             }
                             else
                             {
@@ -222,14 +222,7 @@ namespace AgOpenGPS
                                         {
                                             area += (pointList[j].easting + pointList[i].easting) * (pointList[j].northing - pointList[i].northing);
                                         }
-                                        if (mf.isMetric)
-                                        {
-                                            area = (Math.Abs(area / 2)) * 0.0001;
-                                        }
-                                        else
-                                        {
-                                            area = (Math.Abs(area / 2)) * 0.00024711;
-                                        }
+                                        area = Math.Abs(area / 2) * mf.m2ToUser;
                                     }
                                 }
                             }
@@ -240,7 +233,7 @@ namespace AgOpenGPS
                         }
                     }
                     if (area == 0) fileList.Add("No Bndry");
-                    else fileList.Add(Math.Round(area, 1).ToString().PadLeft(10));
+                    else fileList.Add(area.ToString("0.0").PadLeft(10));
                 }
 
                 else

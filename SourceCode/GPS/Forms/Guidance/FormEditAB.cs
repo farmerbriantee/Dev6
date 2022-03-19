@@ -33,20 +33,20 @@ namespace AgOpenGPS
             if (mf.isMetric)
             {
                 nudMinTurnRadius.DecimalPlaces = 0;
-                nudMinTurnRadius.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * mf.cm2CmOrIn);
+                nudMinTurnRadius.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * mf.cmToUser);
             }
             else
             {
                 nudMinTurnRadius.DecimalPlaces = 1;
-                nudMinTurnRadius.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * mf.cm2CmOrIn), 1);
+                nudMinTurnRadius.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * mf.cmToUser), 1);
             }
 
             label1.Text = mf.unitsInCm;
             lblHalfSnapFtM.Text = mf.unitsFtM;
-            lblHalfWidth.Text = (mf.tool.toolWidth * 0.5 * mf.m2FtOrM).ToString("N2");
+            lblHalfWidth.Text = (mf.tool.toolWidth * 0.5 * mf.mToUserBig).ToString("0.00");
 
             if (currentLine != null && currentLine.curvePts.Count > 0)
-                tboxHeading.Text = Math.Round(glm.toDegrees(currentLine.curvePts[0].heading), 5).ToString();
+                tboxHeading.Text = glm.toDegrees(currentLine.curvePts[0].heading).ToString("0.00000");
 
             mf.panelRight.Enabled = false;
         }
@@ -78,7 +78,7 @@ namespace AgOpenGPS
 
         private void nudMinTurnRadius_ValueChanged(object sender, EventArgs e)
         {
-            snapAdj = (double)nudMinTurnRadius.Value * mf.inOrCm2Cm * 0.01;
+            snapAdj = (double)nudMinTurnRadius.Value * mf.userToM;
         }
 
         private void btnAdjRight_Click(object sender, EventArgs e)
@@ -140,7 +140,7 @@ namespace AgOpenGPS
                 mf.gyd.ReverseGuidanceLine(currentLine);
 
                 if (currentLine.curvePts.Count > 0)
-                    tboxHeading.Text = Math.Round(glm.toDegrees(currentLine.curvePts[0].heading), 5).ToString();
+                    tboxHeading.Text = glm.toDegrees(currentLine.curvePts[0].heading).ToString("0.00000");
             }
         }
 
@@ -192,7 +192,7 @@ namespace AgOpenGPS
                 currentLine.curvePts[1] = new vec3(currentLine.curvePts[0].easting + Math.Sin(heading), currentLine.curvePts[0].northing + Math.Cos(heading), heading);
             }
 
-            tboxHeading.Text = Math.Round(glm.toDegrees(heading), 5).ToString();
+            tboxHeading.Text = glm.toDegrees(heading).ToString("0.00000");
         }
 
         private void FormEditAB_FormClosing(object sender, FormClosingEventArgs e)

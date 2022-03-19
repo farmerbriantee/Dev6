@@ -11,7 +11,8 @@ namespace AgOpenGPS
         //class variables
         private readonly FormGPS mf = null;
         private double easting, northing, latK, lonK;
-        private bool basedOnKML = false;
+        private bool basedOnKML = false, btnSaveEnabled = false;
+        private string FileName = "";
 
         public FormFieldKML(Form _callingForm, bool Basedon)
         {
@@ -44,17 +45,11 @@ namespace AgOpenGPS
 
             if (String.IsNullOrEmpty(tboxFieldName.Text.Trim()))
             {
-                if (basedOnKML)
-                    btnLoadKML.Enabled = false;
-                else
-                    btnSave.Enabled = false;
+                btnSave.Enabled = false;
             }
             else
             {
-                if (basedOnKML)
-                    btnLoadKML.Enabled = true;
-                else
-                    btnSave.Enabled = true;
+                btnSave.Enabled = true && (btnSaveEnabled || !basedOnKML);
             }
 
             lblFilename.Text = tboxFieldName.Text.Trim();
@@ -69,87 +64,88 @@ namespace AgOpenGPS
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (basedOnKML)
+            //fill something in
+            if (string.IsNullOrEmpty(tboxFieldName.Text.Trim()))
             {
-                //fill something in
-                if (string.IsNullOrEmpty(tboxFieldName.Text.Trim()))
+                MessageBox.Show(gStr.gsChooseADifferentName, "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+
+            //append date time to name
+            mf.currentFieldDirectory = tboxFieldName.Text.Trim() + " ";
+
+            //date
+            if (cboxAddDate.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("MMM.dd", CultureInfo.InvariantCulture);
+            if (cboxAddTime.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("HH_mm", CultureInfo.InvariantCulture);
+
+            //get the directory and make sure it exists, create if not
+            string dirNewField = mf.fieldsDirectory + mf.currentFieldDirectory + "\\";
+
+            //if no template set just make a new file.
+            try
+            {
+                //create it for first save
+                string directoryName = Path.GetDirectoryName(dirNewField);
+
+                if ((!string.IsNullOrEmpty(directoryName)) && (Directory.Exists(directoryName)))
                 {
-                    Close();
+                    MessageBox.Show(gStr.gsChooseADifferentName, gStr.gsDirectoryExists, MessageBoxButtons.OK, MessageBoxIcon.Stop);
                     return;
                 }
-
-                //append date time to name
-
-                mf.currentFieldDirectory = tboxFieldName.Text.Trim() + " ";
-
-                //date
-                if (cboxAddDate.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("MMM.dd", CultureInfo.InvariantCulture);
-                if (cboxAddTime.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("HH_mm", CultureInfo.InvariantCulture);
-
-                //get the directory and make sure it exists, create if not
-                string dirNewField = mf.fieldsDirectory + mf.currentFieldDirectory + "\\";
-
-                //if no template set just make a new file.
-                try
+                else
                 {
                     //start a new job
                     mf.JobNew();
 
-                    //create it for first save
-                    string directoryName = Path.GetDirectoryName(dirNewField);
-
-                    if ((!string.IsNullOrEmpty(directoryName)) && (Directory.Exists(directoryName)))
-                    {
-                        MessageBox.Show(gStr.gsChooseADifferentName, gStr.gsDirectoryExists, MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                        return;
-                    }
-                    else
+                    if (!basedOnKML)
                     {
                         mf.pn.latStart = mf.pn.latitude;
                         mf.pn.lonStart = mf.pn.longitude;
-
-                        if (mf.timerSim.Enabled)
-                        {
-                            Properties.Settings.Default.setGPS_SimLatitude = mf.pn.latStart;
-                            Properties.Settings.Default.setGPS_SimLongitude = mf.pn.lonStart;
-                            Properties.Settings.Default.Save();
-
-                            mf.sim.resetSim();
-                        }
-
-                        mf.pn.SetLocalMetersPerDegree();
-
-
-                        //make sure directory exists, or create it
-                        if ((!string.IsNullOrEmpty(directoryName)) && (!Directory.Exists(directoryName)))
-                        { Directory.CreateDirectory(directoryName); }
-
-                        mf.displayFieldName = mf.currentFieldDirectory;
-
-                        //create the field file header info
-                        mf.FileCreateField();
-                        mf.FileCreateSections();
-                        mf.FileCreateRecPath();
-                        mf.FileCreateContour();
-                        mf.FileCreateElevation();
-                        mf.FileSaveFlags();
-                        //mf.FileSaveABLine();
-                        //mf.FileSaveCurveLine();
-                        //mf.FileSaveHeadland();
                     }
-                }
-                catch (Exception ex)
-                {
-                    mf.WriteErrorLog("Creating new field " + ex);
+                    else
+                    {
+                        mf.pn.latStart = latK;
+                        mf.pn.lonStart = lonK;
+                    }
 
-                    MessageBox.Show(gStr.gsError, ex.ToString());
-                    mf.currentFieldDirectory = "";
-                }
+                    if (mf.timerSim.Enabled)
+                    {
+                        Properties.Settings.Default.setGPS_SimLatitude = mf.pn.latStart;
+                        Properties.Settings.Default.setGPS_SimLongitude = mf.pn.lonStart;
+                        Properties.Settings.Default.Save();
 
-                DialogResult = DialogResult.OK;
-                Close();
+                        mf.sim.resetSim();
+                    }
+
+                    mf.pn.SetLocalMetersPerDegree();
+
+
+                    //make sure directory exists, or create it
+                    if ((!string.IsNullOrEmpty(directoryName)) && (!Directory.Exists(directoryName)))
+                    { Directory.CreateDirectory(directoryName); }
+
+                    mf.displayFieldName = mf.currentFieldDirectory;
+
+                    //create the field file header info
+                    mf.FileCreateField();
+                    mf.FileCreateSections();
+                    mf.FileCreateRecPath();
+                    mf.FileCreateContour();
+                    mf.FileCreateElevation();
+                    mf.FileSaveFlags();
+
+                    //Load the boundary
+                    if (basedOnKML)
+                        LoadKMLBoundary(FileName);
+                }
             }
+            catch (Exception ex)
+            {
+                mf.WriteErrorLog("Creating new field " + ex);
 
+                MessageBox.Show(gStr.gsError, ex.ToString());
+                mf.currentFieldDirectory = "";
+            }
 
             DialogResult = DialogResult.OK;
             Close();
@@ -166,10 +162,6 @@ namespace AgOpenGPS
 
         private void btnLoadKML_Click(object sender, EventArgs e)
         {
-            tboxFieldName.Enabled = false;
-            cboxAddDate.Enabled = false;
-            cboxAddTime.Enabled = false;
-
             //create the dialog instance
             OpenFileDialog ofd = new OpenFileDialog
             {
@@ -183,14 +175,9 @@ namespace AgOpenGPS
             //was a file selected
             if (ofd.ShowDialog() == DialogResult.Cancel) return;
 
+            FileName = ofd.FileName;
             //get lat and lon from boundary in kml
-            FindLatLon(ofd.FileName);
-
-            //reset sim and world to kml position
-            CreateNewField();
-
-            //Load the outer boundary
-            LoadKMLBoundary(ofd.FileName);
+            FindLatLon(FileName);
         }
 
         private void LoadKMLBoundary(string filename)
@@ -272,14 +259,9 @@ namespace AgOpenGPS
                     mf.FileSaveBoundary();
                     mf.bnd.BuildTurnLines();
                     mf.CalculateMinMax();
-
-                    btnSave.Enabled = true;
-                    btnLoadKML.Enabled = false;
                 }
                 catch (Exception)
                 {
-                    btnSave.Enabled = false;
-                    btnLoadKML.Enabled = false;
                     return;
                 }
             }
@@ -353,132 +335,20 @@ namespace AgOpenGPS
                             {
                                 mf.TimedMessageBox(2000, gStr.gsErrorreadingKML, gStr.gsChooseBuildDifferentone);
                             }
-                            //if (button.Name == "btnLoadBoundaryFromGE")
-                            //{
                             break;
-                            //}
                         }
                     }
 
+                    btnSaveEnabled = true;
+                    btnSave.Enabled = !String.IsNullOrEmpty(tboxFieldName.Text.Trim());
                 }
                 catch (Exception)
                 {
+                    btnSaveEnabled = false;
+                    btnSave.Enabled = false;
                     mf.TimedMessageBox(2000, "Exception", "Catch Exception");
                     return;
                 }
-            }
-        }
-
-        private void CreateNewField()
-        {
-            //fill something in
-            if (String.IsNullOrEmpty(tboxFieldName.Text.Trim()))
-            {
-                Close();
-                return;
-            }
-
-            //append date time to name
-
-            mf.currentFieldDirectory = tboxFieldName.Text.Trim();
-
-            //date
-            if (cboxAddDate.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("MMM.dd", CultureInfo.InvariantCulture);
-            if (cboxAddTime.Checked) mf.currentFieldDirectory += " " + DateTime.Now.ToString("HH_mm", CultureInfo.InvariantCulture);
-
-            //get the directory and make sure it exists, create if not
-            string dirNewField = mf.fieldsDirectory + mf.currentFieldDirectory + "\\";
-
-            //if no template set just make a new file.
-            try
-            {
-                //start a new job
-                mf.JobNew();
-
-                //create it for first save
-                string directoryName = Path.GetDirectoryName(dirNewField);
-
-                if ((!string.IsNullOrEmpty(directoryName)) && (Directory.Exists(directoryName)))
-                {
-                    MessageBox.Show(gStr.gsChooseADifferentName, gStr.gsDirectoryExists, MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                    return;
-                }
-                else
-                {
-                    mf.pn.latStart = latK;
-                    mf.pn.lonStart = lonK;
-
-                    if (mf.timerSim.Enabled)
-                    {
-                        Properties.Settings.Default.setGPS_SimLatitude = mf.pn.latStart;
-                        Properties.Settings.Default.setGPS_SimLongitude = mf.pn.lonStart;
-                        Properties.Settings.Default.Save();
-
-                        mf.sim.resetSim();
-                    }
-
-                    mf.pn.SetLocalMetersPerDegree();
-
-                    //make sure directory exists, or create it
-                    if ((!string.IsNullOrEmpty(directoryName)) && (!Directory.Exists(directoryName)))
-                    { Directory.CreateDirectory(directoryName); }
-
-                    mf.displayFieldName = mf.currentFieldDirectory;
-
-                    //create the field file header info
-
-                    if (!mf.isJobStarted)
-                    {
-                        using (FormTimedMessage form = new FormTimedMessage(3000, gStr.gsFieldNotOpen, gStr.gsCreateNewField))
-                        { form.Show(this); }
-                        return;
-                    }
-                    string myFileName, dirField;
-
-                    //get the directory and make sure it exists, create if not
-                    dirField = mf.fieldsDirectory + mf.currentFieldDirectory + "\\";
-                    directoryName = Path.GetDirectoryName(dirField);
-
-                    if ((directoryName.Length > 0) && (!Directory.Exists(directoryName)))
-                    { Directory.CreateDirectory(directoryName); }
-
-                    myFileName = "Field.txt";
-
-                    using (StreamWriter writer = new StreamWriter(dirField + myFileName))
-                    {
-                        //Write out the date
-                        writer.WriteLine(DateTime.Now.ToString("yyyy-MMMM-dd hh:mm:ss tt", CultureInfo.InvariantCulture));
-
-                        writer.WriteLine("$FieldDir");
-                        writer.WriteLine(mf.currentFieldDirectory.ToString(CultureInfo.InvariantCulture));
-
-                        //write out the easting and northing Offsets
-                        writer.WriteLine("$Offsets");
-                        writer.WriteLine("0,0");
-
-                        writer.WriteLine("Convergence");
-                        writer.WriteLine("0");
-
-                        writer.WriteLine("StartFix");
-                        writer.WriteLine(mf.pn.latStart.ToString(CultureInfo.InvariantCulture) + "," + mf.pn.lonStart.ToString(CultureInfo.InvariantCulture));
-                    }
-
-                    mf.FileCreateSections();
-                    mf.FileCreateRecPath();
-                    mf.FileCreateContour();
-                    mf.FileCreateElevation();
-                    mf.FileSaveFlags();
-                    //mf.FileSaveABLine();
-                    //mf.FileSaveCurveLine();
-                    //mf.FileSaveHeadland();
-                }
-            }
-            catch (Exception ex)
-            {
-                mf.WriteErrorLog("Creating new field " + ex);
-
-                MessageBox.Show(gStr.gsError, ex.ToString());
-                mf.currentFieldDirectory = "";
             }
         }
     }

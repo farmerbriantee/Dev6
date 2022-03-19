@@ -344,11 +344,11 @@ namespace AgOpenGPS
         #region Antenna Enter/Leave
         private void tabVAntenna_Enter(object sender, EventArgs e)
         {
-            nudAntennaHeight.Value = (int)(Properties.Vehicle.Default.setVehicle_antennaHeight* mf.m2InchOrCm);
+            nudAntennaHeight.Value = (int)(Properties.Vehicle.Default.setVehicle_antennaHeight* mf.mToUser);
 
-            nudAntennaPivot.Value = (int)((Properties.Vehicle.Default.setVehicle_antennaPivot)* mf.m2InchOrCm);
+            nudAntennaPivot.Value = (int)((Properties.Vehicle.Default.setVehicle_antennaPivot)* mf.mToUser);
 
-            nudAntennaOffset.Value = (int)(Properties.Vehicle.Default.setVehicle_antennaOffset* mf.m2InchOrCm);
+            nudAntennaOffset.Value = (int)(Properties.Vehicle.Default.setVehicle_antennaOffset* mf.mToUser);
 
 
             if (Properties.Vehicle.Default.setVehicle_vehicleType == 0)
@@ -370,7 +370,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Vehicle.Default.setVehicle_antennaPivot = (double)nudAntennaPivot.Value * mf.inchOrCm2m;
+                Properties.Vehicle.Default.setVehicle_antennaPivot = (double)nudAntennaPivot.Value * mf.userToM;
                 mf.vehicle.antennaPivot = Properties.Vehicle.Default.setVehicle_antennaPivot;
             }
         }
@@ -379,7 +379,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Vehicle.Default.setVehicle_antennaOffset = (double)nudAntennaOffset.Value * mf.inchOrCm2m;
+                Properties.Vehicle.Default.setVehicle_antennaOffset = (double)nudAntennaOffset.Value * mf.userToM;
                 mf.vehicle.antennaOffset = Properties.Vehicle.Default.setVehicle_antennaOffset;
             }
         }
@@ -388,7 +388,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Vehicle.Default.setVehicle_antennaHeight = (double)nudAntennaHeight.Value * mf.inchOrCm2m;
+                Properties.Vehicle.Default.setVehicle_antennaHeight = (double)nudAntennaHeight.Value * mf.userToM;
                 mf.vehicle.antennaHeight = Properties.Vehicle.Default.setVehicle_antennaHeight;
             }
         }
@@ -398,11 +398,11 @@ namespace AgOpenGPS
         #region Vehicle Dimensions
         private void tabVDimensions_Enter(object sender, EventArgs e)
         {
-            nudMinTurnRadius.Value = (int)(Properties.Vehicle.Default.setVehicle_minTurningRadius * mf.m2InchOrCm);
+            nudMinTurnRadius.Value = (int)(Properties.Vehicle.Default.setVehicle_minTurningRadius * mf.mToUser);
 
-            nudWheelbase.Value = (int)(Math.Abs(Properties.Vehicle.Default.setVehicle_wheelbase) * mf.m2InchOrCm);
+            nudWheelbase.Value = (int)(Math.Abs(Properties.Vehicle.Default.setVehicle_wheelbase) * mf.mToUser);
             
-            nudVehicleTrack.Value = (int)(Math.Abs(Properties.Vehicle.Default.setVehicle_trackWidth) * mf.m2InchOrCm);
+            nudVehicleTrack.Value = (int)(Math.Abs(Properties.Vehicle.Default.setVehicle_trackWidth) * mf.mToUser);
 
             if (mf.vehicle.vehicleType == 0) pictureBox1.Image = Properties.Resources.RadiusWheelBase;
             else if (mf.vehicle.vehicleType == 1) pictureBox1.Image = Properties.Resources.RadiusWheelBaseHarvester;
@@ -418,7 +418,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Vehicle.Default.setVehicle_minTurningRadius = (double)nudMinTurnRadius.Value * mf.inchOrCm2m;
+                Properties.Vehicle.Default.setVehicle_minTurningRadius = (double)nudMinTurnRadius.Value * mf.userToM;
                 mf.vehicle.minTurningRadius = Properties.Vehicle.Default.setVehicle_minTurningRadius;
                 Properties.Vehicle.Default.Save();
             }
@@ -428,7 +428,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Vehicle.Default.setVehicle_wheelbase = (double)nudWheelbase.Value * mf.inchOrCm2m;
+                Properties.Vehicle.Default.setVehicle_wheelbase = (double)nudWheelbase.Value * mf.userToM;
                 mf.vehicle.wheelbase = Properties.Vehicle.Default.setVehicle_wheelbase;
                 Properties.Vehicle.Default.Save();
             }
@@ -438,7 +438,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Vehicle.Default.setVehicle_trackWidth = (double)nudVehicleTrack.Value * mf.inchOrCm2m;
+                Properties.Vehicle.Default.setVehicle_trackWidth = (double)nudVehicleTrack.Value * mf.userToM;
                 mf.vehicle.trackWidth = Properties.Vehicle.Default.setVehicle_trackWidth;
                 mf.tram.halfWheelTrack = mf.vehicle.trackWidth * 0.5;
                 Properties.Vehicle.Default.Save();
@@ -454,19 +454,19 @@ namespace AgOpenGPS
             if (mf.isMetric)
             {
                 nudSnapDistance.DecimalPlaces = 0;
-                nudSnapDistance.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * mf.cm2CmOrIn);
+                nudSnapDistance.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * mf.cmToUser);
             }
             else
             {
                 nudSnapDistance.DecimalPlaces = 1;
-                nudSnapDistance.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * mf.cm2CmOrIn), 1,MidpointRounding.AwayFromZero);
+                nudSnapDistance.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * mf.cmToUser), 1,MidpointRounding.AwayFromZero);
             }
             
-            nudABLength.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAB_lineLength * mf.m2FtOrM));
+            nudABLength.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAB_lineLength * mf.mToUserBig));
 
             nudGuidanceLookAhead.Value = (decimal)Properties.Settings.Default.setAS_guidanceLookAheadTime;
 
-            double bob = ((double)Properties.Settings.Default.setDisplay_lightbarCmPerPixel * mf.cm2CmOrIn);
+            double bob = ((double)Properties.Settings.Default.setDisplay_lightbarCmPerPixel * mf.cmToUser);
             if (bob < 1) bob = 1;
             nudLightbarCmPerPixel.Value = (decimal)bob;
             
@@ -533,7 +533,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Settings.Default.setAS_snapDistance = ((double)nudSnapDistance.Value * mf.inOrCm2Cm);
+                Properties.Settings.Default.setAS_snapDistance = ((double)nudSnapDistance.Value * mf.userToCm);
                 mf.gyd.snapDistance = Properties.Settings.Default.setAS_snapDistance;
             }
         }
@@ -551,7 +551,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Settings.Default.setAB_lineLength = ((double)nudABLength.Value * mf.ftOrMtoM);
+                Properties.Settings.Default.setAB_lineLength = ((double)nudABLength.Value * mf.UserBigToM);
                 mf.gyd.abLength = Properties.Settings.Default.setAB_lineLength;
             }
         }
@@ -560,7 +560,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                Properties.Settings.Default.setDisplay_lightbarCmPerPixel = (int)((double)nudLightbarCmPerPixel.Value * mf.inOrCm2Cm);
+                Properties.Settings.Default.setDisplay_lightbarCmPerPixel = (int)((double)nudLightbarCmPerPixel.Value * mf.userToCm);
                 mf.lightbarCmPerPixel = Properties.Settings.Default.setDisplay_lightbarCmPerPixel;
 
             }

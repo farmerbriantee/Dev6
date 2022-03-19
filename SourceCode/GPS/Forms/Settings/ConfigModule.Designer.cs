@@ -426,7 +426,7 @@ namespace AgOpenGPS
 
             lblSmoothing.Text = mf.gyd.uTurnSmoothing.ToString();
 
-            double bob = Properties.Vehicle.Default.set_youTurnDistanceFromBoundary * mf.m2FtOrM;
+            double bob = Properties.Vehicle.Default.set_youTurnDistanceFromBoundary * mf.mToUserBig;
             if (bob < 0.2) bob = 0.2;
             nudTurnDistanceFromBoundary.Value = (decimal)(Math.Round(bob, 2));
 
@@ -450,21 +450,14 @@ namespace AgOpenGPS
         #region Uturn controls
         private void UpdateUturnText()
         {
-            if (mf.isMetric)
-            {
-                lblDistance.Text = Math.Abs(mf.gyd.youTurnStartOffset).ToString() + " m";
-            }
-            else
-            {
-                lblDistance.Text = Math.Abs((int)(mf.gyd.youTurnStartOffset * glm.m2ft)).ToString() + " ft";
-            }
+            lblDistance.Text = Math.Abs(mf.gyd.youTurnStartOffset * mf.mToUserBig).ToString("0") + mf.unitsFtM;
         }
 
         private void nudTurnDistanceFromBoundary_Click(object sender, EventArgs e)
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                mf.gyd.uturnDistanceFromBoundary = (double)nudTurnDistanceFromBoundary.Value * mf.ftOrMtoM;
+                mf.gyd.uturnDistanceFromBoundary = (double)nudTurnDistanceFromBoundary.Value * mf.UserBigToM;
                 Properties.Vehicle.Default.set_youTurnDistanceFromBoundary = mf.gyd.uturnDistanceFromBoundary;
             }
         }
@@ -508,7 +501,7 @@ namespace AgOpenGPS
         {
             lblTramWidthUnits.Text = mf.unitsInCm;
 
-            nudTramWidth.Value = (int)(Math.Abs(Properties.Settings.Default.setTram_tramWidth) * mf.m2InchOrCm);
+            nudTramWidth.Value = (int)(Math.Abs(Properties.Settings.Default.setTram_tramWidth) * mf.mToUser);
 
             cboxTramOnBackBuffer.Checked = Properties.Settings.Default.setTram_isTramOnBackBuffer;
         }
@@ -528,7 +521,7 @@ namespace AgOpenGPS
         {
             if (mf.KeypadToNUD((NumericUpDown)sender, this))
             {
-                mf.tram.tramWidth = (double)nudTramWidth.Value * mf.inchOrCm2m;
+                mf.tram.tramWidth = (double)nudTramWidth.Value * mf.userToM;
                 Properties.Settings.Default.setTram_tramWidth = mf.tram.tramWidth;
             }
         }

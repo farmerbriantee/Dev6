@@ -20,10 +20,10 @@ namespace AgOpenGPS
         {
             lblTram.Text = mf.tram.controlByte.ToString();
 
-            lblHz.Text = mf.fixUpdateHz + " ~ " + (mf.frameTime.ToString("N1"));
+            lblHz.Text = mf.fixUpdateHz + " ~ " + mf.frameTime.ToString("0.0");
 
-            lblEastingField.Text = Math.Round(mf.pn.fix.easting, 1).ToString();
-            lblNorthingField.Text = Math.Round(mf.pn.fix.northing, 1).ToString();
+            lblEastingField.Text = mf.pn.fix.easting.ToString("0.0");
+            lblNorthingField.Text = mf.pn.fix.northing.ToString("0.0");
 
             lblLatitude.Text = mf.Latitude;
             lblLongitude.Text = mf.Longitude;
@@ -32,23 +32,16 @@ namespace AgOpenGPS
             lblFixQuality.Text = mf.FixQuality;
             lblSatsTracked.Text = mf.SatsTracked;
             lblHDOP.Text = mf.HDOP;
-            lblSpeed.Text = mf.pn.speed.ToString("N1");
+            lblSpeed.Text = mf.pn.speed.ToString("0.0");
 
             //lblUturnByte.Text = Convert.ToString(mf.mc.machineData[mf.mc.mdUTurn], 2).PadLeft(6, '0');
 
             lblRoll.Text = mf.RollInDegrees;
             lblYawHeading.Text = mf.GyroInDegrees;
             lblGPSHeading.Text = mf.GPSHeading;
-            lblFixHeading.Text = (mf.fixHeading * 57.2957795).ToString("N1");
+            lblFixHeading.Text = (mf.fixHeading * 57.2957795).ToString("0.0");
 
-            if (mf.isMetric)
-            {
-                lblAltitude.Text = mf.Altitude;
-            }
-            else //imperial
-            {
-                lblAltitude.Text = mf.AltitudeFeet;
-            }
+            lblAltitude.Text = (mf.pn.altitude * mf.mToUserBig).ToString("0.0");
         }
 
         private void FormGPSData_Load(object sender, EventArgs e)
@@ -65,24 +58,24 @@ namespace AgOpenGPS
 }
 
 
-//lblAreaAppliedMinusOverlap.Text = ((fd.actualAreaCovered * glm.m2ac).ToString("N2"));
-//lblAreaMinusActualApplied.Text = (((mf.fd.areaBoundaryOuterLessInner - mf.fd.actualAreaCovered) * glm.m2ac).ToString("N2"));
-//lblOverlapPercent.Text = (fd.overlapPercent.ToString("N2")) + "%";
-//lblAreaOverlapped.Text = (((fd.workedAreaTotal - fd.actualAreaCovered) * glm.m2ac).ToString("N3"));
+//lblAreaAppliedMinusOverlap.Text = ((fd.actualAreaCovered * glm.m2ac).ToString("0.00"));
+//lblAreaMinusActualApplied.Text = (((mf.fd.areaBoundaryOuterLessInner - mf.fd.actualAreaCovered) * glm.m2ac).ToString("0.00"));
+//lblOverlapPercent.Text = (fd.overlapPercent.ToString("0.00")) + "%";
+//lblAreaOverlapped.Text = (((fd.workedAreaTotal - fd.actualAreaCovered) * glm.m2ac).ToString("0.000"));
 
-//lblAreaAppliedMinusOverlap.Text = ((fd.actualAreaCovered * glm.m2ha).ToString("N2"));
-//lblAreaMinusActualApplied.Text = (((mf.fd.areaBoundaryOuterLessInner - mf.fd.actualAreaCovered) * glm.m2ha).ToString("N2"));
-//lblOverlapPercent.Text = (fd.overlapPercent.ToString("N2")) + "%";
-//lblAreaOverlapped.Text = (((fd.workedAreaTotal - fd.actualAreaCovered) * glm.m2ha).ToString("N3"));
+//lblAreaAppliedMinusOverlap.Text = ((fd.actualAreaCovered * glm.m2ha).ToString("0.00"));
+//lblAreaMinusActualApplied.Text = (((mf.fd.areaBoundaryOuterLessInner - mf.fd.actualAreaCovered) * glm.m2ha).ToString("0.00"));
+//lblOverlapPercent.Text = (fd.overlapPercent.ToString("0.00")) + "%";
+//lblAreaOverlapped.Text = (((fd.workedAreaTotal - fd.actualAreaCovered) * glm.m2ha).ToString("0.000"));
 
 
-//lblLookOnLeft.Text = mf.tool.lookAheadDistanceOnPixelsLeft.ToString("N0");
-//lblLookOnRight.Text = mf.tool.lookAheadDistanceOnPixelsRight.ToString("N0");
-//lblLookOffLeft.Text = mf.tool.lookAheadDistanceOffPixelsLeft.ToString("N0");
-//lblLookOffRight.Text = mf.tool.lookAheadDistanceOffPixelsRight.ToString("N0");
+//lblLookOnLeft.Text = mf.tool.lookAheadDistanceOnPixelsLeft.ToString("0.0");
+//lblLookOnRight.Text = mf.tool.lookAheadDistanceOnPixelsRight.ToString("0.0");
+//lblLookOffLeft.Text = mf.tool.lookAheadDistanceOffPixelsLeft.ToString("0.0");
+//lblLookOffRight.Text = mf.tool.lookAheadDistanceOffPixelsRight.ToString("0.0");
 
-//lblLeftToolSpd.Text = (mf.tool.toolFarLeftSpeed*3.6).ToString("N1");
-//lblRightToolSpd.Text = (mf.tool.toolFarRightSpeed*3.6).ToString("N1");
+//lblLeftToolSpd.Text = (mf.tool.toolFarLeftSpeed*3.6).ToString("0.0");
+//lblRightToolSpd.Text = (mf.tool.toolFarRightSpeed*3.6).ToString("0.0");
 
-//lblSectSpdLeft.Text = (mf.section[0].speedPixels*0.36).ToString("N1");
-//lblSectSpdRight.Text = (mf.section[mf.tool.numOfSections-1].speedPixels*0.36).ToString("N1");
+//lblSectSpdLeft.Text = (mf.section[0].speedPixels*0.36).ToString("0.0");
+//lblSectSpdRight.Text = (mf.section[mf.tool.numOfSections-1].speedPixels*0.36).ToString("0.0");
