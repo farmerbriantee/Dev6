@@ -334,7 +334,8 @@ namespace AgOpenGPS
                     }
                     else
                     {
-                        mf.filePickerFileAndDirectory = mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[0].Text + "\\Field.txt";
+                        mf.currentFieldDirectory = lvLines.SelectedItems[0].SubItems[0].Text;
+                        mf.FileOpenField(mf.fieldsDirectory + mf.currentFieldDirectory + "\\Field.txt");
                         Close();
                     }
                 }
@@ -350,8 +351,6 @@ namespace AgOpenGPS
                 mf.panelDrag.Visible = false;
                 Close();
             }
-            else
-                mf.filePickerFileAndDirectory = "";
         }
 
         private void btnDeleteField_Click(object sender, EventArgs e)

@@ -142,8 +142,8 @@
     <Compile Include="Classes\CFieldData.cs" />
     <Compile Include="Classes\CBoundaryList.cs" />
     <Compile Include="Classes\CDubins.cs">
-		<DependentUpon>CGuidance.cs</DependentUpon>
-	</Compile>
+      <DependentUpon>CGuidance.cs</DependentUpon>
+    </Compile>
     <Compile Include="Classes\CAHRS.cs" />
     <Compile Include="Classes\CABCurve.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
@@ -253,6 +253,129 @@
     <Compile Include="Forms\Guidance\FormMakeBndCon.Designer.cs">
       <DependentUpon>FormMakeBndCon.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\Class1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigAntenna.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigAntenna.Designer.cs">
+      <DependentUpon>ConfigAntenna.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSourceData.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSourceData.Designer.cs">
+      <DependentUpon>ConfigSourceData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigToolType.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigToolType.Designer.cs">
+      <DependentUpon>ConfigToolType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigBrand.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigBrand.Designer.cs">
+      <DependentUpon>ConfigBrand.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigBtns.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigBtns.Designer.cs">
+      <DependentUpon>ConfigBtns.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigDimensions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigDimensions.Designer.cs">
+      <DependentUpon>ConfigDimensions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigGuidance.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigGuidance.Designer.cs">
+      <DependentUpon>ConfigGuidance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigHeading.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigHeading.Designer.cs">
+      <DependentUpon>ConfigHeading.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigHitch.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigHitch.Designer.cs">
+      <DependentUpon>ConfigHitch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigMachine.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigMachine.Designer.cs">
+      <DependentUpon>ConfigMachine.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigRelay.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigRelay.Designer.cs">
+      <DependentUpon>ConfigRelay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigRemoteSwitch.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigRemoteSwitch.Designer.cs">
+      <DependentUpon>ConfigRemoteSwitch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigRoll.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigRoll.Designer.cs">
+      <DependentUpon>ConfigRoll.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSections.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSections.Designer.cs">
+      <DependentUpon>ConfigSections.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSteer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSteer.Designer.cs">
+      <DependentUpon>ConfigSteer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigSummary.Designer.cs">
+      <DependentUpon>ConfigSummary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigToolSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigToolSettings.Designer.cs">
+      <DependentUpon>ConfigToolSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigTram.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigTram.Designer.cs">
+      <DependentUpon>ConfigTram.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigUTurn.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigUTurn.Designer.cs">
+      <DependentUpon>ConfigUTurn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigVehicleType.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigVehicleType.Designer.cs">
+      <DependentUpon>ConfigVehicleType.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Settings\FormCorrection.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -275,30 +398,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\Settings\FormConfig.Designer.cs">
-      <DependentUpon>FormConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigMenu.Designer.cs">
-      <SubType>Form</SubType>
-      <DependentUpon>FormConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigHelp.Designer.cs">
-      <SubType>Form</SubType>
-      <DependentUpon>FormConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigVehicle.Designer.cs">
-      <SubType>Form</SubType>
-      <DependentUpon>FormConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigTool.Designer.cs">
-      <SubType>Form</SubType>
-      <DependentUpon>FormConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigData.Designer.cs">
-      <SubType>Form</SubType>
-      <DependentUpon>FormConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigModule.Designer.cs">
-      <SubType>Form</SubType>
       <DependentUpon>FormConfig.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Guidance\FormABDraw.cs">
@@ -381,6 +480,10 @@
       <SubType>Form</SubType>
       <DependentUpon>FormGPS.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\NTRIPComm.Designer.cs">
+      <SubType>Form</SubType>
+      <DependentUpon>FormGPS.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Form_About.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -392,6 +495,12 @@
     </Compile>
     <Compile Include="Forms\Guidance\FormTram.Designer.cs">
       <DependentUpon>FormTram.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigNTRIP.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\ConfigTabs\ConfigNTRIP.Designer.cs">
+      <DependentUpon>ConfigNTRIP.cs</DependentUpon>
     </Compile>
     <Compile Include="gStr.da.Designer.cs">
       <DependentUpon>gStr.da.resx</DependentUpon>
@@ -544,6 +653,66 @@
     <EmbeddedResource Include="Forms\Guidance\FormMakeBndCon.resx">
       <DependentUpon>FormMakeBndCon.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigAntenna.resx">
+      <DependentUpon>ConfigAntenna.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigSourceData.resx">
+      <DependentUpon>ConfigSourceData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigToolType.resx">
+      <DependentUpon>ConfigToolType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigBrand.resx">
+      <DependentUpon>ConfigBrand.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigBtns.resx">
+      <DependentUpon>ConfigBtns.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigDimensions.resx">
+      <DependentUpon>ConfigDimensions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigGuidance.resx">
+      <DependentUpon>ConfigGuidance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigHeading.resx">
+      <DependentUpon>ConfigHeading.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigHitch.resx">
+      <DependentUpon>ConfigHitch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigMachine.resx">
+      <DependentUpon>ConfigMachine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigRelay.resx">
+      <DependentUpon>ConfigRelay.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigRemoteSwitch.resx">
+      <DependentUpon>ConfigRemoteSwitch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigRoll.resx">
+      <DependentUpon>ConfigRoll.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigSections.resx">
+      <DependentUpon>ConfigSections.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigSteer.resx">
+      <DependentUpon>ConfigSteer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigSummary.resx">
+      <DependentUpon>ConfigSummary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigToolSettings.resx">
+      <DependentUpon>ConfigToolSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigTram.resx">
+      <DependentUpon>ConfigTram.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigUTurn.resx">
+      <DependentUpon>ConfigUTurn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigVehicleType.resx">
+      <DependentUpon>ConfigVehicleType.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\Settings\FormCorrection.resx">
       <DependentUpon>FormCorrection.cs</DependentUpon>
     </EmbeddedResource>
@@ -612,6 +781,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Guidance\FormTram.resx">
       <DependentUpon>FormTram.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigNTRIP.resx">
+      <DependentUpon>ConfigNTRIP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="gStr.da.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -68,14 +68,11 @@ namespace AgOpenGPS
 
         private void btnJobOpen_Click(object sender, EventArgs e)
         {
-            mf.filePickerFileAndDirectory = "";
-
             using (FormFilePicker form = new FormFilePicker(mf, 0, ""))
             {
                 //returns full field.txt file dir name
                 if (form.ShowDialog(this) == DialogResult.Yes)
                 {
-                    mf.FileOpenField(mf.filePickerFileAndDirectory);
                     Close();
                 }
                 else
@@ -146,8 +143,6 @@ namespace AgOpenGPS
 
             if (!string.IsNullOrEmpty(infieldList))
             {
-                mf.filePickerFileAndDirectory = "";
-
                 if (numFields > 1)
                 {
                     using (FormFilePicker form = new FormFilePicker(mf, 1, infieldList))
@@ -155,19 +150,14 @@ namespace AgOpenGPS
                         //returns full field.txt file dir name
                         if (form.ShowDialog(this) == DialogResult.Yes)
                         {
-                            mf.FileOpenField(mf.filePickerFileAndDirectory);
                             Close();
-                        }
-                        else
-                        {
-                            return;
                         }
                     }
                 }
                 else // 1 field found
                 {
-                    mf.filePickerFileAndDirectory = mf.fieldsDirectory + infieldList + "\\Field.txt";
-                    mf.FileOpenField(mf.filePickerFileAndDirectory);
+                    mf.currentFieldDirectory = infieldList;
+                    mf.FileOpenField(mf.fieldsDirectory + infieldList + "\\Field.txt");
                     Close();
                 }
             }

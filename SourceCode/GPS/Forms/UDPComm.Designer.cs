@@ -15,20 +15,150 @@ namespace AgOpenGPS
         private Socket recvFromAppSocket;
 
         //endpoints of modules
-        private EndPoint epAgIO, epSender = new IPEndPoint(IPAddress.Any, 0);
+        private EndPoint epSender = new IPEndPoint(IPAddress.Any, 0);
+        private IPAddress epIP;
+        public int epPort;
 
         // Data stream
         private byte[] loopBuffer = new byte[1024];
 
         // Status delegate
-        private double rollK = 0;
         private int udpWatchCounts = 0;
         public int udpWatchLimit = 70;
 
         private readonly Stopwatch udpWatch = new Stopwatch();
 
+        private bool EnableHeadRoll;
+
         private void ReceiveFromAgIO(byte[] data)
         {
+            #region F9p_UBX_Message
+            //for testing purposes only will be deleted on release!
+            if (data[0] == 0xB5 && data[1] == 0x62 && data[2] == 0x01)//Daniel P
+            {
+                if (data[3] == 0x07 && data.Length > 99)//UBX-NAV-PVT
+                {
+                    int CK_A = 0;
+                    int CK_B = 0;
+
+                    for (int j = 2; j < 98; j += 1)// start with Class and end by Checksum
+                    {
+                        CK_A = (CK_A + data[j]) & 0xFF;
+                        CK_B = (CK_B + CK_A) & 0xFF;
+                    }
+
+                    if (data[98] == CK_A && data[99] == CK_B)
+                    {
+                        long itow = data[6] | (data[7] << 8) | (data[8] << 16) | (data[9] << 24);
+
+                        if ((data[27] & 0x81) == 0x81)
+                        {
+                            pn.fixQuality = 4;
+                            EnableHeadRoll = true;
+                        }
+                        else if ((data[27] & 0x41) == 0x41)
+                        {
+                            pn.fixQuality = 5;
+                            EnableHeadRoll = true;
+                        }
+                        else
+                        {
+                            pn.fixQuality = 1;
+                            EnableHeadRoll = false;
+                        }
+
+                        pn.satellitesTracked = data[29];
+
+                        pn.longitude = (data[30] | (data[31] << 8) | (data[32] << 16) | (data[33] << 24)) * 0.0000001;//to deg
+                        pn.latitude = (data[34] | (data[35] << 8) | (data[36] << 16) | (data[37] << 24)) * 0.0000001;//to deg
+
+                        //Height above ellipsoid
+                        pn.altitude = (data[38] | (data[39] << 8) | (data[40] << 16) | (data[41] << 24)) * 0.001;//to meters
+                        // Height above mean sea level
+                        pn.altitude = (data[42] | (data[43] << 8) | (data[44] << 16) | (data[45] << 24)) * 0.001;//to meters
+
+                        pn.hdop = (data[82] | (data[83] << 8) | (data[84] << 16) | (data[85] << 24)) * 0.01;
+
+                        if (pn.longitude != 0)
+                        {
+                            //if (timerSim.Enabled)
+                            //    SetSimStatus(false);
+
+                            pn.speed = (data[66] | (data[67] << 8) | (data[68] << 16) | (data[69] << 24)) * 0.0036;// mm/s to km/h
+
+                            //if (vehicle.isReverse && Speed > 0) Speed *= -1;
+
+                            pn.ConvertWGS84ToLocal(pn.latitude, pn.longitude, out pn.fix.northing, out pn.fix.easting);
+
+                            //average the speed
+                            pn.AverageTheSpeed();
+
+                            sentenceCounter = 0;
+                            UpdateFixPosition();
+                        }
+                        else
+                        {
+                            EnableHeadRoll = false;
+                            pn.fixQuality = 0;
+                        }
+                    }
+                }
+                else if (data[3] == 0x3C && data.Length > 71)//Daniel P
+                {
+                    int CK_A = 0;
+                    int CK_B = 0;
+                    for (int j = 2; j < 70; j += 1)// start with Class and end by Checksum
+                    {
+                        CK_A = (CK_A + data[j]) & 0xFF;
+                        CK_B = (CK_B + CK_A) & 0xFF;
+                    }
+
+                    if (data[70] == CK_A && data[71] == CK_B)
+                    {
+                        long itow = data[10] | (data[11] << 8) | (data[12] << 16) | (data[13] << 24);
+
+                        if ((true || EnableHeadRoll) && (((data[66] & 0x2F) == 0x2F) || ((data[66] & 0x37) == 0x37)))
+                        {
+                            int relposlength = data[26] | (data[27] << 8) | (data[28] << 16) | (data[29] << 24);//in cm!
+
+
+                            //double DualAntennaDistance = 146.5;
+
+
+                            //if ((DualAntennaDistance - 5) < relposlength && relposlength < (DualAntennaDistance + 5))
+                            {
+                                double RelPosN = ((data[14] | (data[15] << 8) | (data[16] << 16) | (data[17] << 24)) + (sbyte)data[38] * 0.01);
+                                double RelPosE = ((data[18] | (data[19] << 8) | (data[20] << 16) | (data[21] << 24)) + (sbyte)data[39] * 0.01);
+                                double relPosD = ((data[22] | (data[23] << 8) | (data[24] << 16) | (data[25] << 24)) + (sbyte)data[40] * 0.01);
+
+                                double rollK = glm.toDegrees(Math.Atan2(relPosD, Math.Sqrt(RelPosN * RelPosN + RelPosE * RelPosE)));
+                                //ahrs.imuPitch = glm.toDegrees(Math.Atan2(relPosD, DualAntennaDistance));
+                                //if (ahrs.isRollInvert)
+                                //    ahrs.imuRoll *= -1;
+
+                                if (ahrs.isRollInvert) rollK *= -1.0;
+                                rollK -= ahrs.rollZero;
+                                ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
+
+                                //D = d / 2 * cos(roll) + h * sin(roll) * cos(pitch)
+                            }
+
+                            pn.headingTrueDual = (data[30] | (data[31] << 8) | (data[32] << 16) | (data[33] << 24)) * 0.00001 + pn.headingTrueDualOffset;
+
+                            if (ahrs.isDualAsIMU) ahrs.imuHeading = pn.headingTrueDual;
+                        }
+                        else //Bad Quality
+                        {
+                            ahrs.imuRoll = 88888;
+                            pn.headingTrueDual = 0;
+                        }
+                    }
+                }
+
+                return;
+            }
+            #endregion
+
             if (data[0] == 0x80 && data[1] == 0x81)
             {
                 switch (data[3])
@@ -122,7 +252,7 @@ namespace AgOpenGPS
                                 short imuRol = BitConverter.ToInt16(data, 50);
                                 if (imuRol != short.MaxValue)
                                 {
-                                    rollK = imuRol;
+                                    double rollK = imuRol;
                                     if (ahrs.isRollInvert) rollK *= -0.1;
                                     else rollK *= 0.1;
                                     rollK -= ahrs.rollZero;
@@ -166,7 +296,7 @@ namespace AgOpenGPS
                             ahrs.imuHeading *= 0.1;
                             
                             //Roll
-                            rollK = (Int16)((data[8] << 8) + data[7]);
+                            double rollK = (Int16)((data[8] << 8) + data[7]);
 
                             if (ahrs.isRollInvert) rollK *= -0.1;
                             else rollK *= 0.1;
@@ -215,7 +345,7 @@ namespace AgOpenGPS
                             }
 
                             //Roll
-                            rollK = (Int16)((data[10] << 8) + data[9]);
+                            double rollK = (Int16)((data[10] << 8) + data[9]);
                             if (rollK != 8888)
                             {
                                 if (ahrs.isRollInvert) rollK *= -0.1;
@@ -341,16 +471,17 @@ namespace AgOpenGPS
 
                 //sendToAppSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 sendToAppSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-                sendToAppSocket.Bind(new IPEndPoint(IPAddress.Loopback, 15550));
+                sendToAppSocket.Bind(new IPEndPoint(IPAddress.Any, 15550));
 
-                // AOG sends to AgIO using this endpoint
-                epAgIO = new IPEndPoint(IPAddress.Parse("127.255.255.255"), 17777);
+                //IP address and port of Auto Steer server
+                epIP = IPAddress.Parse("192.168.1.255");
+                epPort = 8888;
 
                 // Initialise the client socket
                 recvFromAppSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
                 // IPEndPoint for AOG  to listen on 
-                recvFromAppSocket.Bind(new IPEndPoint(IPAddress.Loopback, 15555));
+                recvFromAppSocket.Bind(new IPEndPoint(IPAddress.Any, 15555));
 
                 // Initialise the IPEndPoint for the client
                 EndPoint clientEp = new IPEndPoint(IPAddress.Any, 0);
@@ -391,19 +522,30 @@ namespace AgOpenGPS
                 Array.Copy(loopBuffer, localMsg, msgLen);
 
                 // Listen for more connections again...
+                epSender = new IPEndPoint(IPAddress.Any, 0);
                 recvFromAppSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), recvFromAppSocket);
-
-                int Length = Math.Max((localMsg[4]) + 5, 5);
-                if (localMsg.Length > Length)
+                if (localMsg.Length > 3)
                 {
-                    byte CK_A = 0;
-                    for (int j = 2; j < Length; j++)
-                    {
-                        CK_A += localMsg[j];
-                    }
+                    int Length = Math.Max((localMsg[4]) + 5, 5);
 
-                    if (localMsg[Length] == (byte)CK_A)
+                    #region F9p_UBX_Message
+                    //for testing purposes only will be deleted on release!
+                    if (localMsg[0] == 0xB5 && localMsg[1] == 0x62 && localMsg[2] == 0x01)
+                    {
                         BeginInvoke((MethodInvoker)(() => ReceiveFromAgIO(localMsg)));
+                    }
+                    #endregion
+                    else if (localMsg.Length > Length)
+                    {
+                        byte CK_A = 0;
+                        for (int j = 2; j < Length; j++)
+                        {
+                            CK_A += localMsg[j];
+                        }
+
+                        if (localMsg[Length] == (byte)CK_A)
+                            BeginInvoke((MethodInvoker)(() => ReceiveFromAgIO(localMsg)));
+                    }
                 }
             }
             catch (Exception)
@@ -419,27 +561,38 @@ namespace AgOpenGPS
                 sendToAppSocket.EndSend(asyncResult);
             }
             catch (Exception ex)
-            {
-                MessageBox.Show("SendData Error: " + ex.Message, "UDP Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            { 
+                if (!panelSim.Visible)
+                    MessageBox.Show("SendData Error: " + ex.Message, "UDP Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         public void SendPgnToLoop(byte[] byteData)
         {
+            if (byteData.Length > 2)
+            {
+                int crc = 0;
+                for (int i = 2; i + 1 < byteData.Length; i++)
+                {
+                    crc += byteData[i];
+                }
+                byteData[byteData.Length - 1] = (byte)crc;
+
+                SendPgnToLoop(byteData, epPort);
+            }
+        }
+
+        public void SendPgnToLoop(byte[] byteData, int port)
+        {
             if (sendToAppSocket != null)
             {
                 try
                 {
-                    int crc = 0;
-                    for (int i = 2; i + 1 < byteData.Length; i++)
-                    {
-                        crc += byteData[i];
-                    }
-                    byteData[byteData.Length - 1] = (byte)crc;
+                    IPEndPoint endPoint = new IPEndPoint(epIP, port);
 
                     if (byteData.Length != 0)
                         sendToAppSocket.BeginSendTo(byteData, 0, byteData.Length,
-                            SocketFlags.None, epAgIO, new AsyncCallback(SendAsyncLoopData), null);
+                            SocketFlags.None, endPoint, new AsyncCallback(SendAsyncLoopData), null);
                 }
                 catch (Exception)
                 {

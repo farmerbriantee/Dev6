@@ -24,23 +24,10 @@ namespace AgOpenGPS
     //the main form object
     public partial class FormGPS : Form
     {
-        //To bring forward AgIO if running
-        [System.Runtime.InteropServices.DllImport("User32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr handle);
-
-        [System.Runtime.InteropServices.DllImport("User32.dll")]
-        private static extern bool ShowWindow(IntPtr hWind, int nCmdShow);
-
         #region // Class Props and instances
 
         //maximum sections available
         public const int MAXSECTIONS = 17;
-
-        //How many boundaries allowed
-        public const int MAXBOUNDARIES = 6;
-
-        //How many headlands allowed
-        public const int MAXHEADS = 6;
 
         //The base directory where AgOpenGPS will be stored and fields and vehicles branch from
         public string baseDirectory;
@@ -61,7 +48,7 @@ namespace AgOpenGPS
         public int flagNumberPicked = 0;
 
         //bool for whether or not a job is active
-        public bool isJobStarted = false, isAutoSteerBtnOn, isLidarBtnOn = true;
+        public bool isJobStarted = false, isAutoSteerBtnOn;
 
         //if we are saving a file
         public bool isLogNMEA = false, isLogElevation = false;
@@ -92,30 +79,15 @@ namespace AgOpenGPS
         private int dayNightCounter = 1;
 
         //whether or not to use Stanley control
-        public bool isStanleyUsed = true;
+        public bool isStanleyUsed = true, isKeepOffsetsOn = false;
 
         private int threeSecondCounter = 0;
         private int oneSecondCounter = 0;
         private int oneHalfSecondCounter = 0;
 
-        public int pbarSteer, pbarMachine, pbarUDP;
-
-        public double nudNumber = 0;
-
-        public double mToUser, userToM, mToUserBig, UserBigToM, cmToUser, userToCm, m2ToUser, KMHToUser;
+        public double mToUser, userToM, mToUserBig, userBigToM, m2ToUser, KMHToUser, userToKMH;
 
         public string unitsFtM, unitsInCm, unitsHaAc;
-
-        //used by filePicker Form to return picked file and directory
-        public string filePickerFileAndDirectory;
-
-        //private int fiveSecondCounter = 0, fiveSeconds = 0;
-
-        //the autoManual drive button. Assume in Auto
-        public bool isInAutoDrive = true;
-
-        //isGPSData form up
-        public bool isGPSSentencesOn = false, isKeepOffsetsOn = false;
 
         /// <summary>
         /// create the world manager
@@ -207,7 +179,10 @@ namespace AgOpenGPS
             //winform initialization
             InitializeComponent();
 
-            CheckSettingsNotNull();
+            if (Settings.Default.setFeatures == null)
+            {
+                Settings.Default.setFeatures = new CFeatureSettings();
+            }
 
             ControlExtension.Draggable(oglZoom, true);
             ControlExtension.Draggable(panelDrag, true);
@@ -318,32 +293,7 @@ namespace AgOpenGPS
             Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
             FixPanelsAndMenus();
 
-            this.Resize += new System.EventHandler(this.FormGPS_Resize);
-
-            //********************************************************************
-            //Start AgIO process
-            //Process[] processName = Process.GetProcessesByName("AgIO");
-            //if (processName.Length == 0)
-            //{
-            //    //Start application here
-            //    DirectoryInfo di = new DirectoryInfo(Application.StartupPath);
-            //    string strPath = di.ToString();
-            //    strPath += "\\AgIO.exe";
-            //    try
-            //    {
-            //        ProcessStartInfo processInfo = new ProcessStartInfo
-            //        {
-            //            FileName = strPath,
-            //            WorkingDirectory = Path.GetDirectoryName(strPath)
-            //        };
-            //        Process proc = Process.Start(processInfo);
-            //    }
-            //    catch
-            //    {
-            //        TimedMessageBox(2000, "No File Found", "Can't Find AgIO");
-            //    }
-            //}
-            //*************************************************************************            
+            this.Resize += new System.EventHandler(this.FormGPS_Resize); 
         }
 
         private void SetGuiText()
@@ -429,14 +379,6 @@ namespace AgOpenGPS
             SteerDot, Tractor, QuestionMark,
             FrontWheels, FourWDFront, FourWDRear,
             Harvester, Lateral
-        }
-
-        public void CheckSettingsNotNull()
-        {
-            if (Settings.Default.setFeatures == null)
-            {
-                Settings.Default.setFeatures = new CFeatureSettings();
-            }
         }
 
         public void LoadGLTextures()
@@ -626,7 +568,44 @@ namespace AgOpenGPS
             }
         }
 
-        public void KeyboardToText(TextBox sender, Form owner)
+        public bool KeypadToButton(ref Button sender, ref double value, double minimum, double maximum, int decimals, bool changetoculture = false, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
+        {
+            using (FormNumeric form = new FormNumeric(minimum, maximum, value, decimals, changetoculture, unit2meter, Mtr2Unit, divisible))
+            {
+                if (form.ShowDialog(sender) == DialogResult.OK)
+                {
+                    value = form.ReturnValue;
+
+                    string guifix = "0";
+                    if (decimals > 0)
+                    {
+                        guifix = "0.0";
+                        while (--decimals > 0)
+                            guifix += "#";
+                    }
+
+                    sender.Text = (value * Mtr2Unit).ToString(guifix);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool KeypadToButton(ref Button sender, ref int value, double minimum, double maximum, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
+        {
+            using (FormNumeric form = new FormNumeric(minimum, maximum, value, 0, true, unit2meter, Mtr2Unit, divisible))
+            {
+                if (form.ShowDialog(sender) == DialogResult.OK)
+                {
+                    value = (int)form.ReturnValue;
+                    sender.Text = (value * Mtr2Unit).ToString("0");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void KeyboardToText(TextBox sender, IWin32Window owner)
         {
             sender.BackColor = Color.Red;
             using (FormKeyboard form = new FormKeyboard(sender.Text))
@@ -642,53 +621,53 @@ namespace AgOpenGPS
         //function to set section positions
         public void SectionSetPosition()
         {
-            section[0].positionLeft = (double)Vehicle.Default.setSection_position1 + Vehicle.Default.setVehicle_toolOffset;
-            section[0].positionRight = (double)Vehicle.Default.setSection_position2 + Vehicle.Default.setVehicle_toolOffset;
+            section[0].positionLeft = Vehicle.Default.setSection_position1 + Vehicle.Default.setVehicle_toolOffset;
+            section[0].positionRight = Vehicle.Default.setSection_position2 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[1].positionLeft = (double)Vehicle.Default.setSection_position2 + Vehicle.Default.setVehicle_toolOffset;
-            section[1].positionRight = (double)Vehicle.Default.setSection_position3 + Vehicle.Default.setVehicle_toolOffset;
+            section[1].positionLeft = Vehicle.Default.setSection_position2 + Vehicle.Default.setVehicle_toolOffset;
+            section[1].positionRight = Vehicle.Default.setSection_position3 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[2].positionLeft = (double)Vehicle.Default.setSection_position3 + Vehicle.Default.setVehicle_toolOffset;
-            section[2].positionRight = (double)Vehicle.Default.setSection_position4 + Vehicle.Default.setVehicle_toolOffset;
+            section[2].positionLeft = Vehicle.Default.setSection_position3 + Vehicle.Default.setVehicle_toolOffset;
+            section[2].positionRight = Vehicle.Default.setSection_position4 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[3].positionLeft = (double)Vehicle.Default.setSection_position4 + Vehicle.Default.setVehicle_toolOffset;
-            section[3].positionRight = (double)Vehicle.Default.setSection_position5 + Vehicle.Default.setVehicle_toolOffset;
+            section[3].positionLeft = Vehicle.Default.setSection_position4 + Vehicle.Default.setVehicle_toolOffset;
+            section[3].positionRight = Vehicle.Default.setSection_position5 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[4].positionLeft = (double)Vehicle.Default.setSection_position5 + Vehicle.Default.setVehicle_toolOffset;
-            section[4].positionRight = (double)Vehicle.Default.setSection_position6 + Vehicle.Default.setVehicle_toolOffset;
+            section[4].positionLeft = Vehicle.Default.setSection_position5 + Vehicle.Default.setVehicle_toolOffset;
+            section[4].positionRight = Vehicle.Default.setSection_position6 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[5].positionLeft = (double)Vehicle.Default.setSection_position6 + Vehicle.Default.setVehicle_toolOffset;
-            section[5].positionRight = (double)Vehicle.Default.setSection_position7 + Vehicle.Default.setVehicle_toolOffset;
+            section[5].positionLeft = Vehicle.Default.setSection_position6 + Vehicle.Default.setVehicle_toolOffset;
+            section[5].positionRight = Vehicle.Default.setSection_position7 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[6].positionLeft = (double)Vehicle.Default.setSection_position7 + Vehicle.Default.setVehicle_toolOffset;
-            section[6].positionRight = (double)Vehicle.Default.setSection_position8 + Vehicle.Default.setVehicle_toolOffset;
+            section[6].positionLeft = Vehicle.Default.setSection_position7 + Vehicle.Default.setVehicle_toolOffset;
+            section[6].positionRight = Vehicle.Default.setSection_position8 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[7].positionLeft = (double)Vehicle.Default.setSection_position8 + Vehicle.Default.setVehicle_toolOffset;
-            section[7].positionRight = (double)Vehicle.Default.setSection_position9 + Vehicle.Default.setVehicle_toolOffset;
+            section[7].positionLeft = Vehicle.Default.setSection_position8 + Vehicle.Default.setVehicle_toolOffset;
+            section[7].positionRight = Vehicle.Default.setSection_position9 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[8].positionLeft = (double)Vehicle.Default.setSection_position9 + Vehicle.Default.setVehicle_toolOffset;
-            section[8].positionRight = (double)Vehicle.Default.setSection_position10 + Vehicle.Default.setVehicle_toolOffset;
+            section[8].positionLeft = Vehicle.Default.setSection_position9 + Vehicle.Default.setVehicle_toolOffset;
+            section[8].positionRight = Vehicle.Default.setSection_position10 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[9].positionLeft = (double)Vehicle.Default.setSection_position10 + Vehicle.Default.setVehicle_toolOffset;
-            section[9].positionRight = (double)Vehicle.Default.setSection_position11 + Vehicle.Default.setVehicle_toolOffset;
+            section[9].positionLeft = Vehicle.Default.setSection_position10 + Vehicle.Default.setVehicle_toolOffset;
+            section[9].positionRight = Vehicle.Default.setSection_position11 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[10].positionLeft = (double)Vehicle.Default.setSection_position11 + Vehicle.Default.setVehicle_toolOffset;
-            section[10].positionRight = (double)Vehicle.Default.setSection_position12 + Vehicle.Default.setVehicle_toolOffset;
+            section[10].positionLeft = Vehicle.Default.setSection_position11 + Vehicle.Default.setVehicle_toolOffset;
+            section[10].positionRight = Vehicle.Default.setSection_position12 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[11].positionLeft = (double)Vehicle.Default.setSection_position12 + Vehicle.Default.setVehicle_toolOffset;
-            section[11].positionRight = (double)Vehicle.Default.setSection_position13 + Vehicle.Default.setVehicle_toolOffset;
+            section[11].positionLeft = Vehicle.Default.setSection_position12 + Vehicle.Default.setVehicle_toolOffset;
+            section[11].positionRight = Vehicle.Default.setSection_position13 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[12].positionLeft = (double)Vehicle.Default.setSection_position13 + Vehicle.Default.setVehicle_toolOffset;
-            section[12].positionRight = (double)Vehicle.Default.setSection_position14 + Vehicle.Default.setVehicle_toolOffset;
+            section[12].positionLeft = Vehicle.Default.setSection_position13 + Vehicle.Default.setVehicle_toolOffset;
+            section[12].positionRight = Vehicle.Default.setSection_position14 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[13].positionLeft = (double)Vehicle.Default.setSection_position14 + Vehicle.Default.setVehicle_toolOffset;
-            section[13].positionRight = (double)Vehicle.Default.setSection_position15 + Vehicle.Default.setVehicle_toolOffset;
+            section[13].positionLeft = Vehicle.Default.setSection_position14 + Vehicle.Default.setVehicle_toolOffset;
+            section[13].positionRight = Vehicle.Default.setSection_position15 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[14].positionLeft = (double)Vehicle.Default.setSection_position15 + Vehicle.Default.setVehicle_toolOffset;
-            section[14].positionRight = (double)Vehicle.Default.setSection_position16 + Vehicle.Default.setVehicle_toolOffset;
+            section[14].positionLeft = Vehicle.Default.setSection_position15 + Vehicle.Default.setVehicle_toolOffset;
+            section[14].positionRight = Vehicle.Default.setSection_position16 + Vehicle.Default.setVehicle_toolOffset;
 
-            section[15].positionLeft = (double)Vehicle.Default.setSection_position16 + Vehicle.Default.setVehicle_toolOffset;
-            section[15].positionRight = (double)Vehicle.Default.setSection_position17 + Vehicle.Default.setVehicle_toolOffset;
+            section[15].positionLeft = Vehicle.Default.setSection_position16 + Vehicle.Default.setVehicle_toolOffset;
+            section[15].positionRight = Vehicle.Default.setSection_position17 + Vehicle.Default.setVehicle_toolOffset;
 
             //Calculate total width and each section width
             SectionCalcWidths();
@@ -699,13 +678,16 @@ namespace AgOpenGPS
         {
             for (int j = 0; j < MAXSECTIONS; j++)
             {
-                section[j].sectionWidth = (section[j].positionRight - section[j].positionLeft);
-                section[j].rpSectionPosition = 250 + (int)(Math.Round(section[j].positionLeft * 10, 0, MidpointRounding.AwayFromZero));
-                section[j].rpSectionWidth = (int)(Math.Round(section[j].sectionWidth * 10, 0, MidpointRounding.AwayFromZero));
+                section[j].sectionWidth = section[j].positionRight - section[j].positionLeft;
+                section[j].rpSectionPosition = 250 + (int)Math.Round(section[j].positionLeft * 10, 0, MidpointRounding.AwayFromZero);
+                section[j].rpSectionWidth = (int)Math.Round(section[j].sectionWidth * 10, 0, MidpointRounding.AwayFromZero);
             }
 
             //calculate tool width based on extreme right and left values
-            tool.toolWidth = (section[tool.numOfSections - 1].positionRight) - (section[0].positionLeft);
+            tool.toolWidth = section[tool.numOfSections - 1].positionRight - section[0].positionLeft;
+
+            Vehicle.Default.setVehicle_toolWidth = tool.toolWidth;
+            Vehicle.Default.Save();
 
             //left and right tool position
             tool.toolFarLeftPosition = section[0].positionLeft;

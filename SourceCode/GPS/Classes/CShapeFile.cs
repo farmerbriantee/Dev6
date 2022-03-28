@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK.Graphics.OpenGL;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -28,7 +29,7 @@ namespace AgOpenGPS
         public double BndBoxTop;
         public double BndBoxBottom;
         //public List<WGS84[]> Parts = new List<WGS84[]>();
-        public List<vec2[]> Parts = new List<vec2[]>();
+        public List<List<vec2>> Parts = new List<List<vec2>>();
         public bool InsideLargeView = false;
         public int[] BufferID, NumElements, BufferIndex;
         public Color color = Color.FromArgb(0x78000000);
@@ -48,6 +49,32 @@ namespace AgOpenGPS
             mf = _f;
         }
 
+
+        public void Draw()
+        {
+            GL.LineWidth(2);
+            for (int i = 0; i < Polygons.Count; i++)
+            {
+                for (int j = 0; j < Polygons[i].Parts.Count; j++)
+                {
+                    //GL.Color4(Polygons[i].color);
+                    //GL.Begin(PrimitiveType.Polygon);
+                    //for (int k = 0; k < Polygons[i].Parts[j].Count; k++)
+                    //{
+                    //    GL.Vertex3(Polygons[i].Parts[j][k].easting, Polygons[i].Parts[j][k].northing, 0);
+                    //}
+                    //GL.End();
+
+                    GL.Color4(Color.FromArgb(0x78000000));
+                    GL.Begin(PrimitiveType.LineLoop);
+                    for (int k = 0; k < Polygons[i].Parts[j].Count; k++)
+                    {
+                        GL.Vertex3(Polygons[i].Parts[j][k].easting, Polygons[i].Parts[j][k].northing, 0);
+                    }
+                    GL.End();
+                }
+            }
+        }
         public void Main(string FilePath)
         {
             FileStream MainStream = File.Open(FilePath + ".shp", FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -158,7 +185,7 @@ namespace AgOpenGPS
 
                         Index += FieldSize[col];
 
-                        if (string.IsNullOrEmpty(value))
+                        if (string.IsNullOrEmpty(value) || value  == "******************")
                         {
                             R[col] = DBNull.Value;
                         }
@@ -198,6 +225,7 @@ namespace AgOpenGPS
                     table.Rows.Add(R);
                     //Application.DoEvents();
                 }
+                DBFStream.Close();
             }
 
             if (MainStream.Length > HeaderLength)
@@ -241,14 +269,10 @@ namespace AgOpenGPS
                         int ShapeType = ParseInt(ByteArray, 8, true);
                         if (ShapeType == 5 && ShapeLength >= 52)
                         {
-                            ShapePolygon2 aa = new ShapePolygon2
-                            {
-                                BndBoxLeft = ParseDouble(ByteArray, 12, true),
-                                BndBoxTop = ParseDouble(ByteArray, 20, true),
-                                BndBoxRight = ParseDouble(ByteArray, 28, true),
-                                BndBoxBottom = ParseDouble(ByteArray, 36, true)
-                            };
-
+                            //BndBoxLeft = ParseDouble(ByteArray, 12, true),
+                            //BndBoxTop = ParseDouble(ByteArray, 20, true),
+                            //BndBoxRight = ParseDouble(ByteArray, 28, true),
+                            //BndBoxBottom = ParseDouble(ByteArray, 36, true)
 
                             int numParts = ParseInt(ByteArray, 44, true);
                             int numPoints = ParseInt(ByteArray, 48, true);
@@ -264,41 +288,46 @@ namespace AgOpenGPS
 
                                     int numBytes = nextPart - startPart;
 
-                                    //int numBytes;
-                                    //if (part == numParts - 1)
-                                    //    numBytes = ShapeLength - startPart;
-                                    //else
-                                    //{
-                                    //    int nextPart = ParseInt(ByteArray, 52 + 4 * (part + 1), true) * 16 + Offset;
-                                    //    numBytes = nextPart - startPart;
-                                    //}
-
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    vec2[] points = new vec2[numPointsInPart];
-
+                                    List<vec2> points = new List<vec2>(numPointsInPart);
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + 0 + (16 * point), true));
 
                                         mf.pn.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        points[point] = new vec2(Easting, Northing);
-
+                                        points.Add(new vec2(Easting, Northing));
                                     }
-                                    aa.Parts.Add(points);
-                                }
-                            }
 
-                            if (aa.BndBoxLeft - 0.1 <= mf.pn.longitude && aa.BndBoxRight + 0.1 >= mf.pn.longitude)
-                            {
-                                if (aa.BndBoxTop - 0.1 <= mf.pn.latitude && aa.BndBoxBottom + 0.1 >= mf.pn.latitude)
-                                {
-                                    aa.InsideLargeView = true;
-                                    if (table.Rows.Count > Polygons.Count)
-                                        aa.color = table.Rows[Polygons.Count][4].ToString() == "100" ? Color.FromArgb(0x78FF0000) : Color.FromArgb(0x7800FF00);
+                                    //CBoundaryList New = new CBoundaryList();
 
-                                    Polygons.Add(aa);
+                                    if (points[0].easting == points[points.Count - 1].easting && points[0].northing == points[points.Count - 1].northing)
+                                    {
+                                        points.RemoveAt(0);
+                                    }
+
+                                    //New.fenceLine.points = points;
+                                    //New.CalculateFenceArea();
+                                    //mf.bnd.bndList.Add(New);
+
+                                    ShapePolygon2 aa = new ShapePolygon2
+                                    {
+                                        BndBoxLeft = ParseDouble(ByteArray, 12, true),
+                                        BndBoxTop = ParseDouble(ByteArray, 20, true),
+                                        BndBoxRight = ParseDouble(ByteArray, 28, true),
+                                        BndBoxBottom = ParseDouble(ByteArray, 36, true)
+                                    };
+
+                                    if (aa.BndBoxLeft - 0.1 <= mf.pn.longitude && aa.BndBoxRight + 0.1 >= mf.pn.longitude)
+                                    {
+                                        if (aa.BndBoxTop - 0.1 <= mf.pn.latitude && aa.BndBoxBottom + 0.1 >= mf.pn.latitude)
+                                        {
+                                            aa.InsideLargeView = true;
+                                            aa.Parts.Add(points);
+                                            Polygons.Add(aa);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -312,10 +341,11 @@ namespace AgOpenGPS
 
                             if (ShapeLength == 48 + (16 * numPoints))
                             {
-                                WGS84[] points = new WGS84[numPoints];
                                 for (int point = 0; point < numPoints; point++)
                                 {
-                                    points[point] = new WGS84(ParseDouble(ByteArray, 56 + (16 * point), true), ParseDouble(ByteArray, 48 + (16 * point), true));
+                                    WGS84 tt = new WGS84(ParseDouble(ByteArray, 56 + (16 * point), true), ParseDouble(ByteArray, 48 + (16 * point), true));
+                                    mf.pn.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
+                                    mf.flagPts.Add(new CFlag(tt.Lat, tt.Lon, Easting, Northing, 0, 0, ""));
                                 }
                             }
                         }
@@ -328,17 +358,6 @@ namespace AgOpenGPS
                             int numParts = ParseInt(ByteArray, 44, true);
                             int numPoints = ParseInt(ByteArray, 48, true);
 
-
-
-                            //Byte      Z*      Mmin            Mmin        Double      1           Little
-                            //Byte      Z + 8*  Mmax            Mmax        Double      1           Little
-                            //Byte      Z + 16* Marray          Marray      Double      NumPoints   Little
-
-                            //Note: W = 52 + (4 * NumParts)
-                            //      X = W + (4 * NumParts)
-                            //      Y = X + (16 * NumPoints)
-                            //      Z = Y + 16 + (8 * NumPoints)
-
                             if (ShapeLength == 68 + (8 * numParts) + (24 * numPoints) || ShapeLength == 84 + (8 * numParts) + (32 * numPoints))//dont care for the Marray
                             {
                                 int Offset = 52 + (8 * numParts);
@@ -346,49 +365,59 @@ namespace AgOpenGPS
                                 for (int part = 0; part < numParts; part++)
                                 {
                                     int startPart = ParseInt(ByteArray, 52 + 4 * part, true) * 16 + Offset;
-                                    int nextPart = part + 1 < numParts ? ParseInt(ByteArray, 52 + 4 * (part + 1), true) * 16 + Offset : ShapeLength;
+
+                                    int nextPart = part + 1 < numParts ? ParseInt(ByteArray, 52 + 4 * (part + 1), true) * 16 + Offset : Offset + 16 * numPoints;
 
                                     int numBytes = nextPart - startPart;
-                                    //int type = ParseInt(ByteArray, 52 + 4 * numParts + 4 * part, true);
-
+                                    int type = ParseInt(ByteArray, 52 + 4 * numParts + 4 * part, true);
 
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    WGS84[] points = new WGS84[numPointsInPart];
+                                    List<vec2> points2 = new List<vec2>(numPointsInPart);
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
-                                        points[point] = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + 0 + (16 * point), true));
+                                        WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + (16 * point), true));
+                                        mf.pn.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
+                                        points2.Add(new vec2(Easting, Northing));
                                     }
 
+                                    if (type == 0)
+                                    {
+                                        mf.patchList.Add(new Polyline { points = points2 });
+                                    }
+                                    else if (type > 1)
+                                    {
+                                        ShapePolygon2 aa = new ShapePolygon2
+                                        {
+                                            BndBoxLeft = ParseDouble(ByteArray, 12, true),
+                                            BndBoxTop = ParseDouble(ByteArray, 20, true),
+                                            BndBoxRight = ParseDouble(ByteArray, 28, true),
+                                            BndBoxBottom = ParseDouble(ByteArray, 36, true)
+                                        };
+
+                                        if (aa.BndBoxLeft - 0.1 <= mf.pn.longitude && aa.BndBoxRight + 0.1 >= mf.pn.longitude)
+                                        {
+                                            if (aa.BndBoxTop - 0.1 <= mf.pn.latitude && aa.BndBoxBottom + 0.1 >= mf.pn.latitude)
+                                            {
+                                                aa.InsideLargeView = true;
+                                                if (table.Rows.Count > Polygons.Count && table.Columns.Count > 3)
+                                                    aa.color = table.Rows[Polygons.Count][4].ToString() == "100" ? Color.FromArgb(0x78FF0000) : Color.FromArgb(0x7800FF00);
+                                                aa.Parts.Add(points2);
+                                                Polygons.Add(aa);
+                                            }
+                                        }
+                                    }
                                 }
                             }
-
-                            //Position          Field           Value       Type        Number      Order
-                            //Byte      44      NumParts        NumParts    Integer     1           Little
-                            //Byte      48      NumPoints       NumPoints   Integer     1           Little
-                            //Byte      52      Parts           Parts       Integer     NumParts    Little
-                            //Byte      W       PartTypes       PartTypes   Integer     NumParts    Little
-                            //Byte      X       Points          Points      Point       NumPoints   Little
-
-
-                            //Byte      Y       Zmin            Zmin        Double      1           Little
-                            //Byte      Y + 8   Zmax            Zmax        Double      1           Little
-                            //Byte      Y + 16  Zarray          Zarray      Double      NumPoints   Little
-                            //Byte      Z*      Mmin            Mmin        Double      1           Little
-                            //Byte      Z + 8*  Mmax            Mmax        Double      1           Little
-                            //Byte      Z + 16* Marray          Marray      Double      NumPoints   Little
-
-                            //Note: W = 52 + (4 * NumParts)
-                            //      X = W + (4 * NumParts)
-                            //      Y = X + (16 * NumPoints)
-                            //      Z = Y + 16 + (8 * NumPoints)
                         }
                         Index += ShapeLength;
                         ShapeLength = 12;//reset length for next
                     }
                 }
             }
+
+            MainStream.Close();
         }
 
         public double ParseDouble(byte[] ByteArray, int Idx, bool LittleEndian)

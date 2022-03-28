@@ -8,6 +8,7 @@ namespace AgOpenGPS
         //access to the main GPS form and all its variables
         private readonly FormGPS mf = null;
         private bool isSaving;
+        private double halfToolWidth;
 
         public FormTram(Form callingForm)
         {
@@ -28,10 +29,12 @@ namespace AgOpenGPS
             nudPasses.Value = Properties.Settings.Default.setTram_passes;
             nudPasses.ValueChanged += nudPasses_ValueChanged;
 
+            halfToolWidth = (mf.tool.toolWidth - mf.tool.toolOverlap) / 2.0;
+
+
             lblTrack.Text = (mf.vehicle.trackWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
 
-            mf.tool.halfToolWidth = (mf.tool.toolWidth - mf.tool.toolOverlap) / 2.0;
-            lblToolWidthHalf.Text = (mf.tool.halfToolWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+            lblToolWidthHalf.Text = (halfToolWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
 
             mf.panelRight.Enabled = false;
 
@@ -125,12 +128,12 @@ namespace AgOpenGPS
 
         private void btnAdjLeft_Click(object sender, EventArgs e)
         {
-            MoveBuildTramLine(-mf.tool.halfToolWidth);
+            MoveBuildTramLine(-halfToolWidth);
         }
 
         private void btnAdjRight_Click(object sender, EventArgs e)
         {
-            MoveBuildTramLine(mf.tool.halfToolWidth);
+            MoveBuildTramLine(halfToolWidth);
         }
 
         private void nudPasses_ValueChanged(object sender, EventArgs e)

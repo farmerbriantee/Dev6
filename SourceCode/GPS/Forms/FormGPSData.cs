@@ -14,6 +14,9 @@ namespace AgOpenGPS
         {
             mf = callingForm as FormGPS;
             InitializeComponent();
+
+            lblSunrise.Text = mf.sunrise.ToString("HH:mm");
+            lblSunset.Text = mf.sunset.ToString("HH:mm");
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -25,8 +28,8 @@ namespace AgOpenGPS
             lblEastingField.Text = mf.pn.fix.easting.ToString("0.0");
             lblNorthingField.Text = mf.pn.fix.northing.ToString("0.0");
 
-            lblLatitude.Text = mf.Latitude;
-            lblLongitude.Text = mf.Longitude;
+            lblLatitude.Text = mf.pn.latitude.ToString("0.0000000");
+            lblLongitude.Text = mf.pn.longitude.ToString("0.0000000");
 
             //other sat and GPS info
             lblFixQuality.Text = mf.FixQuality;
@@ -42,17 +45,6 @@ namespace AgOpenGPS
             lblFixHeading.Text = (mf.fixHeading * 57.2957795).ToString("0.0");
 
             lblAltitude.Text = (mf.pn.altitude * mf.mToUserBig).ToString("0.0");
-        }
-
-        private void FormGPSData_Load(object sender, EventArgs e)
-        {
-            lblSunrise.Text = mf.sunrise.ToString("HH:mm");
-            lblSunset.Text = mf.sunset.ToString("HH:mm");
-        }
-
-        private void FormGPSData_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            mf.isGPSSentencesOn = false;
         }
     }
 }

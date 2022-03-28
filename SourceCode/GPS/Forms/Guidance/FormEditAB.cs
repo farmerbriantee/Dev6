@@ -33,12 +33,12 @@ namespace AgOpenGPS
             if (mf.isMetric)
             {
                 nudMinTurnRadius.DecimalPlaces = 0;
-                nudMinTurnRadius.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * mf.cmToUser);
+                nudMinTurnRadius.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * mf.mToUser);
             }
             else
             {
                 nudMinTurnRadius.DecimalPlaces = 1;
-                nudMinTurnRadius.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * mf.cmToUser), 1);
+                nudMinTurnRadius.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * mf.mToUser), 1);
             }
 
             label1.Text = mf.unitsInCm;

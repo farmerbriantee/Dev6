@@ -27,17 +27,23 @@ namespace AgOpenGPS
 
             if (ChangeToCulture)
             {
-                currentValue = Math.Round(currentValue * Mtr2Unit, decimals, MidpointRounding.AwayFromZero);
+                currentValue = Math.Round(currentValue * Mtr2Unit, Decimals, MidpointRounding.AwayFromZero);
 
                 MaxValue = Math.Round(maxvalue * Mtr2Unit, Decimals, MidpointRounding.AwayFromZero);
                 if (MaxValue * Unit2Mtr > maxvalue)
                 {
-                    MaxValue = Math.Round(MaxValue - Math.Pow(0.1, Decimals), decimals, MidpointRounding.AwayFromZero);
+                    if (Decimals > 0)
+                        MaxValue -= Math.Pow(0.1, Decimals);
+                    else
+                        MaxValue -= 1;
                 }
                 MinValue = Math.Round(minvalue * Mtr2Unit, Decimals, MidpointRounding.AwayFromZero);
                 if (MinValue * Unit2Mtr < minvalue)
                 {
-                    MinValue += Math.Pow(0.1, Decimals);
+                    if (Decimals > 0)
+                        MinValue += Math.Pow(0.1, Decimals);
+                    else
+                        MaxValue += 1;
                 }
             }
             else
@@ -57,7 +63,7 @@ namespace AgOpenGPS
             //fill in the display
 
 
-            BtnSeparator.Enabled = !(WholeNumbers = decimals == 0);
+            BtnSeparator.Enabled = !(WholeNumbers = Decimals == 0);
             BtnPlus.Enabled = minvalue < 0;
             BtnSeparator.Text = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
             isFirstKey = true;
@@ -75,6 +81,9 @@ namespace AgOpenGPS
                 while (--decimals > 0)
                     guifix += "#";
             }
+            else
+                guifix = "0";
+
             tboxNumber.Text = currentValue.ToString(guifix);
         }
 
@@ -343,7 +352,7 @@ namespace AgOpenGPS
                 else
                 {
                     //all good, return the value
-                    if (ChangeToCulture) ReturnValue = Math.Round(tryNumber * Unit2Mtr, Decimals, MidpointRounding.AwayFromZero);
+                    if (ChangeToCulture) ReturnValue = Math.Round(tryNumber, Decimals, MidpointRounding.AwayFromZero) * Unit2Mtr;
                     else ReturnValue = tryNumber;
                     DialogResult = DialogResult.OK;
                     Close();

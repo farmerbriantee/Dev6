@@ -74,9 +74,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("-2.0")]
-        public decimal setSection_position1 {
+        public double setSection_position1 {
             get {
-                return ((decimal)(this["setSection_position1"]));
+                return ((double)(this["setSection_position1"]));
             }
             set {
                 this["setSection_position1"] = value;
@@ -86,9 +86,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("-1.0")]
-        public decimal setSection_position2 {
+        public double setSection_position2 {
             get {
-                return ((decimal)(this["setSection_position2"]));
+                return ((double)(this["setSection_position2"]));
             }
             set {
                 this["setSection_position2"] = value;
@@ -98,9 +98,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1.0")]
-        public decimal setSection_position3 {
+        public double setSection_position3 {
             get {
-                return ((decimal)(this["setSection_position3"]));
+                return ((double)(this["setSection_position3"]));
             }
             set {
                 this["setSection_position3"] = value;
@@ -110,9 +110,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("2.0")]
-        public decimal setSection_position4 {
+        public double setSection_position4 {
             get {
-                return ((decimal)(this["setSection_position4"]));
+                return ((double)(this["setSection_position4"]));
             }
             set {
                 this["setSection_position4"] = value;
@@ -122,9 +122,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position5 {
+        public double setSection_position5 {
             get {
-                return ((decimal)(this["setSection_position5"]));
+                return ((double)(this["setSection_position5"]));
             }
             set {
                 this["setSection_position5"] = value;
@@ -134,9 +134,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position6 {
+        public double setSection_position6 {
             get {
-                return ((decimal)(this["setSection_position6"]));
+                return ((double)(this["setSection_position6"]));
             }
             set {
                 this["setSection_position6"] = value;
@@ -290,9 +290,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position7 {
+        public double setSection_position7 {
             get {
-                return ((decimal)(this["setSection_position7"]));
+                return ((double)(this["setSection_position7"]));
             }
             set {
                 this["setSection_position7"] = value;
@@ -302,9 +302,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position8 {
+        public double setSection_position8 {
             get {
-                return ((decimal)(this["setSection_position8"]));
+                return ((double)(this["setSection_position8"]));
             }
             set {
                 this["setSection_position8"] = value;
@@ -314,9 +314,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position9 {
+        public double setSection_position9 {
             get {
-                return ((decimal)(this["setSection_position9"]));
+                return ((double)(this["setSection_position9"]));
             }
             set {
                 this["setSection_position9"] = value;
@@ -446,9 +446,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position10 {
+        public double setSection_position10 {
             get {
-                return ((decimal)(this["setSection_position10"]));
+                return ((double)(this["setSection_position10"]));
             }
             set {
                 this["setSection_position10"] = value;
@@ -458,9 +458,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position11 {
+        public double setSection_position11 {
             get {
-                return ((decimal)(this["setSection_position11"]));
+                return ((double)(this["setSection_position11"]));
             }
             set {
                 this["setSection_position11"] = value;
@@ -470,9 +470,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position12 {
+        public double setSection_position12 {
             get {
-                return ((decimal)(this["setSection_position12"]));
+                return ((double)(this["setSection_position12"]));
             }
             set {
                 this["setSection_position12"] = value;
@@ -482,9 +482,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position13 {
+        public double setSection_position13 {
             get {
-                return ((decimal)(this["setSection_position13"]));
+                return ((double)(this["setSection_position13"]));
             }
             set {
                 this["setSection_position13"] = value;
@@ -674,9 +674,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position14 {
+        public double setSection_position14 {
             get {
-                return ((decimal)(this["setSection_position14"]));
+                return ((double)(this["setSection_position14"]));
             }
             set {
                 this["setSection_position14"] = value;
@@ -686,9 +686,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position15 {
+        public double setSection_position15 {
             get {
-                return ((decimal)(this["setSection_position15"]));
+                return ((double)(this["setSection_position15"]));
             }
             set {
                 this["setSection_position15"] = value;
@@ -698,9 +698,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position16 {
+        public double setSection_position16 {
             get {
-                return ((decimal)(this["setSection_position16"]));
+                return ((double)(this["setSection_position16"]));
             }
             set {
                 this["setSection_position16"] = value;
@@ -710,9 +710,9 @@ namespace AgOpenGPS.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal setSection_position17 {
+        public double setSection_position17 {
             get {
-                return ((decimal)(this["setSection_position17"]));
+                return ((double)(this["setSection_position17"]));
             }
             set {
                 this["setSection_position17"] = value;

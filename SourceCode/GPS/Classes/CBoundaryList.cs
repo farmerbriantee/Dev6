@@ -10,17 +10,10 @@ namespace AgOpenGPS
         public Polyline turnLine = new Polyline();
 
         //area variable
-        public double area;
+        public double area = 0;
 
         //boundary variables
-        public bool isDriveThru;
-
-        //constructor
-        public CBoundaryList()
-        {
-            area = 0;
-            isDriveThru = false;
-        }
+        public bool isDriveThru = false;
 
         public void FixFenceLine()
         {

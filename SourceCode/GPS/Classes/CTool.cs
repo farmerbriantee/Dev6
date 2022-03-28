@@ -10,7 +10,7 @@ namespace AgOpenGPS
     {
         private readonly FormGPS mf;
 
-        public double toolWidth, halfToolWidth;
+        public double toolWidth;
         public double toolFarLeftPosition = 0;
         public double toolFarLeftSpeed = 0;
         public double toolFarRightPosition = 0;

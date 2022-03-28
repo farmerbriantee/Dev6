@@ -282,9 +282,7 @@ namespace AgOpenGPS
                     //read field directory
                     line = reader.ReadLine();
 
-                    currentFieldDirectory = line.Trim();
-
-                    displayFieldName = currentFieldDirectory;
+                    displayFieldName = line.Trim();
 
                     //Offset header
                     line = reader.ReadLine();
@@ -647,10 +645,11 @@ namespace AgOpenGPS
                         {
                             if (reader.EndOfStream) break;
 
+                            //read the number of points
+                            line = reader.ReadLine();//endless loop fix if no boundary
+
                             if (bnd.bndList.Count > k)
                             {
-                                //read the number of points
-                                line = reader.ReadLine();
                                 int numPoints = int.Parse(line);
 
                                 if (numPoints > 0)

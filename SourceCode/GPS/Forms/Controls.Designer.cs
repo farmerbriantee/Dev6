@@ -121,7 +121,7 @@ namespace AgOpenGPS
                     btnSnapToPivot.Visible = true;
                     cboxpRowWidth.Visible = true;
                     btnYouSkipEnable.Visible = true;
-                    btnAutoYouTurn.Enabled = true;
+                    btnAutoYouTurn.Enabled = bnd.bndList.Count > 0;
                 }
             }
             else if (btnEditAB.Visible)
@@ -280,12 +280,6 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (bnd.bndList.Count == 0)
-            {
-                TimedMessageBox(2000, gStr.gsNoBoundary, gStr.gsCreateABoundaryFirst);
-                return;
-            }
-
             gyd.ResetYouTurn();
 
             p_239.pgn[p_239.uturn] = 0;
@@ -401,40 +395,9 @@ namespace AgOpenGPS
 
         private void btnStartAgIO_Click(object sender, EventArgs e)
         {
-            if (isTT)
-            {
-                MessageBox.Show(gStr.h_btnStartAgIO, gStr.gsHelp);
-                ResetHelpBtn();
-                return;
-            }
-            Process[] processName = Process.GetProcessesByName("AgIO");
-            if (processName.Length == 0)
-            {
-                //Start application here
-                DirectoryInfo di = new DirectoryInfo(Application.StartupPath);
-                string strPath = di.ToString();
-                strPath += "\\AgIO.exe";
-                try
-                {
-                    //TimedMessageBox(2000, "Please Wait", "Starting AgIO");
-                    ProcessStartInfo processInfo = new ProcessStartInfo();
-                    processInfo.FileName = strPath;
-                    //processInfo.ErrorDialog = true;
-                    //processInfo.UseShellExecute = false;
-                    processInfo.WorkingDirectory = Path.GetDirectoryName(strPath);
-                    Process proc = Process.Start(processInfo);
-                }
-                catch
-                {
-                    TimedMessageBox(2000, "No File Found", "Can't Find AgIO");
-                }
-            }
-            else
-            {
-                //Set foreground window
-                ShowWindow(processName[0].MainWindowHandle, 9);
-                SetForegroundWindow(processName[0].MainWindowHandle);
-            }
+            NTRIP_Watchdog = 0;
+            UpdateNtripButton(!NTRIP_TurnedOn);
+            return;
         }
         private void btnAutoSteerConfig_Click(object sender, EventArgs e)
         {
@@ -485,15 +448,8 @@ namespace AgOpenGPS
 
             isStanleyUsed = !isStanleyUsed;
 
-            if (isStanleyUsed)
-            {
-                btnStanleyPure.Image = Resources.ModeStanley;
-            }
-            else
-            {
-                btnStanleyPure.Image = Resources.ModePurePursuit;
-            }
-
+            btnStanleyPure.Image = isStanleyUsed ? Resources.ModeStanley : Resources.ModePurePursuit;
+            
             Properties.Vehicle.Default.setVehicle_isStanleyUsed = isStanleyUsed;
             Properties.Vehicle.Default.Save();
         }
@@ -517,8 +473,6 @@ namespace AgOpenGPS
                 f.Close();
                 return;
             }
-
-            isGPSSentencesOn = true;
 
             Form form = new FormGPSData(this);
             form.Show(this);
@@ -1040,12 +994,6 @@ namespace AgOpenGPS
                 return;
             }
 
-            if (bnd.bndList.Count == 0)
-            {
-                TimedMessageBox(2000, gStr.gsNoBoundary, gStr.gsCreateABoundaryFirst);
-                return;
-            }
-
             using (var form = new FormABDraw(this))
             {
                 form.ShowDialog(this);
@@ -1452,7 +1400,7 @@ namespace AgOpenGPS
                     gyd.StopContourLine();
 
                     //FileSaveHeadland();
-                    FileSaveBoundary();
+                    //FileSaveBoundary();
                     FileSaveSections();
                     FileSaveContour();
                     FileSaveFieldKML();

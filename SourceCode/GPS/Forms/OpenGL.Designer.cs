@@ -21,7 +21,7 @@ namespace AgOpenGPS
 
         //data buffer for pixels read from off screen buffer
         private byte[] grnPixels = new byte[150001];
-        private bool isFastSections = false;
+        public bool isFastSections = false;
         private int bbCounter = 0, deadCam = 0;
         private double maxFieldX, maxFieldY, minFieldX, minFieldY, avgPivDistance;
 
@@ -83,11 +83,11 @@ namespace AgOpenGPS
                 GL.End();                       // Done Drawing Reticle
 
                 GL.Rotate(deadCam + 90, 0.0, 0.0, 1.0);
-                font.DrawText3DNoGPS(0, 0, " I'm Lost  ", 1);
+                font.DrawText3DNoGPS(0, 0, " I'm Lost  ");
                 GL.Color3(0.98f, 0.98f, 0.270f);
 
                 GL.Rotate(deadCam + 180, 0.0, 0.0, 1.0);
-                font.DrawText3DNoGPS(0, 0, "  No GPS!", 1);
+                font.DrawText3DNoGPS(0, 0, "  No GPS!");
 
                 // 2D Ortho ---------------------------------------////////-------------------------------------------------
 
@@ -223,28 +223,7 @@ namespace AgOpenGPS
                 GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
                 GL.Color3(1, 1, 1);
 
-                Color colorBlack = Color.FromArgb(0x78000000);
-                for (int i = 0; i < shape.Polygons.Count; i++)
-                {
-                    GL.Color4(shape.Polygons[i].color);
-                    for (int j = 0; j < shape.Polygons[i].Parts.Count; j++)
-                    {
-                        GL.Begin(PrimitiveType.Polygon);
-                        for (int k = 0; k < shape.Polygons[i].Parts[j].Length; k++)
-                        {
-                            GL.Vertex3(shape.Polygons[i].Parts[j][k].easting, shape.Polygons[i].Parts[j][k].northing, 0);
-                        }
-                        GL.End();
-
-                        GL.Color4(colorBlack);
-                        GL.Begin(PrimitiveType.LineLoop);
-                        for (int k = 0; k < shape.Polygons[i].Parts[j].Length; k++)
-                        {
-                            GL.Vertex3(shape.Polygons[i].Parts[j][k].easting, shape.Polygons[i].Parts[j][k].northing, 0);
-                        }
-                        GL.End();
-                    }
-                }
+                shape.Draw();
 
                 if (bnd.bndList.Count > 0)
                 {
@@ -1193,9 +1172,6 @@ namespace AgOpenGPS
             if (dotDistance < -limit) dotDistance = -limit;
             if (dotDistance > limit) dotDistance = limit;
 
-            //if (dotDistance < -10) dotDistance -= 30;
-            //if (dotDistance > 10) dotDistance += 30;
-
             // dot background
             GL.PointSize(8.0f);
             GL.Color3(0.00f, 0.0f, 0.0f);
@@ -1220,40 +1196,40 @@ namespace AgOpenGPS
             //Are you on the right side of line? So its green.
             //GL.Translate(0, 0, 0.01);
             if ((offlineDistance) < 0.0)
-                {
-                    int dots = (dotDistance * -1 / lightbarCmPerPixel);
+            {
+                int dots = (dotDistance * -1 / lightbarCmPerPixel);
 
-                    GL.PointSize(24.0f);
-                    GL.Color3(0.0f, 0.0f, 0.0f);
-                    GL.Begin(PrimitiveType.Points);
-                    for (int i = 1; i < dots + 1; i++) GL.Vertex2((i * 32), down);
-                    GL.End();
+                GL.PointSize(24.0f);
+                GL.Color3(0.0f, 0.0f, 0.0f);
+                GL.Begin(PrimitiveType.Points);
+                for (int i = 1; i < dots + 1; i++) GL.Vertex2((i * 32), down);
+                GL.End();
 
-                    GL.PointSize(16.0f);
-                    GL.Color3(0.0f, 0.980f, 0.0f);
-                    GL.Begin(PrimitiveType.Points);
-                    for (int i = 0; i < dots; i++) GL.Vertex2((i * 32 + 32), down);
-                    GL.End();
-                    //return;
-                }
+                GL.PointSize(16.0f);
+                GL.Color3(0.0f, 0.980f, 0.0f);
+                GL.Begin(PrimitiveType.Points);
+                for (int i = 0; i < dots; i++) GL.Vertex2((i * 32 + 32), down);
+                GL.End();
+                //return;
+            }
 
-                else
-                {
-                    int dots = (int)(dotDistance / lightbarCmPerPixel);
+            else
+            {
+                int dots = (int)(dotDistance / lightbarCmPerPixel);
 
-                    GL.PointSize(24.0f);
-                    GL.Color3(0.0f, 0.0f, 0.0f);
-                    GL.Begin(PrimitiveType.Points);
-                    for (int i = 1; i < dots + 1; i++) GL.Vertex2((i * -32), down);
-                    GL.End();
+                GL.PointSize(24.0f);
+                GL.Color3(0.0f, 0.0f, 0.0f);
+                GL.Begin(PrimitiveType.Points);
+                for (int i = 1; i < dots + 1; i++) GL.Vertex2((i * -32), down);
+                GL.End();
 
-                    GL.PointSize(16.0f);
-                    GL.Color3(0.980f, 0.30f, 0.0f);
-                    GL.Begin(PrimitiveType.Points);
-                    for (int i = 0; i < dots; i++) GL.Vertex2((i * -32 - 32), down);
-                    GL.End();
-                    //return;
-                }
+                GL.PointSize(16.0f);
+                GL.Color3(0.980f, 0.30f, 0.0f);
+                GL.Begin(PrimitiveType.Points);
+                for (int i = 0; i < dots; i++) GL.Vertex2((i * -32 - 32), down);
+                GL.End();
+                //return;
+            }
             
             //yellow center dot
             if (dotDistance >= -lightbarCmPerPixel && dotDistance <= lightbarCmPerPixel)

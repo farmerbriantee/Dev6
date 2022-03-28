@@ -23,7 +23,6 @@ namespace AgOpenGPS
         public double lastSecond = 0, lastSecondSearch = 0, moveDistance, CurrentHeading;
 
         public double abLength;
-        public double snapDistance;
         public int lineWidth;
         public int tramPassEvery;
 

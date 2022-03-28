@@ -171,6 +171,32 @@ namespace AgOpenGPS
                     else
                         BackColor = Properties.Settings.Default.setDisplay_colorNightFrame;
                 }
+
+                if (NTRIP_TurnedOn)
+                {
+                    NTRIP_Counter++;
+                    if (NTRIP_Connecting || NTRIP_Connected)
+                    {
+                        if (NTRIP_sendGGAInterval > 0 && ++NTRIP_SendGGACounter >= NTRIP_sendGGAInterval)
+                            SendGGA();
+
+                        //Thinks is connected but not receiving anything
+                        if (NTRIP_Watchdog++ > 30)
+                        {
+                            UpdateNtripButton(NTRIP_TurnedOn && !NTRIP_Connecting && NTRIP_Authorized);
+
+                            TimedMessageBox(2000, "Connection Problem", NTRIP_Connecting ? "Not Connecting To Caster" : (NTRIP_Authorized ? "Connection Dead" : "Not Authorized"));
+                        }
+                        else
+                            btnStartAgIO.Text = (NTRIP_byteCount / 1024).ToString() + " Kb";
+                    }
+                    else
+                    {
+                        btnStartAgIO.Text = "Waiting";
+                        if (NTRIP_Counter == 22 && !NTRIP_Connecting && !NTRIP_Connected)
+                            StartNTRIP();
+                    }
+                }
             }
 
             //every half of a second update all status  ////////////////    0.5  0.5   0.5    0.5    /////////////////
@@ -197,73 +223,12 @@ namespace AgOpenGPS
         }
 
         public void LoadSettings()
-        {            //metric settings
-
-            CheckSettingsNotNull();
-
+        {
             isMetric = Settings.Default.setMenu_isMetric;
 
-            tramLinesMenuField.Visible = Properties.Settings.Default.setFeatures.isTramOn;
-            headlandToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isHeadlandOn;
-            topFieldViewToolStripMenuItem.Checked = Properties.Settings.Default.setMenu_isOGLZoomOn == 1;
+            SetUserScales();
 
-            boundariesToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isBoundaryOn;
-            //toolStripBtnMakeBndContour.Visible = Properties.Settings.Default.setFeatures.isBndContourOn;
-            recordedPathStripMenu.Visible = Properties.Settings.Default.setFeatures.isRecPathOn;
-            deleteContourPathsToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isHideContourOn;
-            webcamToolStrip.Visible = Properties.Settings.Default.setFeatures.isWebCamOn;
-            offsetFixToolStrip.Visible = Properties.Settings.Default.setFeatures.isOffsetFixOn;
-            btnContour.Visible = Properties.Settings.Default.setFeatures.isContourOn;
-            btnAutoYouTurn.Visible = Properties.Settings.Default.setFeatures.isYouTurnOn;
-            btnStanleyPure.Visible = Properties.Settings.Default.setFeatures.isSteerModeOn;
-            btnStartAgIO.Visible = Properties.Settings.Default.setFeatures.isAgIOOn;
-
-            btnAutoSteer.Visible = Properties.Settings.Default.setFeatures.isAutoSteerOn;
-            btnCycleLines.Visible = Properties.Settings.Default.setFeatures.isCycleLinesOn;
-            btnManualOffOn.Visible = Properties.Settings.Default.setFeatures.isManualSectionOn;
-            btnSectionOffAutoOn.Visible = Properties.Settings.Default.setFeatures.isAutoSectionOn;
-            btnABLine.Visible = Properties.Settings.Default.setFeatures.isABLineOn;
-            btnCurve.Visible = Properties.Settings.Default.setFeatures.isCurveOn;
-
-            isUTurnOn = Properties.Settings.Default.setFeatures.isUTurnOn;
-            isLateralOn = Properties.Settings.Default.setFeatures.isLateralOn;
-
-            if (isMetric)
-            {
-                userToM = 0.01;//cm to m
-                mToUser = 100.0;//m to cm
-
-                mToUserBig = 1.0;//m to m
-                UserBigToM = 1.0;//m to m
-                KMHToUser = 1.0;//Km/H to Km/H
-
-                m2ToUser = 0.0001;//m2 to Ha
-
-                userToCm = 1.0;//cm to cm
-                cmToUser = 1.0;//cm to cm
-
-                unitsFtM = " m";
-                unitsInCm = " cm";
-                unitsHaAc = " Ha";
-            }
-            else
-            {
-                userToM = 0.0254;//inches to meters
-                mToUser = 39.3701;//meters to inches
-
-                mToUserBig = 3.28084;//meters to feet
-                UserBigToM = 0.3048;//feet to meters
-                KMHToUser = 0.62137;//Km/H to Km/H
-
-                m2ToUser = 0.000247105;//m2 to Acres
-
-                userToCm = 2.54;
-                cmToUser = 0.3937;
-
-                unitsInCm = " in";
-                unitsFtM = " ft";
-                unitsHaAc = " Ac";
-            }
+            SetFeaturesOnOff();
 
             udpWatchLimit = Properties.Settings.Default.SetGPS_udpWatchMsec;
             startSpeed = Vehicle.Default.setVehicle_startSpeed;
@@ -319,9 +284,7 @@ namespace AgOpenGPS
             //set the flag mark button to red dot
             btnFlag.Image = Properties.Resources.FlagRed;
 
-
-            if (Properties.Settings.Default.setAS_isAutoSteerAutoOn) btnAutoSteer.Text = "R";
-            else btnAutoSteer.Text = "M";
+            SetAutoSteerText();
 
             if (bnd.isHeadlandOn) btnHeadlandOnOff.Image = Properties.Resources.HeadlandOn;
             else btnHeadlandOnOff.Image = Properties.Resources.HeadlandOff;
@@ -341,10 +304,6 @@ namespace AgOpenGPS
             guidanceLookAheadTime = Properties.Settings.Default.setAS_guidanceLookAheadTime;
 
             gyd.sideHillCompFactor = Properties.Settings.Default.setAS_sideHillComp;
-
-            //ahrs.isReverseOn = Properties.Settings.Default.setIMU_isReverseOn;
-            //ahrs.reverseComp = Properties.Settings.Default.setGPS_reverseComp;
-            //ahrs.forwardComp = Properties.Settings.Default.setGPS_forwardComp;
 
             ahrs = new CAHRS();
 
@@ -376,8 +335,6 @@ namespace AgOpenGPS
 
             gyd.uTurnSmoothing = Settings.Default.setAS_uTurnSmoothing;
 
-            tool.halfToolWidth = (tool.toolWidth - tool.toolOverlap) / 2.0;
-
             //load the lightbar resolution
             lightbarCmPerPixel = Properties.Settings.Default.setDisplay_lightbarCmPerPixel;
 
@@ -407,6 +364,77 @@ namespace AgOpenGPS
                         Close();
                     }
                 }
+            }
+        }
+
+        public void SetFeaturesOnOff()
+        {
+            tramLinesMenuField.Visible = Properties.Settings.Default.setFeatures.isTramOn;
+            headlandToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isHeadlandOn;
+            topFieldViewToolStripMenuItem.Checked = Properties.Settings.Default.setMenu_isOGLZoomOn == 1;
+
+            boundariesToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isBoundaryOn;
+            //toolStripBtnMakeBndContour.Visible = Properties.Settings.Default.setFeatures.isBndContourOn;
+            recordedPathStripMenu.Visible = Properties.Settings.Default.setFeatures.isRecPathOn;
+            deleteContourPathsToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isHideContourOn;
+            webcamToolStrip.Visible = Properties.Settings.Default.setFeatures.isWebCamOn;
+            offsetFixToolStrip.Visible = Properties.Settings.Default.setFeatures.isOffsetFixOn;
+            btnContour.Visible = Properties.Settings.Default.setFeatures.isContourOn;
+            btnAutoYouTurn.Visible = Properties.Settings.Default.setFeatures.isYouTurnOn;
+            btnStanleyPure.Visible = Properties.Settings.Default.setFeatures.isSteerModeOn;
+            btnStartAgIO.Visible = Properties.Settings.Default.setFeatures.isAgIOOn;
+
+            btnAutoSteer.Visible = Properties.Settings.Default.setFeatures.isAutoSteerOn;
+            btnCycleLines.Visible = Properties.Settings.Default.setFeatures.isCycleLinesOn;
+            btnManualOffOn.Visible = Properties.Settings.Default.setFeatures.isManualSectionOn;
+            btnSectionOffAutoOn.Visible = Properties.Settings.Default.setFeatures.isAutoSectionOn;
+            btnABLine.Visible = Properties.Settings.Default.setFeatures.isABLineOn;
+            btnCurve.Visible = Properties.Settings.Default.setFeatures.isCurveOn;
+
+            isUTurnOn = Properties.Settings.Default.setFeatures.isUTurnOn;
+            isLateralOn = Properties.Settings.Default.setFeatures.isLateralOn;
+        }
+
+        public void SetAutoSteerText()
+        {
+            if (Properties.Settings.Default.setAS_isAutoSteerAutoOn) btnAutoSteer.Text = "R";
+            else btnAutoSteer.Text = "M";
+        }
+
+        public void SetUserScales()
+        {
+
+            if (isMetric)
+            {
+                userToM = 0.01;//cm to m
+                mToUser = 100.0;//m to cm
+
+                mToUserBig = 1.0;//m to m
+                userBigToM = 1.0;//m to m
+                KMHToUser = 1.0;//Km/H to Km/H
+                userToKMH = 1.0;//Km/H to Km/H
+
+                m2ToUser = 0.0001;//m2 to Ha
+
+                unitsFtM = " m";
+                unitsInCm = " cm";
+                unitsHaAc = " Ha";
+            }
+            else
+            {
+                userToM = 0.0254;//inches to meters
+                mToUser = 39.3701;//meters to inches
+
+                mToUserBig = 3.28084;//meters to feet
+                userBigToM = 0.3048;//feet to meters
+                KMHToUser = 0.62137;//Km/H to mph
+                userToKMH = 1.60934;//mph to Km/H
+
+                m2ToUser = 0.000247105;//m2 to Acres
+
+                unitsInCm = " in";
+                unitsFtM = " ft";
+                unitsHaAc = " Ac";
             }
         }
 
