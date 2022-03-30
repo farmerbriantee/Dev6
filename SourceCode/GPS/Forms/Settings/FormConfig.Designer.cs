@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.panelLeftSideMenu = new System.Windows.Forms.Panel();
-            this.btnNtrip = new System.Windows.Forms.Button();
             this.btnFeatureHides = new System.Windows.Forms.Button();
             this.btnTram = new System.Windows.Forms.Button();
             this.panelArduinoSubMenu = new System.Windows.Forms.Panel();
@@ -76,7 +75,6 @@
             // panelLeftSideMenu
             // 
             this.panelLeftSideMenu.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.panelLeftSideMenu.Controls.Add(this.btnNtrip);
             this.panelLeftSideMenu.Controls.Add(this.btnFeatureHides);
             this.panelLeftSideMenu.Controls.Add(this.btnTram);
             this.panelLeftSideMenu.Controls.Add(this.panelArduinoSubMenu);
@@ -93,27 +91,6 @@
             this.panelLeftSideMenu.Name = "panelLeftSideMenu";
             this.panelLeftSideMenu.Size = new System.Drawing.Size(115, 671);
             this.panelLeftSideMenu.TabIndex = 110;
-            // 
-            // btnNtrip
-            // 
-            this.btnNtrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.btnNtrip.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnNtrip.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
-            this.btnNtrip.FlatAppearance.BorderSize = 0;
-            this.btnNtrip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnNtrip.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnNtrip.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.btnNtrip.Image = global::AgOpenGPS.Properties.Resources.NtripSettings;
-            this.btnNtrip.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnNtrip.Location = new System.Drawing.Point(0, 1460);
-            this.btnNtrip.Name = "btnNtrip";
-            this.btnNtrip.Padding = new System.Windows.Forms.Padding(3, 0, 0, 0);
-            this.btnNtrip.Size = new System.Drawing.Size(115, 80);
-            this.btnNtrip.TabIndex = 119;
-            this.btnNtrip.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnNtrip.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.btnNtrip.UseVisualStyleBackColor = false;
-            this.btnNtrip.Click += new System.EventHandler(this.btnNtrip_Click);
             // 
             // btnFeatureHides
             // 
@@ -773,7 +750,6 @@
         private System.Windows.Forms.Button btnFeatureHides;
         private System.Windows.Forms.Button btnSubBrand;
         private System.Windows.Forms.Button btnMachineRelay;
-        private System.Windows.Forms.Button btnNtrip;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button button2;

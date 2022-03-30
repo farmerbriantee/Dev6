@@ -395,9 +395,40 @@ namespace AgOpenGPS
 
         private void btnStartAgIO_Click(object sender, EventArgs e)
         {
-            NTRIP_Watchdog = 0;
-            UpdateNtripButton(!NTRIP_TurnedOn);
-            return;
+            if (isTT)
+            {
+                MessageBox.Show(gStr.h_btnStartAgIO, gStr.gsHelp);
+                ResetHelpBtn();
+                return;
+            }
+            Process[] processName = Process.GetProcessesByName("AgIO");
+            if (processName.Length == 0)
+            {
+                //Start application here
+                DirectoryInfo di = new DirectoryInfo(Application.StartupPath);
+                string strPath = di.ToString();
+                strPath += "\\AgIO.exe";
+                try
+                {
+                    //TimedMessageBox(2000, "Please Wait", "Starting AgIO");
+                    ProcessStartInfo processInfo = new ProcessStartInfo();
+                    processInfo.FileName = strPath;
+                    //processInfo.ErrorDialog = true;
+                    //processInfo.UseShellExecute = false;
+                    processInfo.WorkingDirectory = Path.GetDirectoryName(strPath);
+                    Process proc = Process.Start(processInfo);
+                }
+                catch
+                {
+                    TimedMessageBox(2000, "No File Found", "Can't Find AgIO");
+                }
+            }
+            else
+            {
+                //Set foreground window
+                ShowWindow(processName[0].MainWindowHandle, 9);
+                SetForegroundWindow(processName[0].MainWindowHandle);
+            }
         }
         private void btnAutoSteerConfig_Click(object sender, EventArgs e)
         {

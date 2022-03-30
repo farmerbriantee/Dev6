@@ -262,12 +262,6 @@
     <Compile Include="Forms\Settings\ConfigTabs\ConfigAntenna.Designer.cs">
       <DependentUpon>ConfigAntenna.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Settings\ConfigTabs\ConfigSourceData.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigTabs\ConfigSourceData.Designer.cs">
-      <DependentUpon>ConfigSourceData.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\Settings\ConfigTabs\ConfigToolType.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -480,10 +474,6 @@
       <SubType>Form</SubType>
       <DependentUpon>FormGPS.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\NTRIPComm.Designer.cs">
-      <SubType>Form</SubType>
-      <DependentUpon>FormGPS.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\Form_About.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -495,12 +485,6 @@
     </Compile>
     <Compile Include="Forms\Guidance\FormTram.Designer.cs">
       <DependentUpon>FormTram.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigTabs\ConfigNTRIP.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigTabs\ConfigNTRIP.Designer.cs">
-      <DependentUpon>ConfigNTRIP.cs</DependentUpon>
     </Compile>
     <Compile Include="gStr.da.Designer.cs">
       <DependentUpon>gStr.da.resx</DependentUpon>
@@ -656,9 +640,6 @@
     <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigAntenna.resx">
       <DependentUpon>ConfigAntenna.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigSourceData.resx">
-      <DependentUpon>ConfigSourceData.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigToolType.resx">
       <DependentUpon>ConfigToolType.cs</DependentUpon>
     </EmbeddedResource>
@@ -781,9 +762,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Guidance\FormTram.resx">
       <DependentUpon>FormTram.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Settings\ConfigTabs\ConfigNTRIP.resx">
-      <DependentUpon>ConfigNTRIP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="gStr.da.resx">
       <Generator>ResXFileCodeGenerator</Generator>

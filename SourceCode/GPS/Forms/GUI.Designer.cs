@@ -171,32 +171,6 @@ namespace AgOpenGPS
                     else
                         BackColor = Properties.Settings.Default.setDisplay_colorNightFrame;
                 }
-
-                if (NTRIP_TurnedOn)
-                {
-                    NTRIP_Counter++;
-                    if (NTRIP_Connecting || NTRIP_Connected)
-                    {
-                        if (NTRIP_sendGGAInterval > 0 && ++NTRIP_SendGGACounter >= NTRIP_sendGGAInterval)
-                            SendGGA();
-
-                        //Thinks is connected but not receiving anything
-                        if (NTRIP_Watchdog++ > 30)
-                        {
-                            UpdateNtripButton(NTRIP_TurnedOn && !NTRIP_Connecting && NTRIP_Authorized);
-
-                            TimedMessageBox(2000, "Connection Problem", NTRIP_Connecting ? "Not Connecting To Caster" : (NTRIP_Authorized ? "Connection Dead" : "Not Authorized"));
-                        }
-                        else
-                            btnStartAgIO.Text = (NTRIP_byteCount / 1024).ToString() + " Kb";
-                    }
-                    else
-                    {
-                        btnStartAgIO.Text = "Waiting";
-                        if (NTRIP_Counter == 22 && !NTRIP_Connecting && !NTRIP_Connected)
-                            StartNTRIP();
-                    }
-                }
             }
 
             //every half of a second update all status  ////////////////    0.5  0.5   0.5    0.5    /////////////////

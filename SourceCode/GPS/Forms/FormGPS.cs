@@ -24,6 +24,13 @@ namespace AgOpenGPS
     //the main form object
     public partial class FormGPS : Form
     {
+        //To bring forward AgIO if running
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr handle);
+
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        private static extern bool ShowWindow(IntPtr hWind, int nCmdShow);
+
         #region // Class Props and instances
 
         //maximum sections available

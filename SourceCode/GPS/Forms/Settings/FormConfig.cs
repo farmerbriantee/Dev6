@@ -215,10 +215,5 @@ namespace AgOpenGPS
         {
             ShowTab(new ConfigRelay(mf));
         }
-
-        private void btnNtrip_Click(object sender, EventArgs e)
-        {
-            ShowTab(new ConfigNTRIP(mf));
-        }
     }
 }
