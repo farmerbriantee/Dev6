@@ -4,7 +4,6 @@ using System.IO.Ports;
 using System;
 using System.Windows.Forms;
 using System.Linq;
-using System.Globalization;
 
 namespace AgIO
 {
@@ -150,10 +149,6 @@ namespace AgIO
                 try
                 {
                     spIMU.Close();
-                    byte[] imuClose = new byte[] { 0x80, 0x81, 0x7C, 0xD4, 2, 1, 0, 0xCC };
-
-                    //tell AOG IMU is disconnected
-                    SendToLoopBackMessageAOG(imuClose);
                 }
 
                 catch (Exception e)
@@ -166,17 +161,11 @@ namespace AgIO
                 Properties.Settings.Default.Save();
 
                 spIMU.Dispose();
-                wasIMUConnectedLastRun = false;
             }
 
-            else
-            {
-                byte[] imuClose = new byte[] { 0x80, 0x81, 0x7C, 0xD4, 2, 1, 0, 0xCC };
-
-                //tell AOG IMU is disconnected
-                SendToLoopBackMessageAOG(imuClose);
-                wasIMUConnectedLastRun = false;
-            }
+            byte[] imuClose = new byte[] { 0x80, 0x81, 0x7C, 0xD4, 2, 1, 0, 0xCC };
+            //tell AOG IMU is disconnected
+            SendToLoopBackMessageAOG(imuClose);
 
             wasIMUConnectedLastRun = false;
             lblIMUComm.Text = "---";
@@ -1043,10 +1032,8 @@ namespace AgIO
         //called by the GPS2 delegate every time a chunk is rec'd
         private void ReceiveGPS2Port(string sentence)
         {
-            SendToLoopBackMessageAOG(sentence);
             traffic.cntrGPS2In += sentence.Length;
             recvGPS2Sentence = sentence;
-
         }
         public void SendGPS2Port(byte[] data)
         {

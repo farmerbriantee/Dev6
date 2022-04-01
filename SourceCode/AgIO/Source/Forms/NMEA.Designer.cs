@@ -283,9 +283,10 @@ namespace AgIO
 
                 //Send nmea to AgOpenGPS
                 SendToLoopBackMessageAOG(nmeaPGN);
+                SendToLoopBackMessageVR(nmeaPGN);
 
                 //Send nmea to autosteer module 8888
-                if (isSendNMEAToUDP) SendUDPMessage(nmeaPGN);
+                if (isSendNMEAToUDP) SendUDPMessage(nmeaPGN, epModule);
             }
         }
 

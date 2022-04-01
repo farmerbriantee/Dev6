@@ -11,13 +11,14 @@ namespace AgOpenGPS
     public partial class FormGPS
     {
         // - App Sockets  -----------------------------------------------------
-        private Socket sendToAppSocket;
-        private Socket recvFromAppSocket;
+        private Socket loopBackSocket;
 
         //endpoints of modules
-        private EndPoint epSender = new IPEndPoint(IPAddress.Any, 0);
-        private IPAddress epIP;
-        public int epPort;
+        private IPEndPoint epAgVR = new IPEndPoint(IPAddress.Parse("127.255.255.255"), 16666);
+        private IPEndPoint epAgIO = new IPEndPoint(IPAddress.Parse("127.255.255.255"), 17777);
+
+        // Initialise the IPEndPoint for async listener!
+        private EndPoint epSender = new IPEndPoint(IPAddress.Loopback, 0);
 
         // Data stream
         private byte[] loopBuffer = new byte[1024];
@@ -163,7 +164,7 @@ namespace AgOpenGPS
             {
                 switch (data[3])
                 {
-                    case 0xD6:
+                    case 0xD6:// 214
                         {
                             if (udpWatch.ElapsedMilliseconds < udpWatchLimit)
                             {
@@ -286,7 +287,7 @@ namespace AgOpenGPS
                         }
                         break;
 
-                    case 0xD3: //external IMU
+                    case 0xD3:// 211    external IMU
                         {
                             if (data.Length != 14)
                                 break;
@@ -317,7 +318,7 @@ namespace AgOpenGPS
                             //        );
                             break;
                         }
-                    case 0xD4: //imu disconnect pgn
+                    case 0xD4:// 212    imu disconnect pgn
                         {
                             if (data[5] == 1)
                             {
@@ -329,7 +330,7 @@ namespace AgOpenGPS
                             }
                             break;
                         }
-                    case 253: //return from autosteer module
+                    case 0xFD:// 253    return from autosteer module
                         {
                             //Steer angle actual
                             if (data.Length != 14)
@@ -376,7 +377,7 @@ namespace AgOpenGPS
                             break;
                         }
 
-                    case 250:
+                    case 0xFA: // 250
                         {                            
                             if (data.Length != 14)
                                 break;
@@ -385,7 +386,7 @@ namespace AgOpenGPS
                         }
 
                     #region Remote Switches
-                    case 234://MTZ8302 Feb 2020
+                    case 0xEA: // 234    MTZ8302 Feb 2020
                         {
                             //Steer angle actual
                             if (data.Length != 14)
@@ -467,27 +468,10 @@ namespace AgOpenGPS
             try
             {
                 // Initialise the socket
-                sendToAppSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-                //sendToAppSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                sendToAppSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-                sendToAppSocket.Bind(new IPEndPoint(IPAddress.Any, 15550));
-
-                //IP address and port of Auto Steer server
-                epIP = IPAddress.Parse("192.168.1.255");
-                epPort = 8888;
-
-                // Initialise the client socket
-                recvFromAppSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-                // IPEndPoint for AOG  to listen on 
-                recvFromAppSocket.Bind(new IPEndPoint(IPAddress.Any, 15555));
-
-                // Initialise the IPEndPoint for the client
-                EndPoint clientEp = new IPEndPoint(IPAddress.Any, 0);
-
-                // Start listening for incoming data
-                recvFromAppSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref clientEp, new AsyncCallback(ReceiveAppData), recvFromAppSocket);
+                loopBackSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                loopBackSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
+                loopBackSocket.Bind(new IPEndPoint(IPAddress.Loopback, 15555));
+                loopBackSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), null);
             }
             catch (Exception ex)
             {
@@ -513,17 +497,14 @@ namespace AgOpenGPS
         {
             try
             {
-                // Initialise the IPEndPoint for the clients
-
                 // Receive all data
-                int msgLen = recvFromAppSocket.EndReceiveFrom(asyncResult, ref epSender);
+                int msgLen = loopBackSocket.EndReceiveFrom(asyncResult, ref epSender);
 
                 byte[] localMsg = new byte[msgLen];
                 Array.Copy(loopBuffer, localMsg, msgLen);
 
                 // Listen for more connections again...
-                epSender = new IPEndPoint(IPAddress.Any, 0);
-                recvFromAppSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), recvFromAppSocket);
+                loopBackSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), null);
                 if (localMsg.Length > 3)
                 {
                     int Length = Math.Max((localMsg[4]) + 5, 5);
@@ -558,7 +539,7 @@ namespace AgOpenGPS
         {
             try
             {
-                sendToAppSocket.EndSend(asyncResult);
+                loopBackSocket.EndSend(asyncResult);
             }
             catch (Exception ex)
             { 
@@ -569,36 +550,25 @@ namespace AgOpenGPS
 
         public void SendPgnToLoop(byte[] byteData)
         {
-            if (byteData.Length > 2)
+            try
             {
-                int crc = 0;
-                for (int i = 2; i + 1 < byteData.Length; i++)
+                if (loopBackSocket != null && byteData.Length > 2)
                 {
-                    crc += byteData[i];
+                    int crc = 0;
+                    for (int i = 2; i + 1 < byteData.Length; i++)
+                    {
+                        crc += byteData[i];
+                    }
+                    byteData[byteData.Length - 1] = (byte)crc;
+                    
+                    loopBackSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epAgIO, new AsyncCallback(SendAsyncLoopData), null);
+                    loopBackSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epAgVR, new AsyncCallback(SendAsyncLoopData), null);
                 }
-                byteData[byteData.Length - 1] = (byte)crc;
-
-                SendPgnToLoop(byteData, epPort);
             }
-        }
-
-        public void SendPgnToLoop(byte[] byteData, int port)
-        {
-            if (sendToAppSocket != null)
+            catch (Exception)
             {
-                try
-                {
-                    IPEndPoint endPoint = new IPEndPoint(epIP, port);
-
-                    if (byteData.Length != 0)
-                        sendToAppSocket.BeginSendTo(byteData, 0, byteData.Length,
-                            SocketFlags.None, endPoint, new AsyncCallback(SendAsyncLoopData), null);
-                }
-                catch (Exception)
-                {
-                    //WriteErrorLog("Sending UDP Message" + e.ToString());
-                    //MessageBox.Show("Send Error: " + e.Message, "UDP Client", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                //WriteErrorLog("Sending UDP Message" + e.ToString());
+                //MessageBox.Show("Send Error: " + e.Message, "UDP Client", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

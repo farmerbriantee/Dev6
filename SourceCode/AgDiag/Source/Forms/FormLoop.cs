@@ -120,41 +120,13 @@ namespace AgDiag
 
         private void FormLoop_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (recvFromLoopBackSocket != null)
+            if (loopBackSocket != null)
             {
                 try
                 {
-                    recvFromLoopBackSocket.Shutdown(SocketShutdown.Both);
+                    loopBackSocket.Shutdown(SocketShutdown.Both);
                 }
-                finally { recvFromLoopBackSocket.Close(); }
-            }
-
-
-            if (sendToLoopBackSocket != null)
-            {
-                try
-                {
-                    sendToLoopBackSocket.Shutdown(SocketShutdown.Both);
-                }
-                finally { sendToLoopBackSocket.Close(); }
-            }
-
-            if (sendSocket != null)
-            {
-                try
-                {
-                    sendSocket.Shutdown(SocketShutdown.Both);
-                }
-                finally { sendSocket.Close(); }
-            }
-
-            if (recvSocket != null)
-            {
-                try
-                {
-                    recvSocket.Shutdown(SocketShutdown.Both);
-                }
-                finally { recvSocket.Close(); }
+                finally { loopBackSocket.Close(); }
             }
         }
 

@@ -104,6 +104,8 @@ namespace AgIO
                 toUDP_Port = Properties.Settings.Default.setNTRIP_sendToUDPPort; //send rtcm to which udp port
                 sendGGAInterval = Properties.Settings.Default.setNTRIP_sendGGAInterval; //how often to send fixes
 
+                epNtrip = new IPEndPoint(epIP, toUDP_Port);
+
                 //if we had a timer already, kill it
                 if (tmr != null)
                 {
@@ -254,22 +256,11 @@ namespace AgIO
             {
                 SendGPSPort(data);
             }
-
             //send out UDP Port
             else
             {
-                try
-                {
-                    SendUDPMessageNTRIP(data, toUDP_Port);
-
-                }
-                catch (Exception)
-                {
-                    //WriteErrorLog("NTRIP Data UDP Send" + ex.ToString());
-                }
+                SendUDPMessage(data, epNtrip);
             }
-
-            //SendToLoopBackMessageVR(data);
         }
 
         public void SendGGA()
