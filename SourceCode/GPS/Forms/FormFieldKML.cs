@@ -12,7 +12,7 @@ namespace AgOpenGPS
         private readonly FormGPS mf = null;
         private double easting, northing, latK, lonK;
         private bool basedOnKML = false, btnSaveEnabled = false;
-        private string FileName = "";
+        private string[] FileNames;
 
         public FormFieldKML(Form _callingForm, bool Basedon)
         {
@@ -136,7 +136,16 @@ namespace AgOpenGPS
 
                     //Load the boundary
                     if (basedOnKML)
-                        LoadKMLBoundary(FileName);
+                    {
+                        for (int i = 0; i < FileNames.Length; i++)
+                        {
+                            //Load the outer boundary
+                            LoadKMLBoundary(FileNames[i]);
+                        }
+                        mf.FileSaveBoundary();
+                        mf.bnd.BuildTurnLines();
+                        mf.CalculateMinMax();
+                    }
                 }
             }
             catch (Exception ex)
@@ -169,15 +178,16 @@ namespace AgOpenGPS
                 Filter = "KML files (*.KML)|*.KML",
 
                 //the initial directory, fields, for the open dialog
-                InitialDirectory = mf.fieldsDirectory
+                InitialDirectory = mf.fieldsDirectory,
+                Multiselect = true
             };
 
             //was a file selected
             if (ofd.ShowDialog() == DialogResult.Cancel) return;
 
-            FileName = ofd.FileName;
+            FileNames = ofd.FileNames;
             //get lat and lon from boundary in kml
-            FindLatLon(FileName);
+            FindLatLon(ofd.FileName);
         }
 
         private void LoadKMLBoundary(string filename)
@@ -256,9 +266,6 @@ namespace AgOpenGPS
                             break;
                         }
                     }
-                    mf.FileSaveBoundary();
-                    mf.bnd.BuildTurnLines();
-                    mf.CalculateMinMax();
                 }
                 catch (Exception)
                 {

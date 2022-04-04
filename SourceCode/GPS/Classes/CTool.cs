@@ -110,61 +110,47 @@ namespace AgOpenGPS
             GL.Translate(Math.Sin(mf.fixHeading) * hitchLength,
                             Math.Cos(mf.fixHeading) * hitchLength, 0);
 
-            //settings doesn't change trailing hitch length if set to rigid, so do it here
-            double trailingTank, trailingTool;
             if (isToolTrailing)
             {
-                trailingTank = toolTankTrailingHitchLength;
-                trailingTool = toolTrailingHitchLength;
-            }
-            else { trailingTank = 0; trailingTool = 0; }
+                if (isToolTBT)
+                {
+                    //rotate to tank heading
+                    GL.Rotate(glm.toDegrees(-mf.tankPos.heading), 0.0, 0.0, 1.0);
 
-            //there is a trailing tow between hitch
-            if (isToolTBT && isToolTrailing)
-            {
-                //rotate to tank heading
-                GL.Rotate(glm.toDegrees(-mf.tankPos.heading), 0.0, 0.0, 1.0);
+                    //draw the tank hitch
+                    GL.LineWidth(6);
+                    //draw the rigid hitch
+                    GL.Color3(0, 0, 0);
+                    GL.Begin(PrimitiveType.LineLoop);
+                    GL.Vertex3(-0.57, toolTankTrailingHitchLength, 0);
+                    GL.Vertex3(0, 0, 0);
+                    GL.Vertex3(0.57, toolTankTrailingHitchLength, 0);
 
-                //draw the tank hitch
-                GL.LineWidth(6);
-                //draw the rigid hitch
-                GL.Color3(0, 0, 0);
-                GL.Begin(PrimitiveType.LineLoop);
-                GL.Vertex3(-0.57, trailingTank, 0);
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.57, trailingTank, 0);
+                    GL.End();
 
-                GL.End();
+                    GL.LineWidth(1);
+                    //draw the rigid hitch
+                    GL.Color3(0.765f, 0.76f, 0.32f);
+                    GL.Begin(PrimitiveType.LineLoop);
+                    GL.Vertex3(-0.57, toolTankTrailingHitchLength, 0);
+                    GL.Vertex3(0, 0, 0);
+                    GL.Vertex3(0.57, toolTankTrailingHitchLength, 0);
 
-                GL.LineWidth(1);
-                //draw the rigid hitch
-                GL.Color3(0.765f, 0.76f, 0.32f);
-                GL.Begin(PrimitiveType.LineLoop);
-                GL.Vertex3(-0.57, trailingTank, 0);
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.57, trailingTank, 0);
+                    GL.End();
 
-                GL.End();
+                    //move down the tank hitch, unwind, rotate to section heading
+                    GL.Translate(0.0, toolTankTrailingHitchLength, 0.0);
+                    GL.Rotate(glm.toDegrees(mf.tankPos.heading), 0.0, 0.0, 1.0);
+                }
 
-                //move down the tank hitch, unwind, rotate to section heading
-                GL.Translate(0.0, trailingTank, 0.0);
-                GL.Rotate(glm.toDegrees(mf.tankPos.heading), 0.0, 0.0, 1.0);
                 GL.Rotate(glm.toDegrees(-mf.toolPos.heading), 0.0, 0.0, 1.0);
-            }
-            else//no tow between hitch
-            {
-                GL.Rotate(glm.toDegrees(-mf.toolPos.heading), 0.0, 0.0, 1.0);
-            }
 
-            //draw the hitch if trailing
-            if (isToolTrailing)
-            {
                 GL.LineWidth(6);
                 GL.Color3(0, 0, 0);
                 GL.Begin(PrimitiveType.LineStrip);
-                GL.Vertex3(-0.4 + mf.tool.toolOffset, trailingTool, 0);
+                GL.Vertex3(-0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
                 GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.4 + mf.tool.toolOffset, trailingTool, 0);
+                GL.Vertex3(0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
 
                 GL.End();
 
@@ -172,11 +158,16 @@ namespace AgOpenGPS
                 //draw the rigid hitch
                 GL.Color3(0.7f, 0.4f, 0.2f);
                 GL.Begin(PrimitiveType.LineStrip);
-                GL.Vertex3(-0.4 + mf.tool.toolOffset, trailingTool, 0);
+                GL.Vertex3(-0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
                 GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.4 + mf.tool.toolOffset, trailingTool, 0);
+                GL.Vertex3(0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
 
                 GL.End();
+                GL.Translate(0.0, toolTrailingHitchLength, 0.0);
+            }
+            else//no tow between hitch
+            {
+                GL.Rotate(glm.toDegrees(-mf.toolPos.heading), 0.0, 0.0, 1.0);
             }
 
             if (mf.isJobStarted)
@@ -187,16 +178,16 @@ namespace AgOpenGPS
 
                 //lookahead section on
                 GL.Color3(0.20f, 0.7f, 0.2f);
-                DrawLookAheadLine(mf.tool.lookAheadOnSetting, mf.tool.lookAheadOnSetting, trailingTool);
+                DrawLookAheadLine(mf.tool.lookAheadOnSetting, mf.tool.lookAheadOnSetting);
 
                 //lookahead section off
                 GL.Color3(0.70f, 0.2f, 0.2f);
-                DrawLookAheadLine(mf.tool.lookAheadOffSetting, mf.tool.lookAheadOffSetting, trailingTool);
+                DrawLookAheadLine(mf.tool.lookAheadOffSetting, mf.tool.lookAheadOffSetting);
 
                 if (mf.vehicle.isHydLiftOn)
                 {
                     GL.Color3(0.70f, 0.2f, 0.72f);
-                    DrawLookAheadLine(mf.vehicle.hydLiftLookAheadTime, mf.vehicle.hydLiftLookAheadTime, trailingTool);
+                    DrawLookAheadLine(mf.vehicle.hydLiftLookAheadTime, mf.vehicle.hydLiftLookAheadTime);
                 }
 
                 GL.End();
@@ -239,26 +230,26 @@ namespace AgOpenGPS
 
                 GL.Begin(PrimitiveType.TriangleFan);
                 {
-                    GL.Vertex3(mf.section[j].positionLeft, trailingTool, 0);
-                    GL.Vertex3(mf.section[j].positionLeft, trailingTool - hite, 0);
+                    GL.Vertex3(mf.section[j].positionLeft, 0, 0);
+                    GL.Vertex3(mf.section[j].positionLeft, -hite, 0);
 
-                    GL.Vertex3(mid, trailingTool - hite * 1.5, 0);
+                    GL.Vertex3(mid, -hite * 1.5, 0);
 
-                    GL.Vertex3(mf.section[j].positionRight, trailingTool - hite, 0);
-                    GL.Vertex3(mf.section[j].positionRight, trailingTool, 0);
+                    GL.Vertex3(mf.section[j].positionRight, -hite, 0);
+                    GL.Vertex3(mf.section[j].positionRight, 0, 0);
                 }
                 GL.End();
 
                 GL.Begin(PrimitiveType.LineLoop);
                 {
                     GL.Color3(0.0, 0.0, 0.0);
-                    GL.Vertex3(mf.section[j].positionLeft, trailingTool, 0);
-                    GL.Vertex3(mf.section[j].positionLeft, trailingTool - hite, 0);
+                    GL.Vertex3(mf.section[j].positionLeft, 0, 0);
+                    GL.Vertex3(mf.section[j].positionLeft, -hite, 0);
 
-                    GL.Vertex3(mid, trailingTool - hite * 1.5, 0);
+                    GL.Vertex3(mid, -hite * 1.5, 0);
 
-                    GL.Vertex3(mf.section[j].positionRight, trailingTool - hite, 0);
-                    GL.Vertex3(mf.section[j].positionRight, trailingTool, 0);
+                    GL.Vertex3(mf.section[j].positionRight, -hite, 0);
+                    GL.Vertex3(mf.section[j].positionRight, 0, 0);
                 }
                 GL.End();
             }
@@ -276,29 +267,28 @@ namespace AgOpenGPS
                     if (((mf.tram.controlByte) & 1) == 1) GL.Color3(0.0f, 0.900f, 0.39630f);
                     else GL.Color3(0.90f, 0.00f, 0.0f);
 
-                    GL.Vertex3(mf.tram.isOuter ? (toolFarRightPosition - mf.tram.halfWheelTrack) : mf.tram.halfWheelTrack, trailingTool + 0.21, 0);
+                    GL.Vertex3(mf.tram.isOuter ? (toolFarRightPosition - mf.tram.halfWheelTrack) : mf.tram.halfWheelTrack, 0.21, 0);
 
                     //left side
                     if ((mf.tram.controlByte & 2) == 2) GL.Color3(0.0f, 0.900f, 0.3930f);
                     else GL.Color3(0.90f, 0.00f, 0.0f);
 
-                    GL.Vertex3(mf.tram.isOuter ? (toolFarLeftPosition + mf.tram.halfWheelTrack) : (-mf.tram.halfWheelTrack), trailingTool + 0.21, 0);
-                    GL.End();
+                    GL.Vertex3(mf.tram.isOuter ? (toolFarLeftPosition + mf.tram.halfWheelTrack) : (-mf.tram.halfWheelTrack), 0.21, 0);
                     GL.End();
                 }
             }
             GL.PopMatrix();
         }
 
-        public void DrawLookAheadLine(double leftLookAhead, double rightLookAhead, double trailingTool)
+        public void DrawLookAheadLine(double leftLookAhead, double rightLookAhead)
         {
             leftLookAhead *= mf.tool.toolFarLeftSpeed;
             rightLookAhead *= mf.tool.toolFarRightSpeed;
 
             if (leftLookAhead > 0 && rightLookAhead > 0)
             {
-                GL.Vertex3(mf.tool.toolFarLeftPosition, leftLookAhead + trailingTool, 0);
-                GL.Vertex3(mf.tool.toolFarRightPosition, rightLookAhead + trailingTool, 0);
+                GL.Vertex3(mf.tool.toolFarLeftPosition, leftLookAhead, 0);
+                GL.Vertex3(mf.tool.toolFarRightPosition, rightLookAhead, 0);
             }
             else
             {
@@ -306,13 +296,13 @@ namespace AgOpenGPS
 
                 if (mf.tool.toolFarLeftSpeed > 0)
                 {
-                    GL.Vertex3(toolFarLeftPosition, leftLookAhead + trailingTool, 0);
-                    GL.Vertex3(toolFarLeftPosition - leftLookAhead / mOn, trailingTool, 0);
+                    GL.Vertex3(toolFarLeftPosition, leftLookAhead, 0);
+                    GL.Vertex3(toolFarLeftPosition - leftLookAhead / mOn, 0, 0);
                 }
                 else if (rightLookAhead > 0)
                 {
-                    GL.Vertex3(toolFarRightPosition, rightLookAhead + trailingTool, 0);
-                    GL.Vertex3(toolFarRightPosition - rightLookAhead / mOn, trailingTool, 0);
+                    GL.Vertex3(toolFarRightPosition, rightLookAhead, 0);
+                    GL.Vertex3(toolFarRightPosition - rightLookAhead / mOn, 0, 0);
                 }
             }
         }

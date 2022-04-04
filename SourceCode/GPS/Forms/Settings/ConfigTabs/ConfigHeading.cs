@@ -19,14 +19,6 @@ namespace AgOpenGPS
 
         private void ConfigHeading_Load(object sender, EventArgs e)
         {
-            //heading
-            if (Properties.Settings.Default.setGPS_headingFromWhichSource == "Fix") rbtnHeadingFix.Checked = true;
-            else if (Properties.Settings.Default.setGPS_headingFromWhichSource == "VTG") rbtnHeadingGPS.Checked = true;
-            else if (Properties.Settings.Default.setGPS_headingFromWhichSource == "Dual") rbtnHeadingHDT.Checked = true;
-
-            gboxSingle.Enabled = !rbtnHeadingHDT.Checked;
-            nudDualHeadingOffset.Enabled = rbtnHeadingHDT.Checked;
-
             if (Properties.Settings.Default.setIMU_fusionWeight > 0.2)
             {
                 Properties.Settings.Default.setIMU_fusionWeight = 0.2;
@@ -35,7 +27,7 @@ namespace AgOpenGPS
             }
 
             dualHeadingOffset = Properties.Settings.Default.setGPS_dualHeadingOffset;
-            nudDualHeadingOffset.Text = dualHeadingOffset.ToString();
+            nudDualHeadingOffset.Text = dualHeadingOffset.ToString("0.0");
 
             hsbarFusion.Value = (int)(Properties.Settings.Default.setIMU_fusionWeight * 500);
 
@@ -58,10 +50,10 @@ namespace AgOpenGPS
             nudMinimumFrameTime.Text = frameTime.ToString();
 
             forwardComp = Properties.Settings.Default.setGPS_forwardComp;
-            nudForwardComp.Text = forwardComp.ToString("0");
+            nudForwardComp.Text = forwardComp.ToString("0.00");
 
             reverseComp = Properties.Settings.Default.setGPS_reverseComp;
-            nudReverseComp.Text = reverseComp.ToString("0");
+            nudReverseComp.Text = reverseComp.ToString("0.00");
 
             ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
             nudAgeAlarm.Text = ageAlarm.ToString();
@@ -69,9 +61,6 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            var checkedButton = headingGroupBox.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked);
-            Properties.Settings.Default.setGPS_headingFromWhichSource = mf.headingFromSource = checkedButton.Text;
-
             Properties.Settings.Default.setIMU_isDualAsIMU = mf.ahrs.isDualAsIMU = cboxIsDualAsIMU.Checked;
             Properties.Settings.Default.setIMU_fusionWeight = mf.ahrs.fusionWeight = hsbarFusion.Value * 0.002;
             Properties.Settings.Default.setIMU_isReverseOn = mf.ahrs.isReverseOn = cboxIsReverseOn.Checked;
@@ -130,20 +119,6 @@ namespace AgOpenGPS
         private void nudDualHeadingOffset_Click(object sender, EventArgs e)
         {
             mf.KeypadToButton(ref nudDualHeadingOffset, ref dualHeadingOffset, -90, 90, 3);
-        }
-
-        private void rbtnHeadingFix_Click(object sender, EventArgs e)
-        {
-            if (rbtnHeadingHDT.Checked)
-            {
-                gboxSingle.Enabled = false;
-                nudDualHeadingOffset.Enabled = true;
-            }
-            else
-            {
-                nudDualHeadingOffset.Enabled = false;
-                gboxSingle.Enabled = true;
-            }
         }
 
         private void nudReverseComp_HelpRequested(object sender, HelpEventArgs hlpevent)

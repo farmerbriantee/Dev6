@@ -359,7 +359,7 @@ namespace AgOpenGPS
                 A = (B == 0) ? Points.Count - 1 : B - 1;
                 C = (B + 1 == Points.Count) ? 0 : B + 1;
                 bool stop = false;
-                double dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0, angle, segment = 0, length1 = 0, length2 = 0;
+                double dx1, dy1, dx2, dy2, angle, segment = 0, length1 = 0, length2 = 0;
                 while (true)
                 {
                     tt3 = Points[B];
@@ -535,7 +535,7 @@ namespace AgOpenGPS
                 A = (B == 0) ? Points.Count - 1 : B - 1;
                 C = (B + 1 == Points.Count) ? 0 : B + 1;
                 bool stop = false;
-                double dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0, angle, segment = 0, length1 = 0, length2 = 0;
+                double dx1, dy1, dx2, dy2, angle, segment = 0, length1 = 0, length2 = 0;
                 while (true)
                 {
                     tt3 = Points[B];

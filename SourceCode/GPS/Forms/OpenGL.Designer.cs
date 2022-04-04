@@ -68,8 +68,6 @@ namespace AgOpenGPS
                 //rotate the camera down to look at fix
                 GL.Rotate(-70, 1.0, 0.0, 0.0);
 
-                camHeading = 0;
-
                 deadCam += 2;
                 GL.Rotate(deadCam, 0.0, 0.0, 1.0);
                 ////draw the guide

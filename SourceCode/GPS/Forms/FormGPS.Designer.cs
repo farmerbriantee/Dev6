@@ -125,7 +125,7 @@
             this.btnABDraw = new System.Windows.Forms.Button();
             this.btnSnapToPivot = new System.Windows.Forms.Button();
             this.btnEditAB = new System.Windows.Forms.Button();
-            this.lblSpeed = new System.Windows.Forms.Label();
+            this.lblSpeed = new System.Windows.Forms.Button();
             this.lblTopData = new System.Windows.Forms.Label();
             this.lblInty = new System.Windows.Forms.Label();
             this.lblCurveLineName = new System.Windows.Forms.Label();
@@ -150,6 +150,7 @@
             this.stripBtnConfig = new System.Windows.Forms.Button();
             this.simplifyToolStrip = new System.Windows.Forms.Button();
             this.distanceToolBtn = new System.Windows.Forms.Label();
+            this.panelCaptionBar = new System.Windows.Forms.Panel();
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripMenuItem();
             this.boundariesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -169,6 +170,7 @@
             this.panelMain.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.panelLeft.SuspendLayout();
+            this.panelCaptionBar.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -1454,20 +1456,18 @@
             // 
             // lblSpeed
             // 
-            this.lblSpeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblSpeed.BackColor = System.Drawing.Color.Transparent;
-            this.lblSpeed.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblSpeed.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.lblSpeed.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSpeed.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblSpeed.ForeColor = System.Drawing.Color.Black;
             this.lblSpeed.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblSpeed.Location = new System.Drawing.Point(656, 13);
+            this.lblSpeed.Location = new System.Drawing.Point(0, 5);
             this.lblSpeed.Margin = new System.Windows.Forms.Padding(0);
             this.lblSpeed.Name = "lblSpeed";
-            this.lblSpeed.Size = new System.Drawing.Size(90, 40);
+            this.lblSpeed.Size = new System.Drawing.Size(120, 50);
             this.lblSpeed.TabIndex = 116;
-            this.lblSpeed.Text = "88.8";
-            this.lblSpeed.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.lblSpeed.Text = "888.8";
+            this.lblSpeed.UseVisualStyleBackColor = false;
             this.lblSpeed.Click += new System.EventHandler(this.lblSpeed_Click);
             // 
             // lblTopData
@@ -1518,15 +1518,14 @@
             // lblFix
             // 
             this.lblFix.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblFix.AutoSize = true;
             this.lblFix.BackColor = System.Drawing.Color.Transparent;
             this.lblFix.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFix.Location = new System.Drawing.Point(814, -3);
+            this.lblFix.Location = new System.Drawing.Point(560, 40);
             this.lblFix.Name = "lblFix";
-            this.lblFix.Size = new System.Drawing.Size(81, 16);
+            this.lblFix.Size = new System.Drawing.Size(80, 20);
             this.lblFix.TabIndex = 489;
             this.lblFix.Text = "GPS single: ";
-            this.lblFix.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblFix.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lbludpWatchCounts
             // 
@@ -1544,25 +1543,23 @@
             // lblAge
             // 
             this.lblAge.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblAge.AutoSize = true;
             this.lblAge.BackColor = System.Drawing.Color.Transparent;
             this.lblAge.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblAge.Location = new System.Drawing.Point(760, -3);
+            this.lblAge.Location = new System.Drawing.Point(600, 0);
             this.lblAge.Name = "lblAge";
-            this.lblAge.Size = new System.Drawing.Size(33, 16);
+            this.lblAge.Size = new System.Drawing.Size(40, 20);
             this.lblAge.TabIndex = 493;
-            this.lblAge.Text = "Age";
-            this.lblAge.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblAge.Text = "age";
+            this.lblAge.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(725, -3);
+            this.label1.Location = new System.Drawing.Point(560, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 16);
+            this.label1.Size = new System.Drawing.Size(40, 20);
             this.label1.TabIndex = 494;
             this.label1.Text = "Age:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -1609,7 +1606,6 @@
             // 
             // btnMaximizeMainForm
             // 
-            this.btnMaximizeMainForm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnMaximizeMainForm.BackColor = System.Drawing.Color.Transparent;
             this.btnMaximizeMainForm.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             this.btnMaximizeMainForm.FlatAppearance.BorderSize = 0;
@@ -1617,7 +1613,7 @@
             this.btnMaximizeMainForm.Font = new System.Drawing.Font("Tahoma", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnMaximizeMainForm.Image = global::AgOpenGPS.Properties.Resources.WindowMaximize;
             this.btnMaximizeMainForm.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnMaximizeMainForm.Location = new System.Drawing.Point(883, -3);
+            this.btnMaximizeMainForm.Location = new System.Drawing.Point(240, 0);
             this.btnMaximizeMainForm.Name = "btnMaximizeMainForm";
             this.btnMaximizeMainForm.Size = new System.Drawing.Size(60, 60);
             this.btnMaximizeMainForm.TabIndex = 482;
@@ -1626,15 +1622,13 @@
             // 
             // btnMinimizeMainForm
             // 
-            this.btnMinimizeMainForm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnMinimizeMainForm.BackColor = System.Drawing.Color.Transparent;
             this.btnMinimizeMainForm.FlatAppearance.BorderSize = 0;
             this.btnMinimizeMainForm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMinimizeMainForm.Font = new System.Drawing.Font("Tahoma", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnMinimizeMainForm.ForeColor = System.Drawing.Color.DimGray;
             this.btnMinimizeMainForm.Image = global::AgOpenGPS.Properties.Resources.WindowMinimize;
             this.btnMinimizeMainForm.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnMinimizeMainForm.Location = new System.Drawing.Point(823, -3);
+            this.btnMinimizeMainForm.Location = new System.Drawing.Point(180, 0);
             this.btnMinimizeMainForm.Name = "btnMinimizeMainForm";
             this.btnMinimizeMainForm.Size = new System.Drawing.Size(60, 60);
             this.btnMinimizeMainForm.TabIndex = 481;
@@ -1673,13 +1667,12 @@
             // 
             // btnShutdown
             // 
-            this.btnShutdown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnShutdown.BackColor = System.Drawing.Color.Transparent;
             this.btnShutdown.FlatAppearance.BorderSize = 0;
             this.btnShutdown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnShutdown.Image = global::AgOpenGPS.Properties.Resources.WindowClose;
             this.btnShutdown.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnShutdown.Location = new System.Drawing.Point(943, -3);
+            this.btnShutdown.Location = new System.Drawing.Point(300, 0);
             this.btnShutdown.Name = "btnShutdown";
             this.btnShutdown.Size = new System.Drawing.Size(60, 60);
             this.btnShutdown.TabIndex = 447;
@@ -1688,15 +1681,13 @@
             // 
             // btnHelp
             // 
-            this.btnHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnHelp.BackColor = System.Drawing.Color.Transparent;
             this.btnHelp.FlatAppearance.BorderSize = 0;
             this.btnHelp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnHelp.Font = new System.Drawing.Font("Tahoma", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnHelp.ForeColor = System.Drawing.Color.DimGray;
             this.btnHelp.Image = global::AgOpenGPS.Properties.Resources.Help;
             this.btnHelp.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnHelp.Location = new System.Drawing.Point(763, -3);
+            this.btnHelp.Location = new System.Drawing.Point(120, 0);
             this.btnHelp.Name = "btnHelp";
             this.btnHelp.Size = new System.Drawing.Size(60, 60);
             this.btnHelp.TabIndex = 495;
@@ -1829,6 +1820,19 @@
             this.distanceToolBtn.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.distanceToolBtn.Click += new System.EventHandler(this.toolStripDropDownButtonDistance_Click);
             // 
+            // panelCaptionBar
+            // 
+            this.panelCaptionBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelCaptionBar.Controls.Add(this.lblSpeed);
+            this.panelCaptionBar.Controls.Add(this.btnHelp);
+            this.panelCaptionBar.Controls.Add(this.btnMinimizeMainForm);
+            this.panelCaptionBar.Controls.Add(this.btnMaximizeMainForm);
+            this.panelCaptionBar.Controls.Add(this.btnShutdown);
+            this.panelCaptionBar.Location = new System.Drawing.Point(640, 0);
+            this.panelCaptionBar.Name = "panelCaptionBar";
+            this.panelCaptionBar.Size = new System.Drawing.Size(360, 60);
+            this.panelCaptionBar.TabIndex = 497;
+            // 
             // contextMenuStrip2
             // 
             this.contextMenuStrip2.BackColor = System.Drawing.Color.WhiteSmoke;
@@ -1923,24 +1927,20 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
             this.ClientSize = new System.Drawing.Size(1000, 720);
+            this.Controls.Add(this.panelCaptionBar);
             this.Controls.Add(this.pictureboxStart);
+            this.Controls.Add(this.lblFix);
             this.Controls.Add(this.panelDrag);
             this.Controls.Add(this.panelMain);
             this.Controls.Add(this.lblAge);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.lblFix);
             this.Controls.Add(this.lblCurrentField);
             this.Controls.Add(this.lblCurveLineName);
-            this.Controls.Add(this.lblSpeed);
             this.Controls.Add(this.lblTopData);
-            this.Controls.Add(this.btnMaximizeMainForm);
-            this.Controls.Add(this.btnMinimizeMainForm);
-            this.Controls.Add(this.btnShutdown);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.oglZoom);
             this.Controls.Add(this.lblFieldStatus);
             this.Controls.Add(this.oglBack);
-            this.Controls.Add(this.btnHelp);
             this.DoubleBuffered = true;
             this.Font = new System.Drawing.Font("Tahoma", 12F);
             this.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
@@ -1964,6 +1964,7 @@
             this.panelMain.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
             this.panelLeft.ResumeLayout(false);
+            this.panelCaptionBar.ResumeLayout(false);
             this.contextMenuStrip2.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -1975,7 +1976,7 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.Timer tmrWatchdog;
-        private System.Windows.Forms.Label lblSpeed;
+        private System.Windows.Forms.Button lblSpeed;
         private ProXoft.WinForms.RepeatButton btnZoomOut;
         private ProXoft.WinForms.RepeatButton btnZoomIn;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripFlag;
@@ -2100,5 +2101,6 @@
         private System.Windows.Forms.Button toolStripBtnField;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.Button toolStripDropDownButton4;
+        private System.Windows.Forms.Panel panelCaptionBar;
     }
 }

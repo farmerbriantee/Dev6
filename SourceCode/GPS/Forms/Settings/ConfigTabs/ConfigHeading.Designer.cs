@@ -48,7 +48,6 @@
             this.label116 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.nudForwardComp = new System.Windows.Forms.Button();
-            this.cboxIsDualAsIMU = new System.Windows.Forms.CheckBox();
             this.nudReverseComp = new System.Windows.Forms.Button();
             this.cboxIsReverseOn = new System.Windows.Forms.CheckBox();
             this.nudStartSpeed = new System.Windows.Forms.Button();
@@ -56,24 +55,17 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.nudMinFixStepDistance = new System.Windows.Forms.Button();
-            this.headingGroupBox = new System.Windows.Forms.GroupBox();
-            this.pictureBox13 = new System.Windows.Forms.PictureBox();
-            this.rbtnHeadingHDT = new System.Windows.Forms.RadioButton();
-            this.rbtnHeadingGPS = new System.Windows.Forms.RadioButton();
-            this.rbtnHeadingFix = new System.Windows.Forms.RadioButton();
+            this.cboxIsDualAsIMU = new System.Windows.Forms.CheckBox();
             this.gboxSingle.SuspendLayout();
-            this.headingGroupBox.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox13)).BeginInit();
             this.SuspendLayout();
             // 
             // label12
             // 
-            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label12.BackColor = System.Drawing.Color.Transparent;
             this.label12.Font = new System.Drawing.Font("Tahoma", 14.25F);
             this.label12.ForeColor = System.Drawing.Color.Black;
             this.label12.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label12.Location = new System.Drawing.Point(16, 290);
+            this.label12.Location = new System.Drawing.Point(24, 48);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(178, 56);
             this.label12.TabIndex = 480;
@@ -82,10 +74,9 @@
             // 
             // nudDualHeadingOffset
             // 
-            this.nudDualHeadingOffset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nudDualHeadingOffset.BackColor = System.Drawing.Color.AliceBlue;
             this.nudDualHeadingOffset.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.nudDualHeadingOffset.Location = new System.Drawing.Point(200, 290);
+            this.nudDualHeadingOffset.Location = new System.Drawing.Point(208, 48);
             this.nudDualHeadingOffset.Name = "nudDualHeadingOffset";
             this.nudDualHeadingOffset.Size = new System.Drawing.Size(141, 52);
             this.nudDualHeadingOffset.TabIndex = 481;
@@ -95,7 +86,6 @@
             // 
             // label118
             // 
-            this.label118.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label118.AutoSize = true;
             this.label118.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label118.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
@@ -109,7 +99,6 @@
             // 
             // cboxIsRTK_KillAutoSteer
             // 
-            this.cboxIsRTK_KillAutoSteer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.cboxIsRTK_KillAutoSteer.Appearance = System.Windows.Forms.Appearance.Button;
             this.cboxIsRTK_KillAutoSteer.BackColor = System.Drawing.Color.AliceBlue;
             this.cboxIsRTK_KillAutoSteer.FlatAppearance.BorderColor = System.Drawing.Color.Black;
@@ -128,7 +117,6 @@
             // 
             // label2
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Tahoma", 14.25F);
             this.label2.ForeColor = System.Drawing.Color.Black;
@@ -142,7 +130,6 @@
             // 
             // nudAgeAlarm
             // 
-            this.nudAgeAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nudAgeAlarm.BackColor = System.Drawing.Color.AliceBlue;
             this.nudAgeAlarm.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.nudAgeAlarm.Location = new System.Drawing.Point(222, 413);
@@ -156,7 +143,6 @@
             // 
             // label104
             // 
-            this.label104.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label104.BackColor = System.Drawing.Color.Transparent;
             this.label104.Font = new System.Drawing.Font("Tahoma", 14.25F);
             this.label104.ForeColor = System.Drawing.Color.Black;
@@ -170,7 +156,6 @@
             // 
             // nudMinimumFrameTime
             // 
-            this.nudMinimumFrameTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nudMinimumFrameTime.BackColor = System.Drawing.Color.AliceBlue;
             this.nudMinimumFrameTime.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.nudMinimumFrameTime.Location = new System.Drawing.Point(40, 413);
@@ -184,7 +169,6 @@
             // 
             // cboxIsRTK
             // 
-            this.cboxIsRTK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.cboxIsRTK.Appearance = System.Windows.Forms.Appearance.Button;
             this.cboxIsRTK.BackColor = System.Drawing.Color.AliceBlue;
             this.cboxIsRTK.FlatAppearance.BorderColor = System.Drawing.Color.Black;
@@ -213,7 +197,6 @@
             this.gboxSingle.Controls.Add(this.label116);
             this.gboxSingle.Controls.Add(this.label6);
             this.gboxSingle.Controls.Add(this.nudForwardComp);
-            this.gboxSingle.Controls.Add(this.cboxIsDualAsIMU);
             this.gboxSingle.Controls.Add(this.nudReverseComp);
             this.gboxSingle.Controls.Add(this.cboxIsReverseOn);
             this.gboxSingle.Controls.Add(this.nudStartSpeed);
@@ -346,24 +329,6 @@
             this.nudForwardComp.Click += new System.EventHandler(this.nudForwardComp_Click);
             this.nudForwardComp.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudForwardComp_HelpRequested);
             // 
-            // cboxIsDualAsIMU
-            // 
-            this.cboxIsDualAsIMU.Appearance = System.Windows.Forms.Appearance.Button;
-            this.cboxIsDualAsIMU.BackColor = System.Drawing.Color.AliceBlue;
-            this.cboxIsDualAsIMU.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.cboxIsDualAsIMU.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
-            this.cboxIsDualAsIMU.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cboxIsDualAsIMU.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxIsDualAsIMU.ForeColor = System.Drawing.Color.Black;
-            this.cboxIsDualAsIMU.Location = new System.Drawing.Point(253, 328);
-            this.cboxIsDualAsIMU.Name = "cboxIsDualAsIMU";
-            this.cboxIsDualAsIMU.Size = new System.Drawing.Size(161, 65);
-            this.cboxIsDualAsIMU.TabIndex = 310;
-            this.cboxIsDualAsIMU.Text = "Dual As IMU";
-            this.cboxIsDualAsIMU.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.cboxIsDualAsIMU.UseVisualStyleBackColor = false;
-            this.cboxIsDualAsIMU.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.cboxIsDualAsIMU_HelpRequested);
-            // 
             // nudReverseComp
             // 
             this.nudReverseComp.BackColor = System.Drawing.Color.AliceBlue;
@@ -387,7 +352,7 @@
             this.cboxIsReverseOn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cboxIsReverseOn.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboxIsReverseOn.ForeColor = System.Drawing.Color.Black;
-            this.cboxIsReverseOn.Location = new System.Drawing.Point(35, 327);
+            this.cboxIsReverseOn.Location = new System.Drawing.Point(130, 317);
             this.cboxIsReverseOn.Name = "cboxIsReverseOn";
             this.cboxIsReverseOn.Size = new System.Drawing.Size(161, 66);
             this.cboxIsReverseOn.TabIndex = 465;
@@ -460,88 +425,23 @@
             this.nudMinFixStepDistance.Click += new System.EventHandler(this.nudMinFixStepDistance_Click);
             this.nudMinFixStepDistance.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudMinFixStepDistance_HelpRequested);
             // 
-            // headingGroupBox
+            // cboxIsDualAsIMU
             // 
-            this.headingGroupBox.Controls.Add(this.pictureBox13);
-            this.headingGroupBox.Controls.Add(this.rbtnHeadingHDT);
-            this.headingGroupBox.Controls.Add(this.rbtnHeadingGPS);
-            this.headingGroupBox.Controls.Add(this.rbtnHeadingFix);
-            this.headingGroupBox.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.headingGroupBox.ForeColor = System.Drawing.Color.Black;
-            this.headingGroupBox.Location = new System.Drawing.Point(34, 12);
-            this.headingGroupBox.Name = "headingGroupBox";
-            this.headingGroupBox.Size = new System.Drawing.Size(329, 275);
-            this.headingGroupBox.TabIndex = 471;
-            this.headingGroupBox.TabStop = false;
-            this.headingGroupBox.Text = "Antenna Heading Type";
-            // 
-            // pictureBox13
-            // 
-            this.pictureBox13.Image = global::AgOpenGPS.Properties.Resources.Con_SourcesGPS;
-            this.pictureBox13.Location = new System.Drawing.Point(191, 48);
-            this.pictureBox13.Name = "pictureBox13";
-            this.pictureBox13.Size = new System.Drawing.Size(110, 204);
-            this.pictureBox13.TabIndex = 3;
-            this.pictureBox13.TabStop = false;
-            // 
-            // rbtnHeadingHDT
-            // 
-            this.rbtnHeadingHDT.Appearance = System.Windows.Forms.Appearance.Button;
-            this.rbtnHeadingHDT.BackColor = System.Drawing.Color.AliceBlue;
-            this.rbtnHeadingHDT.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.rbtnHeadingHDT.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
-            this.rbtnHeadingHDT.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.rbtnHeadingHDT.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnHeadingHDT.ForeColor = System.Drawing.Color.Black;
-            this.rbtnHeadingHDT.Location = new System.Drawing.Point(24, 206);
-            this.rbtnHeadingHDT.Name = "rbtnHeadingHDT";
-            this.rbtnHeadingHDT.Size = new System.Drawing.Size(117, 43);
-            this.rbtnHeadingHDT.TabIndex = 2;
-            this.rbtnHeadingHDT.Text = "Dual";
-            this.rbtnHeadingHDT.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.rbtnHeadingHDT.UseVisualStyleBackColor = false;
-            this.rbtnHeadingHDT.Click += new System.EventHandler(this.rbtnHeadingFix_Click);
-            this.rbtnHeadingHDT.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.rbtnHeadingHDT_HelpRequested);
-            // 
-            // rbtnHeadingGPS
-            // 
-            this.rbtnHeadingGPS.Appearance = System.Windows.Forms.Appearance.Button;
-            this.rbtnHeadingGPS.BackColor = System.Drawing.Color.AliceBlue;
-            this.rbtnHeadingGPS.Checked = true;
-            this.rbtnHeadingGPS.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.rbtnHeadingGPS.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
-            this.rbtnHeadingGPS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.rbtnHeadingGPS.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnHeadingGPS.ForeColor = System.Drawing.Color.Black;
-            this.rbtnHeadingGPS.Location = new System.Drawing.Point(24, 106);
-            this.rbtnHeadingGPS.Name = "rbtnHeadingGPS";
-            this.rbtnHeadingGPS.Size = new System.Drawing.Size(117, 43);
-            this.rbtnHeadingGPS.TabIndex = 1;
-            this.rbtnHeadingGPS.TabStop = true;
-            this.rbtnHeadingGPS.Text = "VTG";
-            this.rbtnHeadingGPS.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.rbtnHeadingGPS.UseVisualStyleBackColor = false;
-            this.rbtnHeadingGPS.Click += new System.EventHandler(this.rbtnHeadingFix_Click);
-            this.rbtnHeadingGPS.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.rbtnHeadingGPS_HelpRequested);
-            // 
-            // rbtnHeadingFix
-            // 
-            this.rbtnHeadingFix.Appearance = System.Windows.Forms.Appearance.Button;
-            this.rbtnHeadingFix.BackColor = System.Drawing.Color.AliceBlue;
-            this.rbtnHeadingFix.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.rbtnHeadingFix.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
-            this.rbtnHeadingFix.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.rbtnHeadingFix.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnHeadingFix.ForeColor = System.Drawing.Color.Black;
-            this.rbtnHeadingFix.Location = new System.Drawing.Point(23, 42);
-            this.rbtnHeadingFix.Name = "rbtnHeadingFix";
-            this.rbtnHeadingFix.Size = new System.Drawing.Size(117, 43);
-            this.rbtnHeadingFix.TabIndex = 0;
-            this.rbtnHeadingFix.Text = "Fix";
-            this.rbtnHeadingFix.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.rbtnHeadingFix.UseVisualStyleBackColor = false;
-            this.rbtnHeadingFix.Click += new System.EventHandler(this.rbtnHeadingFix_Click);
-            this.rbtnHeadingFix.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.rbtnHeadingFix_HelpRequested);
+            this.cboxIsDualAsIMU.Appearance = System.Windows.Forms.Appearance.Button;
+            this.cboxIsDualAsIMU.BackColor = System.Drawing.Color.AliceBlue;
+            this.cboxIsDualAsIMU.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.cboxIsDualAsIMU.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
+            this.cboxIsDualAsIMU.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cboxIsDualAsIMU.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cboxIsDualAsIMU.ForeColor = System.Drawing.Color.Black;
+            this.cboxIsDualAsIMU.Location = new System.Drawing.Point(106, 123);
+            this.cboxIsDualAsIMU.Name = "cboxIsDualAsIMU";
+            this.cboxIsDualAsIMU.Size = new System.Drawing.Size(161, 65);
+            this.cboxIsDualAsIMU.TabIndex = 310;
+            this.cboxIsDualAsIMU.Text = "Dual As IMU";
+            this.cboxIsDualAsIMU.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.cboxIsDualAsIMU.UseVisualStyleBackColor = false;
+            this.cboxIsDualAsIMU.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.cboxIsDualAsIMU_HelpRequested);
             // 
             // ConfigHeading
             // 
@@ -556,14 +456,12 @@
             this.Controls.Add(this.nudMinimumFrameTime);
             this.Controls.Add(this.cboxIsRTK);
             this.Controls.Add(this.gboxSingle);
-            this.Controls.Add(this.headingGroupBox);
+            this.Controls.Add(this.cboxIsDualAsIMU);
             this.Name = "ConfigHeading";
             this.Size = new System.Drawing.Size(890, 580);
             this.Load += new System.EventHandler(this.ConfigHeading_Load);
             this.gboxSingle.ResumeLayout(false);
             this.gboxSingle.PerformLayout();
-            this.headingGroupBox.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox13)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -599,10 +497,5 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button nudMinFixStepDistance;
-        private System.Windows.Forms.GroupBox headingGroupBox;
-        private System.Windows.Forms.PictureBox pictureBox13;
-        private System.Windows.Forms.RadioButton rbtnHeadingHDT;
-        private System.Windows.Forms.RadioButton rbtnHeadingGPS;
-        private System.Windows.Forms.RadioButton rbtnHeadingFix;
     }
 }

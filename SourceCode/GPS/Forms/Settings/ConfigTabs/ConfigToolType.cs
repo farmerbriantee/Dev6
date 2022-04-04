@@ -25,7 +25,7 @@ namespace AgOpenGPS
         {
             Properties.Vehicle.Default.setTool_isToolFront = mf.tool.isToolFrontFixed = rbtnFront.Checked;
             Properties.Vehicle.Default.setTool_isToolTBT = mf.tool.isToolTBT = rbtnTBT.Checked;
-            Properties.Vehicle.Default.setTool_isToolTrailing = mf.tool.isToolTrailing = rbtnTrailing.Checked;
+            Properties.Vehicle.Default.setTool_isToolTrailing = mf.tool.isToolTrailing = rbtnTrailing.Checked || rbtnTBT.Checked;
             Properties.Vehicle.Default.setTool_isToolRearFixed = mf.tool.isToolRearFixed = rbtnFixedRear.Checked;
             
             if (Properties.Vehicle.Default.setTool_isToolFront == mf.tool.hitchLength < 0)

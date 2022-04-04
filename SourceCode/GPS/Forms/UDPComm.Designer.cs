@@ -146,12 +146,16 @@ namespace AgOpenGPS
 
                             pn.headingTrueDual = (data[30] | (data[31] << 8) | (data[32] << 16) | (data[33] << 24)) * 0.00001 + pn.headingTrueDualOffset;
 
-                            if (ahrs.isDualAsIMU) ahrs.imuHeading = pn.headingTrueDual;
+                            if (ahrs.isDualAsIMU)
+                            {
+                                ahrs.imuHeading = pn.headingTrueDual;
+                                pn.headingTrueDual = double.MaxValue;
+                            }
                         }
                         else //Bad Quality
                         {
                             ahrs.imuRoll = 88888;
-                            pn.headingTrueDual = 0;
+                            pn.headingTrueDual = double.MaxValue;
                         }
                     }
                 }
@@ -196,7 +200,15 @@ namespace AgOpenGPS
                                 {
                                     pn.headingTrueDual = temp + pn.headingTrueDualOffset;
                                     if (pn.headingTrueDual < 0) pn.headingTrueDual += 360;
-                                    if (ahrs.isDualAsIMU) ahrs.imuHeading = temp;
+                                    if (ahrs.isDualAsIMU)
+                                    {
+                                        ahrs.imuHeading = temp;
+                                        pn.headingTrueDual = double.MaxValue;
+                                    }
+                                }
+                                else
+                                {
+                                    pn.headingTrueDual = double.MaxValue;
                                 }
 
                                 //from single antenna sentences (VTG,RMC)

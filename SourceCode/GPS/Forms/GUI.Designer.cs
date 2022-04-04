@@ -293,10 +293,6 @@ namespace AgOpenGPS
             cboxpRowWidth.SelectedIndex = gyd.rowSkipsWidth - 1;
             gyd.Set_Alternate_skips();
 
-
-            //which heading source is being used
-            headingFromSource = Settings.Default.setGPS_headingFromWhichSource;
-
             //workswitch stuff
             mc.isWorkSwitchEnabled = Settings.Default.setF_IsWorkSwitchEnabled;
             mc.isWorkSwitchActiveLow = Settings.Default.setF_IsWorkSwitchActiveLow;
@@ -453,21 +449,15 @@ namespace AgOpenGPS
             menuStrip1.Top = this.Padding.Top;
             lblAge.Top = this.Padding.Top;
             label1.Top = this.Padding.Top;
-            lblFix.Top = this.Padding.Top;
+            lblFix.Top = 40 + this.Padding.Top;
 
             lblTopData.Top = this.Padding.Top;
             lblCurveLineName.Top = this.Padding.Top;
             lblCurrentField.Top = 17 + this.Padding.Top;
             lblFieldStatus.Top = 34 + this.Padding.Top;
 
-            btnShutdown.Top = this.Padding.Top;
-            btnShutdown.Left = Width - 60 - this.Padding.Right;
-            btnMaximizeMainForm.Top = this.Padding.Top;
-            btnMaximizeMainForm.Left = Width - 120 - this.Padding.Right;
-            btnMinimizeMainForm.Top = this.Padding.Top;
-            btnMinimizeMainForm.Left = Width - 180 - this.Padding.Right;
-            btnHelp.Top = this.Padding.Top;
-            btnHelp.Left = Width - 240 - this.Padding.Right;
+            panelCaptionBar.Top = this.Padding.Top;
+            panelCaptionBar.Left = Width - 360 - this.Padding.Right;
 
             panelMain.Top = 60 + this.Padding.Top;
             panelMain.Left = this.Padding.Left;

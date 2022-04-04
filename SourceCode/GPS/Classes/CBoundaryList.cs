@@ -27,14 +27,14 @@ namespace AgOpenGPS
             double distance;
 
             //make sure distance isn't too small between points on headland
-            int bndCount = fenceLine.points.Count;
-            for (int i = 0; i < bndCount - 1; i++)
+            int j = fenceLine.points.Count - 1;
+            for (int i = 0; i < fenceLine.points.Count; j = i++)
             {
-                distance = glm.DistanceSquared(fenceLine.points[i], fenceLine.points[i + 1]);
+                if (j < 0) j = fenceLine.points.Count - 1;
+                distance = glm.DistanceSquared(fenceLine.points[i], fenceLine.points[j]);
                 if (distance < spacing)
                 {
-                    fenceLine.points.RemoveAt(i + 1);
-                    bndCount = fenceLine.points.Count;
+                    fenceLine.points.RemoveAt(i);
                     i--;
                 }
             }
