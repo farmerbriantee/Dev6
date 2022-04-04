@@ -54,7 +54,7 @@ namespace AgOpenGPS
             }
         }
 
-        public bool IsPointInsideFenceArea(vec3 testPoint)
+        public bool IsPointInsideFenceArea(vec2 testPoint)
         {
             //first where are we, must be inside outer and outside of inner geofence non drive thru turn borders
             if (bndList.Count > 0 && bndList[0].fenceLine.points.IsPointInPolygon(testPoint))
@@ -74,7 +74,7 @@ namespace AgOpenGPS
             return false;
         }
 
-        public int IsPointInsideTurnArea(vec3 pt)
+        public int IsPointInsideTurnArea(vec2 pt)
         {
             if (bndList.Count > 0 && bndList[0].turnLine.points.IsPointInPolygon(pt))
             {

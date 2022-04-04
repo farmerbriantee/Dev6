@@ -1210,7 +1210,7 @@ namespace AgOpenGPS
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        public static double FindDistanceToSegment(this vec3 pt, vec2 p1, vec2 p2)
+        public static double FindDistanceToSegment(this vec2 pt, vec3 p1, vec3 p2)
         {
             double dx = p2.northing - p1.northing;
             double dy = p2.easting - p1.easting;
@@ -1241,38 +1241,7 @@ namespace AgOpenGPS
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        public static double FindDistanceToSegment(this vec3 pt, vec3 p1, vec3 p2)
-        {
-            double dx = p2.northing - p1.northing;
-            double dy = p2.easting - p1.easting;
-            if (dx == 0 && dy == 0)
-            {
-                dx = pt.northing - p1.northing;
-                dy = pt.easting - p1.easting;
-                return Math.Sqrt(dx * dx + dy * dy);
-            }
-
-            double Time = ((pt.northing - p1.northing) * dx + (pt.easting - p1.easting) * dy) / (dx * dx + dy * dy);
-
-            if (Time < 0)
-            {
-                dx = pt.northing - p1.northing;
-                dy = pt.easting - p1.easting;
-            }
-            else if (Time > 1)
-            {
-                dx = pt.northing - p2.northing;
-                dy = pt.easting - p2.easting;
-            }
-            else
-            {
-                dx = pt.northing - (p1.northing + Time * dx);
-                dy = pt.easting - (p1.easting + Time * dy);
-            }
-            return Math.Sqrt(dx * dx + dy * dy);
-        }
-
-        public static bool isInFront(this vec3 point, vec3 a, vec3 b, vec3 c)
+        public static bool isInFront(this vec2 point, vec3 a, vec3 b, vec3 c)
         {
             double Dx1 = b.northing - c.northing;
             double Dy1 = b.easting - c.easting;
@@ -1293,7 +1262,7 @@ namespace AgOpenGPS
             return ((ss.northing - b.northing) * (point.easting - b.easting) - (ss.easting - b.easting) * (point.northing - b.northing)) > 0;
         }
 
-        public static void GetCurrentSegment(this vec3 Point, List<vec3> curList, int Start, bool loop, out int AA, out int BB, int maxlimit = int.MaxValue)
+        public static void GetCurrentSegment(this vec2 Point, List<vec3> curList, int Start, bool loop, out int AA, out int BB, int maxlimit = int.MaxValue)
         {
             AA = -1;
             BB = -1;

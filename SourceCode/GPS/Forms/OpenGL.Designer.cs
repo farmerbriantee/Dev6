@@ -270,8 +270,8 @@ namespace AgOpenGPS
                     GL.Begin(PrimitiveType.LineStrip);
 
                     GL.Vertex3(bnd.bndBeingMadePts[0].easting, bnd.bndBeingMadePts[0].northing, 0);
-                    GL.Vertex3(pivotAxlePos.easting + (Math.Cos(pivotAxlePos.heading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset)),
-                              pivotAxlePos.northing - (Math.Sin(pivotAxlePos.heading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset)), 0);
+                    GL.Vertex3(pivotAxlePos.easting + (Math.Cos(fixHeading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset)),
+                              pivotAxlePos.northing - (Math.Sin(fixHeading) * (bnd.isDrawRightSide ? bnd.createBndOffset : -bnd.createBndOffset)), 0);
                     GL.Vertex3(bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].easting, bnd.bndBeingMadePts[bnd.bndBeingMadePts.Count - 1].northing, 0);
 
                     GL.End();
@@ -1484,7 +1484,6 @@ namespace AgOpenGPS
                 if (!isSuperSlow) GL.Color3(0.98f, 0.972f, 0.59903f);
                 else GL.Color3(0.298f, 0.972f, 0.99903f);
 
-                font.DrawText(center, 55, "Fix:" + (gpsHeading * 57.2957795).ToString("0.0"), 0.8);
                 font.DrawText(center, 80, "IMU:" + ahrs.imuHeading.ToString("0.0"), 0.8);
                 //font.DrawText(center, 110, "R:" + ahrs.imuRoll.ToString("0.0"), 0.8);
                 //font.DrawText(center, 135, "Y:" + ahrs.imuYawRate.ToString("0.0"), 0.8);

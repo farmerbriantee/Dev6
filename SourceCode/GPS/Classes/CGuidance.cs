@@ -73,7 +73,7 @@ namespace AgOpenGPS
             ytList.Capacity = 128;
         }
 
-        public void CalculateSteerAngle(vec3 pivot, vec3 steer, List<vec3> curList, bool looped)
+        public void CalculateSteerAngle(vec2 pivot, vec2 steer, double heading, List<vec3> curList, bool looped)
         {
             bool completeYouTurn = !isYouTurnTriggered;
 
@@ -177,12 +177,12 @@ namespace AgOpenGPS
 
                     if (isYouTurnTriggered || isHeadingSameWay)
                     {
-                        steerHeadingError = steer.heading - lineHeading;
+                        steerHeadingError = heading - lineHeading;
                     }
                     else
                     {
                         distanceFromCurrentLineSteer *= -1.0;
-                        steerHeadingError = steer.heading - lineHeading + Math.PI;
+                        steerHeadingError = heading - lineHeading + Math.PI;
                     }
 
 
@@ -343,7 +343,7 @@ namespace AgOpenGPS
                     double goalPointDistanceSquared = glm.DistanceSquared(goalPoint.northing, goalPoint.easting, pivot.northing, pivot.easting);
 
                     //calculate the the delta x in local coordinates and steering angle degrees based on wheelbase
-                    double localHeading = glm.twoPI - mf.fixHeading + ((isYouTurnTriggered || isHeadingSameWay) ? inty : -inty);
+                    double localHeading = glm.twoPI - heading + ((isYouTurnTriggered || isHeadingSameWay) ? inty : -inty);
 
                     steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
                         + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));
@@ -413,7 +413,7 @@ namespace AgOpenGPS
                 CompleteYouTurn();
         }
 
-        private void PurePursuitRecPath(vec3 pivot, List<CRecPathPt> recList)
+        private void PurePursuitRecPath(vec2 pivot, double heading, List<CRecPathPt> recList)
         {
             double dist, dx, dz;
             double minDistA = double.MaxValue, minDistB = double.MaxValue;
@@ -555,7 +555,7 @@ namespace AgOpenGPS
             //calc "D" the distance from pivotAxlePosRP axle to lookahead point
             double goalPointDistanceSquared = glm.DistanceSquared(goalPoint.northing, goalPoint.easting, pivot.northing, pivot.easting);
 
-            double localHeading = glm.twoPI - mf.fixHeading + inty;
+            double localHeading = glm.twoPI - heading + inty;
 
             steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
                 + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));

@@ -136,10 +136,9 @@ namespace AgOpenGPS
                                 {
                                     line = reader.ReadLine();
                                     string[] words = line.Split(',');
-                                    vec3 vecPt = new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
+                                    New.curvePts.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
                                         double.Parse(words[1], CultureInfo.InvariantCulture),
-                                        double.Parse(words[2], CultureInfo.InvariantCulture));
-                                    New.curvePts.Add(vecPt);
+                                        double.Parse(words[2], CultureInfo.InvariantCulture)));
                                 }
                                 gyd.curveArr.Add(New);
                             }
@@ -455,18 +454,15 @@ namespace AgOpenGPS
                             line = reader.ReadLine();
                             int verts = int.Parse(line);
 
-                            vec3 vecFix = new vec3(0, 0, 0);
-
                             CGuidanceLine New = new CGuidanceLine(Mode.Contour);
 
                             for (int v = 0; v < verts; v++)
                             {
                                 line = reader.ReadLine();
                                 string[] words = line.Split(',');
-                                vecFix.easting = double.Parse(words[0], CultureInfo.InvariantCulture);
-                                vecFix.northing = double.Parse(words[1], CultureInfo.InvariantCulture);
-                                vecFix.heading = double.Parse(words[2], CultureInfo.InvariantCulture);
-                                New.curvePts.Add(vecFix);
+                                New.curvePts.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
+                                    double.Parse(words[1], CultureInfo.InvariantCulture),
+                                    double.Parse(words[2], CultureInfo.InvariantCulture)));
                             }
 
                             gyd.curveArr.Add(New);

@@ -20,9 +20,6 @@ namespace AgOpenGPS
             //create the dubins path based on start and goal to start of recorded path
             if (recList.Count < 5) return false;
 
-            //save a copy of where we started.
-            vec3 homePos = mf.pivotAxlePos;
-
             if (resumeState == 0) //start at the start
                 currentPositonIndex = 0;
             else if (resumeState == 1) //resume from where stopped mid path
@@ -38,7 +35,7 @@ namespace AgOpenGPS
 
                 for (int i = 0; i < recList.Count; i++)
                 {
-                    double temp = glm.Distance(homePos, recList[i]);
+                    double temp = glm.Distance(mf.pivotAxlePos, recList[i]);
 
                     if (temp < distance)
                     {
@@ -81,21 +78,19 @@ namespace AgOpenGPS
             }
         }
 
-        public void UpdatePosition()
+        public void UpdatePosition(vec2 pivot, vec2 steer, double heading)
         {
             if (isFollowingDubinsToPath)
             {
                 //set a speed of 10 kmh
                 mf.sim.stepDistance = 2.77778;
 
-                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList, false);
+                CalculateSteerAngle(pivot, steer, heading, curList, false);
 
                 //check if close to recorded path
                 if (curList.Count - pB < 8)
                 {
-                    vec3 pivotAxlePosRP = mf.pivotAxlePos;
-
-                    double distSqr = glm.Distance(pivotAxlePosRP.northing, pivotAxlePosRP.easting, recList[currentPositonIndex].northing, recList[currentPositonIndex].easting);
+                    double distSqr = glm.Distance(pivot, recList[currentPositonIndex]);
                     if (distSqr < 4)
                     {
                         isFollowingRecPath = true;
@@ -107,7 +102,7 @@ namespace AgOpenGPS
 
             if (isFollowingRecPath)
             {
-                PurePursuitRecPath(mf.pivotAxlePos, recList);
+                PurePursuitRecPath(pivot, heading, recList);
 
                 //if end of the line then stop
                 if (!isEndOfTheRecLine)
@@ -152,7 +147,7 @@ namespace AgOpenGPS
                 mf.sim.stepDistance = 2.77778;
 
                 //StanleyDubinsPath(shuttleListCount);
-                CalculateSteerAngle(mf.pivotAxlePos, mf.steerAxlePos, curList, false);
+                CalculateSteerAngle(pivot, steer, heading, curList, false);
             }
         }
 
@@ -175,19 +170,19 @@ namespace AgOpenGPS
             CDubins dubPath = new CDubins(mf.vehicle.minTurningRadius * 1.2);
 
             // current psition
-            vec3 pivotAxlePosRP = mf.pivotAxlePos;
+            vec2 pivotAxlePosRP = mf.pivotAxlePos;
 
             //bump it forward
             vec3 pt2 = new vec3
             {
-                easting = pivotAxlePosRP.easting + (Math.Sin(pivotAxlePosRP.heading) * 3),
-                northing = pivotAxlePosRP.northing + (Math.Cos(pivotAxlePosRP.heading) * 3),
-                heading = pivotAxlePosRP.heading
+                easting = pivotAxlePosRP.easting + (Math.Sin(mf.fixHeading) * 3),
+                northing = pivotAxlePosRP.northing + (Math.Cos(mf.fixHeading) * 3),
+                heading = mf.fixHeading
             };
 
             //get the dubins path vec3 point coordinates of turn
             curList = dubPath.GenerateDubins(pt2, goal);
-            curList.Insert(0, mf.pivotAxlePos);
+            curList.Insert(0, new vec3(pivotAxlePosRP.easting, pivotAxlePosRP.northing, mf.fixHeading));
         }
     }
 }

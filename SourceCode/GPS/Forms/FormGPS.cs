@@ -747,8 +747,7 @@ namespace AgOpenGPS
             //reset field offsets
             if (!isKeepOffsetsOn)
             {
-                pn.fixOffset.easting = 0;
-                pn.fixOffset.northing = 0;
+                pn.fixOffset = new vec2();
             }
 
             //turn off headland

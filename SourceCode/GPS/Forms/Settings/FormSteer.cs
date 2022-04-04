@@ -11,7 +11,7 @@ namespace AgOpenGPS
 
         private bool toSend = false, isSA = false;
         private int counter = 0, cntr;
-        private vec3 startFix;
+        private vec2 startFix;
         private double diameter, steerAngleRight, dist;
         private int windowSizeState = 0;
 

@@ -6,17 +6,17 @@ namespace AgOpenGPS
 {
     public partial class CGuidance
     {
-        public void GetCurrentGuidanceLine(vec3 pivot, vec3 steer)
+        public void GetCurrentGuidanceLine(vec2 pivot, vec2 steer, double heading)
         {
             if (CurrentGMode == Mode.RecPath)
-                UpdatePosition();
+                UpdatePosition(pivot, steer, heading);
             else
             {
                 if (CurrentGMode == Mode.Contour)
                     FindCurrentContourLine(pivot);
 
                 if (currentGuidanceLine != null)
-                    BuildCurrentCurveLine(pivot, currentGuidanceLine);
+                    BuildCurrentCurveLine(pivot, heading, currentGuidanceLine);
                 else
                 {
                     curList.Clear();
@@ -24,11 +24,11 @@ namespace AgOpenGPS
                     return;
                 }
                 
-                CalculateSteerAngle(pivot, steer, isYouTurnTriggered ? ytList : curList, currentGuidanceLine.mode.HasFlag(Mode.Boundary) && !isYouTurnTriggered);
+                CalculateSteerAngle(pivot, steer, heading, isYouTurnTriggered ? ytList : curList, currentGuidanceLine.mode.HasFlag(Mode.Boundary) && !isYouTurnTriggered);
             }
         }
 
-        public void FindCurrentContourLine(vec3 pivot)
+        public void FindCurrentContourLine(vec2 pivot)
         {
             if ((mf.secondsSinceStart - lastSecondSearch) < (curList.Count == 0 ? 0.3 : 2.0)) return;
 
@@ -81,7 +81,7 @@ namespace AgOpenGPS
             }
         }
 
-        public void BuildCurrentCurveLine(vec3 pivot, CGuidanceLine refList)
+        public void BuildCurrentCurveLine(vec2 pivot, double heading, CGuidanceLine refList)
         {
             //move the ABLine over based on the overlap amount set in vehicle
             double widthMinusOverlap = mf.tool.toolWidth - mf.tool.toolOverlap;
@@ -102,8 +102,8 @@ namespace AgOpenGPS
                 {
                     //guidance look ahead distance based on time or tool width at least 
                     double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
-                    pivot = new vec3(mf.pivotAxlePos.easting + (Math.Sin(mf.pivotAxlePos.heading) * guidanceLookDist),
-                                                    mf.pivotAxlePos.northing + (Math.Cos(mf.pivotAxlePos.heading) * guidanceLookDist), pivot.heading);
+                    pivot = new vec2(pivot.easting + (Math.Sin(heading) * guidanceLookDist),
+                                                    pivot.northing + (Math.Cos(heading) * guidanceLookDist));
                 }
 
                 //close call hit
@@ -145,7 +145,7 @@ namespace AgOpenGPS
                 if (rA > rB) { int C = rA; rA = rB; rB = C; }
 
                 //same way as line creation or not
-                isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(pivot.heading - refList.curvePts[rA].heading) - Math.PI) < glm.PIBy2;
+                isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(heading - refList.curvePts[rA].heading) - Math.PI) < glm.PIBy2;
 
                 //x2-x1
                 double dx = refList.curvePts[rB].easting - refList.curvePts[rA].easting;

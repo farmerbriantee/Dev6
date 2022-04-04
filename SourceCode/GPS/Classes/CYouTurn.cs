@@ -47,7 +47,7 @@ namespace AgOpenGPS
         public bool SwapYouTurn = true;
         public double totalUTurnLength, onA;
 
-        public void FindTurnPoints()
+        public void FindTurnPoints(vec2 pivot)
         {
             if (curList.Count < 2)
             {
@@ -70,7 +70,7 @@ namespace AgOpenGPS
                 int Count = isHeadingSameWay ? 1 : -1;
                 vecCrossing Crossing = new vecCrossing(0, 0, double.MaxValue, -1, -1, -1);
 
-                vec3 Start = new vec3(rEast, rNorth, 0), End;
+                vec2 Start = new vec2(rEast, rNorth), End;
 
                 if (mf.bnd.IsPointInsideTurnArea(Start) != 0)
                 {
@@ -94,7 +94,7 @@ namespace AgOpenGPS
                         else break;
                     }
 
-                    End = curList[i];
+                    End = new vec2(curList[i].easting, curList[i].northing);
                     for (int j = 0; j < mf.bnd.bndList.Count; j++)
                     {
                         if (mf.bnd.bndList[j].isDriveThru) continue;
@@ -104,7 +104,7 @@ namespace AgOpenGPS
                             int k = mf.bnd.bndList[j].turnLine.points.Count - 1;
                             for (int l = 0; l < mf.bnd.bndList[j].turnLine.points.Count; l++)
                             {
-                                if (StaticClass.GetLineIntersection(Start, End, mf.bnd.bndList[j].turnLine.points[l], mf.bnd.bndList[j].turnLine.points[k], out vec3 _Crossing, out double Time, out _))
+                                if (StaticClass.GetLineIntersection(Start, End, mf.bnd.bndList[j].turnLine.points[l], mf.bnd.bndList[j].turnLine.points[k], out vec2 _Crossing, out double Time, out _))
                                 {
                                     if (Time < Crossing.time)
                                         Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time, j, i, l);
@@ -116,7 +116,7 @@ namespace AgOpenGPS
 
                     if (Crossing.boundaryIdx >= 0)
                     {
-                        mf.distancePivotToTurnLine = glm.Distance(mf.pivotAxlePos, Crossing.easting, Crossing.northing);
+                        mf.distancePivotToTurnLine = glm.Distance(pivot, Crossing.easting, Crossing.northing);
 
                         ExitPoint = Crossing;
 
@@ -533,7 +533,7 @@ namespace AgOpenGPS
                         isOutOfBounds = false;
                         for (int k = 0; k < ytList.Count; k += 2)
                         {
-                            if (mf.bnd.IsPointInsideTurnArea(ytList[k]) != 0)
+                            if (mf.bnd.IsPointInsideTurnArea(new vec2(ytList[k].easting, ytList[k].northing)) != 0)
                             {
                                 isOutOfBounds = true;
                                 break;
@@ -587,14 +587,11 @@ namespace AgOpenGPS
                             {
                                 double factor = (Offset - distSoFar) / length1;
 
-                                Point.easting += dy1 * factor;
-                                Point.northing += dx1 * factor;
+                                Point = new vec3(Point.easting + dy1 * factor, Point.northing + dx1 * factor, Point.heading);
                                 break; //tempDist contains the full length of next segment
                             }
                             distSoFar += length1;
-                            Point.easting = curList[i].easting;
-                            Point.northing = curList[i].northing;
-                            Point.heading = isHeadingSameWay ? Heading : Heading + Math.PI;
+                            Point = new vec3(curList[i].easting, curList[i].northing, isHeadingSameWay ? Heading : Heading + Math.PI);
                             i += count;
                         }
 
@@ -617,15 +614,11 @@ namespace AgOpenGPS
                             {
                                 double factor = (Offset - distSoFar) / length1;
 
-                                Point2.easting += dy1 * factor;
-                                Point2.northing += dx1 * factor;
+                                Point2 = new vec3(Point2.easting + dy1 * factor, Point2.northing + dx1 * factor, Point2.heading);
                                 break; //tempDist contains the full length of next segment
                             }
                             distSoFar += length1;
-                            Point2.easting = OffsetList[j].easting;
-                            Point2.northing = OffsetList[j].northing;
-
-                            Point2.heading = isHeadingSameWay ? Heading + Math.PI : Heading;
+                            Point2 = new vec3(OffsetList[j].easting, OffsetList[j].northing, isHeadingSameWay ? Heading + Math.PI : Heading);
                             j += count;
                         }
 
@@ -637,7 +630,7 @@ namespace AgOpenGPS
                             double distancePivotToTurnLine;
                             for (int k = 0; k < ytList.Count; k += 2)
                             {
-                                distancePivotToTurnLine = glm.Distance(ytList[k], mf.pivotAxlePos);
+                                distancePivotToTurnLine = glm.Distance(ytList[k], pivot);
                                 if (distancePivotToTurnLine > 3)
                                 {
                                     isTurnCreationTooClose = false;

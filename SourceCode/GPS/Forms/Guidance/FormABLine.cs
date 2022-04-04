@@ -91,12 +91,12 @@ namespace AgOpenGPS
         {
             if (ModeAB)
             {
-                vec3 fix = new vec3(mf.pivotAxlePos);
+                vec2 fix = mf.pivotAxlePos;
 
-                mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(fix.easting + Math.Cos(fix.heading) * mf.tool.toolOffset, fix.northing - Math.Sin(fix.heading) * mf.tool.toolOffset, fix.heading));
+                mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(fix.easting + Math.Cos(mf.fixHeading) * mf.tool.toolOffset, fix.northing - Math.Sin(mf.fixHeading) * mf.tool.toolOffset, mf.fixHeading));
 
                 nudHeading.Enabled = true;
-                nudHeading.Value = (decimal)glm.toDegrees(fix.heading);
+                nudHeading.Value = (decimal)glm.toDegrees(mf.fixHeading);
 
                 btnEnter_APlus.Enabled = true;
             }
@@ -114,11 +114,11 @@ namespace AgOpenGPS
         {
             if (ModeAB)
             {
-                vec3 fix = new vec3(mf.pivotAxlePos);
+                vec2 fix = mf.pivotAxlePos;
 
                 btnBPoint.BackColor = System.Drawing.Color.Teal;
 
-                vec3 tt = new vec3(fix.easting + Math.Cos(fix.heading) * mf.tool.toolOffset, fix.northing - Math.Sin(fix.heading) * mf.tool.toolOffset, fix.heading);
+                vec3 tt = new vec3(fix.easting + Math.Cos(mf.fixHeading) * mf.tool.toolOffset, fix.northing - Math.Sin(mf.fixHeading) * mf.tool.toolOffset, mf.fixHeading);
 
                 // heading based on AB points
                 double heading = Math.Atan2(tt.easting - mf.gyd.EditGuidanceLine.curvePts[0].easting,

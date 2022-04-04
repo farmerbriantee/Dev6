@@ -7,7 +7,7 @@ namespace AgOpenGPS
 {
     public static class glm
     {
-        public static bool IsPointInPolygon(this List<vec2> polygon, vec3 testPoint)
+        public static bool IsPointInPolygon(this List<vec2> polygon, vec2 testPoint)
         {
             bool result = false;
             int j = polygon.Count - 1;
@@ -152,7 +152,7 @@ namespace AgOpenGPS
                 + Math.Pow(first.northing - second.northing, 2));
         }
 
-        public static double Distance(vec3 first, CRecPathPt second)
+        public static double Distance(vec2 first, CRecPathPt second)
         {
             return Math.Sqrt(
                 Math.Pow(first.easting - second.easting, 2)
