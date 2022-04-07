@@ -61,6 +61,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Speech" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -157,12 +158,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Forms\FormCommPicker.resx">
       <DependentUpon>FormCommPicker.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormCommSaver.resx">
       <DependentUpon>FormCommSaver.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormCommSetGPS.resx">
       <DependentUpon>FormCommSetGPS.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormGPSData.resx">
       <DependentUpon>FormGPSData.cs</DependentUpon>
@@ -278,6 +282,8 @@
     <None Include="btnImages\UpArrow64.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="btnImages\B_GPS2.png" />
+    <None Include="btnImages\B_Autosteer2.png" />
     <None Include="btnImages\Trash.png" />
     <None Include="btnImages\AddNew.png" />
     <None Include="btnImages\Edit.png" />

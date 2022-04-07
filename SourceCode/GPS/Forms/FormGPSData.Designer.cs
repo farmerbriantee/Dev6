@@ -156,25 +156,25 @@
             // 
             // lblLatitude
             // 
-            this.lblLatitude.AutoSize = true;
             this.lblLatitude.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLatitude.Location = new System.Drawing.Point(36, 25);
+            this.lblLatitude.Location = new System.Drawing.Point(40, 25);
             this.lblLatitude.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblLatitude.Name = "lblLatitude";
-            this.lblLatitude.Size = new System.Drawing.Size(70, 18);
+            this.lblLatitude.Size = new System.Drawing.Size(120, 18);
             this.lblLatitude.TabIndex = 12;
             this.lblLatitude.Text = "Latitude";
+            this.lblLatitude.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblLongitude
             // 
-            this.lblLongitude.AutoSize = true;
             this.lblLongitude.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLongitude.Location = new System.Drawing.Point(36, 7);
+            this.lblLongitude.Location = new System.Drawing.Point(40, 7);
             this.lblLongitude.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblLongitude.Name = "lblLongitude";
-            this.lblLongitude.Size = new System.Drawing.Size(82, 18);
+            this.lblLongitude.Size = new System.Drawing.Size(120, 18);
             this.lblLongitude.TabIndex = 13;
             this.lblLongitude.Text = "Longitude";
+            this.lblLongitude.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblAltitude
             // 
@@ -248,15 +248,14 @@
             // 
             // lblSpeed
             // 
-            this.lblSpeed.AutoSize = true;
             this.lblSpeed.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSpeed.Location = new System.Drawing.Point(51, 86);
+            this.lblSpeed.Location = new System.Drawing.Point(50, 86);
             this.lblSpeed.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblSpeed.Name = "lblSpeed";
-            this.lblSpeed.Size = new System.Drawing.Size(54, 18);
+            this.lblSpeed.Size = new System.Drawing.Size(110, 18);
             this.lblSpeed.TabIndex = 115;
             this.lblSpeed.Text = "Speed";
-            this.lblSpeed.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblSpeed.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblRoll
             // 
@@ -407,25 +406,25 @@
             // 
             // lblEastingField
             // 
-            this.lblEastingField.AutoSize = true;
             this.lblEastingField.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblEastingField.Location = new System.Drawing.Point(51, 65);
+            this.lblEastingField.Location = new System.Drawing.Point(50, 65);
             this.lblEastingField.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblEastingField.Name = "lblEastingField";
-            this.lblEastingField.Size = new System.Drawing.Size(63, 18);
+            this.lblEastingField.Size = new System.Drawing.Size(110, 18);
             this.lblEastingField.TabIndex = 477;
             this.lblEastingField.Text = "Easting";
+            this.lblEastingField.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblNorthingField
             // 
-            this.lblNorthingField.AutoSize = true;
             this.lblNorthingField.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNorthingField.Location = new System.Drawing.Point(51, 47);
+            this.lblNorthingField.Location = new System.Drawing.Point(50, 47);
             this.lblNorthingField.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblNorthingField.Name = "lblNorthingField";
-            this.lblNorthingField.Size = new System.Drawing.Size(74, 18);
+            this.lblNorthingField.Size = new System.Drawing.Size(110, 18);
             this.lblNorthingField.TabIndex = 476;
             this.lblNorthingField.Text = "Northing";
+            this.lblNorthingField.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label27
             // 

@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Globalization;
 using System.IO.Ports;
+using System.Collections.Generic;
 
 // Declare the delegate prototype to send data back to the form
 delegate void UpdateRTCM_Data(byte[] data);
@@ -46,6 +47,9 @@ namespace AgIO
 
         public bool isRadio_RequiredOn = false;
         internal SerialPort spRadio = new SerialPort("Radio", 9600, Parity.None, 8, StopBits.One);
+
+        //NTRIP metering
+        Queue<byte> rawTrip = new Queue<byte>();
 
         private void NTRIPtick(object o, EventArgs e)
         {
@@ -104,8 +108,6 @@ namespace AgIO
                 toUDP_Port = Properties.Settings.Default.setNTRIP_sendToUDPPort; //send rtcm to which udp port
                 sendGGAInterval = Properties.Settings.Default.setNTRIP_sendGGAInterval; //how often to send fixes
 
-                epNtrip = new IPEndPoint(epIP, toUDP_Port);
-
                 //if we had a timer already, kill it
                 if (tmr != null)
                 {
@@ -129,6 +131,9 @@ namespace AgIO
                         System.Threading.Thread.Sleep(100);
                         clientSocket.Close();
                     }
+
+
+                    epNtrip = new IPEndPoint(IPAddress.Parse("192.168.5.255"), toUDP_Port);
 
                     // Create the socket object
                     clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -240,8 +245,8 @@ namespace AgIO
             {
                 //MessageBox.Show(this, ex.Message, "Send Message Failed!");
             }
-
         }
+
 
         public void OnAddMessage(byte[] data)
         {
@@ -251,13 +256,69 @@ namespace AgIO
             //reset watchdog since we have updated data
             NTRIP_Watchdog = 0;
 
+            if (rawTrip.Count == 0) lblToGPS.Text = "-";
+
+
+            //move the ntrip stream to queue
+            for (int i = 0; i < data.Length; i++)
+            {
+                rawTrip.Enqueue(data[i]);
+            }
+            
+            ntripMeterTimer.Enabled = true;
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            //how many sends have occured
+            traffic.cntrToGPSMessages++;
+
+            //how many bytes in the Queue
+            int cnt = rawTrip.Count;
+
+            //we really should get here, but have to check
+            if (cnt == 0) return;
+
+            //settable bytes chunks max
+            if (cnt > packetSizeNTRIP) cnt = packetSizeNTRIP;
+
+            //new data array to send
+            byte[] trip = new byte[cnt];
+
+            traffic.cntrToGPSInBytes += cnt;
+
+            //dequeue into the array
+            for (int i = 0; i < cnt; i++) trip[i] = rawTrip.Dequeue();
+
+            //send it
+            SendNTRIP(trip);
+
+            //Are we done?
+            if (rawTrip.Count == 0)
+            {
+                ntripMeterTimer.Enabled = false;
+                lblToGPS.Text = traffic.cntrToGPSInBytes == 0 ? "--" : (traffic.cntrToGPSInBytes).ToString();
+                traffic.cntrToGPSInBytes = 0;
+            }
+
+            //Can't keep up as internet dumped a shit load so clear
+            if (rawTrip.Count > 10000) rawTrip.Clear();
+
+            //show how many bytes left in the queue
+            lblCount.Text = rawTrip.Count.ToString();
+        }
+
+
+        public void SendNTRIP(byte[] data)
+        {
             //serial send out GPS port
-            if (toUDP_Port == 0)
+            if (isSendToSerial)
             {
                 SendGPSPort(data);
             }
+
             //send out UDP Port
-            else
+            if (isSendToUDP)
             {
                 SendUDPMessage(data, epNtrip);
             }

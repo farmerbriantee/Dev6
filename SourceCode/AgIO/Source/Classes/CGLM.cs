@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Windows.Forms;
 
 namespace AgIO
@@ -64,6 +65,40 @@ namespace AgIO
 
             //value is ok
             return isChanged;
+        }
+    }
+
+    public class NmeaValues
+    {
+        public string rawBuffer = "";
+        public bool isNMEAToSend = false;
+
+        public double latitudeSend = double.MaxValue, longitudeSend = double.MaxValue, latitude, longitude;
+
+
+        public float altitude = float.MaxValue, headingTrue = float.MaxValue,
+            headingTrueDual = float.MaxValue, speed = float.MaxValue, roll = float.MaxValue;
+
+        public float hdopData, altitudeData, speedData, rollData, headingTrueData, headingTrueDualData, ageData;
+
+
+        public ushort satellitesData, satellitesTracked = ushort.MaxValue, hdopX100 = ushort.MaxValue, ageX100 = ushort.MaxValue;
+
+        public short imuRollData, imuRoll = short.MaxValue;
+
+        public byte fixQualityData, fixQuality = byte.MaxValue;
+        public bool vehicle;
+
+        //imu data
+        public ushort imuHeadingData, imuHeading = ushort.MaxValue;
+        public short imuPitchData, imuPitch = short.MaxValue,
+            imuYawRateData, imuYawRate = short.MaxValue;
+
+        public StringBuilder logNMEASentence = new StringBuilder();
+
+        public NmeaValues(bool _vehicle)
+        {
+            vehicle = _vehicle;
         }
     }
 

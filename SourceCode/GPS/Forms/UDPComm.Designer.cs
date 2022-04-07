@@ -574,7 +574,6 @@ namespace AgOpenGPS
                     byteData[byteData.Length - 1] = (byte)crc;
                     
                     loopBackSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epAgIO, new AsyncCallback(SendAsyncLoopData), null);
-                    loopBackSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epAgVR, new AsyncCallback(SendAsyncLoopData), null);
                 }
             }
             catch (Exception)

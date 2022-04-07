@@ -18,27 +18,29 @@ namespace AgIO
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            lblLatitude.Text = mf.latitude.ToString("N7");
-            lblLongitude.Text = mf.longitude.ToString("N7");
+            NmeaValues GPS = mf.VehicleGPS;
+
+            lblLatitude.Text = GPS.latitude.ToString("N7");
+            lblLongitude.Text = GPS.longitude.ToString("N7");
 
             ////other sat and GPS info
-            lblFixQuality.Text = mf.FixQuality;
-            lblSatsTracked.Text = mf.satellitesData.ToString();
-            lblHDOP.Text = mf.hdopData.ToString();
-            lblSpeed.Text = mf.speedData.ToString("N1");
+            lblFixQuality.Text = mf.FixQuality(GPS);
+            lblSatsTracked.Text = GPS.satellitesData.ToString();
+            lblHDOP.Text = GPS.hdopData.ToString();
+            lblSpeed.Text = GPS.speedData.ToString("N1");
 
-            lblRoll.Text = mf.rollData.ToString("N2");
-            lblIMURoll.Text = mf.imuRollData.ToString();
-            lblIMUPitch.Text = mf.imuPitchData.ToString();
-            lblIMUYawRate.Text = mf.imuYawRateData.ToString();
-            lblIMUHeading.Text = mf.imuHeadingData.ToString();
+            lblRoll.Text = GPS.rollData.ToString("N2");
+            lblIMURoll.Text = GPS.imuRollData.ToString();
+            lblIMUPitch.Text = GPS.imuPitchData.ToString();
+            lblIMUYawRate.Text = GPS.imuYawRateData.ToString();
+            lblIMUHeading.Text = GPS.imuHeadingData.ToString();
 
-            lblAge.Text = mf.ageData.ToString("N1");
+            lblAge.Text = GPS.ageData.ToString("N1");
 
-            lblGPSHeading.Text = mf.headingTrueData.ToString("N2");
-            lblDualHeading.Text = mf.headingTrueDualData.ToString("N2");
+            lblGPSHeading.Text = GPS.headingTrueData.ToString("N2");
+            lblDualHeading.Text = GPS.headingTrueDualData.ToString("N2");
 
-            lblAltitude.Text = mf.altitudeData.ToString("N1");
+            lblAltitude.Text = GPS.altitudeData.ToString("N1");
 
             tboxVTG.Text = mf.vtgSentence;
             tboxGGA.Text = mf.ggaSentence;
@@ -47,7 +49,8 @@ namespace AgIO
             tboxHDT.Text = mf.hdtSentence;
             //tboxRMC.Text = mf.rmcSentence;
             tboxHPD.Text = mf.hpdSentence;
-            tboxPANDA.Text = mf.pandaSentence;  
+            tboxPANDA.Text = mf.pandaSentence;
+            tboxKSXT.Text = mf.ksxtSentence;
         }
 
         private void FormGPSData_Load(object sender, EventArgs e)
@@ -59,6 +62,7 @@ namespace AgIO
             tboxPAOGI.Text = "";
             tboxHPD.Text = "";
             tboxPANDA.Text = "";
+            tboxKSXT.Text = "";
         }
 
         private void FormGPSData_FormClosing(object sender, FormClosingEventArgs e)

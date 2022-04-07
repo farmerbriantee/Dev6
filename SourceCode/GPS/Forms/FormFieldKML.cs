@@ -142,10 +142,10 @@ namespace AgOpenGPS
                             //Load the outer boundary
                             LoadKMLBoundary(FileNames[i]);
                         }
-                        mf.FileSaveBoundary();
                         mf.bnd.BuildTurnLines();
                         mf.CalculateMinMax();
                     }
+                    mf.FileSaveBoundary();
                 }
             }
             catch (Exception ex)

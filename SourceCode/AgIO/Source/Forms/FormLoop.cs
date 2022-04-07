@@ -1,8 +1,10 @@
 ﻿using AgIO.Properties;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Net.Sockets;
+using System.Speech.Recognition;
 using System.Text;
 using System.Windows.Forms;
 
@@ -21,15 +23,23 @@ namespace AgIO
             InitializeComponent();
         }
 
-        public StringBuilder logNMEASentence = new StringBuilder();
+        //used to send communication check pgn= C8 or 200
+        private byte[] helloFromAgIO = { 0x80, 0x81, 0x7F, 200, 1, 1, 0x47 };
 
+        public bool isLogNMEA;
         public bool isKeyboardOn = true;
+
+        public bool isSendToSerial = false, isSendToUDP = false;
 
         public bool isGPSSentencesOn = false, isSendNMEAToUDP;
 
         public double secondsSinceStart, lastSecond;
 
         public string lastSentence;
+
+        public bool isPluginUsed;
+
+        public int packetSizeNTRIP;
 
         //The base directory where Drive will be stored and fields and vehicles branch from
         public string baseDirectory;
@@ -49,13 +59,15 @@ namespace AgIO
             if (Settings.Default.setUDP_isOn) LoadUDPNetwork();
             LoadLoopback();
 
+            packetSizeNTRIP = Properties.Settings.Default.setNTRIP_packetSize;
+
             isSendNMEAToUDP = Properties.Settings.Default.setUDP_isSendNMEAToUDP;
+            isPluginUsed = Properties.Settings.Default.setUDP_isUsePluginApp;
+
+            isSendToSerial = Settings.Default.setNTRIP_sendToSerial;
+            isSendToUDP = Settings.Default.setNTRIP_sendToUDP;
 
             lblGPS1Comm.Text = "---";
-            lblIMUComm.Text = "---";
-            lblMod1Comm.Text = "---";
-            lblMod2Comm.Text = "---";
-            //lblMod3Comm.Text = "---";
 
             //set baud and port from last time run
             baudRateGPS = Settings.Default.setPort_baudRateGPS;
@@ -64,67 +76,29 @@ namespace AgIO
             if (wasGPSConnectedLastRun)
             {
                 OpenGPSPort();
-                if (spGPS.IsOpen) lblGPS1Comm.Text = portNameGPS;
+
+                if (spGPS.IsOpen)
+                {
+                    lblGPS1Comm.Text = portNameGPS;
+                }
             }
 
-            //Open IMU
-            portNameIMU = Settings.Default.setPort_portNameIMU;
-            wasIMUConnectedLastRun = Settings.Default.setPort_wasIMUConnected;
-            if (wasIMUConnectedLastRun)
+            // set baud and port for rtcm from last time run
+            baudRateRtcm = Settings.Default.setPort_baudRateRtcm;
+            portNameRtcm = Settings.Default.setPort_portNameRtcm;
+            wasRtcmConnectedLastRun = Settings.Default.setPort_wasRtcmConnected;
+            
+            if (wasRtcmConnectedLastRun)
             {
-                OpenIMUPort();
-                if (spIMU.IsOpen) lblIMUComm.Text = portNameIMU;
-            }
-
-
-            //same for Module1 port
-            portNameModule1 = Settings.Default.setPort_portNameModule1;
-            wasModule1ConnectedLastRun = Settings.Default.setPort_wasModule1Connected;
-            if (wasModule1ConnectedLastRun)
-            {
-                OpenModule1Port();
-                if (spModule1.IsOpen) lblMod1Comm.Text = portNameModule1;
-            }
-
-            //same for Module2 port
-            portNameModule2 = Settings.Default.setPort_portNameModule2;
-            wasModule2ConnectedLastRun = Settings.Default.setPort_wasModule2Connected;
-            if (wasModule2ConnectedLastRun)
-            {
-                OpenModule2Port();
-                if (spModule2.IsOpen) lblMod2Comm.Text = portNameModule2;
-            }
-
-            //same for Module3 port
-            portNameModule3 = Settings.Default.setPort_portNameModule3;
-            wasModule3ConnectedLastRun = Settings.Default.setPort_wasModule3Connected;
-            if (wasModule3ConnectedLastRun)
-            {
-                OpenModule3Port();
-                //if (spModule3.IsOpen) lblMod3Comm.Text = portNameModule3;
+                OpenRtcmPort();
             }
 
             ConfigureNTRIP();
 
-            string[] ports = System.IO.Ports.SerialPort.GetPortNames();
-            listBox1.Items.Clear();
-
-            if (ports.Length == 0)
-            {
-                listBox1.Items.Add("None");
-            }
-            else
-            {
-                for (int i = 0; i < ports.Length; i++)
-                {
-                    listBox1.Items.Add(ports[i]);
-                }
-            }
-
             lastSentence = Properties.Settings.Default.setGPS_lastSentence;
 
             timer1.Enabled = true;
-            panel1.Visible = false;
+            //panel1.Visible = false;
             pictureBox1.BringToFront();
             pictureBox1.Dock = DockStyle.Fill;
         }
@@ -137,32 +111,13 @@ namespace AgIO
             Process.Start("devmgmt.msc");
         }
 
-        private void btnRescanPorts_Click(object sender, EventArgs e)
-        {
-            string[] ports = System.IO.Ports.SerialPort.GetPortNames();
-            listBox1.Items.Clear();
-
-            if (ports.Length == 0)
-            {
-                listBox1.Items.Add("None");
-                return;
-            }
-            else
-            {
-                for (int i = 0; i < ports.Length; i++)
-                {
-                    listBox1.Items.Add(ports[i]);
-                }
-            }
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (timer1.Interval > 1000)
             {
                 Controls.Remove(pictureBox1);
                 pictureBox1.Dispose();
-                panel1.Visible = true;
+                //panel1.Visible = true;
                 timer1.Interval = 1000;
                 return;
             }
@@ -171,8 +126,8 @@ namespace AgIO
 
             DoTraffic();
 
-            lblCurentLon.Text = longitude.ToString("N7");
-            lblCurrentLat.Text = latitude.ToString("N7");
+            //send a hello to modules
+            SendUDPMessage(helloFromAgIO, epModule);
 
             //do all the NTRIP routines
             DoNTRIPSecondRoutine();
@@ -181,29 +136,27 @@ namespace AgIO
             //every 3 seconds
             if ((secondsSinceStart - lastSecond) > 2)
             {
+                if (traffic.helloFromMachine < 3) btnMachine.BackColor = Color.LightGreen;
+                else btnMachine.BackColor = Color.Orange;
+
+                if (traffic.helloFromAutoSteer < 3) btnSteer.BackColor = Color.LightGreen;
+                else btnSteer.BackColor = Color.Orange;
+
                 if (isLogNMEA)
                 {
                     using (StreamWriter writer = new StreamWriter("zAgIO_log.txt", true))
                     {
-                        writer.Write(logNMEASentence.ToString());
+                        writer.Write(VehicleGPS.logNMEASentence.ToString());
                     }
-                    logNMEASentence.Clear();
+                    VehicleGPS.logNMEASentence.Clear();
+                    using (StreamWriter writer = new StreamWriter("zAgIO_Tool_log.txt", true))
+                    {
+                        writer.Write(ToolGPS.logNMEASentence.ToString());
+                    }
+                    ToolGPS.logNMEASentence.Clear();
                 }
 
                 lastSecond = secondsSinceStart;
-
-                if (wasIMUConnectedLastRun)
-                {
-                    if (!spIMU.IsOpen)
-                    {
-                        byte[] imuClose = new byte[] { 0x80, 0x81, 0x7C, 0xD4, 2, 1, 0, 83 };
-
-                        //tell AOG IMU is disconnected
-                        SendToLoopBackMessageAOG(imuClose);
-                        wasIMUConnectedLastRun = false;
-                        lblIMUComm.Text = "---";
-                    }
-                }
 
                 if (wasGPSConnectedLastRun)
                 {
@@ -213,33 +166,47 @@ namespace AgIO
                         lblGPS1Comm.Text = "---";
                     }
                 }
-
-                if (wasModule1ConnectedLastRun)
-                {
-                    if (!spModule1.IsOpen)
-                    {
-                        wasModule1ConnectedLastRun = false;
-                        lblMod1Comm.Text = "---";
-                    }
-                }
-
-                if (wasModule2ConnectedLastRun)
-                {
-                    if (!spModule2.IsOpen)
-                    {
-                        wasModule2ConnectedLastRun = false;
-                        lblMod2Comm.Text = "---";
-                    }
-                }
-
-                if (wasModule3ConnectedLastRun)
-                {
-                    if (!spModule3.IsOpen)
-                    {
-                        wasModule3ConnectedLastRun = false;
-                    }
-                }
             }
+        }
+
+        private void DoTraffic()
+        {
+            traffic.helloFromMachine++;
+            traffic.helloFromAutoSteer++;
+
+            lblToAOG.Text = traffic.cntrPGNToAOG == 0 ? "--" : (traffic.cntrPGNToAOG).ToString();
+            lblFromAOG.Text = traffic.cntrPGNFromAOG == 0 ? "--" : (traffic.cntrPGNFromAOG).ToString();
+
+            lblFromGPS.Text = traffic.cntrFromGPS == 0 ? "--" : (traffic.cntrFromGPS).ToString();
+
+            lblToGPS2.Text = traffic.cntrToGPS2 == 0 ? "--" : (traffic.cntrToGPS2).ToString();
+            lblFromGPS2.Text = traffic.cntrFromGPS2 == 0 ? "--" : (traffic.cntrFromGPS2).ToString();
+
+            lblToSteer.Text = traffic.cntrToSteer == 0 ? "--" : (traffic.cntrToSteer).ToString();
+            lblFromSteer.Text = traffic.cntrFromSteer == 0 ? "--" : (traffic.cntrFromSteer).ToString();
+
+            lblToMachine.Text = traffic.cntrToMachine == 0 ? "--" : (traffic.cntrToMachine).ToString();
+            lblFromMachine.Text = traffic.cntrFromMachine == 0 ? "--" : (traffic.cntrFromMachine).ToString();
+
+            lblToModule3.Text = traffic.cntrToModule3 == 0 ? "--" : (traffic.cntrToModule3).ToString();
+            lblFromModule3.Text = traffic.cntrFromModule3 == 0 ? "--" : (traffic.cntrFromModule3).ToString();
+
+            if (traffic.cntrFromGPS > 0) btnGPS.BackColor = Color.LightGreen;
+            else btnGPS.BackColor = Color.Orange;
+
+            if (traffic.cntrPGNFromAOG > 0 && traffic.cntrPGNToAOG > 0) btnAOGButton.BackColor = Color.LightGreen;
+            else btnAOGButton.BackColor = Color.Orange;
+
+            traffic.cntrPGNToAOG = traffic.cntrPGNFromAOG = //traffic.cntrUDPIn = traffic.cntrUDPOut =
+                traffic.cntrFromGPS = traffic.cntrFromGPS2 = traffic.cntrToGPS2 =
+                traffic.cntrToModule3 = traffic.cntrFromModule3 =
+                traffic.cntrToSteer = traffic.cntrFromSteer =
+                traffic.cntrFromMachine = traffic.cntrToMachine = 0;
+
+            lblCurentLon.Text = VehicleGPS.longitude.ToString("N7");
+            lblCurrentLat.Text = VehicleGPS.latitude.ToString("N7");
+
+            if (traffic.cntrToGPSMessages > 9999) traffic.cntrToGPSMessages = 0;
         }
 
         private void deviceManagerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -267,11 +234,6 @@ namespace AgIO
             SettingsNTRIP();
         }
 
-        private void btnRadio_Click(object sender, EventArgs e)
-        {
-            SettingsRadio();
-        }
-
         private void btnExit_Click(object sender, EventArgs e)
         {
             Close();
@@ -297,7 +259,7 @@ namespace AgIO
                 btnStartStopNtrip.Visible = true;
                 lblWatch.Visible = true;
                 lblNTRIPBytes.Visible = true;
-                lblBytes.Visible = true;
+                lblToGPS.Visible = true;
             }
             else
             {
@@ -305,7 +267,7 @@ namespace AgIO
                 btnStartStopNtrip.Visible = false;
                 lblWatch.Visible = false;
                 lblNTRIPBytes.Visible = false;
-                lblBytes.Visible = false;
+                lblToGPS.Visible = false;
             }
 
             btnStartStopNtrip.Text = "Off";
@@ -336,20 +298,7 @@ namespace AgIO
 
         private void toolStripGPSData_Click(object sender, EventArgs e)
         {
-            Form f = Application.OpenForms["FormGPSData"];
-
-            if (f != null)
-            {
-                f.Focus();
-                f.Close();
-                isGPSSentencesOn = false;
-                return;
-            }
-
-            isGPSSentencesOn = true;
-
-            Form form = new FormGPSData(this);
-            form.Show(this);
+            SettingsRadio();
         }
 
         private void toolStripAgDiag_Click(object sender, EventArgs e)
@@ -390,7 +339,6 @@ namespace AgIO
 
         }
 
-        public bool isLogNMEA;
         private void cboxLogNMEA_CheckedChanged(object sender, EventArgs e)
         {
             isLogNMEA = cboxLogNMEA.Checked;
@@ -398,6 +346,10 @@ namespace AgIO
 
         private void FormLoop_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Properties.Settings.Default.setPort_wasGPSConnected = wasGPSConnectedLastRun;
+            Properties.Settings.Default.setPort_wasRtcmConnected = wasRtcmConnectedLastRun;
+            Properties.Settings.Default.Save();
+
             if (loopBackSocket != null)
             {
                 try
@@ -415,37 +367,6 @@ namespace AgIO
                 }
                 finally { UDPSocket.Close(); }
             }
-        }
-
-        private void DoTraffic()
-        {
-            lblToAOG.Text = traffic.cntrPGNToAOG == 0 ? "--" : (traffic.cntrPGNToAOG).ToString();
-            lblFromAOG.Text = traffic.cntrPGNFromAOG == 0 ? "--" : (traffic.cntrPGNFromAOG).ToString();
-
-            lblFromUDP.Text = traffic.cntrUDPIn == 0 ? "--" : (traffic.cntrUDPIn).ToString();
-            lblToUDP.Text = traffic.cntrUDPOut == 0 ? "--" : (traffic.cntrUDPOut).ToString();
-
-            lblFromGPS.Text = traffic.cntrGPSIn == 0 ? "--" : (traffic.cntrGPSIn).ToString();
-            lblToGPS.Text = traffic.cntrGPSOut == 0 ? "--" : (traffic.cntrGPSOut).ToString();
-
-            lblFromModule1.Text = traffic.cntrModule1In == 0 ? "--" : (traffic.cntrModule1In).ToString();
-            lblToModule1.Text = traffic.cntrModule1Out == 0 ? "--" : (traffic.cntrModule1Out).ToString();
-
-            lblFromModule2.Text = traffic.cntrModule2In == 0 ? "--" : (traffic.cntrModule2In).ToString();
-            lblToModule2.Text = traffic.cntrModule2Out == 0 ? "--" : (traffic.cntrModule2Out).ToString();
-
-            lblFromMU.Text = traffic.cntrIMUIn == 0 ? "--" : (traffic.cntrIMUIn).ToString();
-            lblToIMU.Text = traffic.cntrIMUOut == 0 ? "--" : (traffic.cntrIMUOut).ToString();
-
-            traffic.cntrPGNToAOG = traffic.cntrPGNFromAOG = traffic.cntrUDPIn = traffic.cntrUDPOut =
-                traffic.cntrGPSIn = traffic.cntrGPSOut = traffic.cntrGPS2In = traffic.cntrGPS2Out =
-                traffic.cntrIMUIn = traffic.cntrIMUOut =
-                traffic.cntrModule3In = traffic.cntrModule3Out =
-                traffic.cntrModule1In = traffic.cntrModule1Out =
-                traffic.cntrModule2Out = traffic.cntrModule2In = 0;
-
-            lblCurentLon.Text = longitude.ToString("N7");
-            lblCurrentLat.Text = latitude.ToString("N7");
         }
     }
 }
