@@ -25,8 +25,8 @@ namespace AgOpenGPS
 
             lblHz.Text = mf.fixUpdateHz + " ~ " + mf.frameTime.ToString("0.0");
 
-            lblEastingField.Text = mf.pn.fix.easting.ToString("0.00");
-            lblNorthingField.Text = mf.pn.fix.northing.ToString("0.00");
+            lblEastingField.Text = mf.pivotAxlePos.easting.ToString("0.00");
+            lblNorthingField.Text = mf.pivotAxlePos.northing.ToString("0.00");
 
             lblLatitude.Text = mf.pn.latitude.ToString("0.0000000");
             lblLongitude.Text = mf.pn.longitude.ToString("0.0000000");

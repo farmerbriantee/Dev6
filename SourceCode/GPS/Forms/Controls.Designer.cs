@@ -373,7 +373,7 @@ namespace AgOpenGPS
             }
 
             int nextflag = flagPts.Count + 1;
-            CFlag flagPt = new CFlag(pn.latitude, pn.longitude, pn.fix.easting, pn.fix.northing, fixHeading, flagColor, (nextflag).ToString());
+            CFlag flagPt = new CFlag(pn.latitude, pn.longitude, pivotAxlePos.easting, pivotAxlePos.northing, fixHeading, flagColor, (nextflag).ToString());
             flagPts.Add(flagPt);
             FileSaveFlags();
 
@@ -1236,6 +1236,22 @@ namespace AgOpenGPS
                 form.ShowDialog(this);
             }
         }
+
+        private void toolSteerSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form fc = Application.OpenForms["FormToolSteer"];
+
+            if (fc != null)
+            {
+                fc.Focus();
+                return;
+            }
+
+            //
+            Form form = new FormToolSteer(this);
+            form.Show(this);
+        }
+
         private void correctionToolStrip_Click(object sender, EventArgs e)
         {
             //check if window already exists

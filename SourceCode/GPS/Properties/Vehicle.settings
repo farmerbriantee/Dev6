@@ -14,22 +14,22 @@
     <Setting Name="setVehicle_numSections" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3</Value>
     </Setting>
-    <Setting Name="setSection_position1" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position1" Type="System.double" Scope="User">
       <Value Profile="(Default)">-2.0</Value>
     </Setting>
-    <Setting Name="setSection_position2" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position2" Type="System.double" Scope="User">
       <Value Profile="(Default)">-1.0</Value>
     </Setting>
-    <Setting Name="setSection_position3" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position3" Type="System.double" Scope="User">
       <Value Profile="(Default)">1.0</Value>
     </Setting>
-    <Setting Name="setSection_position4" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position4" Type="System.double" Scope="User">
       <Value Profile="(Default)">2.0</Value>
     </Setting>
-    <Setting Name="setSection_position5" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position5" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position6" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position6" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="setVehicle_antennaHeight" Type="System.Double" Scope="User">
@@ -68,13 +68,13 @@
     <Setting Name="setVehicle_vehicleName" Type="System.String" Scope="User">
       <Value Profile="(Default)">Default Vehicle</Value>
     </Setting>
-    <Setting Name="setSection_position7" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position7" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position8" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position8" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position9" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position9" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="setVehicle_slowSpeedCutoff" Type="System.Double" Scope="User">
@@ -88,9 +88,6 @@
     </Setting>
     <Setting Name="setVehicle_goalPointLookAhead" Type="System.Double" Scope="User">
       <Value Profile="(Default)">2</Value>
-    </Setting>
-    <Setting Name="setVehicle_maxAngularVelocity" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">400</Value>
     </Setting>
     <Setting Name="setVehicle_maxSteerAngle" Type="System.Double" Scope="User">
       <Value Profile="(Default)">45</Value>
@@ -107,16 +104,16 @@
     <Setting Name="setVehicle_antennaOffset" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position10" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position10" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position11" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position11" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position12" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position12" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position13" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position13" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="set_youTurnDistanceFromBoundary" Type="System.Double" Scope="User">
@@ -164,16 +161,16 @@
     <Setting Name="setArdSteer_setting0" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">56</Value>
     </Setting>
-    <Setting Name="setSection_position14" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position14" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position15" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position15" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position16" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position16" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="setSection_position17" Type="System.Decimal" Scope="User">
+    <Setting Name="setSection_position17" Type="System.double" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="setVehicle_hydraulicLiftLookAhead" Type="System.Double" Scope="User">
@@ -244,6 +241,42 @@
     </Setting>
     <Setting Name="setArdMac_user4" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">4</Value>
+    </Setting>
+    <Setting Name="setTool_maxSteerAngle" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">20</Value>
+    </Setting>
+    <Setting Name="setTool_wasCounts" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="setTool_wasOffset" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">127</Value>
+    </Setting>
+    <Setting Name="setTool_HighPWM" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">120</Value>
+    </Setting>
+    <Setting Name="setTool_windupLimit" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="setTool_P" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">20</Value>
+    </Setting>
+    <Setting Name="setTool_MinPWM" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="setTool_I" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="setTool_antennaHeight" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="setTool_antennaOffset" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="setArdToolSteer_setting0" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">56</Value>
+    </Setting>
+    <Setting Name="setTool_isToolSteering" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

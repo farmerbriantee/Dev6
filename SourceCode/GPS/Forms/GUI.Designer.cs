@@ -87,7 +87,7 @@ namespace AgOpenGPS
                 }
 
                 //check to make sure the grid is big enough
-                worldManager.checkZoomWorldGrid(pn.fix.northing, pn.fix.easting);
+                worldManager.checkZoomWorldGrid(pivotAxlePos.northing, pivotAxlePos.easting);
 
                 //hide the NAv panel in 6  secs
                 if (panelNavigation.Visible)
@@ -272,8 +272,7 @@ namespace AgOpenGPS
 
             pn.ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
             pn.headingTrueDualOffset = Properties.Settings.Default.setGPS_dualHeadingOffset;
-
-            isAngVelGuidance = Properties.Settings.Default.setAS_isAngVelGuidance;
+            pn.isToolSteering = Properties.Vehicle.Default.setTool_isToolSteering;
 
             guidanceLookAheadTime = Properties.Settings.Default.setAS_guidanceLookAheadTime;
 

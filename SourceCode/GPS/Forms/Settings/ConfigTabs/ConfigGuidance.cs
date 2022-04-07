@@ -45,8 +45,6 @@ namespace AgOpenGPS
                 cboxAutoSteerAuto.Text = gStr.gsManual;
             }
 
-            cboxAngVel.Checked = Properties.Settings.Default.setAS_isAngVelGuidance;
-
             label20.Text = mf.unitsInCm;
             label79.Text = mf.unitsFtM;
             label102.Text = mf.unitsInCm;
@@ -56,7 +54,6 @@ namespace AgOpenGPS
         {
             Properties.Settings.Default.setAS_isAutoSteerAutoOn = mf.ahrs.isAutoSteerAuto = cboxAutoSteerAuto.Checked;
             mf.SetAutoSteerText();
-            Properties.Settings.Default.setAS_isAngVelGuidance = mf.isAngVelGuidance = cboxAngVel.Checked;
             Properties.Settings.Default.setDisplay_lightbarCmPerPixel = mf.lightbarCmPerPixel = lightbarCmPerPixel;
             Properties.Settings.Default.setDisplay_lineWidth = mf.gyd.lineWidth = lineWidth;
             Properties.Settings.Default.setAB_lineLength = mf.gyd.abLength = lineLength;

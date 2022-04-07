@@ -37,7 +37,6 @@
             this.label108 = new System.Windows.Forms.Label();
             this.label107 = new System.Windows.Forms.Label();
             this.nudGuidanceLookAhead = new System.Windows.Forms.Button();
-            this.cboxAngVel = new System.Windows.Forms.CheckBox();
             this.label102 = new System.Windows.Forms.Label();
             this.nudABLength = new System.Windows.Forms.Button();
             this.label79 = new System.Windows.Forms.Label();
@@ -171,25 +170,6 @@
             this.nudGuidanceLookAhead.Text = "10";
             this.nudGuidanceLookAhead.Click += new System.EventHandler(this.nudGuidanceLookAhead_Click);
             this.nudGuidanceLookAhead.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudGuidanceLookAhead_HelpRequested);
-            // 
-            // cboxAngVel
-            // 
-            this.cboxAngVel.Appearance = System.Windows.Forms.Appearance.Button;
-            this.cboxAngVel.BackColor = System.Drawing.Color.AliceBlue;
-            this.cboxAngVel.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.cboxAngVel.FlatAppearance.CheckedBackColor = System.Drawing.Color.MediumAquamarine;
-            this.cboxAngVel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cboxAngVel.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxAngVel.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cboxAngVel.Location = new System.Drawing.Point(50, 445);
-            this.cboxAngVel.Name = "cboxAngVel";
-            this.cboxAngVel.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.cboxAngVel.Size = new System.Drawing.Size(66, 48);
-            this.cboxAngVel.TabIndex = 486;
-            this.cboxAngVel.Text = "AV";
-            this.cboxAngVel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.cboxAngVel.UseVisualStyleBackColor = false;
-            this.cboxAngVel.Visible = false;
             // 
             // label102
             // 
@@ -374,7 +354,6 @@
             this.Controls.Add(this.label108);
             this.Controls.Add(this.label107);
             this.Controls.Add(this.nudGuidanceLookAhead);
-            this.Controls.Add(this.cboxAngVel);
             this.Controls.Add(this.label102);
             this.Controls.Add(this.nudABLength);
             this.Controls.Add(this.label79);
@@ -413,7 +392,6 @@
         private System.Windows.Forms.Label label108;
         private System.Windows.Forms.Label label107;
         private System.Windows.Forms.Button nudGuidanceLookAhead;
-        private System.Windows.Forms.CheckBox cboxAngVel;
         private System.Windows.Forms.Label label102;
         private System.Windows.Forms.Button nudABLength;
         private System.Windows.Forms.Label label79;

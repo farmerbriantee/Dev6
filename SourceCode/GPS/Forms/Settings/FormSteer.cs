@@ -602,63 +602,18 @@ namespace AgOpenGPS
 
         private void SaveSettings()
         {
+            byte value = 0;
 
-            int set = 1;
-            int reset = 2046;
-            int sett = 0;
+            if (chkInvertWAS.Checked) value |= 0x01;
+            if (chkSteerInvertRelays.Checked) value |= 0x02;
+            if (chkInvertSteer.Checked) value |= 0x04;
+            if (cboxConv.Text == "Single") value |= 0x08;
+            if (cboxMotorDrive.Text == "Cytron") value |= 0x10;
+            if (cboxSteerEnable.Text == "Switch") value |= 0x20;
+            if (cboxSteerEnable.Text == "Button") value |= 0x40;
+            if (cboxEncoder.Checked) value |= 0x80;
 
-            if (chkInvertWAS.Checked) sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (chkSteerInvertRelays.Checked) sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (chkInvertSteer.Checked) sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxConv.Text == "Single") sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxMotorDrive.Text == "Cytron") sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxSteerEnable.Text == "Switch") sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxSteerEnable.Text == "Button") sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxEncoder.Checked) sett |= set;
-            else sett &= reset;
-
-            //set = (set << 1);
-            //reset = (reset << 1);
-            //reset = (reset + 1);
-            //if ( ) sett |= set;
-            //else sett &= reset;
-
-            Properties.Vehicle.Default.setArdSteer_setting0 = (byte)sett;
+            Properties.Vehicle.Default.setArdSteer_setting0 = value;
             Properties.Vehicle.Default.setArdMac_isDanfoss = cboxDanfoss.Checked;
 
             if (cboxCurrentSensor.Checked || cboxPressureSensor.Checked)
@@ -671,26 +626,13 @@ namespace AgOpenGPS
             }
 
             // Settings1
-            set = 1;
-            reset = 2046;
-            sett = 0;
+            value = 0x00;
 
-            if (cboxDanfoss.Checked) sett |= set;
-            else sett &= reset;
+            if (cboxDanfoss.Checked) value |= 0x01;
+            if (cboxPressureSensor.Checked) value |= 0x02;
+            if (cboxCurrentSensor.Checked) value |= 0x04;
 
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxPressureSensor.Checked) sett |= set;
-            else sett &= reset;
-
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxCurrentSensor.Checked) sett |= set;
-            else sett &= reset;
-
-            Properties.Vehicle.Default.setArdSteer_setting1 = (byte)sett;
+            Properties.Vehicle.Default.setArdSteer_setting1 = value;
 
             Properties.Vehicle.Default.Save();
 
@@ -698,10 +640,6 @@ namespace AgOpenGPS
             mf.p_251.pgn[mf.p_251.set1] = Properties.Vehicle.Default.setArdSteer_setting1;
             mf.p_251.pgn[mf.p_251.maxPulse] = Properties.Vehicle.Default.setArdSteer_maxPulseCounts;
             mf.p_251.pgn[mf.p_251.minSpeed] = 5; //0.5 kmh
-
-            if (Properties.Settings.Default.setAS_isAngVelGuidance)
-                mf.p_251.pgn[mf.p_251.angVel] = 1;
-            else mf.p_251.pgn[mf.p_251.angVel] = 0;
 
             pboxSendSteer.Visible = false;
         }

@@ -200,9 +200,6 @@
     <Setting Name="setF_steerControlsManual" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="setAS_isAngVelGuidance" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="setAS_guidanceLookAheadTime" Type="System.Double" Scope="User">
       <Value Profile="(Default)">2</Value>
     </Setting>

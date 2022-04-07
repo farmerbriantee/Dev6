@@ -19,6 +19,7 @@ namespace AgOpenGPS
         public double toolOverlap;
         public double toolTrailingHitchLength, toolTankTrailingHitchLength;
         public double toolOffset;
+        public double toolAntennaOffset, toolAntennaHeight;
 
         public double lookAheadOffSetting, lookAheadOnSetting;
         public double turnOffDelay;
@@ -34,7 +35,7 @@ namespace AgOpenGPS
         public bool isMultiColoredSections;
         public string toolAttachType;
 
-        public double hitchLength;
+        public double hitchLength, toolSteerShift;
 
         //how many individual sections
         public int numOfSections;
@@ -101,16 +102,20 @@ namespace AgOpenGPS
 
         public void DrawTool()
         {
-
             //translate and rotate at pivot axle
             GL.Translate(mf.pivotAxlePos.easting, mf.pivotAxlePos.northing, 0);
             GL.PushMatrix();
 
-            //translate down to the hitch pin
-            GL.Translate(Math.Sin(mf.fixHeading) * hitchLength,
+            if (mf.vehicleGPSWatchdog < 11)
+                //translate down to the hitch pin
+                GL.Translate(Math.Sin(mf.fixHeading) * hitchLength,
                             Math.Cos(mf.fixHeading) * hitchLength, 0);
 
-            if (isToolTrailing)
+            if (mf.pn.isToolSteering && !mf.tool.isToolTrailing)
+                GL.Translate(Math.Cos(mf.fixHeading) * toolSteerShift,
+                                Math.Sin(mf.fixHeading) * -toolSteerShift, 0);
+
+            if (isToolTrailing && mf.vehicleGPSWatchdog < 11)
             {
                 if (isToolTBT)
                 {

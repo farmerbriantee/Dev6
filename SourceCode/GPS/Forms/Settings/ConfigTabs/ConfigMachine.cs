@@ -77,20 +77,12 @@ namespace AgOpenGPS
 
         private void SaveSettingsMachine()
         {
-            int set = 1;
-            int reset = 2046;
-            int sett = 0;
+            int value = 0;
 
-            if (cboxMachInvertRelays.Checked) sett |= set;
-            else sett &= reset;
+            if (cboxMachInvertRelays.Checked) value |= 0x01;
+            if (cboxIsHydOn.Checked) value |= 0x02;
 
-            set <<= 1;
-            reset <<= 1;
-            reset += 1;
-            if (cboxIsHydOn.Checked) sett |= set;
-            else sett &= reset;
-
-            Properties.Vehicle.Default.setArdMac_setting0 = (byte)sett;
+            Properties.Vehicle.Default.setArdMac_setting0 = (byte)value;
             Properties.Vehicle.Default.setArdMac_hydRaiseTime = mf.p_238.pgn[mf.p_238.raiseTime] = (byte)raiseTime;
             Properties.Vehicle.Default.setArdMac_hydLowerTime = mf.p_238.pgn[mf.p_238.lowerTime] = (byte)lowerTime;
 
@@ -101,7 +93,7 @@ namespace AgOpenGPS
 
             Properties.Vehicle.Default.setVehicle_hydraulicLiftLookAhead = mf.vehicle.hydLiftLookAheadTime = lookAhead;
 
-            mf.p_238.pgn[mf.p_238.set0] = (byte)sett;
+            mf.p_238.pgn[mf.p_238.set0] = (byte)value;
 
             mf.SendPgnToLoop(mf.p_238.pgn);
             pboxSendMachine.Visible = false;

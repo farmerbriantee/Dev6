@@ -373,18 +373,6 @@ namespace AgOpenGPS.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("400")]
-        public double setVehicle_maxAngularVelocity {
-            get {
-                return ((double)(this["setVehicle_maxAngularVelocity"]));
-            }
-            set {
-                this["setVehicle_maxAngularVelocity"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("45")]
         public double setVehicle_maxSteerAngle {
             get {
@@ -992,6 +980,150 @@ namespace AgOpenGPS.Properties {
             }
             set {
                 this["setArdMac_user4"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public byte setTool_maxSteerAngle {
+            get {
+                return ((byte)(this["setTool_maxSteerAngle"]));
+            }
+            set {
+                this["setTool_maxSteerAngle"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public byte setTool_wasCounts {
+            get {
+                return ((byte)(this["setTool_wasCounts"]));
+            }
+            set {
+                this["setTool_wasCounts"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127")]
+        public byte setTool_wasOffset {
+            get {
+                return ((byte)(this["setTool_wasOffset"]));
+            }
+            set {
+                this["setTool_wasOffset"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("120")]
+        public byte setTool_HighPWM {
+            get {
+                return ((byte)(this["setTool_HighPWM"]));
+            }
+            set {
+                this["setTool_HighPWM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public byte setTool_windupLimit {
+            get {
+                return ((byte)(this["setTool_windupLimit"]));
+            }
+            set {
+                this["setTool_windupLimit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public byte setTool_P {
+            get {
+                return ((byte)(this["setTool_P"]));
+            }
+            set {
+                this["setTool_P"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public byte setTool_MinPWM {
+            get {
+                return ((byte)(this["setTool_MinPWM"]));
+            }
+            set {
+                this["setTool_MinPWM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public byte setTool_I {
+            get {
+                return ((byte)(this["setTool_I"]));
+            }
+            set {
+                this["setTool_I"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double setTool_antennaHeight {
+            get {
+                return ((double)(this["setTool_antennaHeight"]));
+            }
+            set {
+                this["setTool_antennaHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double setTool_antennaOffset {
+            get {
+                return ((double)(this["setTool_antennaOffset"]));
+            }
+            set {
+                this["setTool_antennaOffset"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("56")]
+        public byte setArdToolSteer_setting0 {
+            get {
+                return ((byte)(this["setArdToolSteer_setting0"]));
+            }
+            set {
+                this["setArdToolSteer_setting0"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setTool_isToolSteering {
+            get {
+                return ((bool)(this["setTool_isToolSteering"]));
+            }
+            set {
+                this["setTool_isToolSteering"] = value;
             }
         }
     }

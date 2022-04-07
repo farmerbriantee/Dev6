@@ -1,7 +1,6 @@
 ﻿//Please, if you use this, share the improvements
 
 using AgOpenGPS.Properties;
-using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Diagnostics;
@@ -499,7 +498,6 @@ namespace AgOpenGPS
         private void BuildMachineByte()
         {
             int set = 1;
-            int reset = 2046;
             p_254.pgn[p_254.sc1to8] = 0;
             p_254.pgn[p_254.sc9to16] = 0;
 
@@ -517,16 +515,13 @@ namespace AgOpenGPS
             }
             else
             {
-                for (int j = 0; j < MAXSECTIONS; j++)
+                for (int j = 0; j < tool.numOfSections; j++)
                 {
                     //set if on, reset bit if off
                     if (section[j].isSectionOn) machine |= set;
-                    else machine &= reset;
 
                     //move set and reset over 1 bit left
                     set <<= 1;
-                    reset <<= 1;
-                    reset += 1;
                 }
             }
 

@@ -4,7 +4,6 @@ using OpenTK.Graphics.OpenGL;
 using System.Windows.Forms;
 using System.Text;
 using System.Diagnostics;
-using System.Drawing;
 
 namespace AgOpenGPS
 {
@@ -23,10 +22,10 @@ namespace AgOpenGPS
         private byte[] grnPixels = new byte[150001];
         public bool isFastSections = false;
         private int bbCounter = 0, deadCam = 0;
-        private double maxFieldX, maxFieldY, minFieldX, minFieldY, avgPivDistance;
+        private double maxFieldX, maxFieldY, minFieldX, minFieldY;
 
         public bool isTramOnBackBuffer = false;
-        public double fieldCenterX, fieldCenterY, maxFieldDistance, maxCrossFieldLength;
+        public double fieldCenterX, fieldCenterY, maxFieldDistance, maxCrossFieldLength, avgPivDistance, avgPivDistanceTool;
 
         // When oglMain is created
         private void oglMain_Load(object sender, EventArgs e)
@@ -141,7 +140,7 @@ namespace AgOpenGPS
                 GL.LoadIdentity();
 
                 //position the camera
-                worldManager.SetWorldPerspective(pivotAxlePos.easting, pivotAxlePos.northing, camHeading);
+                worldManager.SetWorldPerspective(pivotAxlePos.easting, pivotAxlePos.northing);
 
                 //the bounding box of the camera for cullling.
                 CalcFrustum();
@@ -305,9 +304,21 @@ namespace AgOpenGPS
                 }
                 catch { }
 
+                GL.PushMatrix();
                 //draw the vehicle/implement
                 tool.DrawTool();
-                vehicle.DrawVehicle();
+                if (vehicleGPSWatchdog < 11)
+                    vehicle.DrawVehicle();
+                GL.PopMatrix();
+
+                if (pn.isToolSteering)
+                {
+                    GL.PointSize(8.0f);
+                    GL.Color3(0.20f, 1.0f, 1.0f);
+                    GL.Begin(PrimitiveType.Points);
+                    GL.Vertex3(pn.fixTool.easting, pn.fixTool.northing, 0.2);
+                    GL.End();
+                }
 
                 // 2D Ortho ---------------------------------------////////-------------------------------------------------
 
@@ -328,7 +339,13 @@ namespace AgOpenGPS
 
                 //LightBar if AB Line is set and turned on or contour
                 if (isLightbarOn)
-                    DrawLightBarText();
+                {
+                    if (vehicleGPSWatchdog < 11)
+                        DrawLightBarText();
+
+                    if (pn.isToolSteering)
+                        DrawLightBarTextTool();
+                }
 
                 if (ahrs.imuRoll != 88888)
                     DrawRollBar();
@@ -1053,22 +1070,6 @@ namespace AgOpenGPS
 
             GL.Disable(EnableCap.Texture2D);
             GL.PopMatrix();
-
-
-            //string pwm;
-            //if (guidanceLineDistanceOff == 32020 | guidanceLineDistanceOff == 32000)
-            //{
-            //    pwm = "Off";
-            //}
-            //else
-            //{
-            //    pwm = mc.pwmDisplay.ToString();
-            //}
-
-            //center = oglMain.Width / -2 + 38 - (int)(((double)(pwm.Length) * 0.5) * 16);
-            //GL.Color3(0.7f, 0.7f, 0.53f);
-
-            //font.DrawText(center, 65, pwm, 0.8);
         }
 
         private void MakeFlagMark()
@@ -1270,6 +1271,9 @@ namespace AgOpenGPS
         {
             if (guidanceLineDistanceOff != 32000)
             {
+                //save distance for display in millimeters
+                avgPivDistance = avgPivDistance * 0.5 + guidanceLineDistanceOff * 0.5;
+
                 double avgPivotDistance = avgPivDistance * (isMetric ? 0.1 : 0.03937);
                 string hede;
 
@@ -1288,6 +1292,36 @@ namespace AgOpenGPS
 
                 int center = -(int)(((double)(hede.Length) * 0.5) * 16);
                 font.DrawText(center, 30, hede, 1);
+            }
+        }
+
+        private void DrawLightBarTextTool()
+        {
+            GL.Disable(EnableCap.DepthTest);
+
+            if (guidanceLineDistanceOff != 32000)
+            {
+                // in millimeters
+                avgPivDistanceTool = avgPivDistanceTool * 0.5 + guidanceLineDistanceOffTool * 0.5;
+
+                double avgPivotDistance2 = avgPivDistanceTool * (isMetric ? 0.1 : 0.03937);
+                string hede;
+
+                //DrawLightBar(oglMain.Width, oglMain.Height, avgPivotDistance2);
+
+                if (avgPivotDistance2 > 0.0)
+                {
+                    GL.Color3(0.9752f, 0.50f, 0.3f);
+                    hede = "< " + (Math.Abs(avgPivotDistance2)).ToString("0");
+                }
+                else
+                {
+                    GL.Color3(0.50f, 0.952f, 0.3f);
+                    hede = (Math.Abs(avgPivotDistance2)).ToString("0") + " >";
+                }
+
+                int center = -(int)(((double)(hede.Length) * 0.5) * 16);
+                font.DrawText(center, 50, hede, 1);
             }
         }
 
@@ -1489,20 +1523,6 @@ namespace AgOpenGPS
                 //font.DrawText(center, 135, "Y:" + ahrs.imuYawRate.ToString("0.0"), 0.8);
             }
 
-            if (isAngVelGuidance)
-            {
-                GL.Color3(0.852f, 0.652f, 0.93f);
-                font.DrawText(center, 130, "Set " + ((int)(setAngVel)).ToString(), 1);
-
-                GL.Color3(0.952f, 0.952f, 0.3f);
-                font.DrawText(center, 160, "Act " + ahrs.angVel.ToString(), 1);
-
-                if (errorAngVel > 0)  GL.Color3(0.2f, 0.952f, 0.53f);
-                else GL.Color3(0.952f, 0.42f, 0.53f);
-
-                font.DrawText(center, 200, "Err " + errorAngVel.ToString(), 1);
-            }
-
             //GL.Color3(0.9652f, 0.9752f, 0.1f);
             //font.DrawText(center, 150, "BETA 5.0.0.5", 1);
 
@@ -1541,7 +1561,7 @@ namespace AgOpenGPS
 
             GL.Translate(center, 78, 0);
 
-            GL.Rotate(-camHeading, 0, 0, 1);
+            GL.Rotate(-worldManager.camHeading, 0, 0, 1);
             GL.Begin(PrimitiveType.Quads);              // Build Quad From A Triangle Strip
             {
                 GL.TexCoord2(0, 0); GL.Vertex2(-52, -52); // 

@@ -33,6 +33,7 @@ namespace AgOpenGPS
         public double Count = 40;
         public bool isGridOn;
         public bool isGeoMap;
+        public double camHeading = 0.0, smoothCamHeading = 0;
 
         public CWorldManager(FormGPS _f)
         {
@@ -45,7 +46,7 @@ namespace AgOpenGPS
             camSmoothFactor = (Properties.Settings.Default.setDisplay_camSmooth * 0.004) + 0.2;
         }
 
-        public void SetWorldPerspective(double camPosX, double camPosY, double camYaw)
+        public void SetWorldPerspective(double camPosX, double camPosY)
         {
             //back the camera up
             GL.Translate(0.0, 0.0, camSetDistance * 0.5);
@@ -55,11 +56,25 @@ namespace AgOpenGPS
 
             //following game style or N fixed cam
             if (camFollowing)
-                GL.Rotate(camYaw, 0.0, 0.0, 1.0);
+                GL.Rotate(camHeading, 0.0, 0.0, 1.0);
 
             GL.Translate(-camPosX, -camPosY, 0.0);
 
             DrawFieldSurface();
+        }
+
+        public void SmoothCam(double newHeading)
+        {
+            double distance = (newHeading - smoothCamHeading) % glm.twoPI;
+            if (distance < -glm.PIBy2) distance += glm.twoPI;
+            if (distance > glm.PIBy2) distance -= glm.twoPI;
+
+            smoothCamHeading += distance * camSmoothFactor;
+
+            if (smoothCamHeading > glm.twoPI) smoothCamHeading -= glm.twoPI;
+            else if (smoothCamHeading < 0) smoothCamHeading += glm.twoPI;
+
+            camHeading = glm.toDegrees(smoothCamHeading);
         }
 
         public void DrawFieldSurface()

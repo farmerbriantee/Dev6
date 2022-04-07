@@ -38,7 +38,7 @@ namespace AgOpenGPS
                 {
                     if (!mf.worldManager.camFollowing)
                     {
-                        GL.Rotate(mf.camHeading, 0, 0, 1);
+                        GL.Rotate(mf.worldManager.camHeading, 0, 0, 1);
                         y *= 1.2;
                     }
                     else
@@ -54,7 +54,7 @@ namespace AgOpenGPS
                     if (!mf.worldManager.camFollowing)
                     {
                         GL.Rotate(90, 1, 0, 0);
-                        GL.Rotate(mf.camHeading, 0, 1, 0);
+                        GL.Rotate(mf.worldManager.camHeading, 0, 1, 0);
                         //GL.Rotate(90, 1, 0, 0);
                         y *= 0.3;
                     }
@@ -116,7 +116,7 @@ namespace AgOpenGPS
             if (mf.worldManager.camPitch < -45)
             {
                 GL.Rotate(90, 1, 0, 0);
-                if (mf.worldManager.camFollowing) GL.Rotate(-mf.camHeading, 0, 1, 0);
+                if (mf.worldManager.camFollowing) GL.Rotate(-mf.worldManager.camHeading, 0, 1, 0);
                 size = -mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.8);
                 size /= 800;
@@ -124,7 +124,7 @@ namespace AgOpenGPS
 
             else
             {
-                if (mf.worldManager.camFollowing) GL.Rotate(-mf.camHeading, 0, 0, 1);
+                if (mf.worldManager.camFollowing) GL.Rotate(-mf.worldManager.camHeading, 0, 0, 1);
                 size = -mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.85);
                 size /= 1000;

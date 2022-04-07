@@ -6,12 +6,12 @@ namespace AgOpenGPS
         //private readonly FormGPS mf;
 
         //Roll and heading from the IMU
-        public double imuHeading = 99999, prevIMUHeading = 0, imuRoll = 0, imuPitch=0, imuYawRate = 0;
+        public double imuHeading = 99999, imuHeadingTool = 99999, imuRoll = 0, imuRollTool, imuPitch=0, imuYawRate = 0;
 
-        public System.Int16 angVel;
+        public short angVel;
 
         //actual value in degrees
-        public double rollZero;
+        public double rollZero, rollZeroTool;
 
         //Roll Filter Value
         public double rollFilter;

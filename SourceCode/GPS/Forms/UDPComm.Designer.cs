@@ -18,14 +18,14 @@ namespace AgOpenGPS
         private IPEndPoint epAgIO = new IPEndPoint(IPAddress.Parse("127.255.255.255"), 17777);
 
         // Initialise the IPEndPoint for async listener!
-        private EndPoint epSender = new IPEndPoint(IPAddress.Loopback, 0);
+        private EndPoint epSender = new IPEndPoint(IPAddress.Broadcast, 0);
 
         // Data stream
         private byte[] loopBuffer = new byte[1024];
 
         // Status delegate
         private int udpWatchCounts = 0;
-        public int udpWatchLimit = 70;
+        public int udpWatchLimit = 70, toolGPSWatchdog = 20, vehicleGPSWatchdog = 20;
 
         private readonly Stopwatch udpWatch = new Stopwatch();
 
@@ -184,8 +184,12 @@ namespace AgOpenGPS
                             double Lon = BitConverter.ToDouble(data, 5);
                             double Lat = BitConverter.ToDouble(data, 13);
 
-                            if (Lon != double.MaxValue && Lat != double.MaxValue)
+                            if (pn.isToolSteering && Lon != double.MaxValue && Lat != double.MaxValue)
                             {
+                                //make sure tool gps is either off or resetting watchdog
+                                vehicleGPSWatchdog = 0;
+                                if (toolGPSWatchdog < 20) toolGPSWatchdog++;
+
                                 if (timerSim.Enabled)
                                     DisableSim();
 
@@ -299,49 +303,63 @@ namespace AgOpenGPS
                         }
                         break;
 
-                    case 0xD3:// 211    external IMU
+                    case 0xD7: //Tool Antenna
                         {
-                            if (data.Length != 14)
-                                break;
-                            if (ahrs.imuRoll > 25 || ahrs.imuRoll < -25) ahrs.imuRoll = 0;
-                            //Heading
-                            ahrs.imuHeading = (Int16)((data[6] << 8) + data[5]);
-                            ahrs.imuHeading *= 0.1;
-                            
-                            //Roll
-                            double rollK = (Int16)((data[8] << 8) + data[7]);
+                            double Lon = BitConverter.ToDouble(data, 5);
+                            double Lat = BitConverter.ToDouble(data, 13);
 
-                            if (ahrs.isRollInvert) rollK *= -0.1;
-                            else rollK *= 0.1;
-                            rollK -= ahrs.rollZero;                           
-                            ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
-
-                            //Angular velocity
-                            ahrs.angVel = (Int16)((data[10] << 8) + data[9]);
-                            ahrs.angVel /= -2;
-
-                            //Log activity
-                            //if (isLogNMEA)
-                            //    pn.logNMEASentence.Append(
-                            //        DateTime.UtcNow.ToString("HH:mm:ss.ff", CultureInfo.InvariantCulture) + " IMU " +
-                            //        ahrs.imuRoll.ToString("0.0") + " " +
-                            //        ahrs.imuHeading.ToString("0.0") + 
-                            //        "\r\n"
-                            //        );
-                            break;
-                        }
-                    case 0xD4:// 212    imu disconnect pgn
-                        {
-                            if (data[5] == 1)
+                            if (Lon != double.MaxValue && Lat != double.MaxValue)
                             {
-                                ahrs.imuHeading = 99999;
+                                if (vehicleGPSWatchdog < 20) vehicleGPSWatchdog++;
+                                toolGPSWatchdog = 0;
 
-                                ahrs.imuRoll = 88888;
+                                pn.longitudeTool = Lon;
+                                pn.latitudeTool = Lat;
+                                pn.ConvertWGS84ToLocal(Lat, Lon, out pn.fixTool.northing, out pn.fixTool.easting);
 
-                                ahrs.angVel = 0;
+                                ushort sats = BitConverter.ToUInt16(data, 21);
+                                if (sats != ushort.MaxValue)
+                                    pn.satellitesTrackedTool = sats;
+
+                                byte fix = data[23];
+                                if (fix != byte.MaxValue)
+                                    pn.fixQualityTool = fix;
+
+                                ushort hdop = BitConverter.ToUInt16(data, 24);
+                                if (hdop != ushort.MaxValue)
+                                    pn.hdopTool = hdop * 0.01;
+
+                                ushort age = BitConverter.ToUInt16(data, 26);
+                                if (age != ushort.MaxValue)
+                                    pn.ageTool = age * 0.01;
+
+                                short imuRoll = BitConverter.ToInt16(data, 28);
+                                if (imuRoll != short.MaxValue)
+                                {
+                                    double rollK = imuRoll;
+                                    if (ahrs.isRollInvert) rollK *= -0.1;
+                                    else rollK *= 0.1;
+                                    rollK -= ahrs.rollZeroTool;
+                                    ahrs.imuRollTool = rollK;
+                                }
+
+                                //From dual antenna heading sentences
+                                float temp = BitConverter.ToSingle(data, 30);
+                                if (temp != float.MaxValue)
+                                {
+                                    pn.headingTrueDualTool = temp;// + pn.headingTrueDualOffset;
+                                    if (pn.headingTrueDualTool < 0) pn.headingTrueDualTool += 360;
+                                    if (ahrs.isDualAsIMU) ahrs.imuHeadingTool = temp;
+                                }
+
+                                sentenceCounter = 0;//or when vehicleGPSWatchdog > 10 only?
+
+                                if (vehicleGPSWatchdog > 10)
+                                    UpdateFixPosition();
                             }
-                            break;
                         }
+                        break;
+
                     case 0xFD:// 253    return from autosteer module
                         {
                             //Steer angle actual
@@ -397,15 +415,28 @@ namespace AgOpenGPS
                             break;
                         }
 
-                    #region Remote Switches
-                    case 0xEA: // 234    MTZ8302 Feb 2020
+                    case 0xE6:// 230    return from tool steer module
                         {
                             //Steer angle actual
                             if (data.Length != 14)
                                 break;
+                            mc.toolActualDistance = (Int16)((data[6] << 8) + data[5]);
+                            mc.toolActualDistance *= 0.1;
+                            mc.toolError = (Int16)((data[8] << 8) + data[7]);
+                            mc.toolError *= 0.1;
 
+                            mc.toolPWM = (Int16)((data[9]));
+
+                            mc.toolStatus = (Int16)((data[10]));
+
+                            break;
+                        }
+
+                    #region Remote Switches
+                    case 0xEA: // 234    MTZ8302 Feb 2020
+                        {
                             //MTZ8302 Feb 2020 
-                            if (isJobStarted)
+                            if (data.Length != 14 && isJobStarted)
                             {
                                 //MainSW was used
                                 if (data[mc.swMain] != mc.ssP[0])
@@ -482,7 +513,7 @@ namespace AgOpenGPS
                 // Initialise the socket
                 loopBackSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 loopBackSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-                loopBackSocket.Bind(new IPEndPoint(IPAddress.Loopback, 15555));
+                loopBackSocket.Bind(new IPEndPoint(IPAddress.Broadcast, 15555));
                 loopBackSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), null);
             }
             catch (Exception ex)

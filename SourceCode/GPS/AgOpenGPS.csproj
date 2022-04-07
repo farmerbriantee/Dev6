@@ -486,6 +486,12 @@
     <Compile Include="Forms\Guidance\FormTram.Designer.cs">
       <DependentUpon>FormTram.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Settings\FormToolSteer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\FormToolSteer.Designer.cs">
+		<DependentUpon>FormToolSteer.cs</DependentUpon>
+	</Compile>
     <Compile Include="gStr.da.Designer.cs">
       <DependentUpon>gStr.da.resx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -763,6 +769,9 @@
     <EmbeddedResource Include="Forms\Guidance\FormTram.resx">
       <DependentUpon>FormTram.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\FormToolSteer.resx">
+		<DependentUpon>FormToolSteer.cs</DependentUpon>
+	</EmbeddedResource>
     <EmbeddedResource Include="gStr.da.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>gStr.da.Designer.cs</LastGenOutput>

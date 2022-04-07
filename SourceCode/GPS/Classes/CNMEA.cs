@@ -6,7 +6,7 @@ namespace AgOpenGPS
     public class CNMEA
     {
         //WGS84 Lat Long
-        public double latitude, longitude;
+        public double latitude, longitude, latitudeTool, longitudeTool;
 
         //local plane geometry
         public double latStart, lonStart;
@@ -14,17 +14,19 @@ namespace AgOpenGPS
 
         //our current fix
         public vec2 fix = new vec2(0, 0);
-
+        public vec2 fixTool = new vec2(0, 0);
+        
         //used to offset the antenna position to compensate for drift
         public vec2 fixOffset = new vec2(0, 0);
 
         //other GIS Info
         public double altitude, speed;
 
-        public double headingTrueDual, headingTrue, hdop, age, headingTrueDualOffset;
+        public double headingTrueDual, headingTrueDualTool, headingTrue, hdop, age, hdopTool, ageTool, headingTrueDualOffset;
 
-        public int fixQuality, ageAlarm;
-        public int satellitesTracked;
+        public int fixQuality, fixQualityTool, ageAlarm;
+        public int satellitesTracked, satellitesTrackedTool;
+        public bool isToolSteering;
 
         public StringBuilder logNMEASentence = new StringBuilder();
 

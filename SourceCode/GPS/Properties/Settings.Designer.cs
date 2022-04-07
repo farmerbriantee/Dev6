@@ -818,18 +818,6 @@ namespace AgOpenGPS.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool setAS_isAngVelGuidance {
-            get {
-                return ((bool)(this["setAS_isAngVelGuidance"]));
-            }
-            set {
-                this["setAS_isAngVelGuidance"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public double setAS_guidanceLookAheadTime {
             get {

@@ -35,7 +35,7 @@ namespace AgOpenGPS
 
         public bool isSmoothWindowOpen, isHeadingSameWay = true, oldIsHeadingSameWay = true;
 
-        public double distanceFromCurrentLinePivot;
+        public double distanceFromCurrentLinePivot, distanceFromCurrentLineTool;
         public double steerAngle, rEast, rNorth;
 
         public vec2 goalPoint = new vec2(0, 0);//, radiusPoint = new vec2(0, 0);
@@ -102,6 +102,11 @@ namespace AgOpenGPS
 
                 //how far from current AB Line is fix
                 distanceFromCurrentLinePivot = ((dy2 * pivot.easting) - (dx2 * pivot.northing) + (curList[pB].easting
+                            * curList[pA].northing) - (curList[pB].northing * curList[pA].easting))
+                                / Math.Sqrt((dy2 * dy2) + (dx2 * dx2));
+
+                //should get its own closest segment
+                distanceFromCurrentLineTool = ((dy2 * mf.toolPos.easting) - (dx2 * mf.toolPos.northing) + (curList[pB].easting
                             * curList[pA].northing) - (curList[pB].northing * curList[pA].easting))
                                 / Math.Sqrt((dy2 * dy2) + (dx2 * dx2));
 
@@ -354,53 +359,18 @@ namespace AgOpenGPS
                     if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
                     if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
 
-                    //ppRadius = goalPointDistanceSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading)) + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
-
-                    //if (ppRadius < -500) ppRadius = -500;
-                    //if (ppRadius > 500) ppRadius = 500;
-
-                    //radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
-                    //radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
-
-                    if (!isYouTurnTriggered)
-                    {
-                        if (CurrentGMode == Mode.AB)
-                        {
-                            if (mf.isAngVelGuidance)
-                            {
-                                //angular velocity in rads/sec  = 2PI * m/sec * radians/meters
-                                mf.setAngVel = 0.277777 * mf.pn.speed * (Math.Tan(glm.toRadians(steerAngle))) / mf.vehicle.wheelbase;
-                                mf.setAngVel = glm.toDegrees(mf.setAngVel) * 100;
-
-                                //clamp the steering angle to not exceed safe angular velocity
-                                if (Math.Abs(mf.setAngVel) > 1000)
-                                {
-                                    //mf.setAngVel = mf.setAngVel < 0 ? -mf.vehicle.maxAngularVelocity : mf.vehicle.maxAngularVelocity;
-                                    mf.setAngVel = mf.setAngVel < 0 ? -1000 : 1000;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            //angular velocity in rads/sec  = 2PI * m/sec * radians/meters
-                            double angVel = glm.twoPI * 0.277777 * mf.pn.speed * (Math.Tan(glm.toRadians(steerAngle))) / mf.vehicle.wheelbase;
-
-                            //clamp the steering angle to not exceed safe angular velocity
-                            if (Math.Abs(angVel) > mf.vehicle.maxAngularVelocity)
-                            {
-                                steerAngle = glm.toDegrees(Math.Atan(mf.vehicle.wheelbase * (steerAngle > 0 ? mf.vehicle.maxAngularVelocity : -mf.vehicle.maxAngularVelocity)
-                                    / (glm.twoPI * mf.pn.speed * 0.277777)));
-                            }
-                        }
-                    }
                     #endregion Pure Pursuit
                 }
 
                 if (!isYouTurnTriggered && !isHeadingSameWay)
+                {
                     distanceFromCurrentLinePivot *= -1.0;
+                    distanceFromCurrentLineTool *= -1.0;
+                }
 
                 //Convert to millimeters from meters
                 mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
+                mf.guidanceLineDistanceOffTool = (short)Math.Round(distanceFromCurrentLineTool * 1000.0, MidpointRounding.AwayFromZero);
                 mf.guidanceLineSteerAngle = (short)(steerAngle * 100);
             }
             else
@@ -479,6 +449,11 @@ namespace AgOpenGPS
 
             //how far from current AB Line is fix
             distanceFromCurrentLinePivot = ((dz * pivot.easting) - (dx * pivot.northing) + (recList[pB].easting
+                        * recList[pA].northing) - (recList[pB].northing * recList[pA].easting))
+                            / Math.Sqrt((dz * dz) + (dx * dx));
+
+            //should get its own closest segment
+            distanceFromCurrentLineTool = ((dz * mf.toolPos.easting) - (dx * mf.toolPos.northing) + (recList[pB].easting
                         * recList[pA].northing) - (recList[pB].northing * recList[pA].easting))
                             / Math.Sqrt((dz * dz) + (dx * dx));
 
@@ -563,16 +538,9 @@ namespace AgOpenGPS
             if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
             if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
 
-            //ppRadius = goalPointDistanceSquared / (2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading)) + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))));
-
-            //if (ppRadius < -500) ppRadius = -500;
-            //if (ppRadius > 500) ppRadius = 500;
-
-            //radiusPoint.easting = pivot.easting + (ppRadius * Math.Cos(localHeading));
-            //radiusPoint.northing = pivot.northing + (ppRadius * Math.Sin(localHeading));
-
             //Convert to centimeters
             mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
+            mf.guidanceLineDistanceOffTool = (short)Math.Round(distanceFromCurrentLineTool * 1000.0, MidpointRounding.AwayFromZero);
             mf.guidanceLineSteerAngle = (short)(steerAngle * 100);
         }
     }

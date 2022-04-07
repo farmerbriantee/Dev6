@@ -14,7 +14,7 @@ namespace AgOpenGPS
         /// <summary> /// Is the youturn button enabled? /// </summary>
         public bool isYouTurnBtnOn;
 
-        public double boundaryAngleOffPerpendicular, turnOffset;
+        public double turnOffset;
 
         public int rowSkipsWidth = 1, uTurnSmoothing = 10;
 

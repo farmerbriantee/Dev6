@@ -28,7 +28,6 @@ namespace AgOpenGPS
         public double stanleyDistanceErrorGain, stanleyHeadingErrorGain;
         public double minLookAheadDistance = 2.0;
         public double maxSteerAngle;
-        public double maxAngularVelocity;
         public double hydLiftLookAheadTime, trackWidth;
 
         public double hydLiftLookAheadDistanceLeft, hydLiftLookAheadDistanceRight;
@@ -38,10 +37,10 @@ namespace AgOpenGPS
 
 
         //flag for free drive window to control autosteer
-        public bool isInFreeDriveMode;
+        public bool isInFreeDriveMode, isInFreeToolDriveMode;
 
         //the trackbar angle for free drive
-        public double driveFreeSteerAngle = 0;
+        public double driveFreeSteerAngle = 0, driveFreeToolDistance = 0;
 
         public CVehicle(FormGPS _f)
         {
@@ -65,7 +64,6 @@ namespace AgOpenGPS
             stanleyDistanceErrorGain = Properties.Vehicle.Default.stanleyDistanceErrorGain;
             stanleyHeadingErrorGain = Properties.Vehicle.Default.stanleyHeadingErrorGain;
 
-            maxAngularVelocity = Properties.Vehicle.Default.setVehicle_maxAngularVelocity;
             maxSteerAngle = Properties.Vehicle.Default.setVehicle_maxSteerAngle;
 
             isHydLiftOn = false;
@@ -103,7 +101,6 @@ namespace AgOpenGPS
 
         public void DrawVehicle()
         {
-
             //draw vehicle
             GL.Rotate(glm.toDegrees(-mf.fixHeading), 0.0, 0.0, 1.0);
             //mf.font.DrawText3D(0, 0, "&TGF");
