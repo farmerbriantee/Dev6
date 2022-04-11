@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace AgOpenGPS
@@ -45,15 +46,15 @@ namespace AgOpenGPS
         public double cosSectionHeading = 1.0, sinSectionHeading = 0.0;
 
         //how far travelled since last section was added, section points
-        double sectionTriggerDistance = 0, sectionTriggerStepDistance = 0;
+        double sectionTriggerStepDistance = 0;
 
         //Everything is so wonky at the start
         int startCounter = 0;
 
         //individual points for the flags in a list
         public List<CFlag> flagPts = new List<CFlag>();
-
-        public double avgSpeed;//for average speed
+        
+        public double previousSpeed;//for average speed
         public int crossTrackError;
 
         //youturn
@@ -89,6 +90,12 @@ namespace AgOpenGPS
             fixUpdateHz = (int)(HzTime + 0.5);
             fixUpdateTime = 1 / HzTime;
 
+            if (Debugger.IsAttached)
+            {
+                //fixUpdateHz = 10;
+                //fixUpdateTime = 0.1;
+            }
+
             swHz.Reset();
             swHz.Start();
 
@@ -103,6 +110,7 @@ namespace AgOpenGPS
                 InitializeFirstFewGPSPositions();
                 return;
             }
+            vec2 oldpivotAxlePos = new vec2(pivotAxlePos.easting, pivotAxlePos.northing);
 
             if (vehicleGPSWatchdog < 11)
             {
@@ -111,7 +119,7 @@ namespace AgOpenGPS
                     //calculate current heading only when moving, otherwise use last
                     if (!isFirstHeadingSet) //set in steer settings, Stanley
                     {
-                        if (Math.Abs(avgSpeed) >= 1.5)
+                        if (Math.Abs(pn.avgSpeed) >= 1.5)
                         {
                             prevFix.easting = stepFixPts[0].easting; prevFix.northing = stepFixPts[0].northing;
 
@@ -208,7 +216,7 @@ namespace AgOpenGPS
                         }
 
                         //initializing all done
-                        if (Math.Abs(avgSpeed) > startSpeed)
+                        if (Math.Abs(pn.avgSpeed) > startSpeed)
                         {
                             isSuperSlow = false;
 
@@ -358,7 +366,7 @@ namespace AgOpenGPS
                             if (gyroDelta > glm.twoPI) gyroDelta -= glm.twoPI;
                             else if (gyroDelta < -glm.twoPI) gyroDelta += glm.twoPI;
 
-                            if (Math.Abs(avgSpeed) > startSpeed)
+                            if (Math.Abs(pn.avgSpeed) > startSpeed)
                             {
                                 if (isReverse)
                                     imuGPS_Offset += (gyroDelta * (0.01));
@@ -391,7 +399,7 @@ namespace AgOpenGPS
 
                     uncorrectedEastingGraph = pn.fix.easting;
 
-                    if (glm.DistanceSquared(lastReverseFix, pn.fix) > 0.6)
+                    if (glm.DistanceSquared(lastReverseFix, pn.fix) > 0.3)
                     {
                         //most recent heading
                         double newHeading = Math.Atan2(pn.fix.easting - lastReverseFix.easting,
@@ -441,10 +449,6 @@ namespace AgOpenGPS
                 double heading = glm.toRadians(pn.headingTrueDualTool);
                 //for TEST DUAL only
 
-
-
-
-
                 toolPos = new vec3(pn.fixTool.easting, pn.fixTool.northing, heading);
 
                 //offset based on settings
@@ -474,11 +478,22 @@ namespace AgOpenGPS
                 return;
             }
 
+            if (pn.speed == double.MaxValue)
+            {
+                double distance = glm.Distance(oldpivotAxlePos, pivotAxlePos);
+                pn.avgSpeed = (pn.avgSpeed * 0.5) + (distance * 3.6 * 0.5) * HzTime;
+            }
+            else
+            {
+                pn.avgSpeed = (pn.avgSpeed * 0.5) + (pn.speed * 0.5);
+                pn.speed = double.MaxValue;
+            }
+
             //calculate lookahead at full speed, no sentence misses
             CalculateSectionLookAhead(toolPos.northing, toolPos.easting);
 
             //To prevent drawing high numbers of triangles, determine and test before drawing vertex
-            sectionTriggerDistance = glm.Distance(pivotAxlePos, prevSectionPos);
+            double sectionTriggerDistance = glm.Distance(pivotAxlePos, prevSectionPos);
 
             //section on off and points, contour points
             if (sectionTriggerDistance > sectionTriggerStepDistance && isJobStarted)
@@ -499,10 +514,16 @@ namespace AgOpenGPS
             }
 
             //calc distance travelled since last GPS fix
-            if (pn.speed > 1)
+            if (pn.avgSpeed > 1)
             {
                 if ((fd.distanceUser += distanceCurrentStepFix) > 3000) fd.distanceUser = 0; ;//userDistance can be reset
             }
+
+            if (pn.panicStopSpeed > 0 && (previousSpeed - pn.avgSpeed) > pn.panicStopSpeed)
+            {
+                setBtnAutoSteer(false);
+            }
+            previousSpeed = pn.avgSpeed;
 
             #region AutoSteer
 
@@ -539,8 +560,8 @@ namespace AgOpenGPS
             }
 
             p_254.pgn[p_254.lineDistance] = unchecked((byte)distanceX2);
-            p_254.pgn[p_254.speedHi] = unchecked((byte)((int)(Math.Abs(pn.speed) * 10.0) >> 8));
-            p_254.pgn[p_254.speedLo] = unchecked((byte)((int)(Math.Abs(pn.speed) * 10.0)));
+            p_254.pgn[p_254.speedHi] = unchecked((byte)((int)(Math.Abs(pn.avgSpeed) * 10.0) >> 8));
+            p_254.pgn[p_254.speedLo] = unchecked((byte)((int)(Math.Abs(pn.avgSpeed) * 10.0)));
 
             if (vehicle.isInFreeDriveMode) //Drive button is on
             {
@@ -550,7 +571,7 @@ namespace AgOpenGPS
             p_254.pgn[p_254.steerAngleLo] = unchecked((byte)(guidanceLineSteerAngle));
 
             //speed for tool
-            p_233.pgn[p_233.speed] = unchecked((byte)(Math.Abs(pn.speed) * 10.0));
+            p_233.pgn[p_233.speed] = unchecked((byte)(Math.Abs(pn.avgSpeed) * 10.0));
 
             if (vehicle.isInFreeToolDriveMode)
             {
@@ -893,11 +914,8 @@ namespace AgOpenGPS
             if (gyd.isRecordOn)
             {
                 //keep minimum speed of 1.0
-                double speed = pn.speed;
-                if (pn.speed < 1.0) speed = 1.0;
-                bool autoBtn = (autoBtnState == btnStates.Auto);
-
-                gyd.recList.Add(new CRecPathPt(pivotAxlePos.easting, pivotAxlePos.northing, fixHeading, speed, autoBtn));
+                gyd.recList.Add(new CRecPathPt(pivotAxlePos.easting, pivotAxlePos.northing, fixHeading,
+                    pn.avgSpeed < 1.0? 1.0 : pn.avgSpeed, autoBtnState == btnStates.Auto));
             }
 
             if (gyd.isOkToAddDesPoints && gyd.EditGuidanceLine != null)
@@ -940,7 +958,7 @@ namespace AgOpenGPS
             double leftSpeed = 0, rightSpeed = 0;
 
             //speed max for section kmh*0.277 to m/s * 10 cm per pixel * 1.7 max speed
-            double meterPerSecPerPixel = Math.Abs(pn.speed) * 4.5;
+            double meterPerSecPerPixel = Math.Abs(pn.avgSpeed) * 4.5;
 
             //now loop all the section rights and the one extreme left
             for (int j = 0; j < tool.numOfSections; j++)

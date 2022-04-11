@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AgOpenGPS
 {
@@ -6,7 +7,7 @@ namespace AgOpenGPS
     {
         //list of coordinates of boundary line
         public Polyline fenceLine = new Polyline();
-        public Polyline hdLine = new Polyline();
+        public List<Polyline> hdLine = new List<Polyline>();
         public Polyline turnLine = new Polyline();
 
         //area variable

@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Media;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace AgOpenGPS
@@ -62,10 +63,7 @@ namespace AgOpenGPS
         //texture holders
         public uint[] texture;
 
-        //the currentversion of software
-        public string currentVersionStr, inoVersionStr;
-        public int inoVersionInt;
-
+        public string currentVersionStr = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         //create instance of a stopwatch for timing of frames and NMEA hz determination
         private readonly Stopwatch swFrame = new Stopwatch();
 
@@ -263,15 +261,6 @@ namespace AgOpenGPS
 
             //set the language to last used
             SetLanguage(Settings.Default.setF_culture);
-
-            currentVersionStr = Application.ProductVersion.ToString(CultureInfo.InvariantCulture);
-
-            string[] fullVers = currentVersionStr.Split('.');
-            int inoV = int.Parse(fullVers[0], CultureInfo.InvariantCulture);
-            inoV += int.Parse(fullVers[1], CultureInfo.InvariantCulture);
-            inoV += int.Parse(fullVers[2], CultureInfo.InvariantCulture);
-            inoVersionInt = inoV;
-            inoVersionStr = inoV.ToString();
 
             if (Settings.Default.setF_workingDirectory == "Default")
                 baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AgOpenGPS\\";
@@ -532,7 +521,7 @@ namespace AgOpenGPS
             //machine pgn
             p_239.pgn[p_239.sc9to16] = p_254.pgn[p_254.sc9to16];
             p_239.pgn[p_239.sc1to8] = p_254.pgn[p_254.sc1to8];
-            p_239.pgn[p_239.speed] = unchecked((byte)(avgSpeed*10));
+            p_239.pgn[p_239.speed] = unchecked((byte)(pn.avgSpeed*10));
             p_239.pgn[p_239.tram] = unchecked((byte)tram.controlByte);
 
             //out serial to autosteer module  //indivdual classes load the distance and heading deltas 
@@ -560,9 +549,9 @@ namespace AgOpenGPS
             }
         }
 
-        public bool KeypadToButton(ref Button sender, ref double value, double minimum, double maximum, int decimals, bool changetoculture = false, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
+        public bool KeypadToButton(ref Button sender, ref double value, double minimum, double maximum, int decimals, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
         {
-            using (FormNumeric form = new FormNumeric(minimum, maximum, value, decimals, changetoculture, unit2meter, Mtr2Unit, divisible))
+            using (FormNumeric form = new FormNumeric(minimum, maximum, value, decimals, true, unit2meter, Mtr2Unit, divisible))
             {
                 if (form.ShowDialog(sender) == DialogResult.OK)
                 {
@@ -583,7 +572,7 @@ namespace AgOpenGPS
             return false;
         }
 
-        public bool KeypadToButton(ref Button sender, ref int value, double minimum, double maximum, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
+        public bool KeypadToButton(ref Button sender, ref int value, int minimum, int maximum, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
         {
             using (FormNumeric form = new FormNumeric(minimum, maximum, value, 0, true, unit2meter, Mtr2Unit, divisible))
             {

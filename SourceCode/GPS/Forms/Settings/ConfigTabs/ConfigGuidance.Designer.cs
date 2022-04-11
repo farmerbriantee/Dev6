@@ -51,6 +51,9 @@
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.label31 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.nudPanicStopSpeed = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox12)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox14)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
@@ -61,7 +64,6 @@
             // pictureBox12
             // 
             this.pictureBox12.BackgroundImage = global::AgOpenGPS.Properties.Resources.ConV_GuidanceLookAhead;
-            this.pictureBox12.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox12.Location = new System.Drawing.Point(472, 407);
             this.pictureBox12.Name = "pictureBox12";
             this.pictureBox12.Size = new System.Drawing.Size(200, 123);
@@ -74,7 +76,7 @@
             this.label113.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label113.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.label113.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label113.Location = new System.Drawing.Point(180, 393);
+            this.label113.Location = new System.Drawing.Point(47, 386);
             this.label113.Name = "label113";
             this.label113.Size = new System.Drawing.Size(137, 18);
             this.label113.TabIndex = 494;
@@ -168,6 +170,7 @@
             this.nudGuidanceLookAhead.Size = new System.Drawing.Size(132, 52);
             this.nudGuidanceLookAhead.TabIndex = 487;
             this.nudGuidanceLookAhead.Text = "10";
+            this.nudGuidanceLookAhead.UseVisualStyleBackColor = false;
             this.nudGuidanceLookAhead.Click += new System.EventHandler(this.nudGuidanceLookAhead_Click);
             this.nudGuidanceLookAhead.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudGuidanceLookAhead_HelpRequested);
             // 
@@ -193,6 +196,7 @@
             this.nudABLength.Size = new System.Drawing.Size(131, 52);
             this.nudABLength.TabIndex = 483;
             this.nudABLength.Text = "2888";
+            this.nudABLength.UseVisualStyleBackColor = false;
             this.nudABLength.Click += new System.EventHandler(this.nudABLength_Click);
             this.nudABLength.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudABLength_HelpRequested);
             // 
@@ -257,6 +261,7 @@
             this.nudSnapDistance.Size = new System.Drawing.Size(110, 52);
             this.nudSnapDistance.TabIndex = 474;
             this.nudSnapDistance.Text = "499";
+            this.nudSnapDistance.UseVisualStyleBackColor = false;
             this.nudSnapDistance.Click += new System.EventHandler(this.nudSnapDistance_Click);
             this.nudSnapDistance.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudSnapDistance_HelpRequested);
             // 
@@ -269,6 +274,7 @@
             this.nudLightbarCmPerPixel.Size = new System.Drawing.Size(110, 52);
             this.nudLightbarCmPerPixel.TabIndex = 473;
             this.nudLightbarCmPerPixel.Text = "5";
+            this.nudLightbarCmPerPixel.UseVisualStyleBackColor = false;
             this.nudLightbarCmPerPixel.Click += new System.EventHandler(this.nudLightbarCmPerPixel_Click);
             this.nudLightbarCmPerPixel.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudLightbarCmPerPixel_HelpRequested);
             // 
@@ -281,6 +287,7 @@
             this.nudLineWidth.Size = new System.Drawing.Size(110, 52);
             this.nudLineWidth.TabIndex = 475;
             this.nudLineWidth.Text = "1";
+            this.nudLineWidth.UseVisualStyleBackColor = false;
             this.nudLineWidth.Click += new System.EventHandler(this.nudLineWidth_Click);
             this.nudLineWidth.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudLineWidth_HelpRequested);
             // 
@@ -304,7 +311,7 @@
             this.cboxAutoSteerAuto.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.cboxAutoSteerAuto.Image = global::AgOpenGPS.Properties.Resources.AutoSteerOn;
             this.cboxAutoSteerAuto.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.cboxAutoSteerAuto.Location = new System.Drawing.Point(198, 417);
+            this.cboxAutoSteerAuto.Location = new System.Drawing.Point(65, 410);
             this.cboxAutoSteerAuto.Name = "cboxAutoSteerAuto";
             this.cboxAutoSteerAuto.Size = new System.Drawing.Size(98, 103);
             this.cboxAutoSteerAuto.TabIndex = 472;
@@ -335,16 +342,54 @@
             // pictureBox2
             // 
             this.pictureBox2.BackgroundImage = global::AgOpenGPS.Properties.Resources.ConV_SnapDistance;
-            this.pictureBox2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox2.Location = new System.Drawing.Point(472, 221);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(200, 123);
             this.pictureBox2.TabIndex = 476;
             this.pictureBox2.TabStop = false;
             // 
+            // label31
+            // 
+            this.label31.BackColor = System.Drawing.Color.Transparent;
+            this.label31.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label31.ForeColor = System.Drawing.Color.Black;
+            this.label31.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label31.Location = new System.Drawing.Point(268, 479);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(120, 28);
+            this.label31.TabIndex = 526;
+            this.label31.Text = "0 = Off";
+            this.label31.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label16
+            // 
+            this.label16.ForeColor = System.Drawing.Color.Black;
+            this.label16.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label16.Location = new System.Drawing.Point(268, 407);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(120, 20);
+            this.label16.TabIndex = 525;
+            this.label16.Text = "Panic Stop Speed";
+            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // nudPanicStopSpeed
+            // 
+            this.nudPanicStopSpeed.BackColor = System.Drawing.Color.AliceBlue;
+            this.nudPanicStopSpeed.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudPanicStopSpeed.Location = new System.Drawing.Point(268, 427);
+            this.nudPanicStopSpeed.Name = "nudPanicStopSpeed";
+            this.nudPanicStopSpeed.Size = new System.Drawing.Size(120, 52);
+            this.nudPanicStopSpeed.TabIndex = 524;
+            this.nudPanicStopSpeed.Text = "15";
+            this.nudPanicStopSpeed.UseVisualStyleBackColor = false;
+            this.nudPanicStopSpeed.Click += new System.EventHandler(this.nudPanicStopSpeed_Click);
+            // 
             // ConfigGuidance
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
+            this.Controls.Add(this.label31);
+            this.Controls.Add(this.label16);
+            this.Controls.Add(this.nudPanicStopSpeed);
             this.Controls.Add(this.pictureBox12);
             this.Controls.Add(this.label113);
             this.Controls.Add(this.label112);
@@ -406,5 +451,8 @@
         private System.Windows.Forms.PictureBox pictureBox5;
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Button nudPanicStopSpeed;
     }
 }

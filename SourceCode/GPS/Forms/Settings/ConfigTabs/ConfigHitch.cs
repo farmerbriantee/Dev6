@@ -77,6 +77,7 @@ namespace AgOpenGPS
         public override void Close()
         {
             Properties.Vehicle.Default.setTool_toolTrailingHitchLength = mf.tool.toolTrailingHitchLength = -trailingHitchLength;
+            Properties.Vehicle.Default.setVehicle_tankTrailingHitchLength = mf.tool.toolTankTrailingHitchLength = -tankHitch;
 
             mf.tool.hitchLength = drawbarLength;
             if (!Properties.Vehicle.Default.setTool_isToolFront)
@@ -85,24 +86,23 @@ namespace AgOpenGPS
             }
             Properties.Vehicle.Default.setVehicle_hitchLength = mf.tool.hitchLength;
 
-            Properties.Vehicle.Default.setVehicle_tankTrailingHitchLength = mf.tool.toolTankTrailingHitchLength = -trailingHitchLength;
 
             Properties.Vehicle.Default.Save();
         }
 
         private void nudTrailingHitchLength_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTrailingHitchLength, ref trailingHitchLength, 0.1, 30, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudTrailingHitchLength, ref trailingHitchLength, 0.01, 30, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudDrawbarLength_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudDrawbarLength, ref drawbarLength, 0.1, 30, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudDrawbarLength, ref drawbarLength, 0.0, 30, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudTankHitch_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTankHitch, ref tankHitch, 0.1, 30, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudTankHitch, ref tankHitch, 0.01, 30, 0, mf.mToUser, mf.userToM);
         }
     }
 }

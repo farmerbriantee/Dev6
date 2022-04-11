@@ -101,7 +101,7 @@ namespace AgOpenGPS
                 if (!refList.mode.HasFlag(Mode.Contour))
                 {
                     //guidance look ahead distance based on time or tool width at least 
-                    double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
+                    double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.pn.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
                     pivot = new vec2(pivot.easting + (Math.Sin(heading) * guidanceLookDist),
                                                     pivot.northing + (Math.Cos(heading) * guidanceLookDist));
                 }

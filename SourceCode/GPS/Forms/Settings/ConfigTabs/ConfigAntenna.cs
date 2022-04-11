@@ -45,17 +45,17 @@ namespace AgOpenGPS
 
         private void nudAntennaPivot_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudAntennaPivot, ref antennaPivot, -10, 10, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudAntennaPivot, ref antennaPivot, -10, 10, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudAntennaHeight_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudAntennaHeight, ref antennaHeight, 0, 10, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudAntennaHeight, ref antennaHeight, 0, 10, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudAntennaOffset_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudAntennaOffset, ref antennaOffset, -5, 5, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudAntennaOffset, ref antennaOffset, -5, 5, 0, mf.mToUser, mf.userToM);
         }
     }
 }

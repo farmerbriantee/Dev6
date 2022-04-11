@@ -43,10 +43,8 @@ namespace AgOpenGPS
 
                 mf.pn.ConvertLocalToWGS84(mf.pn.fix.northing, mf.pn.fix.easting, out mf.pn.latitude, out mf.pn.longitude);
 
-                mf.pn.speed = Math.Abs(Math.Round(stepDistance * 3.6, 1));
-                mf.pn.AverageTheSpeed();
-
                 mf.pn.headingTrue = mf.pn.headingTrueDual = glm.toDegrees(heading);
+                if (mf.ahrs.isDualAsIMU) mf.pn.headingTrueDual = double.MaxValue;
             }
 
             if (ToolGPS)

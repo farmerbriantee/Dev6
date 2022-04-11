@@ -20,7 +20,7 @@ namespace AgOpenGPS
         public vec2 fixOffset = new vec2(0, 0);
 
         //other GIS Info
-        public double altitude, speed;
+        public double altitude, speed = double.MaxValue, avgSpeed, panicStopSpeed;
 
         public double headingTrueDual, headingTrueDualTool, headingTrue, hdop, age, hdopTool, ageTool, headingTrueDualOffset;
 
@@ -38,14 +38,6 @@ namespace AgOpenGPS
             latStart = 0;
             lonStart = 0;
             ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
-        }
-
-        public void AverageTheSpeed()
-        {
-            //average the speed
-            //if (mf.isReverse) speed *= -1;
-
-            mf.avgSpeed = (mf.avgSpeed * 0.5) + (speed * 0.5);
         }
 
         public void SetLocalMetersPerDegree()

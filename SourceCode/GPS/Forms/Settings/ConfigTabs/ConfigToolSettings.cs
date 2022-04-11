@@ -91,12 +91,12 @@ namespace AgOpenGPS
 
         private void nudOffset_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudOffset, ref offset, -25, 25, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudOffset, ref offset, -25, 25, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudOverlap_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudOverlap, ref overlap, -30, 30, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudOverlap, ref overlap, -30, 30, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudLookAhead_HelpRequested(object sender, HelpEventArgs hlpevent)

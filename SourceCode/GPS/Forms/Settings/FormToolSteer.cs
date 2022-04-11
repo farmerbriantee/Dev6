@@ -189,12 +189,12 @@ namespace AgOpenGPS
 
         private void nudToolAntennaHeight_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudToolAntennaHeight, ref AntennaHeight, 0.0, 10.0, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudToolAntennaHeight, ref AntennaHeight, 0.0, 10.0, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudToolAntennaOffset_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudToolAntennaOffset, ref AntennaOffset, -5.0, 5.0, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudToolAntennaOffset, ref AntennaOffset, -5.0, 5.0, 0, mf.mToUser, mf.userToM);
         }
 
         public void SetProgressNoAnimation(ProgressBar pb, int value)

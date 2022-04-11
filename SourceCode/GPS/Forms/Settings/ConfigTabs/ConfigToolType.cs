@@ -17,7 +17,7 @@ namespace AgOpenGPS
         {
             rbtnFixedRear.Checked = Properties.Vehicle.Default.setTool_isToolRearFixed;
             rbtnTBT.Checked = Properties.Vehicle.Default.setTool_isToolTBT;
-            rbtnTrailing.Checked = Properties.Vehicle.Default.setTool_isToolTrailing;
+            rbtnTrailing.Checked = Properties.Vehicle.Default.setTool_isToolTrailing && !rbtnTBT.Checked;
             rbtnFront.Checked = Properties.Vehicle.Default.setTool_isToolFront;
         }
 

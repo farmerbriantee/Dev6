@@ -37,7 +37,7 @@ namespace AgOpenGPS
             {
                 try
                 {
-                    writer.WriteLine("$CurveLines");
+                    writer.WriteLine("$CurveLines," + currentVersionStr);
 
                     for (int i = 0; i < gyd.curveArr.Count; i++)
                     {
@@ -87,7 +87,7 @@ namespace AgOpenGPS
             {
                 using (StreamWriter writer = new StreamWriter(filename))
                 {
-                    writer.WriteLine("$CurveLines");
+                    writer.WriteLine("$CurveLines," + currentVersionStr);
                 }
             }
 
@@ -348,7 +348,6 @@ namespace AgOpenGPS
             }
             else
             {
-                bool isv3 = false;
                 using (StreamReader reader = new StreamReader(fileAndDirectory))
                 {
                     try
@@ -360,11 +359,6 @@ namespace AgOpenGPS
                         while (!reader.EndOfStream)
                         {
                             line = reader.ReadLine();
-                            if (line.Contains("ect"))
-                            {
-                                isv3 = true;
-                                break;
-                            }
                             int verts = int.Parse(line);
 
                             Polyline New = new Polyline();
@@ -416,15 +410,6 @@ namespace AgOpenGPS
                         form.Show(this);
                     }
 
-                }
-
-                //was old version prior to v4
-                if (isv3)
-                {
-                        //Append the current list to the field file
-                        using (StreamWriter writer = new StreamWriter((fieldsDirectory + currentFieldDirectory + "\\Sections.txt"), false))
-                        {
-                        }
                 }
             }
 
@@ -634,37 +619,56 @@ namespace AgOpenGPS
                 {
                     try
                     {
+                        Version currentFileVersion = new Version();
+                        Version FileVersion6 = new Version(6, 0);
+
                         //read header
                         line = reader.ReadLine();
 
-                        for (int k = 0; true; k++)
+                        string[] words = line.Split(',');
+                        if (words.Length > 1)
                         {
-                            if (reader.EndOfStream) break;
+                            currentFileVersion = Version.Parse(words[1]);
+                        }
+
+                        for (int i = 0; true; i++)//bndList.Count
+                        {
+                            if (i >= bnd.bndList.Count || reader.EndOfStream) break;
 
                             //read the number of points
                             line = reader.ReadLine();//endless loop fix if no boundary
 
-                            if (bnd.bndList.Count > k)
+                            int hdLineCount = int.Parse(line);
+                            for (int j = 0; j < hdLineCount; j++)
                             {
+                                if (currentFileVersion < FileVersion6)
+                                {
+                                    hdLineCount = 1;
+                                }
+                                else
+                                {
+                                    line = reader.ReadLine();
+                                }
                                 int numPoints = int.Parse(line);
 
                                 if (numPoints > 0)
                                 {
+                                    Polyline New = new Polyline();
                                     //load the line
-                                    for (int i = 0; i < numPoints; i++)
+                                    for (int k = 0; k < numPoints; k++)
                                     {
                                         line = reader.ReadLine();
-                                        string[] words = line.Split(',');
-                                        bnd.bndList[k].hdLine.points.Add(new vec2(
+                                        words = line.Split(',');
+                                        New.points.Add(new vec2(
                                             double.Parse(words[0], CultureInfo.InvariantCulture),
                                             double.Parse(words[1], CultureInfo.InvariantCulture)));
                                     }
-                                    bnd.bndList[k].hdLine.loop = true;
+                                    New.loop = true;
+                                    bnd.bndList[i].hdLine.Add(New);
                                 }
                             }
                         }
                     }
-
                     catch (Exception e)
                     {
                         var form = new FormTimedMessage(2000, "Headland File is Corrupt", "But Field is Loaded");
@@ -674,7 +678,7 @@ namespace AgOpenGPS
                 }
             }
 
-            if (bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.points.Count > 0)
+            if (bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.Count > 0)
             {
                 bnd.isHeadlandOn = true;
                 btnHeadlandOnOff.Image = Properties.Resources.HeadlandOn;
@@ -903,7 +907,7 @@ namespace AgOpenGPS
                 //Write out the date
                 writer.WriteLine(DateTime.Now.ToString("yyyy-MMMM-dd hh:mm:ss tt", CultureInfo.InvariantCulture));
 
-                writer.WriteLine("$FieldDir");
+                writer.WriteLine("$FieldDir," + currentVersionStr);
                 writer.WriteLine(currentFieldDirectory.ToString(CultureInfo.InvariantCulture));
 
                 //write out the easting and northing Offsets
@@ -949,7 +953,7 @@ namespace AgOpenGPS
                 //Write out the date
                 writer.WriteLine(DateTime.Now.ToString("yyyy-MMMM-dd hh:mm:ss tt", CultureInfo.InvariantCulture));
 
-                writer.WriteLine("$FieldDir");
+                writer.WriteLine("$FieldDir," + currentVersionStr);
                 writer.WriteLine(currentFieldDirectory.ToString(CultureInfo.InvariantCulture));
 
                 //write out the easting and northing Offsets
@@ -1017,32 +1021,6 @@ namespace AgOpenGPS
             //write out the file
             using (StreamWriter writer = new StreamWriter(dirField + myFileName))
             {
-                //write paths # of sections
-                //writer.WriteLine("$Sectionsv4");
-            }
-        }
-
-        //Create Flag file
-        public void FileCreateFlags()
-        {
-            //$Sections
-            //10 - points in this patch
-            //10.1728031317344,0.723157039771303 -easting, northing
-
-            //get the directory and make sure it exists, create if not
-            string dirField = fieldsDirectory + currentFieldDirectory + "\\";
-
-            string directoryName = Path.GetDirectoryName(dirField);
-            if ((directoryName.Length > 0) && (!Directory.Exists(directoryName)))
-            { Directory.CreateDirectory(directoryName); }
-
-            string myFileName = "Flags.txt";
-
-            //write out the file
-            using (StreamWriter writer = new StreamWriter(dirField + myFileName))
-            {
-                //write paths # of sections
-                //writer.WriteLine("$Sectionsv4");
             }
         }
 
@@ -1064,7 +1042,7 @@ namespace AgOpenGPS
             //write out the file
             using (StreamWriter writer = new StreamWriter(dirField + myFileName))
             {
-                writer.WriteLine("$Contour");
+                writer.WriteLine("$Contour," + currentVersionStr);
             }
         }
 
@@ -1115,7 +1093,7 @@ namespace AgOpenGPS
             //write out the file
             using (StreamWriter writer = new StreamWriter(dirField + "Boundary.Txt"))
             {
-                writer.WriteLine("$Boundary");
+                writer.WriteLine("$Boundary," + currentVersionStr);
                 for (int i = 0; i < bnd.bndList.Count; i++)
                 {
                     writer.WriteLine(bnd.bndList[i].isDriveThru);
@@ -1145,7 +1123,7 @@ namespace AgOpenGPS
             //write out the file
             using (StreamWriter writer = new StreamWriter(dirField + "Tram.Txt"))
             {
-                writer.WriteLine("$Tram");
+                writer.WriteLine("$Tram," + currentVersionStr);
 
                 writer.WriteLine(tram.tramBoundary.Count.ToString(CultureInfo.InvariantCulture));
                 for (int i = 0; i < tram.tramBoundary.Count; i++)
@@ -1192,18 +1170,20 @@ namespace AgOpenGPS
             //write out the file
             using (StreamWriter writer = new StreamWriter(dirField + "Headland.Txt"))
             {
-                writer.WriteLine("$Headland");
+                writer.WriteLine("$Headland," + currentVersionStr);
 
-                if (bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.points.Count > 0)
+                for (int i = 0; i < bnd.bndList.Count; i++)
                 {
-                    for (int i = 0; i < bnd.bndList.Count; i++)
+                    writer.WriteLine(bnd.bndList[i].hdLine.Count.ToString(CultureInfo.InvariantCulture));
+
+                    for (int j = 0; j < bnd.bndList[i].hdLine.Count; j++)
                     {
-                        writer.WriteLine(bnd.bndList[i].hdLine.points.Count.ToString(CultureInfo.InvariantCulture));
-                        if (bnd.bndList[0].hdLine.points.Count > 0)
+                        writer.WriteLine(bnd.bndList[i].hdLine[j].points.Count.ToString(CultureInfo.InvariantCulture));
+
+                        for (int k = 0; k < bnd.bndList[i].hdLine[j].points.Count; k++)
                         {
-                            for (int j = 0; j < bnd.bndList[i].hdLine.points.Count; j++)
-                                writer.WriteLine(Math.Round(bnd.bndList[i].hdLine.points[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                                    Math.Round(bnd.bndList[i].hdLine.points[j].northing, 3).ToString(CultureInfo.InvariantCulture) + ",0");
+                            writer.WriteLine(bnd.bndList[i].hdLine[j].points[k].easting.ToString("0.000", CultureInfo.InvariantCulture) + "," +
+                                             bnd.bndList[i].hdLine[j].points[k].northing.ToString("0.000", CultureInfo.InvariantCulture) + ",0");
                         }
                     }
                 }
@@ -1226,7 +1206,7 @@ namespace AgOpenGPS
             using (StreamWriter writer = new StreamWriter(dirField + myFileName))
             {
                 //write paths # of sections
-                writer.WriteLine("$RecPath");
+                writer.WriteLine("$RecPath," + currentVersionStr);
                 writer.WriteLine("0");
             }
         }
@@ -1247,7 +1227,7 @@ namespace AgOpenGPS
             //write out the file
             using (StreamWriter writer = new StreamWriter((dirField + name)))
             {
-                writer.WriteLine("$RecPath");
+                writer.WriteLine("$RecPath," + currentVersionStr);
                 writer.WriteLine(gyd.recList.Count.ToString(CultureInfo.InvariantCulture));
                 if (gyd.recList.Count > 0)
                 {
@@ -1283,7 +1263,7 @@ namespace AgOpenGPS
             {
                 try
                 {
-                    writer.WriteLine("$Flags");
+                    writer.WriteLine("$Flags," + currentVersionStr);
 
                     int count2 = flagPts.Count;
                     writer.WriteLine(count2);
@@ -1309,91 +1289,6 @@ namespace AgOpenGPS
                 }
             }
         }
-
-        //save all the flag markers
-        //public void FileSaveABLine()
-        //{
-        //    //Saturday, February 11, 2017  -->  7:26:52 AM
-
-        //    //get the directory and make sure it exists, create if not
-        //    string dirField = fieldsDirectory + currentFieldDirectory + "\\";
-
-        //    string directoryName = Path.GetDirectoryName(dirField);
-        //    if ((directoryName.Length > 0) && (!Directory.Exists(directoryName)))
-        //    { Directory.CreateDirectory(directoryName); }
-
-        //    //use Streamwriter to create and overwrite existing ABLine file
-        //    using (StreamWriter writer = new StreamWriter(dirField + "gyd.txt"))
-        //    {
-        //        try
-        //        {
-        //            //write out the ABLine
-        //            writer.WriteLine("$ABLine");
-
-        //            //true or false if ABLine is set
-        //            if (gyd.isABLineSet) writer.WriteLine(true);
-        //            else writer.WriteLine(false);
-
-        //            writer.WriteLine(gyd.abHeading.ToString(CultureInfo.InvariantCulture));
-        //            writer.WriteLine(gyd.refPoint1.easting.ToString(CultureInfo.InvariantCulture) + "," + gyd.refPoint1.northing.ToString(CultureInfo.InvariantCulture));
-        //            writer.WriteLine(gyd.refPoint2.easting.ToString(CultureInfo.InvariantCulture) + "," + gyd.refPoint2.northing.ToString(CultureInfo.InvariantCulture));
-        //            writer.WriteLine(gyd.tramPassEvery.ToString(CultureInfo.InvariantCulture) + "," + gyd.passBasedOn.ToString(CultureInfo.InvariantCulture));
-        //        }
-
-        //        catch (Exception e)
-        //        {
-        //            Console.WriteLine(e.Message + "\n Cannot write to file.");
-        //            WriteErrorLog("Saving AB Line" + e.ToString());
-
-        //            return;
-        //        }
-
-        //    }
-        //}
-
-        //save all the flag markers
-        //public void FileSaveCurveLine()
-        //{
-        //    //Saturday, February 11, 2017  -->  7:26:52 AM
-
-        //    //get the directory and make sure it exists, create if not
-        //    string dirField = fieldsDirectory + currentFieldDirectory + "\\";
-
-        //    string directoryName = Path.GetDirectoryName(dirField);
-        //    if ((directoryName.Length > 0) && (!Directory.Exists(directoryName)))
-        //    { Directory.CreateDirectory(directoryName); }
-
-        //    //use Streamwriter to create and overwrite existing ABLine file
-        //    using (StreamWriter writer = new StreamWriter(dirField + "CurveLine.txt"))
-        //    {
-        //        try
-        //        {
-        //            //write out the ABLine
-        //            writer.WriteLine("$CurveLine");
-
-        //            //write out the aveheading
-        //            writer.WriteLine(curve.aveLineHeading.ToString(CultureInfo.InvariantCulture));
-
-        //            //write out the points of ref line
-        //            writer.WriteLine(curve.refList.Count.ToString(CultureInfo.InvariantCulture));
-        //            if (curve.refList.Count > 0)
-        //            {
-        //                for (int j = 0; j < curve.refList.Count; j++)
-        //                    writer.WriteLine(Math.Round(curve.refList[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-        //                                        Math.Round(curve.refList[j].northing, 3).ToString(CultureInfo.InvariantCulture) + "," +
-        //                                            Math.Round(curve.refList[j].heading, 5).ToString(CultureInfo.InvariantCulture));
-        //            }
-        //        }
-
-        //        catch (Exception e)
-        //        {
-        //            WriteErrorLog("Saving Curve Line" + e.ToString());
-
-        //            return;
-        //        }
-
-        //    }
-        //}
 
         //save nmea sentences
         public void FileSaveNMEA()

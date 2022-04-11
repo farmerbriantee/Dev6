@@ -18,7 +18,7 @@ namespace AgOpenGPS
         private IPEndPoint epAgIO = new IPEndPoint(IPAddress.Parse("127.255.255.255"), 17777);
 
         // Initialise the IPEndPoint for async listener!
-        private EndPoint epSender = new IPEndPoint(IPAddress.Broadcast, 0);
+        private EndPoint epSender = new IPEndPoint(IPAddress.Any, 0);
 
         // Data stream
         private byte[] loopBuffer = new byte[1024];
@@ -35,7 +35,7 @@ namespace AgOpenGPS
         {
             #region F9p_UBX_Message
             //for testing purposes only will be deleted on release!
-            if (data[0] == 0xB5 && data[1] == 0x62 && data[2] == 0x01)//Daniel P
+            if (data.Length > 7 && data[0] == 0xB5 && data[1] == 0x62 && data[2] == 0x01)//Daniel P
             {
                 if (data[3] == 0x07 && data.Length > 99)//UBX-NAV-PVT
                 {
@@ -82,17 +82,8 @@ namespace AgOpenGPS
 
                         if (pn.longitude != 0)
                         {
-                            //if (timerSim.Enabled)
-                            //    SetSimStatus(false);
-
                             pn.speed = (data[66] | (data[67] << 8) | (data[68] << 16) | (data[69] << 24)) * 0.0036;// mm/s to km/h
-
-                            //if (vehicle.isReverse && Speed > 0) Speed *= -1;
-
                             pn.ConvertWGS84ToLocal(pn.latitude, pn.longitude, out pn.fix.northing, out pn.fix.easting);
-
-                            //average the speed
-                            pn.AverageTheSpeed();
 
                             sentenceCounter = 0;
                             UpdateFixPosition();
@@ -163,344 +154,353 @@ namespace AgOpenGPS
                 return;
             }
             #endregion
+            int Length;
 
-            if (data[0] == 0x80 && data[1] == 0x81)
+            if (data.Length > 4 && data[0] == 0x80 && data[1] == 0x81 && data.Length > (Length = data[4] + 5))
             {
-                switch (data[3])
+                byte CK_A = 0;
+                for (int j = 2; j < Length; j++)
                 {
-                    case 0xD6:// 214
-                        {
-                            if (udpWatch.ElapsedMilliseconds < udpWatchLimit)
+                    CK_A += data[j];
+                }
+
+                if (data[Length] == (byte)CK_A)
+                {
+                    switch (data[3])
+                    {
+                        case 0xD6:// 214
                             {
-                                udpWatchCounts++;
-                                if (isLogNMEA) pn.logNMEASentence.Append("*** "
-                                    + DateTime.UtcNow.ToString("ss.ff -> ", CultureInfo.InvariantCulture)
-                                    + udpWatch.ElapsedMilliseconds + "\r\n");
-                                return;
-                            }
-                            udpWatch.Reset();
-                            udpWatch.Start();
-
-                            double Lon = BitConverter.ToDouble(data, 5);
-                            double Lat = BitConverter.ToDouble(data, 13);
-
-                            if (pn.isToolSteering && Lon != double.MaxValue && Lat != double.MaxValue)
-                            {
-                                //make sure tool gps is either off or resetting watchdog
-                                vehicleGPSWatchdog = 0;
-                                if (toolGPSWatchdog < 20) toolGPSWatchdog++;
-
-                                if (timerSim.Enabled)
-                                    DisableSim();
-
-                                pn.longitude = Lon;
-                                pn.latitude = Lat;
-
-                                pn.ConvertWGS84ToLocal(Lat, Lon, out pn.fix.northing, out pn.fix.easting);
-
-                                //From dual antenna heading sentences
-                                float temp = BitConverter.ToSingle(data, 21);
-                                if (temp != float.MaxValue)
+                                if (udpWatch.ElapsedMilliseconds < udpWatchLimit)
                                 {
-                                    pn.headingTrueDual = temp + pn.headingTrueDualOffset;
-                                    if (pn.headingTrueDual < 0) pn.headingTrueDual += 360;
-                                    if (ahrs.isDualAsIMU)
+                                    udpWatchCounts++;
+                                    if (isLogNMEA) pn.logNMEASentence.Append("*** "
+                                        + DateTime.UtcNow.ToString("ss.ff -> ", CultureInfo.InvariantCulture)
+                                        + udpWatch.ElapsedMilliseconds + "\r\n");
+                                    return;
+                                }
+                                udpWatch.Reset();
+                                udpWatch.Start();
+
+                                double Lon = BitConverter.ToDouble(data, 5);
+                                double Lat = BitConverter.ToDouble(data, 13);
+
+                                if (Lon != double.MaxValue && Lat != double.MaxValue)
+                                {
+                                    //make sure tool gps is either off or resetting watchdog
+                                    vehicleGPSWatchdog = 0;
+                                    if (toolGPSWatchdog < 20) toolGPSWatchdog++;
+
+                                    if (timerSim.Enabled)
+                                        DisableSim();
+
+                                    pn.longitude = Lon;
+                                    pn.latitude = Lat;
+
+                                    pn.ConvertWGS84ToLocal(Lat, Lon, out pn.fix.northing, out pn.fix.easting);
+
+                                    //From dual antenna heading sentences
+                                    float temp = BitConverter.ToSingle(data, 21);
+                                    if (temp != float.MaxValue)
                                     {
-                                        ahrs.imuHeading = temp;
+                                        pn.headingTrueDual = temp + pn.headingTrueDualOffset;
+                                        if (pn.headingTrueDual < 0) pn.headingTrueDual += 360;
+                                        if (ahrs.isDualAsIMU)
+                                        {
+                                            ahrs.imuHeading = temp;
+                                            pn.headingTrueDual = double.MaxValue;
+                                        }
+                                    }
+                                    else
+                                    {
                                         pn.headingTrueDual = double.MaxValue;
                                     }
+
+                                    //from single antenna sentences (VTG,RMC)
+                                    temp = BitConverter.ToSingle(data, 25);
+                                    if (temp != float.MaxValue)
+                                        pn.headingTrue = temp;
+
+                                    temp = BitConverter.ToSingle(data, 29);
+                                    if (temp != float.MaxValue)
+                                    {
+                                        //pn.speed = temp;
+                                        //if (temp < 0) pn.speed *= -1;
+                                        //pn.AverageTheSpeed();
+                                    }
+
+                                    //roll in degrees
+                                    temp = BitConverter.ToSingle(data, 33);
+                                    if (temp != float.MaxValue)
+                                    {
+                                        if (ahrs.isRollInvert) temp *= -1;
+                                        ahrs.imuRoll = temp - ahrs.rollZero;
+                                    }
+                                    if (temp == float.MinValue)
+                                        ahrs.imuRoll = 0;
+
+                                    //altitude in meters
+                                    temp = BitConverter.ToSingle(data, 37);
+                                    if (temp != float.MaxValue)
+                                        pn.altitude = temp;
+
+                                    ushort sats = BitConverter.ToUInt16(data, 41);
+                                    if (sats != ushort.MaxValue)
+                                        pn.satellitesTracked = sats;
+
+                                    byte fix = data[43];
+                                    if (fix != byte.MaxValue)
+                                        pn.fixQuality = fix;
+
+                                    ushort hdop = BitConverter.ToUInt16(data, 44);
+                                    if (hdop != ushort.MaxValue)
+                                        pn.hdop = hdop * 0.01;
+
+                                    ushort age = BitConverter.ToUInt16(data, 46);
+                                    if (age != ushort.MaxValue)
+                                        pn.age = age * 0.01;
+
+                                    ushort imuHead = BitConverter.ToUInt16(data, 48);
+                                    if (imuHead != ushort.MaxValue)
+                                    {
+                                        ahrs.imuHeading = imuHead;
+                                        ahrs.imuHeading *= 0.1;
+                                    }
+
+                                    short imuRol = BitConverter.ToInt16(data, 50);
+                                    if (imuRol != short.MaxValue)
+                                    {
+                                        double rollK = imuRol;
+                                        if (ahrs.isRollInvert) rollK *= -0.1;
+                                        else rollK *= 0.1;
+                                        rollK -= ahrs.rollZero;
+                                        ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
+                                    }
+
+                                    short imuPich = BitConverter.ToInt16(data, 52);
+                                    if (imuPich != short.MaxValue)
+                                    {
+                                        ahrs.imuPitch = imuPich;
+                                    }
+
+                                    short imuYaw = BitConverter.ToInt16(data, 54);
+                                    if (imuYaw != short.MaxValue)
+                                    {
+                                        ahrs.imuYawRate = imuYaw;
+                                    }
+
+                                    sentenceCounter = 0;
+
+                                    if (isLogNMEA)
+                                        pn.logNMEASentence.Append(
+                                            DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " " +
+                                            Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
+                                            pn.headingTrueDual.ToString("0.0") + "\r\n"
+                                            );
+
+                                    UpdateFixPosition();
                                 }
-                                else
+                            }
+                            break;
+
+                        case 0xD7: //Tool Antenna
+                            {
+                                double Lon = BitConverter.ToDouble(data, 5);
+                                double Lat = BitConverter.ToDouble(data, 13);
+
+                                if (pn.isToolSteering && Lon != double.MaxValue && Lat != double.MaxValue)
                                 {
-                                    pn.headingTrueDual = double.MaxValue;
+                                    if (vehicleGPSWatchdog < 20) vehicleGPSWatchdog++;
+                                    toolGPSWatchdog = 0;
+
+                                    pn.longitudeTool = Lon;
+                                    pn.latitudeTool = Lat;
+                                    pn.ConvertWGS84ToLocal(Lat, Lon, out pn.fixTool.northing, out pn.fixTool.easting);
+
+                                    ushort sats = BitConverter.ToUInt16(data, 21);
+                                    if (sats != ushort.MaxValue)
+                                        pn.satellitesTrackedTool = sats;
+
+                                    byte fix = data[23];
+                                    if (fix != byte.MaxValue)
+                                        pn.fixQualityTool = fix;
+
+                                    ushort hdop = BitConverter.ToUInt16(data, 24);
+                                    if (hdop != ushort.MaxValue)
+                                        pn.hdopTool = hdop * 0.01;
+
+                                    ushort age = BitConverter.ToUInt16(data, 26);
+                                    if (age != ushort.MaxValue)
+                                        pn.ageTool = age * 0.01;
+
+                                    short imuRoll = BitConverter.ToInt16(data, 28);
+                                    if (imuRoll != short.MaxValue)
+                                    {
+                                        double rollK = imuRoll;
+                                        if (ahrs.isRollInvert) rollK *= -0.1;
+                                        else rollK *= 0.1;
+                                        rollK -= ahrs.rollZeroTool;
+                                        ahrs.imuRollTool = rollK;
+                                    }
+
+                                    //From dual antenna heading sentences
+                                    float temp = BitConverter.ToSingle(data, 30);
+                                    if (temp != float.MaxValue)
+                                    {
+                                        pn.headingTrueDualTool = temp;// + pn.headingTrueDualOffset;
+                                        if (pn.headingTrueDualTool < 0) pn.headingTrueDualTool += 360;
+                                        if (ahrs.isDualAsIMU) ahrs.imuHeadingTool = temp;
+                                    }
+
+                                    sentenceCounter = 0;//or when vehicleGPSWatchdog > 10 only?
+
+                                    if (vehicleGPSWatchdog > 10)
+                                        UpdateFixPosition();
+                                }
+                            }
+                            break;
+
+                        case 0xFD:// 253    return from autosteer module
+                            {
+                                //Steer angle actual
+                                if (data.Length != 14)
+                                    break;
+                                mc.actualSteerAngleChart = (Int16)((data[6] << 8) + data[5]);
+                                mc.actualSteerAngleDegrees = (double)mc.actualSteerAngleChart * 0.01;
+
+                                //Heading
+                                double head253 = (Int16)((data[8] << 8) + data[7]);
+                                if (head253 != 9999)
+                                {
+                                    ahrs.imuHeading = head253 * 0.1;
                                 }
 
-                                //from single antenna sentences (VTG,RMC)
-                                temp = BitConverter.ToSingle(data, 25);
-                                if (temp != float.MaxValue)
-                                    pn.headingTrue = temp;
-
-                                temp = BitConverter.ToSingle(data, 29);
-                                if (temp != float.MaxValue)
+                                //Roll
+                                double rollK = (Int16)((data[10] << 8) + data[9]);
+                                if (rollK != 8888)
                                 {
-                                    pn.speed = temp;
-                                    if (temp < 0) pn.speed *= -1;
-                                    pn.AverageTheSpeed();
-                                }
-
-                                //roll in degrees
-                                temp = BitConverter.ToSingle(data, 33);
-                                if (temp != float.MaxValue)
-                                {
-                                    if (ahrs.isRollInvert) temp *= -1;
-                                    ahrs.imuRoll = temp - ahrs.rollZero;
-                                }
-                                if (temp == float.MinValue)
-                                    ahrs.imuRoll = 0;                               
-
-                                //altitude in meters
-                                temp = BitConverter.ToSingle(data, 37);
-                                if (temp != float.MaxValue)
-                                    pn.altitude = temp;
-
-                                ushort sats = BitConverter.ToUInt16(data, 41);
-                                if (sats != ushort.MaxValue)
-                                    pn.satellitesTracked = sats;
-
-                                byte fix = data[43];
-                                if (fix != byte.MaxValue)
-                                    pn.fixQuality = fix;
-
-                                ushort hdop = BitConverter.ToUInt16(data, 44);
-                                if (hdop != ushort.MaxValue)
-                                    pn.hdop = hdop * 0.01;
-
-                                ushort age = BitConverter.ToUInt16(data, 46);
-                                if (age != ushort.MaxValue)
-                                    pn.age = age * 0.01;
-
-                                ushort imuHead = BitConverter.ToUInt16(data, 48);
-                                if (imuHead != ushort.MaxValue)
-                                {
-                                    ahrs.imuHeading = imuHead;
-                                    ahrs.imuHeading *= 0.1;
-                                }
-
-                                short imuRol = BitConverter.ToInt16(data, 50);
-                                if (imuRol != short.MaxValue)
-                                {
-                                    double rollK = imuRol;
                                     if (ahrs.isRollInvert) rollK *= -0.1;
                                     else rollK *= 0.1;
                                     rollK -= ahrs.rollZero;
                                     ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
                                 }
+                                //else ahrs.imuRoll = 88888;
 
-                                short imuPich = BitConverter.ToInt16(data, 52);
-                                if (imuPich != short.MaxValue)
-                                {
-                                    ahrs.imuPitch = imuPich;
-                                }
+                                //switch status
+                                mc.workSwitchHigh = (data[11] & 1) == 1;
+                                mc.steerSwitchHigh = (data[11] & 2) == 2;
 
-                                short imuYaw = BitConverter.ToInt16(data, 54);
-                                if (imuYaw != short.MaxValue)
-                                {
-                                    ahrs.imuYawRate = imuYaw;
-                                }
+                                //the pink steer dot reset
+                                steerModuleConnectedCounter = 0;
 
-                                sentenceCounter = 0;
+                                //Actual PWM
+                                mc.pwmDisplay = data[12];
 
                                 if (isLogNMEA)
                                     pn.logNMEASentence.Append(
-                                        DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " " +
-                                        Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
-                                        pn.speed.ToString("0.0") + " " +
-                                        pn.headingTrueDual.ToString("0.0") + "\r\n"
+                                        DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " AS " +
+                                        //Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
+                                        //pn.speed.ToString("0.0") + " " + ahrs.imuRoll.ToString("0.0") + " " +
+                                        mc.actualSteerAngleDegrees.ToString("0.0") + "\r\n"
                                         );
 
-                                UpdateFixPosition();
-                            }
-                        }
-                        break;
-
-                    case 0xD7: //Tool Antenna
-                        {
-                            double Lon = BitConverter.ToDouble(data, 5);
-                            double Lat = BitConverter.ToDouble(data, 13);
-
-                            if (Lon != double.MaxValue && Lat != double.MaxValue)
-                            {
-                                if (vehicleGPSWatchdog < 20) vehicleGPSWatchdog++;
-                                toolGPSWatchdog = 0;
-
-                                pn.longitudeTool = Lon;
-                                pn.latitudeTool = Lat;
-                                pn.ConvertWGS84ToLocal(Lat, Lon, out pn.fixTool.northing, out pn.fixTool.easting);
-
-                                ushort sats = BitConverter.ToUInt16(data, 21);
-                                if (sats != ushort.MaxValue)
-                                    pn.satellitesTrackedTool = sats;
-
-                                byte fix = data[23];
-                                if (fix != byte.MaxValue)
-                                    pn.fixQualityTool = fix;
-
-                                ushort hdop = BitConverter.ToUInt16(data, 24);
-                                if (hdop != ushort.MaxValue)
-                                    pn.hdopTool = hdop * 0.01;
-
-                                ushort age = BitConverter.ToUInt16(data, 26);
-                                if (age != ushort.MaxValue)
-                                    pn.ageTool = age * 0.01;
-
-                                short imuRoll = BitConverter.ToInt16(data, 28);
-                                if (imuRoll != short.MaxValue)
-                                {
-                                    double rollK = imuRoll;
-                                    if (ahrs.isRollInvert) rollK *= -0.1;
-                                    else rollK *= 0.1;
-                                    rollK -= ahrs.rollZeroTool;
-                                    ahrs.imuRollTool = rollK;
-                                }
-
-                                //From dual antenna heading sentences
-                                float temp = BitConverter.ToSingle(data, 30);
-                                if (temp != float.MaxValue)
-                                {
-                                    pn.headingTrueDualTool = temp;// + pn.headingTrueDualOffset;
-                                    if (pn.headingTrueDualTool < 0) pn.headingTrueDualTool += 360;
-                                    if (ahrs.isDualAsIMU) ahrs.imuHeadingTool = temp;
-                                }
-
-                                sentenceCounter = 0;//or when vehicleGPSWatchdog > 10 only?
-
-                                if (vehicleGPSWatchdog > 10)
-                                    UpdateFixPosition();
-                            }
-                        }
-                        break;
-
-                    case 0xFD:// 253    return from autosteer module
-                        {
-                            //Steer angle actual
-                            if (data.Length != 14)
                                 break;
-                            mc.actualSteerAngleChart = (Int16)((data[6] << 8) + data[5]);
-                            mc.actualSteerAngleDegrees = (double)mc.actualSteerAngleChart * 0.01;
-
-                            //Heading
-                            double head253 = (Int16)((data[8] << 8) + data[7]);
-                            if (head253 != 9999)
-                            {
-                                ahrs.imuHeading = head253 * 0.1;
                             }
 
-                            //Roll
-                            double rollK = (Int16)((data[10] << 8) + data[9]);
-                            if (rollK != 8888)
+                        case 0xFA: // 250
                             {
-                                if (ahrs.isRollInvert) rollK *= -0.1;
-                                else rollK *= 0.1;
-                                rollK -= ahrs.rollZero;
-                                ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
+                                if (data.Length != 14)
+                                    break;
+                                mc.sensorData = data[5];
+                                break;
                             }
-                            //else ahrs.imuRoll = 88888;
 
-                            //switch status
-                            mc.workSwitchHigh = (data[11] & 1) == 1;
-                            mc.steerSwitchHigh = (data[11] & 2) == 2;
-
-                            //the pink steer dot reset
-                            steerModuleConnectedCounter = 0;
-
-                            //Actual PWM
-                            mc.pwmDisplay = data[12];
-
-                            if (isLogNMEA)
-                                pn.logNMEASentence.Append(
-                                    DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " AS " +
-                                    //Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
-                                    //pn.speed.ToString("0.0") + " " + ahrs.imuRoll.ToString("0.0") + " " +
-                                    mc.actualSteerAngleDegrees.ToString("0.0") + "\r\n"
-                                    );
-
-                            break;
-                        }
-
-                    case 0xFA: // 250
-                        {                            
-                            if (data.Length != 14)
-                                break;
-                            mc.sensorData = data[5];
-                            break;
-                        }
-
-                    case 0xE6:// 230    return from tool steer module
-                        {
-                            //Steer angle actual
-                            if (data.Length != 14)
-                                break;
-                            mc.toolActualDistance = (Int16)((data[6] << 8) + data[5]);
-                            mc.toolActualDistance *= 0.1;
-                            mc.toolError = (Int16)((data[8] << 8) + data[7]);
-                            mc.toolError *= 0.1;
-
-                            mc.toolPWM = (Int16)((data[9]));
-
-                            mc.toolStatus = (Int16)((data[10]));
-
-                            break;
-                        }
-
-                    #region Remote Switches
-                    case 0xEA: // 234    MTZ8302 Feb 2020
-                        {
-                            //MTZ8302 Feb 2020 
-                            if (data.Length != 14 && isJobStarted)
+                        case 0xE6:// 230    return from tool steer module
                             {
-                                //MainSW was used
-                                if (data[mc.swMain] != mc.ssP[0])
+                                //Steer angle actual
+                                if (data.Length != 14)
+                                    break;
+                                mc.toolActualDistance = (Int16)((data[6] << 8) + data[5]);
+                                mc.toolActualDistance *= 0.1;
+                                mc.toolError = (Int16)((data[8] << 8) + data[7]);
+                                mc.toolError *= 0.1;
+
+                                mc.toolPWM = (Int16)((data[9]));
+
+                                mc.toolStatus = (Int16)((data[10]));
+
+                                break;
+                            }
+
+                        #region Remote Switches
+                        case 0xEA: // 234    MTZ8302 Feb 2020
+                            {
+                                //MTZ8302 Feb 2020 
+                                if (data.Length != 14 && isJobStarted)
                                 {
-                                    //Main SW pressed
-                                    if ((data[mc.swMain] & 1) == 1)
+                                    //MainSW was used
+                                    if (data[mc.swMain] != mc.ssP[0])
                                     {
-                                        setSectionBtnState(btnStates.On);
-                                    } // if Main SW ON
-                                    //if Main SW in Arduino is pressed OFF
-                                    if ((data[mc.swMain] & 2) == 2)
+                                        //Main SW pressed
+                                        if ((data[mc.swMain] & 1) == 1)
+                                        {
+                                            setSectionBtnState(btnStates.On);
+                                        } // if Main SW ON
+                                          //if Main SW in Arduino is pressed OFF
+                                        if ((data[mc.swMain] & 2) == 2)
+                                        {
+                                            setSectionBtnState(btnStates.Off);
+                                        } // if Main SW OFF
+
+                                        mc.ssP[0] = data[mc.swMain];
+                                    }  //Main or Rate SW
+
+                                    int set = 1;
+                                    int idx1 = mc.swOnGr0;
+                                    int idx2 = mc.swOffGr0;
+                                    int idx3 = 1;
+
+                                    for (int j = 0; j < tool.numOfSections; j++)
                                     {
-                                        setSectionBtnState(btnStates.Off);
-                                    } // if Main SW OFF
+                                        if (j == 8)
+                                        {
+                                            set = 1;
+                                            idx1 = mc.swOnGr1;
+                                            idx2 = mc.swOffGr1;
+                                            idx3 = 2;
+                                        }
 
-                                    mc.ssP[0] = data[mc.swMain];
-                                }  //Main or Rate SW
+                                        //do nothing if bit isn't set [only works fully when BBBBB is deleted]
+                                        btnStates status = section[j].sectionState;
 
-                                int set = 1;
-                                int idx1 = mc.swOnGr0;
-                                int idx2 = mc.swOffGr0;
-                                int idx3 = 1;
-
-                                for (int j = 0; j < tool.numOfSections; j++)
-                                {
-                                    if (j == 8)
-                                    {
-                                        set = 1;
-                                        idx1 = mc.swOnGr1;
-                                        idx2 = mc.swOffGr1;
-                                        idx3 = 2;
-                                    }
-
-                                    //do nothing if bit isn't set [only works fully when BBBBB is deleted]
-                                    btnStates status = section[j].sectionState;
-
-                                    if ((data[idx1] & set) == set)
-                                    {
-                                        if (autoBtnState == btnStates.Auto && (data[idx2] & set) == set)//AAAAA
-                                            status = btnStates.Auto;//not sure if we want to force on when auto is off!
-                                        else if (autoBtnState != btnStates.Off)
-                                            status = btnStates.On;
-                                        else
+                                        if ((data[idx1] & set) == set)
+                                        {
+                                            if (autoBtnState == btnStates.Auto && (data[idx2] & set) == set)//AAAAA
+                                                status = btnStates.Auto;//not sure if we want to force on when auto is off!
+                                            else if (autoBtnState != btnStates.Off)
+                                                status = btnStates.On;
+                                            else
+                                                status = btnStates.Off;
+                                        }
+                                        else if ((data[idx2] & set) == set)
                                             status = btnStates.Off;
+                                        else if ((data[idx2] & set) != (mc.ssP[idx3] & set) && status == btnStates.Off)//BBBBB
+                                            status = btnStates.Auto;//should change to AAAAA (Both on [so that it doesnt change when you send 0])
+
+                                        set <<= 1;
+
+                                        section[j].UpdateButton(status);
                                     }
-                                    else if ((data[idx2] & set) == set)
-                                        status = btnStates.Off;
-                                    else if ((data[idx2] & set) != (mc.ssP[idx3] & set) && status == btnStates.Off)//BBBBB
-                                        status = btnStates.Auto;//should change to AAAAA (Both on [so that it doesnt change when you send 0])
 
-                                    set <<= 1;
+                                    //only needed for BBBBB
+                                    mc.ssP[1] = data[mc.swOffGr0];
+                                    mc.ssP[2] = data[mc.swOffGr1];
 
-                                    section[j].UpdateButton(status);
-                                }
+                                }//if serial or udp port open
 
-                                //only needed for BBBBB
-                                mc.ssP[1] = data[mc.swOffGr0];
-                                mc.ssP[2] = data[mc.swOffGr1];
-
-                            }//if serial or udp port open
-
-                            break;
-                        }
-                     #endregion
+                                break;
+                            }
+                            #endregion
+                    }
                 }
             }
         }
@@ -513,7 +513,7 @@ namespace AgOpenGPS
                 // Initialise the socket
                 loopBackSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 loopBackSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-                loopBackSocket.Bind(new IPEndPoint(IPAddress.Broadcast, 15555));
+                loopBackSocket.Bind(new IPEndPoint(IPAddress.Loopback, 15555));
                 loopBackSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), null);
             }
             catch (Exception ex)
@@ -548,29 +548,8 @@ namespace AgOpenGPS
 
                 // Listen for more connections again...
                 loopBackSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), null);
-                if (localMsg.Length > 3)
-                {
-                    int Length = Math.Max((localMsg[4]) + 5, 5);
 
-                    #region F9p_UBX_Message
-                    //for testing purposes only will be deleted on release!
-                    if (localMsg[0] == 0xB5 && localMsg[1] == 0x62 && localMsg[2] == 0x01)
-                    {
-                        BeginInvoke((MethodInvoker)(() => ReceiveFromAgIO(localMsg)));
-                    }
-                    #endregion
-                    else if (localMsg.Length > Length)
-                    {
-                        byte CK_A = 0;
-                        for (int j = 2; j < Length; j++)
-                        {
-                            CK_A += localMsg[j];
-                        }
-
-                        if (localMsg[Length] == (byte)CK_A)
-                            BeginInvoke((MethodInvoker)(() => ReceiveFromAgIO(localMsg)));
-                    }
-                }
+                BeginInvoke((MethodInvoker)(() => ReceiveFromAgIO(localMsg)));
             }
             catch (Exception)
             {

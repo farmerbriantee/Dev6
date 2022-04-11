@@ -85,7 +85,7 @@ namespace AgOpenGPS
 
         private void nudTurnDistanceFromBoundary_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTurnDistanceFromBoundary, ref DistanceFromBoundary, 0, 100, 2, true, mf.mToUserBig, mf.userBigToM);
+            mf.KeypadToButton(ref nudTurnDistanceFromBoundary, ref DistanceFromBoundary, 0, 100, 2, mf.mToUserBig, mf.userBigToM);
         }
 
         private void nudTurnDistanceFromBoundary_HelpRequested(object sender, HelpEventArgs hlpevent)

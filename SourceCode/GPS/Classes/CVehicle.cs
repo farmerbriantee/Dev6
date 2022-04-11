@@ -9,18 +9,11 @@ namespace AgOpenGPS
     {
         private readonly FormGPS mf;
 
-        public bool isSteerAxleAhead;
-        public bool isPivotBehindAntenna;
-
-        public double antennaHeight;
-        public double antennaPivot;
-        public double wheelbase;
-        public double minTurningRadius;
-        public double antennaOffset;
-        public int vehicleType;
-
+        public bool isSteerAxleAhead, isPivotBehindAntenna;
+        public double antennaHeight, antennaPivot;
+        public double wheelbase, minTurningRadius;
+        public double antennaOffset, slowSpeedCutoff = 0;
         //min vehicle speed allowed before turning shit off
-        public double slowSpeedCutoff = 0;
 
         //autosteer values
         public double goalPointLookAhead, goalPointLookAheadMult;
@@ -32,6 +25,7 @@ namespace AgOpenGPS
 
         public double hydLiftLookAheadDistanceLeft, hydLiftLookAheadDistanceRight;
 
+        public int vehicleType;
         public bool isHydLiftOn;
         public double stanleyIntegralDistanceAwayTriggerAB, stanleyIntegralGainAB, purePursuitIntegralGain;
 
@@ -82,17 +76,8 @@ namespace AgOpenGPS
         public double UpdateGoalPointDistance()
         {
             //how far should goal point be away  - speed * seconds * kmph -> m/s then limit min value
-            double goalPointDistance = mf.pn.speed * goalPointLookAhead * 0.05 * goalPointLookAheadMult;
+            double goalPointDistance = mf.pn.avgSpeed * goalPointLookAhead * 0.05 * goalPointLookAheadMult;
             goalPointDistance += goalPointLookAhead;
-            //double dist = Math.Abs(distanceFromCurrentLine);
-
-            //if (dist > 3) dist = 3;
-            //goalPointDistance += dist;
-
-            //if (distanceFromCurrentLine < 1.0)
-            //    goalPointDistance += distanceFromCurrentLine * goalPointDistance * 1.5;
-            //else
-            //    goalPointDistance += goalPointDistance * 1.5;
 
             if (goalPointDistance < 1) goalPointDistance = 1;
 

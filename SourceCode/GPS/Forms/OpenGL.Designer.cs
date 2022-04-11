@@ -243,9 +243,13 @@ namespace AgOpenGPS
                     if (bnd.isHeadlandOn)
                     {
                         GL.Color3(0.960f, 0.96232f, 0.30f);
-                        //There is only 1 headland for now. 
-                        //for (int i = 0; i < bnd.bndList.Count; i++)
-                        bnd.bndList[0].hdLine.DrawPolyLine(DrawType.LineLoop);
+                        for (int i = 0; i < bnd.bndList.Count; i++)
+                        {
+                            for (int j = 0; j < bnd.bndList[i].hdLine.Count; j++)
+                            {
+                                bnd.bndList[i].hdLine[j].DrawPolyLine(DrawType.LineLoop);
+                            }
+                        }
                     }
                 }
 
@@ -311,9 +315,15 @@ namespace AgOpenGPS
                     vehicle.DrawVehicle();
                 GL.PopMatrix();
 
-                if (pn.isToolSteering)
+                if (worldManager.camSetDistance > -75 && pn.isToolSteering)
                 {
                     GL.PointSize(8.0f);
+                    GL.Color3(0.0f, 0.0f, 0.0f);
+                    GL.Begin(PrimitiveType.Points);
+                    GL.Vertex3(pn.fixTool.easting, pn.fixTool.northing, 0.2);
+                    GL.End();
+
+                    GL.PointSize(4.0f);
                     GL.Color3(0.20f, 1.0f, 1.0f);
                     GL.Begin(PrimitiveType.Points);
                     GL.Vertex3(pn.fixTool.easting, pn.fixTool.northing, 0.2);
@@ -583,7 +593,7 @@ namespace AgOpenGPS
 
             if (!Needsupdate)//set hydraulics based on tool in headland or not
             {
-                if (vehicle.isHydLiftOn && pn.speed > 0.2 && autoBtnState == btnStates.Auto)
+                if (vehicle.isHydLiftOn && pn.avgSpeed > 0.2 && autoBtnState == btnStates.Auto)
                 {
                     if (totalHead > 0 && taggedHead >= totalHead)
                     {
@@ -660,13 +670,16 @@ namespace AgOpenGPS
 
             if (!tramOnly)
             {
-                if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland && bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.points.Count > 0)
+                if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland && bnd.bndList.Count > 0 && bnd.bndList[0].hdLine.Count > 0)
                 {
                     GL.Color3((byte)0, (byte)249, (byte)0);
                     bnd.bndList[0].fenceLine.DrawPolyLine(DrawType.Triangles);
 
                     GL.Color3((byte)0, (byte)250, (byte)0);
-                    bnd.bndList[0].hdLine.DrawPolyLine(DrawType.Triangles);
+                    for (int k = 0; k < bnd.bndList[0].hdLine.Count; k++)
+                    {
+                        bnd.bndList[0].hdLine[k].DrawPolyLine(DrawType.Triangles);
+                    }
                 }
                 else if (bnd.bndList.Count > 0)
                 {
@@ -676,10 +689,13 @@ namespace AgOpenGPS
 
                 for (int k = 1; k < bnd.bndList.Count; k++)
                 {
-                    if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland && bnd.bndList[k].hdLine.points.Count > 0)
+                    if (bnd.isHeadlandOn && bnd.isSectionControlledByHeadland && bnd.bndList[k].hdLine.Count > 0)
                     {
                         GL.Color3((byte)0, (byte)248, (byte)0);
-                        bnd.bndList[k].hdLine.DrawPolyLine(DrawType.Triangles);
+                        for (int l = 0; l < bnd.bndList[k].hdLine.Count; l++)
+                        {
+                            bnd.bndList[k].hdLine[l].DrawPolyLine(DrawType.Triangles);
+                        }
                     }
 
                     GL.Color3((byte)0, (byte)251, (byte)0);
@@ -1651,11 +1667,11 @@ namespace AgOpenGPS
             GL.BindTexture(TextureTarget.Texture2D, texture[8]);        // Select Our Texture
 
             double angle = 0;
-            double aveSpd = Math.Abs(avgSpeed * KMHToUser);
+            double aveSpd = Math.Abs(pn.avgSpeed * KMHToUser);
             if (aveSpd > 20) aveSpd = 20;
             angle = (aveSpd - 10) * 15;
 
-            if (pn.speed > -0.1) GL.Color3(0.850f, 0.950f, 0.30f);
+            if (pn.avgSpeed > -0.1) GL.Color3(0.850f, 0.950f, 0.30f);
             else GL.Color3(0.952f, 0.0f, 0.0f);
 
             GL.Rotate(angle, 0, 0, 1);

@@ -161,96 +161,96 @@ namespace AgOpenGPS
 
         private void nudSection1_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection1, ref sectionWidth1, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection1, ref sectionWidth1, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection1, ref sectionWidth1);
         }
 
         private void nudSection2_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection2, ref sectionWidth2, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection2, ref sectionWidth2, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection2, ref sectionWidth2);
         }
 
         private void nudSection3_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection3, ref sectionWidth3, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection3, ref sectionWidth3, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection3, ref sectionWidth3);
         }
 
         private void nudSection4_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection4, ref sectionWidth4, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection4, ref sectionWidth4, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection4, ref sectionWidth4);
         }
 
         private void nudSection5_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection5, ref sectionWidth5, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection5, ref sectionWidth5, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection5, ref sectionWidth5);
         }
         private void nudSection6_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection6, ref sectionWidth6, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection6, ref sectionWidth6, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection6, ref sectionWidth6);
         }
 
         private void nudSection7_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection7, ref sectionWidth7, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection7, ref sectionWidth7, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection7, ref sectionWidth7);
         }
 
         private void nudSection8_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection8, ref sectionWidth8, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection8, ref sectionWidth8, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection8, ref sectionWidth8);
         }
 
         private void nudSection9_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection9, ref sectionWidth9, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection9, ref sectionWidth9, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection9, ref sectionWidth9);
         }
 
         private void nudSection10_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection10, ref sectionWidth10, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection10, ref sectionWidth10, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection10, ref sectionWidth10);
         }
 
         private void nudSection11_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection11, ref sectionWidth11, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection11, ref sectionWidth11, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection11, ref sectionWidth11);
         }
 
         private void nudSection12_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection12, ref sectionWidth12, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection12, ref sectionWidth12, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection12, ref sectionWidth12);
         }
 
         private void nudSection13_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection13, ref sectionWidth13, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection13, ref sectionWidth13, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection13, ref sectionWidth13);
         }
 
         private void nudSection14_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection14, ref sectionWidth14, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection14, ref sectionWidth14, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection14, ref sectionWidth14);
         }
 
         private void nudSection15_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection15, ref sectionWidth15, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection15, ref sectionWidth15, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection15, ref sectionWidth15);
         }
 
         private void nudSection16_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection16, ref sectionWidth16, 0.01, 50, 0, true, mf.mToUser, mf.userToM))
+            if (mf.KeypadToButton(ref nudSection16, ref sectionWidth16, 0.01, 50, 0, mf.mToUser, mf.userToM))
                 SectionFeetInchesTotalWidthLabelUpdate(ref nudSection16, ref sectionWidth16);
         }
 
@@ -266,7 +266,7 @@ namespace AgOpenGPS
 
         private void nudCutoffSpeed_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudCutoffSpeed, ref cutoffSpeed, 0, 30, 1, true, mf.KMHToUser, mf.userToKMH);
+            mf.KeypadToButton(ref nudCutoffSpeed, ref cutoffSpeed, 0, 30, 1, mf.KMHToUser, mf.userToKMH);
         }
 
         private void nudMinCoverage_HelpRequested(object sender, HelpEventArgs hlpevent)
@@ -340,7 +340,7 @@ namespace AgOpenGPS
 
         private void nudDefaultSectionWidth_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudDefaultSectionWidth, ref defaultSectionWidth, 0.01, 50, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudDefaultSectionWidth, ref defaultSectionWidth, 0.01, 50, 0, mf.mToUser, mf.userToM);
         }
 
         public void UpdateSpinners()

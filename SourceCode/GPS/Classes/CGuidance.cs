@@ -205,7 +205,7 @@ namespace AgOpenGPS
 
                     //the non linear distance error part of stanley
                     double XTEc = Math.Atan((distanceFromCurrentLineSteer * mf.vehicle.stanleyDistanceErrorGain)
-                        / ((Math.Abs(mf.pn.speed) * 0.277777) + 1));
+                        / ((Math.Abs(mf.pn.avgSpeed) * 0.277777) + 1));
 
                     //clamp it to max 42 degrees
                     if (XTEc > 0.74) XTEc = 0.74;
@@ -237,7 +237,7 @@ namespace AgOpenGPS
 
                     if (mf.vehicle.stanleyIntegralGainAB != 0 && !mf.isReverse)
                     {
-                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && mf.pn.speed > mf.startSpeed && Math.Abs(steerDerivativeDistError) < 1 && Math.Abs(pivotDerivativeDistError) < 0.15)
+                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && mf.pn.avgSpeed > mf.startSpeed && Math.Abs(steerDerivativeDistError) < 1 && Math.Abs(pivotDerivativeDistError) < 0.15)
                         {
                             //if over the line heading wrong way, rapidly decrease integral
                             if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
@@ -277,7 +277,7 @@ namespace AgOpenGPS
                             pivotDerivativeDistError *= 2;
                         }
 
-                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.avgSpeed > 2.5)
+                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.pn.avgSpeed > 2.5)
                         {
                             //if over the line heading wrong way, rapidly decrease integral
                             if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
@@ -471,7 +471,7 @@ namespace AgOpenGPS
 
                 }
 
-                if (isFollowingRecPath && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.avgSpeed > 2.5)
+                if (isFollowingRecPath && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.pn.avgSpeed > 2.5)
                 {
                     //if over the line heading wrong way, rapidly decrease integral
                     if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))

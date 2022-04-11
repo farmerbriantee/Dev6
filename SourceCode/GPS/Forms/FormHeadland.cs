@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -12,10 +13,10 @@ namespace AgOpenGPS
         private readonly FormGPS mf = null;
 
         private bool isA = true, isSet, isSaving;
-        private int start = -1, end = -1;
+        private int start = -1, end = -1, index = -1;
         private double totalHeadlandWidth = 0;
 
-        public Polyline headLineTemplate = new Polyline();
+        public List<Polyline> headLineTemplate = new List<Polyline>();
 
         public FormHeadland(Form callingForm)
         {
@@ -41,7 +42,7 @@ namespace AgOpenGPS
             nudDistance.Value = 0;
             nudSetDistance.Value = 0;
 
-            BuildHeadLineTemplateFromBoundary(mf.bnd.bndList[0].hdLine.points.Count > 0);
+            BuildHeadLineTemplateFromBoundary(mf.bnd.bndList[0].hdLine.Count > 0);
 
             oglSelf.Refresh();
 
@@ -52,7 +53,11 @@ namespace AgOpenGPS
         {
             if (isSaving)
             {
-                mf.bnd.bndList[0].hdLine.RemoveHandle();
+                for (int j = 0; j < mf.bnd.bndList[0].hdLine.Count; j++)
+                {
+                    mf.bnd.bndList[0].hdLine[j].RemoveHandle();
+                }
+
                 //does headland control sections
                 mf.bnd.isSectionControlledByHeadland = cboxIsSectionControlled.Checked;
                 Properties.Settings.Default.setHeadland_isSectionControlled = cboxIsSectionControlled.Checked;
@@ -65,18 +70,33 @@ namespace AgOpenGPS
 
         private void BuildHeadLineTemplateFromBoundary(bool fromHd = false)
         {
-            headLineTemplate.points.Clear();
+            headLineTemplate.Clear();
             if (fromHd)
-                for (int i = 0; i < mf.bnd.bndList[0].hdLine.points.Count; i++)
-                    headLineTemplate.points.Add(new vec2(mf.bnd.bndList[0].hdLine.points[i].easting, mf.bnd.bndList[0].hdLine.points[i].northing));
+            {
+                for (int i = 0; i < mf.bnd.bndList[0].hdLine.Count; i++)
+                {
+                    Polyline New = new Polyline();
+                    for (int j = 0; j < mf.bnd.bndList[0].hdLine[i].points.Count; j++)
+                    {
+                        New.points.Add(new vec2(mf.bnd.bndList[0].hdLine[i].points[j].easting, mf.bnd.bndList[0].hdLine[i].points[j].northing));
+                    }
+                    headLineTemplate.Add(New);
+                }
+            }
             else
+            {
+                Polyline New = new Polyline();
                 for (int i = 0; i < mf.bnd.bndList[0].fenceLine.points.Count; i++)
-                    headLineTemplate.points.Add(new vec2(mf.bnd.bndList[0].fenceLine.points[i].easting, mf.bnd.bndList[0].fenceLine.points[i].northing));
+                {
+                    New.points.Add(new vec2(mf.bnd.bndList[0].fenceLine.points[i].easting, mf.bnd.bndList[0].fenceLine.points[i].northing));
+                }
+                headLineTemplate.Add(New);
+            }
 
             totalHeadlandWidth = 0;
             lblHeadlandWidth.Text = "0";
             nudDistance.Value = 0;
-            start = end = -1;
+            index = start = end = -1;
             isSet = false;
         }
 
@@ -84,10 +104,11 @@ namespace AgOpenGPS
         {
             double width = (double)nudSetDistance.Value * mf.userBigToM;
 
-            headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, start, end, true);
+            headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, true, start, end, true));
+            headLineTemplate.Remove(headLineTemplate[index]);
 
             isSet = false;
-            start = end = -1;
+            index = start = end = -1;
 
             oglSelf.Refresh();
         }
@@ -95,14 +116,26 @@ namespace AgOpenGPS
         private void btnMakeFixedHeadland_Click(object sender, EventArgs e)
         {
             double width = (double)nudDistance.Value * mf.userBigToM;
+            if (index < 0)
+            {
+                List<Polyline> New = new List<Polyline>();
+                for (int i = 0; i < headLineTemplate.Count; i++)
+                {
+                    New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));
+                }
+                headLineTemplate = New;
 
-            headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, -1, -1, true);
-
-            totalHeadlandWidth += width;
-            lblHeadlandWidth.Text = (totalHeadlandWidth * mf.mToUserBig).ToString("0.00");
+                totalHeadlandWidth += width;
+                lblHeadlandWidth.Text = (totalHeadlandWidth * mf.mToUserBig).ToString("0.00");
+            }
+            else
+            {
+                headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));
+                headLineTemplate.Remove(headLineTemplate[index]);
+            }
 
             isSet = false;
-            start = end = -1;
+            index = start = end = -1;
 
             oglSelf.Refresh();
         }
@@ -113,7 +146,12 @@ namespace AgOpenGPS
 
             double width = mf.tool.toolWidth * cboxToolWidths.SelectedIndex;
 
-            headLineTemplate = headLineTemplate.OffsetAndDissolvePolyline(width, true, -1, -1, true);
+            List<Polyline> New = new List<Polyline>();
+            for (int i = 0; i < headLineTemplate.Count; i++)
+            {
+                New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));
+            }
+            headLineTemplate = New;
 
             lblHeadlandWidth.Text = (width * mf.mToUserBig).ToString("0.00");
             totalHeadlandWidth = width;
@@ -136,15 +174,20 @@ namespace AgOpenGPS
             //draw all the boundaries
             mf.bnd.DrawFenceLines();
 
-            if (headLineTemplate.points.Count > 1)
+            GL.LineWidth(1);
+            GL.Color3(0.20f, 0.96232f, 0.30f);
+            GL.PointSize(2);
+            for (int i = 0; i < headLineTemplate.Count; i++)
             {
-                GL.LineWidth(1);
-                GL.Color3(0.20f, 0.96232f, 0.30f);
-                GL.PointSize(2);
-
-                GL.Begin(PrimitiveType.LineLoop);
-                for (int h = 0; h < headLineTemplate.points.Count; h++) GL.Vertex3(headLineTemplate.points[h].easting, headLineTemplate.points[h].northing, 0);
-                GL.End();
+                if (headLineTemplate[i].points.Count > 1)
+                {
+                    GL.Begin(PrimitiveType.LineLoop);
+                    for (int h = 0; h < headLineTemplate[i].points.Count; h++)
+                    {
+                        GL.Vertex3(headLineTemplate[i].points[h].easting, headLineTemplate[i].points[h].northing, 0);
+                    }
+                    GL.End();
+                }
             }
 
             GL.PointSize(8.0f);
@@ -153,7 +196,10 @@ namespace AgOpenGPS
             GL.Vertex3(mf.pivotAxlePos.easting, mf.pivotAxlePos.northing, 0.0);
             GL.End();
 
-            DrawABTouchLine();
+            if (index != -1)
+            {
+                DrawABTouchLine();
+            }
 
             GL.Flush();
             oglSelf.SwapBuffers();
@@ -164,7 +210,7 @@ namespace AgOpenGPS
             if (isSet)
             {
                 isSet = false;
-                start = end = -1;
+                index = start = end = -1;
             }
             else
             {
@@ -178,30 +224,37 @@ namespace AgOpenGPS
 
                 double minDist = double.MaxValue;
                 int A = -1;
+                int indexB = -1;
 
                 //find the closest 2 points to current fix
-                for (int t = 0; t < headLineTemplate.points.Count; t++)
+                for (int s = index < 0 ? 0 : index; s < headLineTemplate.Count; s++)
                 {
-                    double dist = glm.Distance(plotPt, headLineTemplate.points[t]);
-                    if (dist < minDist)
+                    for (int t = 0; t < headLineTemplate[s].points.Count; t++)
                     {
-                        minDist = dist;
-                        A = t;
+                        double dist = glm.Distance(plotPt, headLineTemplate[s].points[t]);
+                        if (dist < minDist)
+                        {
+                            minDist = dist;
+                            A = t;
+                            indexB = s;
+                        }
                     }
+                    if (index > -1) break;
                 }
 
-                if (isA)
+                if (isA || index < 0)
                 {
                     start = A;
                     end = -1;
                     isA = false;
+                    index = indexB;
                 }
-                else
+                else 
                 {
                     end = A;
                     isA = true;
                     isSet = true;
-                    if (((headLineTemplate.points.Count - end + start) % headLineTemplate.points.Count) < ((headLineTemplate.points.Count - start + end) % headLineTemplate.points.Count)) { int index = start; start = end; end = index; }
+                    if (((headLineTemplate[index].points.Count - end + start) % headLineTemplate[index].points.Count) < ((headLineTemplate[index].points.Count - start + end) % headLineTemplate[index].points.Count)) { int index = start; start = end; end = index; }
                 }
             }
 
@@ -217,10 +270,10 @@ namespace AgOpenGPS
             GL.Begin(PrimitiveType.Points);
 
             GL.Color3(0.990, 0.00, 0.250);
-            if (start != -1) GL.Vertex3(headLineTemplate.points[start].easting, headLineTemplate.points[start].northing, 0);
+            if (start != -1) GL.Vertex3(headLineTemplate[index].points[start].easting, headLineTemplate[index].points[start].northing, 0);
 
             GL.Color3(0.990, 0.960, 0.250);
-            if (end != -1) GL.Vertex3(headLineTemplate.points[end].easting, headLineTemplate.points[end].northing, 0);
+            if (end != -1) GL.Vertex3(headLineTemplate[index].points[end].easting, headLineTemplate[index].points[end].northing, 0);
             GL.End();
 
             if (start != -1 && end != -1)
@@ -229,19 +282,19 @@ namespace AgOpenGPS
                 //draw the turn line oject
                 GL.LineWidth(2.0f);
                 GL.Begin(PrimitiveType.LineStrip);
-                if (headLineTemplate.points.Count < 1) return;
+                if (headLineTemplate[index].points.Count < 1) return;
 
                 if (start > end)
                 {
-                    for (int c = start; c < headLineTemplate.points.Count; c++)
-                        GL.Vertex3(headLineTemplate.points[c].easting, headLineTemplate.points[c].northing, 0);
+                    for (int c = start; c < headLineTemplate[index].points.Count; c++)
+                        GL.Vertex3(headLineTemplate[index].points[c].easting, headLineTemplate[index].points[c].northing, 0);
                     for (int c = 0; c < end; c++)
-                        GL.Vertex3(headLineTemplate.points[c].easting, headLineTemplate.points[c].northing, 0);
+                        GL.Vertex3(headLineTemplate[index].points[c].easting, headLineTemplate[index].points[c].northing, 0);
                 }
                 else
                 {
                     for (int c = start; c < end; c++)
-                        GL.Vertex3(headLineTemplate.points[c].easting, headLineTemplate.points[c].northing, 0);
+                        GL.Vertex3(headLineTemplate[index].points[c].easting, headLineTemplate[index].points[c].northing, 0);
                 }
                 GL.End();
             }
@@ -285,11 +338,11 @@ namespace AgOpenGPS
         {
             if (start > end)
             {
-                headLineTemplate.points.RemoveRange(start, headLineTemplate.points.Count - start);
-                headLineTemplate.points.RemoveRange(0, end);
+                headLineTemplate[index].points.RemoveRange(start, headLineTemplate[index].points.Count - start);
+                headLineTemplate[index].points.RemoveRange(0, end);
             }
             else
-                headLineTemplate.points.RemoveRange(start, end - start);
+                headLineTemplate[index].points.RemoveRange(start, end - start);
 
             oglSelf.Refresh();
         }

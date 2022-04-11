@@ -8,7 +8,7 @@ namespace AgOpenGPS
         private readonly FormGPS mf;
 
         private int lightbarCmPerPixel, lineWidth;
-        private double lineLength, lookAheadTime, snapDistance;
+        private double lineLength, lookAheadTime, snapDistance, PanicStopSpeed;
 
         public ConfigGuidance(Form callingForm)
         {
@@ -32,6 +32,9 @@ namespace AgOpenGPS
 
             lineWidth = Properties.Settings.Default.setDisplay_lineWidth;
             nudLineWidth.Text = lineWidth.ToString();
+
+            PanicStopSpeed = Properties.Settings.Default.setVehicle_panicStopSpeed;
+            nudPanicStopSpeed.Text = (PanicStopSpeed * mf.KMHToUser).ToString("0.0");
 
             cboxAutoSteerAuto.Checked = Properties.Settings.Default.setAS_isAutoSteerAutoOn;
             if (Properties.Settings.Default.setAS_isAutoSteerAutoOn)
@@ -59,6 +62,7 @@ namespace AgOpenGPS
             Properties.Settings.Default.setAB_lineLength = mf.gyd.abLength = lineLength;
             Properties.Settings.Default.setAS_snapDistance = snapDistance;
             Properties.Settings.Default.setAS_guidanceLookAheadTime = mf.guidanceLookAheadTime = lookAheadTime;
+            Properties.Settings.Default.setVehicle_panicStopSpeed = mf.pn.panicStopSpeed = PanicStopSpeed;
 
             Properties.Settings.Default.Save();
         }
@@ -84,12 +88,12 @@ namespace AgOpenGPS
 
         private void nudABLength_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudABLength, ref lineLength, 200, 5000, 0, true, mf.mToUserBig, mf.userBigToM);
+            mf.KeypadToButton(ref nudABLength, ref lineLength, 200, 5000, 0, mf.mToUserBig, mf.userBigToM);
         }
 
         private void nudSnapDistance_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudSnapDistance, ref snapDistance, 0, 10, mf.isMetric ? 0 : 1, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudSnapDistance, ref snapDistance, 0, 10, mf.isMetric ? 0 : 1, mf.mToUser, mf.userToM);
         }
 
         private void nudGuidanceLookAhead_Click(object sender, EventArgs e)
@@ -100,6 +104,11 @@ namespace AgOpenGPS
         private void nudLineWidth_Click(object sender, EventArgs e)
         {
             mf.KeypadToButton(ref nudLineWidth, ref lineWidth, 1, 8);
+        }
+
+        private void nudPanicStopSpeed_Click(object sender, EventArgs e)
+        {
+            mf.KeypadToButton(ref nudPanicStopSpeed, ref PanicStopSpeed, 0.0, 100.0, 1, mf.KMHToUser, mf.userToKMH);
         }
 
         private void cboxAutoSteerAuto_HelpRequested(object sender, HelpEventArgs hlpevent)

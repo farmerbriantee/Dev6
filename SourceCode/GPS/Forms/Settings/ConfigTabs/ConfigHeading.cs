@@ -82,12 +82,12 @@ namespace AgOpenGPS
 
         private void nudMinFixStepDistance_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMinFixStepDistance, ref stepDistance, 0.2, 10, 2, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudMinFixStepDistance, ref stepDistance, 0.2, 10, 2, mf.mToUser, mf.userToM);
         }
 
         private void nudStartSpeed_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudStartSpeed, ref startSpeed, 0.5, 5, 1, true, mf.KMHToUser, mf.userToKMH);
+            mf.KeypadToButton(ref nudStartSpeed, ref startSpeed, 0.5, 5, 1, mf.KMHToUser, mf.userToKMH);
         }
 
         private void nudForwardComp_Click(object sender, EventArgs e)

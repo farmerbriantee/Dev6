@@ -14,13 +14,13 @@ namespace AgOpenGPS
         private vec2 startFix;
         private double diameter, steerAngleRight, dist;
         private int windowSizeState = 0;
+        private int MaxCounts;
 
         //Form stuff
         public FormSteer(Form callingForm)
         {
             mf = callingForm as FormGPS;
             InitializeComponent();
-            nudMaxCounts.Controls[0].Enabled = false;
 
             this.label3.Text = gStr.gsAgressiveness;
             this.label5.Text = gStr.gsOvershootReduction;
@@ -116,8 +116,6 @@ namespace AgOpenGPS
 
             toSend = false;
 
-            nudMaxCounts.Controls[0].Enabled = false;
-
             int sett = Properties.Vehicle.Default.setArdSteer_setting0;
 
             if ((sett & 1) == 0) chkInvertWAS.Checked = false;
@@ -142,7 +140,8 @@ namespace AgOpenGPS
             if ((sett & 128) == 0) cboxEncoder.Checked = false;
             else cboxEncoder.Checked = true;
 
-            nudMaxCounts.Value = (decimal)Properties.Vehicle.Default.setArdSteer_maxPulseCounts;
+            MaxCounts = Properties.Vehicle.Default.setArdSteer_maxPulseCounts;
+            nudMaxCounts.Text = MaxCounts.ToString();
             hsbarSensor.Value = (int)Properties.Vehicle.Default.setArdSteer_maxPulseCounts;
             lblhsbarSensor.Text = ((int)((double)hsbarSensor.Value * 0.3921568627)).ToString() + "%";
 
@@ -519,10 +518,7 @@ namespace AgOpenGPS
 
         private void nudMaxCounts_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToNUD((NumericUpDown)sender, this))
-            {
-                pboxSendSteer.Visible = true;
-            }
+            mf.KeypadToButton(ref nudMaxCounts, ref MaxCounts, 0, 255);
         }
 
         private void EnableAlert_Click(object sender, EventArgs e)
@@ -622,7 +618,7 @@ namespace AgOpenGPS
             }
             else
             {
-                Properties.Vehicle.Default.setArdSteer_maxPulseCounts = (byte)nudMaxCounts.Value;
+                Properties.Vehicle.Default.setArdSteer_maxPulseCounts = (byte)MaxCounts;
             }
 
             // Settings1

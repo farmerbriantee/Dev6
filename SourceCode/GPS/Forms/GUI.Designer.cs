@@ -180,7 +180,7 @@ namespace AgOpenGPS
 
                 isFlashOnOff = !isFlashOnOff;
 
-                lblSpeed.Text = (avgSpeed * KMHToUser).ToString("0.0");
+                lblSpeed.Text = (pn.avgSpeed * KMHToUser).ToString("0.0");
             }
 
             //every fifth second update  ///////////////////////////   FIFTH Fifth ////////////////////////////
@@ -264,7 +264,6 @@ namespace AgOpenGPS
             else btnHeadlandOnOff.Image = Properties.Resources.HeadlandOff;
 
             btnChangeMappingColor.BackColor = sectionColor;
-            btnChangeMappingColor.Text = Application.ProductVersion.ToString(CultureInfo.InvariantCulture);
 
             //is rtk on?
             isRTK = Properties.Settings.Default.setGPS_isRTK;

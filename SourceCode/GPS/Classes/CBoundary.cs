@@ -29,7 +29,11 @@ namespace AgOpenGPS
 
         public void RemoveHandles(int idx)
         {
-            bndList[idx].hdLine.RemoveHandle();
+            for (int i = 0; i < bndList[idx].hdLine.Count; i++)
+            {
+                bndList[idx].hdLine[i].RemoveHandle();
+            }
+
             bndList[idx].fenceLine.RemoveHandle();
             bndList[idx].turnLine.RemoveHandle();
             mf.bnd.bndList.RemoveAt(idx);

@@ -38,7 +38,7 @@ namespace AgOpenGPS
 
         private void nudTramWidth_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTramWidth, ref tramWidth, 0.5, 50, 2, true, mf.mToUserBig, mf.userBigToM);
+            mf.KeypadToButton(ref nudTramWidth, ref tramWidth, 0.5, 50, 2, mf.mToUserBig, mf.userBigToM);
         }
 
         private void cboxTramOnBackBuffer_HelpRequested(object sender, HelpEventArgs hlpevent)

@@ -43,17 +43,17 @@ namespace AgOpenGPS
 
         private void nudVehicleTrack_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudVehicleTrack, ref vehicleTrack, 0.5, 20, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudVehicleTrack, ref vehicleTrack, 0.5, 20, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudMinTurnRadius_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMinTurnRadius, ref minTurnRadius, 0.5, 100, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudMinTurnRadius, ref minTurnRadius, 0.5, 100, 0, mf.mToUser, mf.userToM);
         }
 
         private void nudWheelbase_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudWheelbase, ref wheelbase, 0.5, 20, 0, true, mf.mToUser, mf.userToM);
+            mf.KeypadToButton(ref nudWheelbase, ref wheelbase, 0.5, 20, 0, mf.mToUser, mf.userToM);
         }
     }
 }
