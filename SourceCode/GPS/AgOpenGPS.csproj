@@ -144,7 +144,6 @@
     <Compile Include="Classes\CDubins.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Classes\CAHRS.cs" />
     <Compile Include="Classes\CABCurve.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
     </Compile>
@@ -154,16 +153,20 @@
     <Compile Include="Classes\CYouTurn.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Classes\CFlag.cs" />
     <Compile Include="Classes\CContour.cs">
       <DependentUpon>CGuidance.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\CModuleComm.cs" />
-    <Compile Include="Classes\CNMEA.cs" />
     <Compile Include="Classes\CSection.cs" />
     <Compile Include="Classes\CVehicle.cs" />
     <Compile Include="Classes\CWorldManager.cs" />
     <Compile Include="Classes\CTool.cs" />
+    <Compile Include="Forms\FormHelp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormHelp.Designer.cs">
+      <DependentUpon>FormHelp.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\FormFieldKML.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -177,6 +180,9 @@
     <EmbeddedResource Include="..\References\Inputs\FormNumeric.resx">
       <Link>Forms\Inputs\FormNumeric.resx</Link>
       <DependentUpon>FormNumeric.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormHelp.resx">
+      <DependentUpon>FormHelp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormMap.resx">
       <DependentUpon>FormMap.cs</DependentUpon>
@@ -490,8 +496,8 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\Settings\FormToolSteer.Designer.cs">
-		<DependentUpon>FormToolSteer.cs</DependentUpon>
-	</Compile>
+      <DependentUpon>FormToolSteer.cs</DependentUpon>
+    </Compile>
     <Compile Include="gStr.da.Designer.cs">
       <DependentUpon>gStr.da.resx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -770,8 +776,8 @@
       <DependentUpon>FormTram.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Settings\FormToolSteer.resx">
-		<DependentUpon>FormToolSteer.cs</DependentUpon>
-	</EmbeddedResource>
+      <DependentUpon>FormToolSteer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="gStr.da.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>gStr.da.Designer.cs</LastGenOutput>

@@ -4,34 +4,6 @@ namespace AgOpenGPS
 {
     public partial class FormGPS
     {
-        //Latitude
-        public class CPGN_D0
-        {
-            /// <summary>
-            ///  Latitude Longitude 8 bytes as modified float
-            ///  double lat = (encodedAngle / (0x7FFFFFFF / 90.0));
-            ///  double lon = (encodedAngle / (0x7FFFFFFF / 180.0));
-            /// </summary>
-            public byte[] latLong = new byte[] { 0x80, 0x81, 0x7F, 0xD0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0xCC };
-
-
-            public void LoadLatitudeLongitude(double lat, double lon)
-            {
-                
-                int encodedAngle = (int)(lat * (0x7FFFFFFF / 90.0));
-                //double angle = (encodedAngle / (0x7FFFFFFF / 90.0));
-
-                byte[] lat6 = BitConverter.GetBytes(encodedAngle);
-                Array.Copy(lat6, 0, latLong, 5, 4);
-
-                encodedAngle = (int)(lon * (0x7FFFFFFF / 180.0));
-                //double angle = (encodedAngle / (0x7FFFFFFF / 180.0));
-
-                lat6 = BitConverter.GetBytes(encodedAngle);
-                Array.Copy(lat6, 0, latLong, 9, 4);
-            }
-        }
-
         //AutoSteerData
         public class CPGN_FE
         {

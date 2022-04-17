@@ -304,19 +304,19 @@ namespace AgOpenGPS
                         line = reader.ReadLine();
                         offs = line.Split(',');
 
-                        pn.latStart = double.Parse(offs[0], CultureInfo.InvariantCulture);
-                        pn.lonStart = double.Parse(offs[1], CultureInfo.InvariantCulture);
+                        worldManager.latStart = double.Parse(offs[0], CultureInfo.InvariantCulture);
+                        worldManager.lonStart = double.Parse(offs[1], CultureInfo.InvariantCulture);
 
                         if (timerSim.Enabled)
                         {
-                            Properties.Settings.Default.setGPS_SimLatitude = pn.latStart;
-                            Properties.Settings.Default.setGPS_SimLongitude = pn.lonStart;
+                            Properties.Settings.Default.setGPS_SimLatitude = worldManager.latStart;
+                            Properties.Settings.Default.setGPS_SimLongitude = worldManager.lonStart;
                             Properties.Settings.Default.Save();
 
                             sim.resetSim();
                         }
 
-                        pn.SetLocalMetersPerDegree();
+                        worldManager.SetLocalMetersPerDegree();
                     }
                 }
 
@@ -918,7 +918,7 @@ namespace AgOpenGPS
                 writer.WriteLine("0");
 
                 writer.WriteLine("StartFix");
-                writer.WriteLine(pn.latitude.ToString(CultureInfo.InvariantCulture) + "," + pn.longitude.ToString(CultureInfo.InvariantCulture));
+                writer.WriteLine(mc.latitude.ToString(CultureInfo.InvariantCulture) + "," + mc.longitude.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -964,7 +964,7 @@ namespace AgOpenGPS
                 writer.WriteLine("0");
 
                 writer.WriteLine("StartFix");
-                writer.WriteLine(pn.latitude.ToString(CultureInfo.InvariantCulture) + "," + pn.longitude.ToString(CultureInfo.InvariantCulture));
+                writer.WriteLine(mc.latitude.ToString(CultureInfo.InvariantCulture) + "," + mc.longitude.ToString(CultureInfo.InvariantCulture));
             }
         }
 
@@ -1295,9 +1295,9 @@ namespace AgOpenGPS
         {
             using (StreamWriter writer = new StreamWriter("zAOG_log.txt", true))
             {
-                writer.Write(pn.logNMEASentence.ToString());
+                writer.Write(mc.logNMEASentence.ToString());
             }
-            pn.logNMEASentence.Clear();
+            mc.logNMEASentence.Clear();
         }
 
         //save nmea sentences
@@ -1316,7 +1316,7 @@ namespace AgOpenGPS
             double lat = 0;
             double lon = 0;
 
-            pn.ConvertLocalToWGS84(flagPts[flagNumber - 1].northing, flagPts[flagNumber - 1].easting, out lat, out lon);
+            worldManager.ConvertLocalToWGS84(flagPts[flagNumber - 1].northing, flagPts[flagNumber - 1].easting, out lat, out lon);
 
             //get the directory and make sure it exists, create if not
             string dirField = fieldsDirectory + currentFieldDirectory + "\\";
@@ -1537,12 +1537,12 @@ namespace AgOpenGPS
                     for (int j = 0; j < gyd.curveArr[i].curvePts.Count; j++)
                     {
                         if (j == 0)
-                            linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting - (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
+                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting - (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
                                 gyd.curveArr[i].curvePts[j].northing - (Math.Cos(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength));
-                        linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
+                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
 
                         if (j == gyd.curveArr[i].curvePts.Count -1)
-                            linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting + (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
+                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting + (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
                                 gyd.curveArr[i].curvePts[j].northing + (Math.Cos(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength));
                     }
 
@@ -1584,7 +1584,7 @@ namespace AgOpenGPS
                     string linePts = "";
                     for (int j = 0; j < gyd.curveArr[i].curvePts.Count; j++)
                     {
-                        linePts += pn.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
+                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
                     }
                     kml.WriteRaw(linePts);
 
@@ -1620,7 +1620,7 @@ namespace AgOpenGPS
             string linePts2 = "";
             for (int j = 0; j < gyd.recList.Count; j++)
             {
-                linePts2 += pn.GetLocalToWSG84_KML(gyd.recList[j].easting, gyd.recList[j].northing);
+                linePts2 += worldManager.GetLocalToWSG84_KML(gyd.recList[j].easting, gyd.recList[j].northing);
             }
             kml.WriteRaw(linePts2);
 
@@ -1704,13 +1704,13 @@ namespace AgOpenGPS
                     secPts = "";
                     for (int i = 1; i < triList.points.Count; i += 2)
                     {
-                        secPts += pn.GetLocalToWSG84_KML(triList.points[i].easting, triList.points[i].northing);
+                        secPts += worldManager.GetLocalToWSG84_KML(triList.points[i].easting, triList.points[i].northing);
                     }
                     for (int i = triList.points.Count - 1; i > 1; i -= 2)
                     {
-                        secPts += pn.GetLocalToWSG84_KML(triList.points[i].easting, triList.points[i].northing);
+                        secPts += worldManager.GetLocalToWSG84_KML(triList.points[i].easting, triList.points[i].northing);
                     }
-                    secPts += pn.GetLocalToWSG84_KML(triList.points[1].easting, triList.points[1].northing);
+                    secPts += worldManager.GetLocalToWSG84_KML(triList.points[1].easting, triList.points[1].northing);
 
                     kml.WriteRaw(secPts);
                     kml.WriteEndElement(); // <coordinates>
@@ -1748,7 +1748,7 @@ namespace AgOpenGPS
                 double lat = 0;
                 double lon = 0;
 
-                pn.ConvertLocalToWGS84(bnd.bndList[bndNum].fenceLine.points[i].northing, bnd.bndList[bndNum].fenceLine.points[i].easting, out lat, out lon);
+                worldManager.ConvertLocalToWGS84(bnd.bndList[bndNum].fenceLine.points[i].northing, bnd.bndList[bndNum].fenceLine.points[i].easting, out lat, out lon);
 
                 sb.Append(lon.ToString("0.0000000") + ',' + lat.ToString("0.0000000") + ",0 ");
             }

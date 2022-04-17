@@ -10,6 +10,12 @@ namespace AgOpenGPS
     {
         private readonly FormGPS mf;
 
+        //local plane geometry
+        public double latStart, lonStart;
+        public double mPerDegreeLat, mPerDegreeLon;
+        //used to offset the antenna position to compensate for drift
+        public vec2 fixOffset = new vec2(0, 0);
+
         public double camPitch;
         public double camSetDistance = -75;
         public double gridZoom;
@@ -44,6 +50,48 @@ namespace AgOpenGPS
             zoomValue = Properties.Settings.Default.setDisplay_camZoom;
             camFollowing = true;
             camSmoothFactor = (Properties.Settings.Default.setDisplay_camSmooth * 0.004) + 0.2;
+            latStart = 0;
+            lonStart = 0;
+        }
+
+        public void SetLocalMetersPerDegree()
+        {
+            double LatRad = latStart * 0.01745329251994329576923690766743;
+
+            mPerDegreeLat = 111132.92 - 559.82 * Math.Cos(2.0 * LatRad) + 1.175 * Math.Cos(4.0 * LatRad) - 0.0023 * Math.Cos(6.0 * LatRad);
+            mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
+
+            ConvertWGS84ToLocal(mf.mc.latitude, mf.mc.longitude, out double northing, out double easting);
+            mf.worldManager.checkZoomWorldGrid(northing, easting);
+        }
+
+        public void ConvertWGS84ToLocal(double Lat, double Lon, out double Northing, out double Easting)
+        {
+            double LatRad = Lat * 0.01745329251994329576923690766743;
+            mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
+
+            Northing = (Lat - latStart) * mPerDegreeLat;
+            Easting = (Lon - lonStart) * mPerDegreeLon;
+        }
+
+        public void ConvertLocalToWGS84(double Northing, double Easting, out double Lat, out double Lon)
+        {
+            Lat = ((Northing + fixOffset.northing) / mPerDegreeLat) + latStart;
+            double LatRad = Lat * 0.01745329251994329576923690766743;
+
+            mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
+            Lon = ((Easting + fixOffset.easting) / mPerDegreeLon) + lonStart;
+        }
+
+        public string GetLocalToWSG84_KML(double Easting, double Northing)
+        {
+            double Lat = (Northing / mPerDegreeLat) + latStart;
+            double LatRad = Lat * 0.01745329251994329576923690766743;
+
+            mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
+            double Lon = (Easting / mPerDegreeLon) + lonStart;
+
+            return Lon.ToString("0.0000000") + ',' + Lat.ToString("0.0000000") + ",0 ";
         }
 
         public void SetWorldPerspective(double camPosX, double camPosY)

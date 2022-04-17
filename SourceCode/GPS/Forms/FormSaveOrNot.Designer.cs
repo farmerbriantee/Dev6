@@ -85,42 +85,36 @@
             // 
             // btnSaveAs
             // 
-            this.btnSaveAs.BackColor = System.Drawing.Color.Transparent;
             this.btnSaveAs.FlatAppearance.BorderSize = 0;
             this.btnSaveAs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSaveAs.Font = new System.Drawing.Font("Tahoma", 15.75F);
             this.btnSaveAs.Image = global::AgOpenGPS.Properties.Resources.FileSaveAs;
             this.btnSaveAs.Location = new System.Drawing.Point(262, 45);
             this.btnSaveAs.Name = "btnSaveAs";
-            this.btnSaveAs.Size = new System.Drawing.Size(97, 64);
+            this.btnSaveAs.Size = new System.Drawing.Size(90, 90);
             this.btnSaveAs.TabIndex = 258;
             this.btnSaveAs.UseVisualStyleBackColor = false;
             this.btnSaveAs.Click += new System.EventHandler(this.btnSaveAs_Click);
             // 
             // btnOk
             // 
-            this.btnOk.BackColor = System.Drawing.Color.Transparent;
             this.btnOk.FlatAppearance.BorderSize = 0;
             this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOk.Font = new System.Drawing.Font("Tahoma", 15.75F);
             this.btnOk.Image = global::AgOpenGPS.Properties.Resources.ExitAOG;
             this.btnOk.Location = new System.Drawing.Point(492, 45);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(97, 64);
+            this.btnOk.Size = new System.Drawing.Size(90, 90);
             this.btnOk.TabIndex = 0;
             this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // btnReturn
             // 
-            this.btnReturn.BackColor = System.Drawing.Color.Transparent;
             this.btnReturn.FlatAppearance.BorderSize = 0;
             this.btnReturn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReturn.Font = new System.Drawing.Font("Tahoma", 15.75F);
             this.btnReturn.Image = global::AgOpenGPS.Properties.Resources.back_button;
             this.btnReturn.Location = new System.Drawing.Point(24, 45);
             this.btnReturn.Name = "btnReturn";
-            this.btnReturn.Size = new System.Drawing.Size(97, 64);
+            this.btnReturn.Size = new System.Drawing.Size(90, 90);
             this.btnReturn.TabIndex = 5;
             this.btnReturn.UseVisualStyleBackColor = false;
             this.btnReturn.Click += new System.EventHandler(this.btnReturn_Click);

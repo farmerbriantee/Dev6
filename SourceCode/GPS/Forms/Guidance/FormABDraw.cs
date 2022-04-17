@@ -661,77 +661,77 @@ namespace AgOpenGPS
         #region Help
         private void btnCancelTouch_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnCancelTouch, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnCancelTouch, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudDistance_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_nudDistance, gStr.gsHelp);
+            new FormHelp(gStr.hd_nudDistance, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnFlipOffset_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnFlipOffset, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnFlipOffset, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnMakeBoundaryCurve_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnMakeBoundaryCurve, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnMakeBoundaryCurve, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnMakeCurve_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnMakeCurve, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnMakeCurve, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnSelectCurve_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnSelectCurve, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnSelectCurve, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnDeleteCurve_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnDeleteCurve, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnDeleteCurve, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnMakeABLine_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnMakeABLine, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnMakeABLine, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnSelectABLine_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnSelectABLine, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnSelectABLine, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnDeleteABLine_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnDeleteABLine, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnDeleteABLine, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnDrawSections_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_btnDrawSections, gStr.gsHelp);
+            new FormHelp(gStr.hd_btnDrawSections, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnExit_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_btnExit, gStr.gsHelp);
+            new FormHelp(gStr.hh_btnExit, gStr.gsHelp).ShowDialog(this);
         }
 
         private void oglSelf_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_oglSelf, gStr.gsHelp);
+            new FormHelp(gStr.hd_oglSelf, gStr.gsHelp).ShowDialog(this);
         }
 
         private void tboxNameCurve_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_tboxNameLine, gStr.gsHelp);
+            new FormHelp(gStr.hd_tboxNameLine, gStr.gsHelp).ShowDialog(this);
         }
 
         private void tboxNameLine_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_tboxNameLine, gStr.gsHelp);
+            new FormHelp(gStr.hd_tboxNameLine, gStr.gsHelp).ShowDialog(this);
         }
 
         #endregion

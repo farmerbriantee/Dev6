@@ -365,52 +365,52 @@ namespace AgOpenGPS
         #region Help
         private void cboxToolWidths_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_cboxToolWidths, gStr.gsHelp);
+            new FormHelp(gStr.hh_cboxToolWidths, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudDistance_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_nudDistance, gStr.gsHelp);
+            new FormHelp(gStr.hh_nudDistance, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnMakeFixedHeadland_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_btnMakeFixedHeadland, gStr.gsHelp);
+            new FormHelp(gStr.hh_btnMakeFixedHeadland, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudSetDistance_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_nudSetDistance, gStr.gsHelp);
+            new FormHelp(gStr.hh_nudSetDistance, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnSetDistance_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_btnSetDistance, gStr.gsHelp);
+            new FormHelp(gStr.hh_btnSetDistance, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnDeletePoints_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_btnDeletePoints, gStr.gsHelp);
+            new FormHelp(gStr.hh_btnDeletePoints, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxIsSectionControlled_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_cboxIsSectionControlled, gStr.gsHelp);
+            new FormHelp(gStr.hh_cboxIsSectionControlled, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnReset_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_btnReset, gStr.gsHelp);
+            new FormHelp(gStr.hh_btnReset, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnTurnOffHeadland_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_btnTurnOffHeadland, gStr.gsHelp);
+            new FormHelp(gStr.hh_btnTurnOffHeadland, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnExit_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hh_btnExit, gStr.gsHelp);
+            new FormHelp(gStr.hh_btnExit, gStr.gsHelp).ShowDialog(this);
         }
 
         #endregion
@@ -419,11 +419,7 @@ namespace AgOpenGPS
 }
 
 /*
-            
-            MessageBox.Show(gStr, gStr.gsHelp);
-
-            DialogResult result2 = MessageBox.Show(gStr, gStr.gsHelp,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            DialogResult result2 = new FormHelp(gStr, gStr.gsHelp).ShowDialog(this)
 
             if (result2 == DialogResult.Yes)
             {

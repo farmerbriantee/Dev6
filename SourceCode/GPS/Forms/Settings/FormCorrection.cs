@@ -32,16 +32,16 @@ namespace AgOpenGPS
         {
             {
                 roll = (mf.correctionDistanceGraph*20).ToString("0.00");
-                east = (mf.pn.fix.easting * 20).ToString("0.00");
+                east = (mf.mc.fix.easting * 20).ToString("0.00");
                 ost = (mf.uncorrectedEastingGraph * 20).ToString("0.00");
 
                 if (!isPole) roll = ((mf.correctionDistanceGraph + mf.uncorrectedEastingGraph) * 20).ToString("0.00");
 
                 lblCorrectionDistance.Text = (mf.correctionDistanceGraph).ToString("0.00"); ;
-                lblEast.Text = (mf.pn.fix.easting).ToString("0.00"); ;
+                lblEast.Text = (mf.mc.fix.easting).ToString("0.00"); ;
                 lblOst.Text = (mf.uncorrectedEastingGraph).ToString("0.00");
                 lblRollDegrees.Text = (mf.RollInDegrees);
-                lblEastOnGraph.Text = ((int)(mf.pn.fix.easting * 100)).ToString();
+                lblEastOnGraph.Text = ((int)(mf.mc.fix.easting * 100)).ToString();
             }
 
             if (isScroll)

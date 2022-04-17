@@ -10,10 +10,9 @@ namespace AgOpenGPS
 
         //tram settings
         //public double wheelTrack;
-        public double tramWidth;
-        public double halfWheelTrack;
+        public double tramWidth, halfWheelTrack;
         public int passes;
-        public bool isOuter;
+        public bool isOuter, isTramOnBackBuffer;
 
         //tramlines
         public List<Polyline> tramList = new List<Polyline>();
@@ -34,6 +33,7 @@ namespace AgOpenGPS
             //halfTramWidth = (Math.Round((Properties.Settings.Default.setTram_tramWidth) / 2.0, 3));
 
             halfWheelTrack = Properties.Vehicle.Default.setVehicle_trackWidth * 0.5;
+            isTramOnBackBuffer = Properties.Settings.Default.setTram_isTramOnBackBuffer;
 
             passes = Properties.Settings.Default.setTram_passes;
             displayMode = 0;

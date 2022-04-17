@@ -139,7 +139,7 @@ namespace AgOpenGPS
                                 latStart = (double.Parse(offs[0], CultureInfo.InvariantCulture));
                                 lonStart = (double.Parse(offs[1], CultureInfo.InvariantCulture));
 
-                                distance = Math.Pow((latStart - mf.pn.latitude), 2) + Math.Pow((lonStart - mf.pn.longitude), 2);
+                                distance = Math.Pow((latStart - mf.mc.latitude), 2) + Math.Pow((lonStart - mf.mc.longitude), 2);
                                 distance = Math.Sqrt(distance);
                                 distance *= 100;
 
@@ -355,14 +355,7 @@ namespace AgOpenGPS
                 if (mode == 2)
                     dir2Delete = mf.fieldsDirectory + mf.currentFieldDirectory + "\\" + selectedRecord + ".rec";
 
-
-                DialogResult result3 = MessageBox.Show(
-                    dir2Delete,
-                    gStr.gsDeleteForSure,
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2);
-                if (result3 == DialogResult.Yes)
+                if (new FormHelp(dir2Delete, gStr.gsDeleteForSure, true).ShowDialog(this) == DialogResult.Yes)
                 {
                     if (mode == 2)
                         File.Delete(dir2Delete);

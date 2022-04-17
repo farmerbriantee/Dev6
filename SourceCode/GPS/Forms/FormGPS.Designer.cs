@@ -98,7 +98,6 @@
             this.btnAutoSteer = new System.Windows.Forms.Button();
             this.deleteContourPathsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteAppliedAreaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteForSureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.steerChartStripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.webcamToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.offsetFixToolStrip = new System.Windows.Forms.ToolStripMenuItem();
@@ -647,7 +646,7 @@
             this.btnResetSim.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnResetSim.Font = new System.Drawing.Font("Tahoma", 9.75F);
             this.btnResetSim.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnResetSim.Location = new System.Drawing.Point(524, 4);
+            this.btnResetSim.Location = new System.Drawing.Point(522, 4);
             this.btnResetSim.Name = "btnResetSim";
             this.btnResetSim.Size = new System.Drawing.Size(50, 30);
             this.btnResetSim.TabIndex = 164;
@@ -662,7 +661,7 @@
             this.btnResetSteerAngle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnResetSteerAngle.Font = new System.Drawing.Font("Tahoma", 9.75F);
             this.btnResetSteerAngle.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnResetSteerAngle.Location = new System.Drawing.Point(467, 4);
+            this.btnResetSteerAngle.Location = new System.Drawing.Point(465, 4);
             this.btnResetSteerAngle.Name = "btnResetSteerAngle";
             this.btnResetSteerAngle.Size = new System.Drawing.Size(50, 30);
             this.btnResetSteerAngle.TabIndex = 162;
@@ -687,10 +686,10 @@
             this.hsbarSteerAngle.Dock = System.Windows.Forms.DockStyle.Fill;
             this.hsbarSteerAngle.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.hsbarSteerAngle.LargeChange = 20;
-            this.hsbarSteerAngle.Location = new System.Drawing.Point(261, 1);
+            this.hsbarSteerAngle.Location = new System.Drawing.Point(260, 1);
             this.hsbarSteerAngle.Maximum = 819;
             this.hsbarSteerAngle.Name = "hsbarSteerAngle";
-            this.hsbarSteerAngle.Size = new System.Drawing.Size(202, 36);
+            this.hsbarSteerAngle.Size = new System.Drawing.Size(201, 36);
             this.hsbarSteerAngle.TabIndex = 179;
             this.hsbarSteerAngle.Value = 400;
             this.hsbarSteerAngle.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hsbarSteerAngle_Scroll);
@@ -704,7 +703,7 @@
             this.hsbarStepDistance.Maximum = 101;
             this.hsbarStepDistance.Minimum = -25;
             this.hsbarStepDistance.Name = "hsbarStepDistance";
-            this.hsbarStepDistance.Size = new System.Drawing.Size(202, 36);
+            this.hsbarStepDistance.Size = new System.Drawing.Size(201, 36);
             this.hsbarStepDistance.TabIndex = 178;
             this.hsbarStepDistance.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hsbarStepDistance_Scroll);
             // 
@@ -734,7 +733,7 @@
             this.panelSim.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 56F));
             this.panelSim.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.panelSim.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 56F));
-            this.panelSim.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 77F));
+            this.panelSim.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 79F));
             this.panelSim.Controls.Add(this.hsbarStepDistance, 0, 0);
             this.panelSim.Controls.Add(this.btnSimSetSpeedToZero, 1, 0);
             this.panelSim.Controls.Add(this.hsbarSteerAngle, 2, 0);
@@ -757,7 +756,7 @@
             this.btnSimSetSpeedToZero.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSimSetSpeedToZero.Font = new System.Drawing.Font("Tahoma", 9.75F);
             this.btnSimSetSpeedToZero.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnSimSetSpeedToZero.Location = new System.Drawing.Point(207, 4);
+            this.btnSimSetSpeedToZero.Location = new System.Drawing.Point(206, 4);
             this.btnSimSetSpeedToZero.Name = "btnSimSetSpeedToZero";
             this.btnSimSetSpeedToZero.Size = new System.Drawing.Size(50, 30);
             this.btnSimSetSpeedToZero.TabIndex = 453;
@@ -984,21 +983,13 @@
             // 
             // deleteAppliedAreaToolStripMenuItem
             // 
-            this.deleteAppliedAreaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.deleteForSureToolStripMenuItem});
             this.deleteAppliedAreaToolStripMenuItem.Enabled = false;
             this.deleteAppliedAreaToolStripMenuItem.Image = global::AgOpenGPS.Properties.Resources.skull;
             this.deleteAppliedAreaToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.deleteAppliedAreaToolStripMenuItem.Name = "deleteAppliedAreaToolStripMenuItem";
             this.deleteAppliedAreaToolStripMenuItem.Size = new System.Drawing.Size(404, 70);
             this.deleteAppliedAreaToolStripMenuItem.Text = "Delete Applied Area";
-            // 
-            // deleteForSureToolStripMenuItem
-            // 
-            this.deleteForSureToolStripMenuItem.Name = "deleteForSureToolStripMenuItem";
-            this.deleteForSureToolStripMenuItem.Size = new System.Drawing.Size(300, 38);
-            this.deleteForSureToolStripMenuItem.Text = "Delete For Sure";
-            this.deleteForSureToolStripMenuItem.Click += new System.EventHandler(this.toolStripAreYouSure_Click);
+            this.deleteAppliedAreaToolStripMenuItem.Click += new System.EventHandler(this.toolStripAreYouSure_Click);
             // 
             // steerChartStripMenu
             // 
@@ -1923,7 +1914,7 @@
             this.angleChartToolStripMenuItem,
             this.correctionToolStrip});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(405, 564);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(405, 586);
             // 
             // toolSteerSettingsToolStripMenuItem
             // 
@@ -2043,7 +2034,6 @@
         public System.Windows.Forms.ToolStripMenuItem steerChartStripMenu;
         private System.Windows.Forms.ToolStripMenuItem webcamToolStrip;
         private System.Windows.Forms.ToolStripMenuItem deleteAppliedAreaToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem deleteForSureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem offsetFixToolStrip;
         private System.Windows.Forms.TableLayoutPanel panelNavigation;
         private System.Windows.Forms.Label lblFieldStatus;

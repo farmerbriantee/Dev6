@@ -202,47 +202,47 @@ namespace AgOpenGPS
         #region Help
         private void btnAdjLeft_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnAdjHalfToolWidth, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnAdjHalfToolWidth, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnAdjRight_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnAdjHalfToolWidth, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnAdjHalfToolWidth, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnLeft_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnLeftRightNudge, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnLeftRightNudge, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnRight_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnLeftRightNudge, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnLeftRightNudge, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnSwapAB_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnSwapAB, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnSwapAB, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnMode_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_btnTramDisplayMode, gStr.gsHelp);
+            new FormHelp(gStr.h_btnTramDisplayMode, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudPasses_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_nudPasses, gStr.gsHelp);
+            new FormHelp(gStr.ht_nudPasses, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnCancel_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnCancel, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnCancel, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnExit_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnSave, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnSave, gStr.gsHelp).ShowDialog(this);
         }
 
         #endregion
@@ -252,10 +252,8 @@ namespace AgOpenGPS
 
 /*
             
-            MessageBox.Show(gStr, gStr.gsHelp);
 
-            DialogResult result2 = MessageBox.Show(gStr, gStr.gsHelp,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            DialogResult result2 = new FormAccept(gStr, gStr.gsHelp).ShowDialog(this);
 
             if (result2 == DialogResult.Yes)
             {

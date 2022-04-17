@@ -1,9 +1,43 @@
-﻿namespace AgOpenGPS
+﻿using System.Text;
+
+namespace AgOpenGPS
 {
     public class CModuleComm
     {
         //copy of the mainform address
         private readonly FormGPS mf;
+
+        //WGS84 Lat Long
+        public double latitude, longitude, latitudeTool, longitudeTool;
+
+        //our current fix
+        public vec2 fix = new vec2(0, 0);
+        public vec2 fixTool = new vec2(0, 0);
+
+        //other GIS Info
+        public double altitude, speed = double.MaxValue, avgSpeed, panicStopSpeed;
+
+        public double headingTrueDual, headingTrueDualTool, headingTrue, hdop, age, hdopTool, ageTool, headingTrueDualOffset;
+
+        public int fixQuality, fixQualityTool, ageAlarm;
+        public int satellitesTracked, satellitesTrackedTool;
+
+        public StringBuilder logNMEASentence = new StringBuilder();
+
+        //Roll and heading from the IMU
+        public double imuHeading = 99999, imuHeadingTool = 99999, imuRoll = 0, imuRollTool, imuPitch = 0, imuYawRate = 0;
+
+        //actual value in degrees
+        public double rollZero, rollZeroTool;
+
+        //Roll Filter Value
+        public double rollFilter;
+
+        //is the auto steer in auto turn on mode or not
+        public bool isRollInvert, isDualAsIMU, isReverseOn;
+
+        //the factor for fusion of GPS and IMU
+        public double forwardComp, reverseComp, fusionWeight, sideHillCompFactor;
 
         //Critical Safety Properties
         public bool isOutOfBounds = false;
@@ -31,35 +65,61 @@
         public double toolActualDistance = 0, toolError = 0;
 
         //for the workswitch
-        public bool isWorkSwitchActiveLow, isWorkSwitchEnabled, isWorkSwitchManual, isSteerControlsManual;
+        public bool isWorkSwitchEnabled, isWorkSwitchManual, isWorkSwitchActiveLow;
+        public bool isSteerSwitchEnabled, isSteerSwitchManual, isAutoSteerAuto;
 
-        public bool workSwitchHigh, oldWorkSwitchHigh, steerSwitchHigh, oldsteerSwitchHigh;
+        public bool workSwitchHigh, oldWorkSwitchHigh, steerSwitchHigh, oldSteerSwitchHigh;
 
         //constructor
         public CModuleComm(FormGPS _f)
         {
             mf = _f;
-            //WorkSwitch logic
-            isWorkSwitchEnabled = false;
+        }
 
-            //does a low, grounded out, mean on
-            isWorkSwitchActiveLow = true;
+        public void LoadSettings()
+        {
+            isWorkSwitchEnabled = Properties.Settings.Default.setF_IsWorkSwitchEnabled;
+            isWorkSwitchManual = Properties.Settings.Default.setF_IsWorkSwitchManual;
+            isWorkSwitchActiveLow = Properties.Settings.Default.setF_IsWorkSwitchActiveLow;
+
+            isSteerSwitchEnabled = Properties.Settings.Default.setF_IsSteerSwitchEnabled;
+            isSteerSwitchManual = Properties.Settings.Default.setF_steerControlsManual;
+            isAutoSteerAuto = Properties.Settings.Default.setAS_isAutoSteerAutoOn;
+
+            ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
+            rollZero = Properties.Settings.Default.setIMU_rollZero;
+            rollFilter = Properties.Settings.Default.setIMU_rollFilter;
+            fusionWeight = Properties.Settings.Default.setIMU_fusionWeight;
+            forwardComp = Properties.Settings.Default.setGPS_forwardComp;
+            reverseComp = Properties.Settings.Default.setGPS_reverseComp;
+            isRollInvert = Properties.Settings.Default.setIMU_invertRoll;
+            isDualAsIMU = Properties.Settings.Default.setIMU_isDualAsIMU;
+            isReverseOn = Properties.Settings.Default.setIMU_isReverseOn;
+            sideHillCompFactor = Properties.Settings.Default.setAS_sideHillComp;
         }
 
         //Called from "OpenGL.Designer.cs" when requied
         public void CheckWorkAndSteerSwitch()
         {
-            //AutoSteerAuto button enable - Ray Bear inspired code - Thx Ray!
-            if (mf.ahrs.isAutoSteerAuto && steerSwitchHigh != oldsteerSwitchHigh)
+            if (steerSwitchHigh != oldSteerSwitchHigh)
             {
-                oldsteerSwitchHigh = steerSwitchHigh;
-                //steerSwith is active low
-                mf.setBtnAutoSteer(!steerSwitchHigh);
+                oldSteerSwitchHigh = steerSwitchHigh;
+
+                if (isAutoSteerAuto)
+                {
+                    mf.setBtnAutoSteer(!steerSwitchHigh); //steerSwith is active low
+                }
+
+                if (isSteerSwitchEnabled)
+                {
+                    if ((mf.isAutoSteerBtnOn && isAutoSteerAuto) || !isAutoSteerAuto && !steerSwitchHigh)
+                        mf.setSectionBtnState(isWorkSwitchManual ? btnStates.On : btnStates.Auto);
+                    else
+                        mf.setSectionBtnState(btnStates.Off);
+                }
             }
 
-            if (isSteerControlsManual) workSwitchHigh = steerSwitchHigh;
-
-            if ((isWorkSwitchEnabled || isSteerControlsManual) && workSwitchHigh != oldWorkSwitchHigh)
+            if (isWorkSwitchEnabled && workSwitchHigh != oldWorkSwitchHigh)
             {
                 oldWorkSwitchHigh = workSwitchHigh;
 

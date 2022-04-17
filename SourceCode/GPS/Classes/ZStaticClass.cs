@@ -77,7 +77,7 @@ namespace AgOpenGPS
                     }
                     else if (type == DrawType.Points)
                         GL.DrawArrays(PrimitiveType.Points, 0, BufferPointsCnt);
-                    else if (loop)
+                    else if (loop || type == DrawType.LineLoop)
                         GL.DrawArrays(PrimitiveType.LineLoop, 0, BufferPointsCnt);
                     else
                         GL.DrawArrays(PrimitiveType.LineStrip, 0, BufferPointsCnt);

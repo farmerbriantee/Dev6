@@ -101,7 +101,7 @@ namespace AgOpenGPS
                 if (!refList.mode.HasFlag(Mode.Contour))
                 {
                     //guidance look ahead distance based on time or tool width at least 
-                    double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.pn.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
+                    double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.mc.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
                     pivot = new vec2(pivot.easting + (Math.Sin(heading) * guidanceLookDist),
                                                     pivot.northing + (Math.Cos(heading) * guidanceLookDist));
                 }
@@ -511,30 +511,6 @@ namespace AgOpenGPS
 
                     if (!mf.isStanleyUsed && mf.worldManager.camSetDistance > -200)
                     {
-                        /*
-                        if (ppRadius < 150 && ppRadius > -150)
-                        {
-                            const int numSegments = 100;
-                            double theta = glm.twoPI / numSegments;
-                            double c = Math.Cos(theta);//precalculate the sine and cosine
-                            double s = Math.Sin(theta);
-                            double x = ppRadius;//we start at angle = 0
-                            double y = 0;
-
-                            GL.LineWidth(1);
-                            GL.Color3(0.53f, 0.530f, 0.950f);
-                            GL.Begin(PrimitiveType.LineLoop);
-                            for (int ii = 0; ii < numSegments; ii++)
-                            {
-                                //glVertex2f(x + cx, y + cy);//output vertex
-                                GL.Vertex3(x + radiusPoint.easting, y + radiusPoint.northing, 0);//output vertex
-                                double t = x;//apply the rotation matrix
-                                x = (c * x) - (s * y);
-                                y = (s * t) + (c * y);
-                            }
-                            GL.End();
-                        }
-                        */
                         //Draw lookahead Point
                         GL.PointSize(8.0f);
                         GL.Begin(PrimitiveType.Points);
@@ -545,13 +521,16 @@ namespace AgOpenGPS
 
                     if (OffsetList.Count > 1)
                     {
-
+                        GL.Enable(EnableCap.LineStipple);
+                        GL.LineStipple(1, 0xFC00);
+                        GL.Color3(0.95f, 0.5f, 0.95f);
                         GL.Begin(PrimitiveType.LineStrip);
                         for (int i = 0; i < OffsetList.Count; i++)
                         {
                             GL.Vertex3(OffsetList[i].easting, OffsetList[i].northing, 0);
                         }
                         GL.End();
+                        GL.Disable(EnableCap.LineStipple);
                     }
 
                     if (ytList.Count > 1)

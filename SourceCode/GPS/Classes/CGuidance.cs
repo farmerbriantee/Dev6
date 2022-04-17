@@ -38,15 +38,13 @@ namespace AgOpenGPS
         public double distanceFromCurrentLinePivot, distanceFromCurrentLineTool;
         public double steerAngle, rEast, rNorth;
 
-        public vec2 goalPoint = new vec2(0, 0);//, radiusPoint = new vec2(0, 0);
+        public vec2 goalPoint = new vec2(0, 0);
 
         public double inty, steerHeadingError, xTrackSteerCorrection = 0;
 
         private double pivotDistError, lastPivotDistError, pivotDerivativeDistError;
         public double steerDistError, lastSteerDistError, steerDerivativeDistError;
 
-        //for adding steering angle based on side slope hill
-        public double sideHillCompFactor;//, ppRadius;
 
         //derivative counter
         private int counter2;
@@ -55,7 +53,6 @@ namespace AgOpenGPS
         {
             //constructor
             mf = _f;
-            sideHillCompFactor = Properties.Settings.Default.setAS_sideHillComp;
 
             curList.Capacity = 1024;
 
@@ -205,7 +202,7 @@ namespace AgOpenGPS
 
                     //the non linear distance error part of stanley
                     double XTEc = Math.Atan((distanceFromCurrentLineSteer * mf.vehicle.stanleyDistanceErrorGain)
-                        / ((Math.Abs(mf.pn.avgSpeed) * 0.277777) + 1));
+                        / ((Math.Abs(mf.mc.avgSpeed) * 0.277777) + 1));
 
                     //clamp it to max 42 degrees
                     if (XTEc > 0.74) XTEc = 0.74;
@@ -237,7 +234,7 @@ namespace AgOpenGPS
 
                     if (mf.vehicle.stanleyIntegralGainAB != 0 && !mf.isReverse)
                     {
-                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && mf.pn.avgSpeed > mf.startSpeed && Math.Abs(steerDerivativeDistError) < 1 && Math.Abs(pivotDerivativeDistError) < 0.15)
+                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && mf.mc.avgSpeed > mf.startSpeed && Math.Abs(steerDerivativeDistError) < 1 && Math.Abs(pivotDerivativeDistError) < 0.15)
                         {
                             //if over the line heading wrong way, rapidly decrease integral
                             if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
@@ -253,8 +250,8 @@ namespace AgOpenGPS
                     }
                     else inty = 0;
 
-                    if (!isYouTurnTriggered && mf.ahrs.imuRoll != 88888)
-                        steerAngle += mf.ahrs.imuRoll * -sideHillCompFactor;
+                    if (!isYouTurnTriggered && mf.mc.imuRoll != 88888)
+                        steerAngle += mf.mc.imuRoll * -mf.mc.sideHillCompFactor;
 
                     //add them up and clamp to max in vehicle settings
                     if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
@@ -277,7 +274,7 @@ namespace AgOpenGPS
                             pivotDerivativeDistError *= 2;
                         }
 
-                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.pn.avgSpeed > 2.5)
+                        if (!isYouTurnTriggered && mf.isAutoSteerBtnOn && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.mc.avgSpeed > 2.5)
                         {
                             //if over the line heading wrong way, rapidly decrease integral
                             if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
@@ -353,8 +350,8 @@ namespace AgOpenGPS
                     steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
                         + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));
 
-                    if (!isYouTurnTriggered && mf.ahrs.imuRoll != 88888)
-                        steerAngle += mf.ahrs.imuRoll * -sideHillCompFactor;
+                    if (!isYouTurnTriggered && mf.mc.imuRoll != 88888)
+                        steerAngle += mf.mc.imuRoll * -mf.mc.sideHillCompFactor;
 
                     if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
                     if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
@@ -471,7 +468,7 @@ namespace AgOpenGPS
 
                 }
 
-                if (isFollowingRecPath && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.pn.avgSpeed > 2.5)
+                if (isFollowingRecPath && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.mc.avgSpeed > 2.5)
                 {
                     //if over the line heading wrong way, rapidly decrease integral
                     if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))

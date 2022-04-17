@@ -25,8 +25,8 @@ namespace AgOpenGPS
 
         private void FormShiftPos_Load(object sender, EventArgs e)
         {
-            nudEast.Value = (decimal)mf.pn.fixOffset.easting * 100;
-            nudNorth.Value = (decimal)mf.pn.fixOffset.northing * 100;
+            nudEast.Value = (decimal)mf.worldManager.fixOffset.easting * 100;
+            nudNorth.Value = (decimal)mf.worldManager.fixOffset.northing * 100;
             chkOffsetsOn.Checked = mf.isKeepOffsetsOn;
             if (chkOffsetsOn.Checked) chkOffsetsOn.Text = "On";
             else chkOffsetsOn.Text = "Off";
@@ -56,14 +56,14 @@ namespace AgOpenGPS
         {
             nudEast.Value = 0;
             nudNorth.Value = 0;
-            mf.pn.fixOffset = new vec2();
+            mf.worldManager.fixOffset = new vec2();
         }
 
         private void bntOK_Click(object sender, EventArgs e)
         {
             mf.isKeepOffsetsOn = chkOffsetsOn.Checked;
             
-            mf.pn.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
+            mf.worldManager.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
             Close();
         }
 
@@ -76,13 +76,13 @@ namespace AgOpenGPS
         private void nudNorth_Click(object sender, EventArgs e)
         {
             mf.KeypadToNUD((NumericUpDown)sender, this);
-            mf.pn.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
+            mf.worldManager.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
         }
 
         private void nudEast_Click(object sender, EventArgs e)
         {
             mf.KeypadToNUD((NumericUpDown)sender, this);
-            mf.pn.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
+            mf.worldManager.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
         }
     }
 }

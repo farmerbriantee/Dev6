@@ -296,7 +296,7 @@ namespace AgOpenGPS
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + 0 + (16 * point), true));
 
-                                        mf.pn.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
+                                        mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
                                         points.Add(new vec2(Easting, Northing));
                                     }
 
@@ -319,9 +319,9 @@ namespace AgOpenGPS
                                         BndBoxBottom = ParseDouble(ByteArray, 36, true)
                                     };
 
-                                    if (aa.BndBoxLeft - 0.1 <= mf.pn.longitude && aa.BndBoxRight + 0.1 >= mf.pn.longitude)
+                                    if (aa.BndBoxLeft - 0.1 <= mf.mc.longitude && aa.BndBoxRight + 0.1 >= mf.mc.longitude)
                                     {
-                                        if (aa.BndBoxTop - 0.1 <= mf.pn.latitude && aa.BndBoxBottom + 0.1 >= mf.pn.latitude)
+                                        if (aa.BndBoxTop - 0.1 <= mf.mc.latitude && aa.BndBoxBottom + 0.1 >= mf.mc.latitude)
                                         {
                                             aa.InsideLargeView = true;
                                             aa.Parts.Add(points);
@@ -344,7 +344,7 @@ namespace AgOpenGPS
                                 for (int point = 0; point < numPoints; point++)
                                 {
                                     WGS84 tt = new WGS84(ParseDouble(ByteArray, 56 + (16 * point), true), ParseDouble(ByteArray, 48 + (16 * point), true));
-                                    mf.pn.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
+                                    mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
                                     mf.flagPts.Add(new CFlag(tt.Lat, tt.Lon, Easting, Northing, 0, 0, ""));
                                 }
                             }
@@ -378,7 +378,7 @@ namespace AgOpenGPS
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + (16 * point), true));
-                                        mf.pn.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
+                                        mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
                                         points2.Add(new vec2(Easting, Northing));
                                     }
 
@@ -396,9 +396,9 @@ namespace AgOpenGPS
                                             BndBoxBottom = ParseDouble(ByteArray, 36, true)
                                         };
 
-                                        if (aa.BndBoxLeft - 0.1 <= mf.pn.longitude && aa.BndBoxRight + 0.1 >= mf.pn.longitude)
+                                        if (aa.BndBoxLeft - 0.1 <= mf.mc.longitude && aa.BndBoxRight + 0.1 >= mf.mc.longitude)
                                         {
-                                            if (aa.BndBoxTop - 0.1 <= mf.pn.latitude && aa.BndBoxBottom + 0.1 >= mf.pn.latitude)
+                                            if (aa.BndBoxTop - 0.1 <= mf.mc.latitude && aa.BndBoxBottom + 0.1 >= mf.mc.latitude)
                                             {
                                                 aa.InsideLargeView = true;
                                                 if (table.Rows.Count > Polygons.Count && table.Columns.Count > 3)

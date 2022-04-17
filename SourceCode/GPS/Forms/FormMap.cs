@@ -43,7 +43,7 @@ namespace AgOpenGPS
         {
             lblPoints.Text = "0";
             mapControl.ZoomLevel = 15;//mapControl
-            mapControl.Center = new GeoPoint((float)mf.pn.longitude, (float)mf.pn.latitude);
+            mapControl.Center = new GeoPoint((float)mf.mc.longitude, (float)mf.mc.latitude);
 
             mapControl.Invalidate();
             
@@ -129,7 +129,7 @@ namespace AgOpenGPS
             //var coord = mapControl.Mouse;
             //StringBuilder sb = new StringBuilder();
             //sb.AppendLine($"Location: {coord}");
-            //MessageBox.Show(sb.ToString(), "Info");
+            //new FormHelp(sb.ToString(), "Info");
         }
 
         private void btnGo_Click(object sender, EventArgs e)
@@ -139,10 +139,10 @@ namespace AgOpenGPS
                 if (mapControl.Markers.Count == 0)
                 {
                     mapControl.Markers.Clear();
-                    mapControl.Center = new GeoPoint((float)mf.pn.longitude, (float)mf.pn.latitude);
+                    mapControl.Center = new GeoPoint((float)mf.mc.longitude, (float)mf.mc.latitude);
 
                     // Create marker's location point
-                    var point = new GeoPoint((float)mf.pn.longitude, (float)mf.pn.latitude);
+                    var point = new GeoPoint((float)mf.mc.longitude, (float)mf.mc.latitude);
 
                     var style = new MarkerStyle(4);
 
@@ -158,7 +158,7 @@ namespace AgOpenGPS
                 else
                 {
                     mapControl.Markers.Clear();
-                    mapControl.Center = new GeoPoint((float)mf.pn.longitude, (float)mf.pn.latitude);
+                    mapControl.Center = new GeoPoint((float)mf.mc.longitude, (float)mf.mc.latitude);
 
                     UpdateWindowTitle();
                     mapControl.Invalidate();
@@ -166,7 +166,7 @@ namespace AgOpenGPS
             }
             else
             {
-                mapControl.Center = new GeoPoint((float)mf.pn.longitude, (float)mf.pn.latitude);
+                mapControl.Center = new GeoPoint((float)mf.mc.longitude, (float)mf.mc.latitude);
 
                 UpdateWindowTitle();
                 mapControl.Invalidate();
@@ -228,7 +228,7 @@ namespace AgOpenGPS
                 CBoundaryList New = new CBoundaryList();
                 for (int i = 0; i < bingLine.Count; i++)
                 {
-                    mf.pn.ConvertWGS84ToLocal(bingLine[i].Latitude, bingLine[i].Longitude, out double nort, out double east);
+                    mf.worldManager.ConvertWGS84ToLocal(bingLine[i].Latitude, bingLine[i].Longitude, out double nort, out double east);
                     New.fenceLine.points.Add(new vec2(east, nort));
                 }
 
@@ -258,13 +258,8 @@ namespace AgOpenGPS
                 lblPoints.Text = bingLine.Count.ToString();
                 return;
             }
-            DialogResult result3 = MessageBox.Show("Delete Last Field Boundary Made?",
-                gStr.gsDeleteForSure,
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
 
-            if (result3 == DialogResult.Yes)
+            if (new FormHelp("Delete Last Field Boundary Made?", gStr.gsDeleteForSure, true).ShowDialog(this) == DialogResult.Yes)
             {
                 if (mf.bnd.bndList == null || mf.bnd.bndList.Count == 0) return;
                 int cnt = mf.bnd.bndList.Count;
@@ -401,13 +396,13 @@ namespace AgOpenGPS
             mf.worldManager.isGeoMap = true;
 
             CornerPoint geoRef = mapControl.TopLeftCorner;
-            mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out double nor, out double eas);
+            mf.worldManager.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out double nor, out double eas);
             if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldManager.isGeoMap = false;
             mf.worldManager.northingMaxGeo = nor;
             mf.worldManager.eastingMinGeo = eas;
 
             geoRef = mapControl.BottomRightCorner;
-            mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out nor, out eas);
+            mf.worldManager.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out nor, out eas);
             if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldManager.isGeoMap = false;
             mf.worldManager.northingMinGeo = nor;
             mf.worldManager.eastingMaxGeo = eas;

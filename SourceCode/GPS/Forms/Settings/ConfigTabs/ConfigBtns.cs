@@ -15,27 +15,27 @@ namespace AgOpenGPS
 
         private void ConfigBtns_Load(object sender, EventArgs e)
         {
-            cboxFeatureTram.Checked = Properties.Settings.Default.setFeatures.isTramOn;
-            cboxFeatureHeadland.Checked = Properties.Settings.Default.setFeatures.isHeadlandOn;
-            cboxFeatureBoundary.Checked = Properties.Settings.Default.setFeatures.isBoundaryOn;
-            cboxFeatureBoundaryContour.Checked = Properties.Settings.Default.setFeatures.isBndContourOn;
-            cboxFeatureRecPath.Checked = Properties.Settings.Default.setFeatures.isRecPathOn;
-            cboxFeatureABSmooth.Checked = Properties.Settings.Default.setFeatures.isABSmoothOn;
-            cboxFeatureHideContour.Checked = Properties.Settings.Default.setFeatures.isHideContourOn;
-            cboxFeatureWebcam.Checked = Properties.Settings.Default.setFeatures.isWebCamOn;
-            cboxFeatureOffsetFix.Checked = Properties.Settings.Default.setFeatures.isOffsetFixOn;
-            cboxFeatureContour.Checked = Properties.Settings.Default.setFeatures.isContourOn;
-            cboxFeatureYouTurn.Checked = Properties.Settings.Default.setFeatures.isYouTurnOn;
-            cboxFeatureSteerMode.Checked = Properties.Settings.Default.setFeatures.isSteerModeOn;
-            cboxFeatureAgIO.Checked = Properties.Settings.Default.setFeatures.isAgIOOn;
-            cboxFeatureAutoSection.Checked = Properties.Settings.Default.setFeatures.isAutoSectionOn;
-            cboxFeatureManualSection.Checked = Properties.Settings.Default.setFeatures.isManualSectionOn;
-            cboxFeatureCycleLines.Checked = Properties.Settings.Default.setFeatures.isCycleLinesOn;
-            cboxFeatureABLine.Checked = Properties.Settings.Default.setFeatures.isABLineOn;
-            cboxFeatureCurve.Checked = Properties.Settings.Default.setFeatures.isCurveOn;
-            cboxFeatureAutoSteer.Checked = Properties.Settings.Default.setFeatures.isAutoSteerOn;
-            cboxFeatureUTurn.Checked = Properties.Settings.Default.setFeatures.isUTurnOn;
-            cboxFeatureLateral.Checked = Properties.Settings.Default.setFeatures.isLateralOn;
+            cboxFeatureTram.Checked = Properties.Settings.Default.setDisplayFeature_Tram;
+            cboxFeatureHeadland.Checked = Properties.Settings.Default.setDisplayFeature_Headland;
+            cboxFeatureBoundary.Checked = Properties.Settings.Default.setDisplayFeature_Boundary;
+            cboxFeatureBoundaryContour.Checked = Properties.Settings.Default.setDisplayFeature_BoundaryContour;
+            cboxFeatureRecPath.Checked = Properties.Settings.Default.setDisplayFeature_RecPath;
+            cboxFeatureABSmooth.Checked = Properties.Settings.Default.setDisplayFeature_ABSmooth;
+            cboxFeatureHideContour.Checked = Properties.Settings.Default.setDisplayFeature_HideContour;
+            cboxFeatureWebcam.Checked = Properties.Settings.Default.setDisplayFeature_Webcam;
+            cboxFeatureOffsetFix.Checked = Properties.Settings.Default.setDisplayFeature_OffsetFix;
+            cboxFeatureContour.Checked = Properties.Settings.Default.setDisplayFeature_Contour;
+            cboxFeatureYouTurn.Checked = Properties.Settings.Default.setDisplayFeature_YouTurn;
+            cboxFeatureSteerMode.Checked = Properties.Settings.Default.setDisplayFeature_SteerMode;
+            cboxFeatureAgIO.Checked = Properties.Settings.Default.setDisplayFeature_AgIO;
+            cboxFeatureAutoSection.Checked = Properties.Settings.Default.setDisplayFeature_AutoSection;
+            cboxFeatureManualSection.Checked = Properties.Settings.Default.setDisplayFeature_ManualSection;
+            cboxFeatureCycleLines.Checked = Properties.Settings.Default.setDisplayFeature_CycleLines;
+            cboxFeatureABLine.Checked = Properties.Settings.Default.setDisplayFeature_ABLine;
+            cboxFeatureCurve.Checked = Properties.Settings.Default.setDisplayFeature_Curve;
+            cboxFeatureAutoSteer.Checked = Properties.Settings.Default.setDisplayFeature_AutoSteer;
+            cboxFeatureUTurn.Checked = Properties.Settings.Default.setDisplayFeature_UTurn;
+            cboxFeatureLateral.Checked = Properties.Settings.Default.setDisplayFeature_Lateral;
 
             cboxTurnSound.Checked = Properties.Settings.Default.setSound_isUturnOn;
             cboxSteerSound.Checked = Properties.Settings.Default.setSound_isAutoSteerOn;
@@ -44,34 +44,37 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            Properties.Settings.Default.setFeatures.isTramOn = cboxFeatureTram.Checked;
-            Properties.Settings.Default.setFeatures.isHeadlandOn = cboxFeatureHeadland.Checked;
-            Properties.Settings.Default.setFeatures.isBoundaryOn = cboxFeatureBoundary.Checked;
-            Properties.Settings.Default.setFeatures.isBndContourOn = cboxFeatureBoundaryContour.Checked;
-            Properties.Settings.Default.setFeatures.isRecPathOn = cboxFeatureRecPath.Checked;
-            Properties.Settings.Default.setFeatures.isABSmoothOn = cboxFeatureABSmooth.Checked;
-            Properties.Settings.Default.setFeatures.isHideContourOn = cboxFeatureHideContour.Checked;
-            Properties.Settings.Default.setFeatures.isWebCamOn = cboxFeatureWebcam.Checked;
-            Properties.Settings.Default.setFeatures.isOffsetFixOn = cboxFeatureOffsetFix.Checked;
-            Properties.Settings.Default.setFeatures.isContourOn = cboxFeatureContour.Checked;
-            Properties.Settings.Default.setFeatures.isYouTurnOn = cboxFeatureYouTurn.Checked;
-            Properties.Settings.Default.setFeatures.isSteerModeOn = cboxFeatureSteerMode.Checked;
-            Properties.Settings.Default.setFeatures.isAgIOOn = cboxFeatureAgIO.Checked;
-            Properties.Settings.Default.setFeatures.isAutoSectionOn = cboxFeatureAutoSection.Checked;
-            Properties.Settings.Default.setFeatures.isManualSectionOn = cboxFeatureManualSection.Checked;
-            Properties.Settings.Default.setFeatures.isCycleLinesOn = cboxFeatureCycleLines.Checked;
-            Properties.Settings.Default.setFeatures.isABLineOn = cboxFeatureABLine.Checked;
-            Properties.Settings.Default.setFeatures.isCurveOn = cboxFeatureCurve.Checked;
-            Properties.Settings.Default.setFeatures.isAutoSteerOn = cboxFeatureAutoSteer.Checked;
-            Properties.Settings.Default.setFeatures.isLateralOn = cboxFeatureLateral.Checked;
-            Properties.Settings.Default.setFeatures.isUTurnOn = cboxFeatureUTurn.Checked;
-            mf.SetFeaturesOnOff();
+            Properties.Settings.Default.setDisplayFeature_Tram = cboxFeatureTram.Checked;
+            Properties.Settings.Default.setDisplayFeature_Headland = cboxFeatureHeadland.Checked;
+            Properties.Settings.Default.setDisplayFeature_Boundary = cboxFeatureBoundary.Checked;
+            Properties.Settings.Default.setDisplayFeature_BoundaryContour = cboxFeatureBoundaryContour.Checked;
+            Properties.Settings.Default.setDisplayFeature_RecPath = cboxFeatureRecPath.Checked;
+            Properties.Settings.Default.setDisplayFeature_ABSmooth = cboxFeatureABSmooth.Checked;
+            Properties.Settings.Default.setDisplayFeature_HideContour = cboxFeatureHideContour.Checked;
+            Properties.Settings.Default.setDisplayFeature_Webcam = cboxFeatureWebcam.Checked;
+            Properties.Settings.Default.setDisplayFeature_OffsetFix = cboxFeatureOffsetFix.Checked;
+            Properties.Settings.Default.setDisplayFeature_Contour = cboxFeatureContour.Checked;
+            Properties.Settings.Default.setDisplayFeature_YouTurn = cboxFeatureYouTurn.Checked;
+            Properties.Settings.Default.setDisplayFeature_SteerMode = cboxFeatureSteerMode.Checked;
+            Properties.Settings.Default.setDisplayFeature_AgIO = cboxFeatureAgIO.Checked;
+            Properties.Settings.Default.setDisplayFeature_AutoSection = cboxFeatureAutoSection.Checked;
+            Properties.Settings.Default.setDisplayFeature_ManualSection = cboxFeatureManualSection.Checked;
+            Properties.Settings.Default.setDisplayFeature_CycleLines = cboxFeatureCycleLines.Checked;
+            Properties.Settings.Default.setDisplayFeature_ABLine = cboxFeatureABLine.Checked;
+            Properties.Settings.Default.setDisplayFeature_Curve = cboxFeatureCurve.Checked;
+            Properties.Settings.Default.setDisplayFeature_AutoSteer = cboxFeatureAutoSteer.Checked;
+            Properties.Settings.Default.setDisplayFeature_UTurn = cboxFeatureUTurn.Checked;
+            Properties.Settings.Default.setDisplayFeature_Lateral = cboxFeatureLateral.Checked;
 
             Properties.Settings.Default.setSound_isUturnOn = mf.sounds.isTurnSoundOn = cboxTurnSound.Checked;
             Properties.Settings.Default.setSound_isAutoSteerOn = mf.sounds.isSteerSoundOn = cboxSteerSound.Checked;
             Properties.Settings.Default.setSound_isHydLiftOn = mf.sounds.isHydLiftSoundOn = cboxHydLiftSound.Checked;
 
+            Properties.Settings.Default.setDisplayFeature_SimpleCloseField = !(cboxFeatureTram.Checked | cboxFeatureHeadland.Checked | cboxFeatureBoundary.Checked | cboxFeatureBoundaryContour.Checked | cboxFeatureRecPath.Checked);
+
             Properties.Settings.Default.Save();
+
+            mf.SetFeaturesOnOff();
         }
     }
 }

@@ -161,36 +161,36 @@ namespace AgOpenGPS
 
         private void btnSendMachinePGN_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_btnSendSteerConfigPGN, gStr.gsHelp);
+            new FormHelp(gStr.hc_btnSendSteerConfigPGN, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudLowerTime_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudLowerTime, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudLowerTime, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudRaiseTime_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudRaiseTime, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudRaiseTime, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudHydLiftLookAhead_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudHydLiftLookAhead, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudHydLiftLookAhead, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxIsHydOn_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxIsHydOn, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxIsHydOn, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxMachInvertRelays_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxMachInvertRelays, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxMachInvertRelays, gStr.gsHelp).ShowDialog(this);
         }
         private void pboxSendMachine_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_pboxSendSteer, gStr.gsHelp);
+            new FormHelp(gStr.hc_pboxSendSteer, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

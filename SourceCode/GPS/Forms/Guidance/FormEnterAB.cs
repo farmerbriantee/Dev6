@@ -24,10 +24,10 @@ namespace AgOpenGPS
             nudLatitudeB.Controls[0].Enabled = false;
             nudHeading.Controls[0].Enabled = false;
 
-            nudLatitude.Value = (decimal)mf.pn.latitude;
-            nudLatitudeB.Value = (decimal)mf.pn.latitude + 0.000001m;
-            nudLongitude.Value = (decimal)mf.pn.longitude;
-            nudLongitudeB.Value = (decimal)mf.pn.longitude + 0.000001m;
+            nudLatitude.Value = (decimal)mf.mc.latitude;
+            nudLatitudeB.Value = (decimal)mf.mc.latitude + 0.000001m;
+            nudLongitude.Value = (decimal)mf.mc.longitude;
+            nudLongitudeB.Value = (decimal)mf.mc.longitude + 0.000001m;
         }
 
         private void FormEnterAB_Load(object sender, EventArgs e)
@@ -111,13 +111,13 @@ namespace AgOpenGPS
         {
             if (mf.gyd.EditGuidanceLine != null)
             {
-                mf.pn.ConvertWGS84ToLocal((double)nudLatitude.Value, (double)nudLongitude.Value, out double nort, out double east);
+                mf.worldManager.ConvertWGS84ToLocal((double)nudLatitude.Value, (double)nudLongitude.Value, out double nort, out double east);
                 double heading;
                 double nort2, east2;
 
                 if (isAB)
                 {
-                    mf.pn.ConvertWGS84ToLocal((double)nudLatitudeB.Value, (double)nudLongitudeB.Value, out nort2, out east2);
+                    mf.worldManager.ConvertWGS84ToLocal((double)nudLatitudeB.Value, (double)nudLongitudeB.Value, out nort2, out east2);
 
                     // heading based on AB points
                     heading = Math.Atan2(east2 - east, nort2 - nort);

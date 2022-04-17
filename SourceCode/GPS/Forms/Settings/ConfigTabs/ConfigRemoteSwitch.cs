@@ -15,137 +15,64 @@ namespace AgOpenGPS
 
         private void ConfigRemoteSwitch_Load(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.setF_IsWorkSwitchManual)
-            {
-                chkSetManualSections.Checked = true;
-                chkSetAutoSections.Checked = false;
-            }
-            else
-            {
-                chkSetManualSections.Checked = false;
-                chkSetAutoSections.Checked = true;
-            }
+            chkSelectWorkSwitch.Checked = Properties.Settings.Default.setF_IsWorkSwitchEnabled;
 
-            if (mf.mc.isWorkSwitchEnabled)
-            {
-                chkRemoteSwitchEnable.Checked = true;
-                chkSelectSteerSwitch.Checked = false;
-                chkSelectWorkSwitch.Checked = true;
-            }
-
-            if (mf.mc.isSteerControlsManual)
-            {
-                chkRemoteSwitchEnable.Checked = true;
-                chkSelectSteerSwitch.Checked = true;
-                chkSelectWorkSwitch.Checked = false;
-            }
-
-            if (!mf.mc.isSteerControlsManual && !mf.mc.isWorkSwitchEnabled)
-            {
-                chkRemoteSwitchEnable.Checked = false;
-                chkSelectSteerSwitch.Checked = false;
-                chkSelectWorkSwitch.Checked = false;
-            }
-
-            if (!chkRemoteSwitchEnable.Checked)
-            {
-                chkRemoteSwitchEnable.Image = Properties.Resources.SwitchOff;
-                grpControls.Enabled = false;
-                grpSwitch.Enabled = false;
-                chkRemoteSwitchEnable.Checked = false;
-                chkSelectSteerSwitch.Checked = false;
-                chkSelectWorkSwitch.Checked = false;
-                grpControls.Enabled = false;
-                grpSwitch.Enabled = false;
-                chkSetManualSections.Checked = false;
-                chkSetAutoSections.Checked = false;
-            }
-            else
-            {
-                chkRemoteSwitchEnable.Image = Properties.Resources.SwitchOn;
-                grpControls.Enabled = true;
-                grpSwitch.Enabled = true;
-            }
+            chkSetManualSections.Checked = Properties.Settings.Default.setF_IsWorkSwitchManual;
+            chkSetAutoSections.Checked = !chkSetManualSections.Checked;
 
             chkWorkSwActiveLow.Checked = Properties.Settings.Default.setF_IsWorkSwitchActiveLow;
-            if (chkWorkSwActiveLow.Checked) chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveClosed;
-            else chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveOpen;
+            chkWorkSwActiveLow.Image = chkWorkSwActiveLow.Checked ? Properties.Resources.SwitchActiveClosed : Properties.Resources.SwitchActiveOpen;
 
-            chkWorkSwActiveLow.Visible = !chkSelectSteerSwitch.Checked;
+
+            chkSelectSteerSwitch.Checked = Properties.Settings.Default.setF_IsSteerSwitchEnabled;
+
+            chkSetManualSectionsSteer.Checked = Properties.Settings.Default.setF_steerControlsManual;
+            chkSetAutoSectionsSteer.Enabled = !chkSetManualSectionsSteer.Checked;
+
+            cboxAutoSteerAuto.Checked = Properties.Settings.Default.setAS_isAutoSteerAutoOn;
+            if (Properties.Settings.Default.setAS_isAutoSteerAutoOn)
+            {
+                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOn;
+                cboxAutoSteerAuto.Text = "        Remote";
+            }
+            else
+            {
+                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOff;
+                cboxAutoSteerAuto.Text = "        " + gStr.gsManual;
+            }
+
+
+            chkWorkSwActiveLow.Enabled = chkSetManualSections.Enabled = chkSetAutoSections.Enabled = chkSelectWorkSwitch.Checked;
+            chkSetManualSectionsSteer.Enabled = chkSetAutoSectionsSteer.Enabled = chkSelectSteerSwitch.Checked;
         }
 
         public override void Close()
         {
-            Properties.Settings.Default.setF_IsWorkSwitchActiveLow = mf.mc.isWorkSwitchActiveLow = chkWorkSwActiveLow.Checked;
+            //is work switch enabled
+            mf.mc.isWorkSwitchEnabled = Properties.Settings.Default.setF_IsWorkSwitchEnabled = chkSelectWorkSwitch.Checked;
 
-            Properties.Settings.Default.setF_IsWorkSwitchEnabled = mf.mc.isWorkSwitchEnabled = chkSelectWorkSwitch.Checked || mf.mc.isSteerControlsManual;            
+            mf.mc.isWorkSwitchManual = Properties.Settings.Default.setF_IsWorkSwitchManual = chkSetManualSections.Checked;
+            mf.mc.isWorkSwitchActiveLow = Properties.Settings.Default.setF_IsWorkSwitchActiveLow = chkWorkSwActiveLow.Checked;
 
-            Properties.Settings.Default.setF_steerControlsManual = mf.mc.isSteerControlsManual = chkSelectSteerSwitch.Checked;
 
-            //Are auto or manual sections controlled. Manual and Auto buttons, the old manual sets the setting, auto just visual
-            Properties.Settings.Default.setF_IsWorkSwitchManual = mf.mc.isWorkSwitchManual = chkSetManualSections.Checked;
+            mf.mc.isSteerSwitchEnabled = Properties.Settings.Default.setF_IsSteerSwitchEnabled = chkSelectSteerSwitch.Checked;
+
+            mf.mc.isSteerSwitchManual = Properties.Settings.Default.setF_steerControlsManual = chkSetManualSectionsSteer.Checked;
+            mf.mc.isAutoSteerAuto = Properties.Settings.Default.setAS_isAutoSteerAutoOn = cboxAutoSteerAuto.Checked;
+            mf.SetAutoSteerText();
 
             Properties.Settings.Default.Save();
         }
 
-        private void chkRemoteSwitchEnable_CheckedChanged(object sender, EventArgs e)
-        {
-            if (chkRemoteSwitchEnable.Checked)
-            {
-                //turning on
-                chkSelectSteerSwitch.Checked = false;
-                chkSelectWorkSwitch.Checked = true;
-                grpControls.Enabled = true;
-                grpSwitch.Enabled = true;
-                chkSetManualSections.Checked = true;
-                chkSetAutoSections.Checked = false;
-                chkRemoteSwitchEnable.Image = Properties.Resources.SwitchOn;
-                chkWorkSwActiveLow.Checked = true;
-                chkWorkSwActiveLow.Enabled = true;
-                chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveClosed;
-                chkWorkSwActiveLow.Visible = true;
-            }
-            else
-            {
-                //turning off
-                chkSelectSteerSwitch.Checked = false;
-                chkSelectWorkSwitch.Checked = false;
-                grpControls.Enabled = false;
-                grpSwitch.Enabled = false;
-                chkSetManualSections.Checked = false;
-                chkSetAutoSections.Checked = false;
-                chkRemoteSwitchEnable.Image = Properties.Resources.SwitchOff;
-                chkWorkSwActiveLow.Checked = true;
-                chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveClosed;
-                chkWorkSwActiveLow.Visible = true;
-            }
-        }
-
         private void chkSelectWorkSwitch_Click(object sender, EventArgs e)
         {
-            chkSelectSteerSwitch.Checked = false;
-            chkSelectWorkSwitch.Checked = true;
-
-            chkWorkSwActiveLow.Checked = true;
-            if (chkWorkSwActiveLow.Checked) chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveClosed;
-            else chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveOpen;
-            chkWorkSwActiveLow.Visible = true;
+            chkWorkSwActiveLow.Enabled = chkSetManualSections.Enabled = chkSetAutoSections.Enabled = chkSelectWorkSwitch.Checked;
         }
 
-        private void chkSelectSteerSwitch_Click(object sender, EventArgs e)
+        private void chkSetManualSections_Click(object sender, EventArgs e)
         {
-            chkSelectSteerSwitch.Checked = true;
-            chkSelectWorkSwitch.Checked = false;
-
-            chkWorkSwActiveLow.Checked = true;
-            chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveClosed;
-            chkWorkSwActiveLow.Visible = false;
-        }
-
-        private void chkWorkSwActiveLow_Click(object sender, EventArgs e)
-        {
-            if (chkWorkSwActiveLow.Checked) chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveClosed;
-            else chkWorkSwActiveLow.Image = Properties.Resources.SwitchActiveOpen;
+            chkSetManualSections.Checked = true;
+            chkSetAutoSections.Checked = false;
         }
 
         private void chkSetAutoSections_Click(object sender, EventArgs e)
@@ -154,10 +81,45 @@ namespace AgOpenGPS
             chkSetAutoSections.Checked = true;
         }
 
-        private void chkSetManualSections_Click(object sender, EventArgs e)
+        private void chkWorkSwActiveLow_Click(object sender, EventArgs e)
         {
-            chkSetAutoSections.Checked = false;
-            chkSetManualSections.Checked = true;
+            chkWorkSwActiveLow.Image = chkWorkSwActiveLow.Checked ? Properties.Resources.SwitchActiveClosed : Properties.Resources.SwitchActiveOpen;
+        }
+
+        private void chkSelectSteerSwitch_Click(object sender, EventArgs e)
+        {
+            chkSetManualSectionsSteer.Enabled = chkSetAutoSectionsSteer.Enabled = chkSelectSteerSwitch.Checked;
+        }
+
+        private void chkSetManualSectionsSteer_Click(object sender, EventArgs e)
+        {
+            chkSetManualSectionsSteer.Checked = true;
+            chkSetAutoSectionsSteer.Checked = false;
+        }
+
+        private void chkSetAutoSectionsSteer_Click(object sender, EventArgs e)
+        {
+            chkSetManualSectionsSteer.Checked = false;
+            chkSetAutoSectionsSteer.Checked = true;
+        }
+
+        private void cboxAutoSteerAuto_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            new FormHelp(gStr.hc_cboxAutoSteerAuto, gStr.gsHelp).ShowDialog(this);
+        }
+
+        private void cboxAutoSteerAuto_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cboxAutoSteerAuto.Checked)
+            {
+                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOn;
+                cboxAutoSteerAuto.Text = "        Remote";
+            }
+            else
+            {
+                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOff;
+                cboxAutoSteerAuto.Text = "        " + gStr.gsManual;
+            }
         }
     }
 }

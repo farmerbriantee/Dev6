@@ -90,17 +90,17 @@ namespace AgOpenGPS
 
         private void nudTurnDistanceFromBoundary_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudTurnDistanceFromBoundary, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudTurnDistanceFromBoundary, gStr.gsHelp).ShowDialog(this);
         }
 
         private void lblDistance_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_lblUTurnLegDistance, gStr.gsHelp);
+            new FormHelp(gStr.hc_lblUTurnLegDistance, gStr.gsHelp).ShowDialog(this);
         }
 
         private void lblSmoothing_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_lblUTurnSmoothing, gStr.gsHelp);
+            new FormHelp(gStr.hc_lblUTurnSmoothing, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.pictureBox12 = new System.Windows.Forms.PictureBox();
-            this.label113 = new System.Windows.Forms.Label();
             this.label112 = new System.Windows.Forms.Label();
             this.label111 = new System.Windows.Forms.Label();
             this.label110 = new System.Windows.Forms.Label();
@@ -47,7 +46,6 @@
             this.nudLightbarCmPerPixel = new System.Windows.Forms.Button();
             this.nudLineWidth = new System.Windows.Forms.Button();
             this.pictureBox14 = new System.Windows.Forms.PictureBox();
-            this.cboxAutoSteerAuto = new System.Windows.Forms.CheckBox();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -69,19 +67,6 @@
             this.pictureBox12.Size = new System.Drawing.Size(200, 123);
             this.pictureBox12.TabIndex = 495;
             this.pictureBox12.TabStop = false;
-            // 
-            // label113
-            // 
-            this.label113.AutoSize = true;
-            this.label113.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label113.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label113.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label113.Location = new System.Drawing.Point(47, 386);
-            this.label113.Name = "label113";
-            this.label113.Size = new System.Drawing.Size(137, 18);
-            this.label113.TabIndex = 494;
-            this.label113.Text = "Steer Switch Control";
-            this.label113.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label112
             // 
@@ -300,27 +285,6 @@
             this.pictureBox14.TabIndex = 484;
             this.pictureBox14.TabStop = false;
             // 
-            // cboxAutoSteerAuto
-            // 
-            this.cboxAutoSteerAuto.Appearance = System.Windows.Forms.Appearance.Button;
-            this.cboxAutoSteerAuto.BackColor = System.Drawing.Color.Firebrick;
-            this.cboxAutoSteerAuto.FlatAppearance.BorderColor = System.Drawing.Color.Black;
-            this.cboxAutoSteerAuto.FlatAppearance.CheckedBackColor = System.Drawing.Color.DarkGreen;
-            this.cboxAutoSteerAuto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cboxAutoSteerAuto.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxAutoSteerAuto.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.cboxAutoSteerAuto.Image = global::AgOpenGPS.Properties.Resources.AutoSteerOn;
-            this.cboxAutoSteerAuto.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.cboxAutoSteerAuto.Location = new System.Drawing.Point(65, 410);
-            this.cboxAutoSteerAuto.Name = "cboxAutoSteerAuto";
-            this.cboxAutoSteerAuto.Size = new System.Drawing.Size(98, 103);
-            this.cboxAutoSteerAuto.TabIndex = 472;
-            this.cboxAutoSteerAuto.Text = "Manual";
-            this.cboxAutoSteerAuto.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.cboxAutoSteerAuto.UseVisualStyleBackColor = false;
-            this.cboxAutoSteerAuto.Click += new System.EventHandler(this.cboxAutoSteerAuto_Click);
-            this.cboxAutoSteerAuto.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.cboxAutoSteerAuto_HelpRequested);
-            // 
             // pictureBox5
             // 
             this.pictureBox5.Image = global::AgOpenGPS.Properties.Resources.ConV_LineWith;
@@ -391,7 +355,6 @@
             this.Controls.Add(this.label16);
             this.Controls.Add(this.nudPanicStopSpeed);
             this.Controls.Add(this.pictureBox12);
-            this.Controls.Add(this.label113);
             this.Controls.Add(this.label112);
             this.Controls.Add(this.label111);
             this.Controls.Add(this.label110);
@@ -409,7 +372,6 @@
             this.Controls.Add(this.nudLightbarCmPerPixel);
             this.Controls.Add(this.nudLineWidth);
             this.Controls.Add(this.pictureBox14);
-            this.Controls.Add(this.cboxAutoSteerAuto);
             this.Controls.Add(this.pictureBox5);
             this.Controls.Add(this.pictureBox4);
             this.Controls.Add(this.pictureBox2);
@@ -429,7 +391,6 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBox12;
-        private System.Windows.Forms.Label label113;
         private System.Windows.Forms.Label label112;
         private System.Windows.Forms.Label label111;
         private System.Windows.Forms.Label label110;
@@ -447,7 +408,6 @@
         private System.Windows.Forms.Button nudLightbarCmPerPixel;
         private System.Windows.Forms.Button nudLineWidth;
         private System.Windows.Forms.PictureBox pictureBox14;
-        private System.Windows.Forms.CheckBox cboxAutoSteerAuto;
         private System.Windows.Forms.PictureBox pictureBox5;
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.PictureBox pictureBox2;

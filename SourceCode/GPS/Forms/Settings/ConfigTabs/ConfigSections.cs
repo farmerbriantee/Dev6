@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace AgOpenGPS
@@ -8,31 +11,28 @@ namespace AgOpenGPS
 
         private readonly FormGPS mf;
 
-        private int numberOfSections, minCoverage;
+        private int numberOfSections, maxOverlap, xpos = 0;
 
-        private double sectionWidth1, sectionWidth2, sectionWidth3, sectionWidth4, sectionWidth5, sectionWidth6,
-                sectionWidth7, sectionWidth8, sectionWidth9, sectionWidth10, sectionWidth11, sectionWidth12,
-                sectionWidth13, sectionWidth14, sectionWidth15, sectionWidth16;
+        private List<double> sectionWidths = new List<double>();
+        private List<Button> sectionButtons = new List<Button>();
+        private List<Label> sectionLabels = new List<Label>();
 
-        private double sectionPosition1, sectionPosition2, sectionPosition3, sectionPosition4,
-                        sectionPosition5, sectionPosition6, sectionPosition7, sectionPosition8, sectionPosition9,
-                        sectionPosition10, sectionPosition11, sectionPosition12, sectionPosition13, sectionPosition14,
-                        sectionPosition15, sectionPosition16, sectionPosition17;
-
-        private double defaultSectionWidth, cutoffSpeed;
+        private double defaultSectionWidth, cutoffSpeed, bndOverlap, totalWidth = 0;
         private bool somethingChanged = false;
 
         public ConfigSections(Form callingForm)
         {
             mf = callingForm as FormGPS;
             InitializeComponent();
+            Scroll += (s, e) => { HandleScroll(Math.Sign(e.NewValue - e.OldValue)); };
+            MouseWheel += (s, e) => { HandleScroll(Math.Sign(e.Delta)); };
         }
 
         private void ConfigSections_Load(object sender, EventArgs e)
         {
             if (mf.isMetric)
             {
-                lblSecTotalWidthFeet.Text = (mf.tool.toolWidth * mf.mToUser).ToString("0") + mf.unitsInCm;
+                lblSecTotalWidthFeet.Text = (mf.tool.toolWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
                 lblTurnOffBelowUnits.Text = gStr.gsKMH;
             }
             else
@@ -45,53 +45,22 @@ namespace AgOpenGPS
                 lblSecTotalWidthInches.Text = Convert.ToString(temp) + '"';
             }
 
-            cboxSectionResponse.Checked = Properties.Vehicle.Default.setSection_isFast;
+            cboxSectionResponse.Checked = mf.tool.isFastSections;
 
-            cutoffSpeed = Properties.Vehicle.Default.setVehicle_slowSpeedCutoff;
+            cutoffSpeed = mf.tool.slowSpeedCutoff;
             nudCutoffSpeed.Text = (cutoffSpeed * mf.KMHToUser).ToString("0.0");
 
-            numberOfSections = Properties.Vehicle.Default.setVehicle_numSections;
+            numberOfSections = mf.tool.numOfSections;
             btnNumSections.Text = numberOfSections.ToString();
 
-            minCoverage = Properties.Vehicle.Default.setVehicle_minCoverage;
-            nudMinCoverage.Text = minCoverage.ToString() + "%";
+            maxOverlap = mf.tool.maxOverlap;
+            nudMinCoverage.Text = maxOverlap.ToString();
 
-            defaultSectionWidth = Properties.Vehicle.Default.setTool_defaultSectionWidth;
+            bndOverlap = mf.tool.boundOverlap;
+            btnMaxBoundOverlap.Text = bndOverlap.ToString();
+
+            defaultSectionWidth = Properties.Vehicle.Default.Tool_defaultSectionWidth;
             nudDefaultSectionWidth.Text = (defaultSectionWidth * mf.mToUser).ToString("0");
-
-            sectionWidth1 = Math.Abs(Properties.Vehicle.Default.setSection_position2 - Properties.Vehicle.Default.setSection_position1);
-            sectionWidth2 = Math.Abs(Properties.Vehicle.Default.setSection_position3 - Properties.Vehicle.Default.setSection_position2);
-            sectionWidth3 = Math.Abs(Properties.Vehicle.Default.setSection_position4 - Properties.Vehicle.Default.setSection_position3);
-            sectionWidth4 = Math.Abs(Properties.Vehicle.Default.setSection_position5 - Properties.Vehicle.Default.setSection_position4);
-            sectionWidth5 = Math.Abs(Properties.Vehicle.Default.setSection_position6 - Properties.Vehicle.Default.setSection_position5);
-            sectionWidth6 = Math.Abs(Properties.Vehicle.Default.setSection_position7 - Properties.Vehicle.Default.setSection_position6);
-            sectionWidth7 = Math.Abs(Properties.Vehicle.Default.setSection_position8 - Properties.Vehicle.Default.setSection_position7);
-            sectionWidth8 = Math.Abs(Properties.Vehicle.Default.setSection_position9 - Properties.Vehicle.Default.setSection_position8);
-            sectionWidth9 = Math.Abs(Properties.Vehicle.Default.setSection_position10 - Properties.Vehicle.Default.setSection_position9);
-            sectionWidth10 = Math.Abs(Properties.Vehicle.Default.setSection_position11 - Properties.Vehicle.Default.setSection_position10);
-            sectionWidth11 = Math.Abs(Properties.Vehicle.Default.setSection_position12 - Properties.Vehicle.Default.setSection_position11);
-            sectionWidth12 = Math.Abs(Properties.Vehicle.Default.setSection_position13 - Properties.Vehicle.Default.setSection_position12);
-            sectionWidth13 = Math.Abs(Properties.Vehicle.Default.setSection_position14 - Properties.Vehicle.Default.setSection_position13);
-            sectionWidth14 = Math.Abs(Properties.Vehicle.Default.setSection_position15 - Properties.Vehicle.Default.setSection_position14);
-            sectionWidth15 = Math.Abs(Properties.Vehicle.Default.setSection_position16 - Properties.Vehicle.Default.setSection_position15);
-            sectionWidth16 = Math.Abs(Properties.Vehicle.Default.setSection_position17 - Properties.Vehicle.Default.setSection_position16);
-
-            nudSection1.Text = (sectionWidth1 * mf.mToUser).ToString("0");
-            nudSection2.Text = (sectionWidth2 * mf.mToUser).ToString("0");
-            nudSection3.Text = (sectionWidth3 * mf.mToUser).ToString("0");
-            nudSection4.Text = (sectionWidth4 * mf.mToUser).ToString("0");
-            nudSection5.Text = (sectionWidth5 * mf.mToUser).ToString("0");
-            nudSection6.Text = (sectionWidth6 * mf.mToUser).ToString("0");
-            nudSection7.Text = (sectionWidth7 * mf.mToUser).ToString("0");
-            nudSection8.Text = (sectionWidth8 * mf.mToUser).ToString("0");
-            nudSection9.Text = (sectionWidth9 * mf.mToUser).ToString("0");
-            nudSection10.Text = (sectionWidth10 * mf.mToUser).ToString("0");
-            nudSection11.Text = (sectionWidth11 * mf.mToUser).ToString("0");
-            nudSection12.Text = (sectionWidth12 * mf.mToUser).ToString("0");
-            nudSection13.Text = (sectionWidth13 * mf.mToUser).ToString("0");
-            nudSection14.Text = (sectionWidth14 * mf.mToUser).ToString("0");
-            nudSection15.Text = (sectionWidth15 * mf.mToUser).ToString("0");
-            nudSection16.Text = (sectionWidth16 * mf.mToUser).ToString("0");
 
             //based on number of sections and values update the page before displaying
             UpdateSpinners();
@@ -101,167 +70,106 @@ namespace AgOpenGPS
         {
             if (somethingChanged)
             {
-                //take the section widths and convert to meters and positions along tool.
-                CalculateSectionPositions();
-
-                //save the values in each spinner for section position widths in settings
-                Properties.Vehicle.Default.setSection_position1 = sectionPosition1;
-                Properties.Vehicle.Default.setSection_position2 = sectionPosition2;
-                Properties.Vehicle.Default.setSection_position3 = sectionPosition3;
-                Properties.Vehicle.Default.setSection_position4 = sectionPosition4;
-                Properties.Vehicle.Default.setSection_position5 = sectionPosition5;
-                Properties.Vehicle.Default.setSection_position6 = sectionPosition6;
-                Properties.Vehicle.Default.setSection_position7 = sectionPosition7;
-                Properties.Vehicle.Default.setSection_position8 = sectionPosition8;
-                Properties.Vehicle.Default.setSection_position9 = sectionPosition9;
-                Properties.Vehicle.Default.setSection_position10 = sectionPosition10;
-                Properties.Vehicle.Default.setSection_position11 = sectionPosition11;
-                Properties.Vehicle.Default.setSection_position12 = sectionPosition12;
-                Properties.Vehicle.Default.setSection_position13 = sectionPosition13;
-                Properties.Vehicle.Default.setSection_position14 = sectionPosition14;
-                Properties.Vehicle.Default.setSection_position15 = sectionPosition15;
-                Properties.Vehicle.Default.setSection_position16 = sectionPosition16;
-                Properties.Vehicle.Default.setSection_position17 = sectionPosition17;
-
                 //turn section buttons all OFF
-                for (int j = 0; j < FormGPS.MAXSECTIONS; j++)
+                for (int j = 0; j < mf.tool.sections.Count; j++)
                 {
-                    mf.section[j].sectionOnRequest = false;
-                    mf.section[j].isSectionOn = false;
-                    if (mf.section[j].isMappingOn)
-                        mf.section[j].TurnMappingOff();
-                    mf.section[j].UpdateButton(btnStates.Off);
+                    mf.tool.sections[j].sectionOnRequest = 0;
+                    mf.tool.sections[j].isSectionOn = false;
+                    if (mf.tool.sections[j].isMappingOn)
+                        mf.tool.sections[j].TurnMappingOff();
                 }
+
+                string widthString = "";
+                for (int j = 0; j < sectionWidths.Count; j++)
+                {
+                    widthString += sectionWidths[j].ToString("0.00", CultureInfo.InvariantCulture);
+                    if (j < sectionWidths.Count - 1) widthString += ",";
+                }
+
+                Properties.Vehicle.Default.Tool_Width = mf.tool.toolWidth = totalWidth;
+                Properties.Vehicle.Default.Tool_SectionWidths = widthString;
+
+                bool update = false;
+
 
                 if (mf.tool.numOfSections != numberOfSections)
                 {
                     mf.tool.numOfSections = numberOfSections;
-                    mf.tool.numSuperSection = numberOfSections + 1;
 
-                    Properties.Vehicle.Default.setVehicle_numSections = mf.tool.numOfSections;
-
-                    //line up manual buttons based on # of sections
-                    mf.LineUpManualBtns();
+                    Properties.Vehicle.Default.Tool_numSections = mf.tool.numOfSections;
+                    update = true;
                 }
 
-                mf.tram.isOuter = ((int)(mf.tram.tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
-
                 //update the sections to newly configured widths and positions in main
-                mf.SectionSetPosition();
+                mf.tool.SectionSetPosition();
+
+
+                //line up manual buttons based on # of sections
+                if (update)
+                    mf.LineUpManualBtns();
+
+                mf.tram.isOuter = ((int)(mf.tram.tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
             }
 
+            Properties.Vehicle.Default.Tool_slowSpeedCutoff = mf.tool.slowSpeedCutoff = cutoffSpeed;
+            Properties.Vehicle.Default.Tool_minCoverage = mf.tool.maxOverlap = maxOverlap;
+            Properties.Vehicle.Default.setVehicle_bndOverlap = mf.tool.boundOverlap = bndOverlap;
 
-            Properties.Vehicle.Default.setVehicle_slowSpeedCutoff = mf.vehicle.slowSpeedCutoff = cutoffSpeed;
-            Properties.Vehicle.Default.setVehicle_minCoverage = mf.tool.minOverlap = minCoverage;
-            Properties.Vehicle.Default.setTool_defaultSectionWidth = defaultSectionWidth;
-            Properties.Vehicle.Default.setSection_isFast = mf.isFastSections = cboxSectionResponse.Checked;
+            Properties.Vehicle.Default.Tool_defaultSectionWidth = defaultSectionWidth;
+            Properties.Vehicle.Default.Tool_Section_isFast = mf.tool.isFastSections = cboxSectionResponse.Checked;
 
             Properties.Vehicle.Default.Save();
         }
 
-        private void nudSection1_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection1, ref sectionWidth1, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection1, ref sectionWidth1);
+            HandleScroll(-6);
         }
 
-        private void nudSection2_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection2, ref sectionWidth2, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection2, ref sectionWidth2);
+            HandleScroll(6);
         }
 
-        private void nudSection3_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection3, ref sectionWidth3, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection3, ref sectionWidth3);
+            MouseEventArgs me = (MouseEventArgs)e;
+            double procent = (1.0 / button1.Width) * me.Location.X;
+            xpos = (int)(procent * (panel1.Width - panelSections.Width));
+
+            HandleScroll(0);
         }
 
-        private void nudSection4_Click(object sender, EventArgs e)
+        private void HandleScroll(int delta)
         {
-            if (mf.KeypadToButton(ref nudSection4, ref sectionWidth4, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection4, ref sectionWidth4);
+            xpos += delta * 25;
+            xpos = Math.Max(xpos, panel1.Width - panelSections.Width);
+            xpos = Math.Min(xpos, panel1.Width - panelSections.Width > 0 ? (panel1.Width - panelSections.Width) / 2 : 0);
+
+            panelSections.Location = new Point(xpos, 0);
         }
 
-        private void nudSection5_Click(object sender, EventArgs e)
+        private void btnMaxBoundOverlap_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection5, ref sectionWidth5, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection5, ref sectionWidth5);
-        }
-        private void nudSection6_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection6, ref sectionWidth6, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection6, ref sectionWidth6);
+            mf.KeypadToButton(ref btnMaxBoundOverlap, ref bndOverlap, 0, 100, 0);
         }
 
-        private void nudSection7_Click(object sender, EventArgs e)
+        private void btnSection_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudSection7, ref sectionWidth7, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection7, ref sectionWidth7);
-        }
+            if (sender is Button button)
+            {
+                int idx = Convert.ToInt32(button.Name);
+                if (idx < sectionWidths.Count)
+                {
+                    double val = sectionWidths[idx];
 
-        private void nudSection8_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection8, ref sectionWidth8, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection8, ref sectionWidth8);
-        }
-
-        private void nudSection9_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection9, ref sectionWidth9, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection9, ref sectionWidth9);
-        }
-
-        private void nudSection10_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection10, ref sectionWidth10, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection10, ref sectionWidth10);
-        }
-
-        private void nudSection11_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection11, ref sectionWidth11, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection11, ref sectionWidth11);
-        }
-
-        private void nudSection12_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection12, ref sectionWidth12, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection12, ref sectionWidth12);
-        }
-
-        private void nudSection13_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection13, ref sectionWidth13, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection13, ref sectionWidth13);
-        }
-
-        private void nudSection14_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection14, ref sectionWidth14, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection14, ref sectionWidth14);
-        }
-
-        private void nudSection15_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection15, ref sectionWidth15, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection15, ref sectionWidth15);
-        }
-
-        private void nudSection16_Click(object sender, EventArgs e)
-        {
-            if (mf.KeypadToButton(ref nudSection16, ref sectionWidth16, 0.01, 50, 0, mf.mToUser, mf.userToM))
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection16, ref sectionWidth16);
-        }
-
-        private void nudSection1_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_nudSectionWidth, gStr.gsHelp);
-        }
-
-        private void nudCutoffSpeed_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_nudCutoffSpeed, gStr.gsHelp);
+                    if (mf.KeypadToButton(ref button, ref val, 0.01, 50, 0, mf.mToUser, mf.userToM))
+                    {
+                        sectionWidths[idx] = val;
+                        SectionFeetInchesTotalWidthLabelUpdate(idx);
+                    }
+                }
+            }
         }
 
         private void nudCutoffSpeed_Click(object sender, EventArgs e)
@@ -269,73 +177,34 @@ namespace AgOpenGPS
             mf.KeypadToButton(ref nudCutoffSpeed, ref cutoffSpeed, 0, 30, 1, mf.KMHToUser, mf.userToKMH);
         }
 
-        private void nudMinCoverage_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_nudMinCoverage, gStr.gsHelp);
-        }
-
         private void nudMinCoverage_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMinCoverage, ref minCoverage, 0, 100);
-        }
-
-        private void cboxSectionResponse_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_cboxSectionResponse, gStr.gsHelp);
-        }
-
-        private void cboxNumSections_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_cboxNumSections, gStr.gsHelp);
+            mf.KeypadToButton(ref nudMinCoverage, ref maxOverlap, 0, 100);
         }
 
         private void btnNumSections_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref btnNumSections, ref numberOfSections, 0, FormGPS.MAXSECTIONS - 1))
+            if (mf.KeypadToButton(ref btnNumSections, ref numberOfSections, 0, CTool.MAXSECTIONS))
             {
                 double wide = defaultSectionWidth;
 
-                if (numberOfSections * wide > 48)
+                if (numberOfSections * wide > 50)
                 {
-                    if (mf.isMetric)
-                        mf.TimedMessageBox(3000, "Too Wide", "Max 48 Meters");
-                    else
-                        mf.TimedMessageBox(3000, "Too Wide", "Max 157.48 Feet");
-                    wide = 48.0 / numberOfSections;
+                    wide = 50.0 / numberOfSections;
                 }
 
                 UpdateSpinners();
 
-                sectionWidth1 = sectionWidth2 = sectionWidth3 = sectionWidth4 = wide;
-                sectionWidth5 = sectionWidth6 = sectionWidth7 = sectionWidth8 = wide;
-                sectionWidth9 = sectionWidth10 = sectionWidth11 = sectionWidth12 = wide;
-                sectionWidth13 = sectionWidth14 = sectionWidth15 = sectionWidth16 = wide;
+                string tt = (wide * mf.mToUser).ToString("0");
+                for (int j = 0; j < sectionWidths.Count; j++)
+                {
+                    sectionWidths[j] = wide;
+                    sectionButtons[j].Text = tt;
+                }
 
                 //update in settings dialog ONLY total tool width
-                SectionFeetInchesTotalWidthLabelUpdate(ref nudSection1, ref sectionWidth1);
-
-                nudSection1.Text = (sectionWidth1 * mf.mToUser).ToString("0");
-                nudSection2.Text = (sectionWidth2 * mf.mToUser).ToString("0");
-                nudSection3.Text = (sectionWidth3 * mf.mToUser).ToString("0");
-                nudSection4.Text = (sectionWidth4 * mf.mToUser).ToString("0");
-                nudSection5.Text = (sectionWidth5 * mf.mToUser).ToString("0");
-                nudSection6.Text = (sectionWidth6 * mf.mToUser).ToString("0");
-                nudSection7.Text = (sectionWidth7 * mf.mToUser).ToString("0");
-                nudSection8.Text = (sectionWidth8 * mf.mToUser).ToString("0");
-                nudSection9.Text = (sectionWidth9 * mf.mToUser).ToString("0");
-                nudSection10.Text = (sectionWidth10 * mf.mToUser).ToString("0");
-                nudSection11.Text = (sectionWidth11 * mf.mToUser).ToString("0");
-                nudSection12.Text = (sectionWidth12 * mf.mToUser).ToString("0");
-                nudSection13.Text = (sectionWidth13 * mf.mToUser).ToString("0");
-                nudSection14.Text = (sectionWidth14 * mf.mToUser).ToString("0");
-                nudSection15.Text = (sectionWidth15 * mf.mToUser).ToString("0");
-                nudSection16.Text = (sectionWidth16 * mf.mToUser).ToString("0");
+                SectionFeetInchesTotalWidthLabelUpdate(0);
             }
-        }
-
-        private void nudDefaultSectionWidth_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_nudDefaultSectionWidth, gStr.gsHelp);
         }
 
         private void nudDefaultSectionWidth_Click(object sender, EventArgs e)
@@ -345,446 +214,126 @@ namespace AgOpenGPS
 
         public void UpdateSpinners()
         {
-            nudSection1.Enabled = nudSection1.Visible = numberOfSections > 0;
-            nudSection2.Enabled = nudSection2.Visible = numberOfSections > 1;
-            nudSection3.Enabled = nudSection3.Visible = numberOfSections > 2;
-            nudSection4.Enabled = nudSection4.Visible = numberOfSections > 3;
-            nudSection5.Enabled = nudSection5.Visible = numberOfSections > 4;
-            nudSection6.Enabled = nudSection6.Visible = numberOfSections > 5;
-            nudSection7.Enabled = nudSection7.Visible = numberOfSections > 6;
-            nudSection8.Enabled = nudSection8.Visible = numberOfSections > 7;
-            nudSection9.Enabled = nudSection9.Visible = numberOfSections > 8;
-            nudSection10.Enabled = nudSection10.Visible = numberOfSections > 9;
-            nudSection11.Enabled = nudSection11.Visible = numberOfSections > 10;
-            nudSection12.Enabled = nudSection12.Visible = numberOfSections > 11;
-            nudSection13.Enabled = nudSection13.Visible = numberOfSections > 12;
-            nudSection14.Enabled = nudSection14.Visible = numberOfSections > 13;
-            nudSection15.Enabled = nudSection15.Visible = numberOfSections > 14;
-            nudSection16.Enabled = nudSection16.Visible = numberOfSections > 15;
+            for (int j = sectionWidths.Count - 1; j >= numberOfSections; j--)
+            {
+                panelSections.Controls.Remove(sectionButtons[j]);
+                panelSections.Controls.Remove(sectionLabels[j]);
+                sectionWidths.RemoveAt(j);
+                sectionButtons.RemoveAt(j);
+                sectionLabels.RemoveAt(j);
+            }
+
+            string stringsetting = Properties.Vehicle.Default.Tool_SectionWidths;
+            string[] words = stringsetting.Split(',');
+
+            for (int j = sectionWidths.Count; j < numberOfSections; j++)
+            {
+                sectionWidths.Add(j < words.Length ? double.Parse(words[j], CultureInfo.InvariantCulture) : defaultSectionWidth);
+
+                Button New = new Button
+                {
+                    Margin = new Padding(6),
+                    Size = new Size(125, 50),
+                    Name = j.ToString(),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Text = (sectionWidths[j] * mf.mToUser).ToString("0"),
+                    Font = new Font("Tahoma", 24F, FontStyle.Bold, GraphicsUnit.Point, 0),
+                    UseVisualStyleBackColor = false
+                };
+
+                New.HelpRequested += new HelpEventHandler(nudSection_HelpRequested);
+                New.Click += btnSection_Click;
+                New.BackColor = SystemColors.ButtonFace;
+                sectionButtons.Add(New);
+
+                Label Newlbl = new Label
+                {
+                    Font = new Font("Tahoma", 15.75F, FontStyle.Bold, GraphicsUnit.Point,0),
+                    ForeColor = Color.Black,
+                    ImeMode = ImeMode.NoControl,
+                    Size = new Size(125, 25),
+                    Text = sectionWidths.Count.ToString(),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+                sectionLabels.Add(Newlbl);
+
+                //var newPoint = new Point(100 + 225 * j + panelSections.AutoScrollPosition.X, 50);
+                var newPoint = new Point(25 + 150 * j + panelSections.AutoScrollPosition.X, 50);
+
+                panelSections.Controls.Add(Newlbl);
+                Newlbl.Location = new Point(newPoint.X, 50);
+                panelSections.Controls.Add(New);
+                New.Location = new Point(newPoint.X, 100);
+            }
+
+            panelSections.Width = 25 + 150 * numberOfSections;
+            HandleScroll(0);
         }
 
         //update tool width label at bottom of window
-        private void SectionFeetInchesTotalWidthLabelUpdate(ref Button nudSection, ref double section)
+        private void SectionFeetInchesTotalWidthLabelUpdate(int idx)
         {
             somethingChanged = true;
-            double width = 0;
-            if (numberOfSections > 0)
-                width += sectionWidth1;
-            if (numberOfSections > 1)
-                width += sectionWidth2;
-            if (numberOfSections > 2)
-                width += sectionWidth3;
-            if (numberOfSections > 3)
-                width += sectionWidth4;
-            if (numberOfSections > 4)
-                width += sectionWidth5;
-            if (numberOfSections > 5)
-                width += sectionWidth6;
-            if (numberOfSections > 6)
-                width += sectionWidth7;
-            if (numberOfSections > 7)
-                width += sectionWidth8;
-            if (numberOfSections > 8)
-                width += sectionWidth9;
-            if (numberOfSections > 9)
-                width += sectionWidth10;
-            if (numberOfSections > 10)
-                width += sectionWidth11;
-            if (numberOfSections > 11)
-                width += sectionWidth12;
-            if (numberOfSections > 12)
-                width += sectionWidth13;
-            if (numberOfSections > 13)
-                width += sectionWidth14;
-            if (numberOfSections > 14)
-                width += sectionWidth15;
-            if (numberOfSections > 15)
-                width += sectionWidth16;
+            totalWidth = 0;
+            for (int j = 0; j < sectionWidths.Count; j++)
+            {
+                totalWidth += sectionWidths[j];
+            }
 
-            if (width > 48)
+            if (Math.Round(totalWidth, 3) > 50)
             {
                 if (mf.isMetric)
                     mf.TimedMessageBox(3000, "Too Wide", "Max 50 Meters");
                 else
                     mf.TimedMessageBox(3000, "Too Wide", "Max 164 Feet");
 
-                section = 48 - (width - section);
-                nudSection.Text = (section * mf.mToUser).ToString("0");
+                totalWidth -= sectionWidths[idx];
+                sectionWidths[idx] = 50 - (totalWidth - sectionWidths[idx]);
+                sectionButtons[idx].Text = (sectionWidths[idx] * mf.mToUser).ToString("0");
+                totalWidth += sectionWidths[idx];
             }
 
             if (mf.isMetric)
             {
-                lblSecTotalWidthFeet.Text = (width * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+                lblSecTotalWidthFeet.Text = (totalWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
             }
             else
             {
-                double toFeet = (width * mf.mToUserBig);
+                double toFeet = (totalWidth * mf.mToUserBig);
                 lblSecTotalWidthFeet.Text = Convert.ToString((int)toFeet) + "'";
                 double temp = Math.Round((toFeet - Math.Truncate(toFeet)) * 12, 0);
                 lblSecTotalWidthInches.Text = Convert.ToString(temp) + '"';
             }
         }
 
-        //Convert section width to positions along toolbar
-        private void CalculateSectionPositions()
+        private void cboxSectionResponse_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            int i = numberOfSections;
+            new FormHelp(gStr.hc_cboxSectionResponse, gStr.gsHelp).ShowDialog(this);
+        }
 
-            switch (i)
-            {
-                case 1:
-                    {
-                        sectionPosition2 = sectionWidth1 / 2.0;
-                        sectionPosition1 = sectionPosition2 * -1;
-                        sectionPosition3 = 0;
-                        sectionPosition4 = 0;
-                        sectionPosition5 = 0;
-                        sectionPosition6 = 0;
-                        sectionPosition7 = 0;
-                        sectionPosition8 = 0;
-                        sectionPosition9 = 0;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
+        private void cboxNumSections_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            new FormHelp(gStr.hc_cboxNumSections, gStr.gsHelp).ShowDialog(this);
+        }
 
-                        break;
-                    }
-                case 2:
-                    {
-                        sectionPosition1 = sectionWidth1 * -1;
-                        sectionPosition2 = 0;
-                        sectionPosition3 = sectionWidth2;
-                        sectionPosition4 = 0;
-                        sectionPosition5 = 0;
-                        sectionPosition6 = 0;
-                        sectionPosition7 = 0;
-                        sectionPosition8 = 0;
-                        sectionPosition9 = 0;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
+        private void nudMinCoverage_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            new FormHelp(gStr.hc_nudMinCoverage, gStr.gsHelp).ShowDialog(this);
+        }
 
-                        break;
-                    }
-                case 3:
-                    {
-                        sectionPosition3 = sectionWidth2 / 2.0;
-                        sectionPosition2 = sectionPosition3 * -1;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition4 = sectionPosition3 + sectionWidth3;
-                        sectionPosition5 = 0;
-                        sectionPosition6 = 0;
-                        sectionPosition7 = 0;
-                        sectionPosition8 = 0;
-                        sectionPosition9 = 0;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
+        private void nudSection_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            new FormHelp(gStr.hc_nudSectionWidth, gStr.gsHelp).ShowDialog(this);
+        }
 
-                        break;
-                    }
-                case 4:
-                    {
-                        sectionPosition2 = sectionWidth2 * -1;
-                        sectionPosition3 = 0;
-                        sectionPosition4 = sectionWidth3;
-                        sectionPosition5 = sectionWidth3 + sectionWidth4;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition6 = 0;
-                        sectionPosition7 = 0;
-                        sectionPosition8 = 0;
-                        sectionPosition9 = 0;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
+        private void nudCutoffSpeed_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            new FormHelp(gStr.hc_nudCutoffSpeed, gStr.gsHelp).ShowDialog(this);
+        }
 
-                        break;
-                    }
-                case 5:
-                    {
-                        sectionPosition4 = sectionWidth3 / 2.0;
-                        sectionPosition3 = sectionPosition4 * -1;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition5 = sectionPosition4 + sectionWidth4;
-                        sectionPosition6 = sectionPosition5 + sectionWidth5;
-                        sectionPosition7 = 0;
-                        sectionPosition8 = 0;
-                        sectionPosition9 = 0;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-                case 6:
-                    {
-                        sectionPosition4 = 0;
-                        sectionPosition3 = sectionWidth3 * -1;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition5 = sectionWidth4;
-                        sectionPosition6 = sectionPosition5 + sectionWidth5;
-                        sectionPosition7 = sectionPosition6 + sectionWidth6;
-                        sectionPosition8 = 0;
-                        sectionPosition9 = 0;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-                case 7:
-                    {
-                        sectionPosition5 = sectionWidth4 / 2.0;
-                        sectionPosition4 = sectionPosition5 * -1;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition6 = sectionPosition5 + sectionWidth5;
-                        sectionPosition7 = sectionPosition6 + sectionWidth6;
-                        sectionPosition8 = sectionPosition7 + sectionWidth7;
-                        sectionPosition9 = 0;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-                case 8:
-                    {
-                        sectionPosition5 = 0;
-                        sectionPosition4 = sectionWidth4 * -1;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition6 = sectionWidth5;
-                        sectionPosition7 = sectionPosition6 + sectionWidth6;
-                        sectionPosition8 = sectionPosition7 + sectionWidth7;
-                        sectionPosition9 = sectionPosition8 + sectionWidth8;
-                        sectionPosition10 = 0;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-                case 9:
-                    {
-                        sectionPosition6 = sectionWidth5 / 2.0;
-                        sectionPosition5 = sectionPosition6 * -1;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition7 = sectionPosition6 + sectionWidth6;
-                        sectionPosition8 = sectionPosition7 + sectionWidth7;
-                        sectionPosition9 = sectionPosition8 + sectionWidth8;
-                        sectionPosition10 = sectionPosition9 + sectionWidth9;
-                        sectionPosition11 = 0;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-                case 10:
-                    {
-                        sectionPosition6 = 0;
-                        sectionPosition5 = sectionWidth5 * -1;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition7 = sectionWidth6;
-                        sectionPosition8 = sectionPosition7 + sectionWidth7;
-                        sectionPosition9 = sectionPosition8 + sectionWidth8;
-                        sectionPosition10 = sectionPosition9 + sectionWidth9;
-                        sectionPosition11 = sectionPosition10 + sectionWidth10;
-                        sectionPosition12 = 0;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-                case 11:
-                    {
-                        sectionPosition7 = sectionWidth6 / 2.0;
-                        sectionPosition6 = sectionPosition7 * -1;
-                        sectionPosition5 = sectionPosition6 - sectionWidth5;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition8 = sectionPosition7 + sectionWidth7;
-                        sectionPosition9 = sectionPosition8 + sectionWidth8;
-                        sectionPosition10 = sectionPosition9 + sectionWidth9;
-                        sectionPosition11 = sectionPosition10 + sectionWidth10;
-                        sectionPosition12 = sectionPosition11 + sectionWidth11;
-                        sectionPosition13 = 0;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-                case 12:
-                    {
-                        sectionPosition7 = 0;
-                        sectionPosition6 = sectionWidth6 * -1;
-                        sectionPosition5 = sectionPosition6 - sectionWidth5;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition8 = sectionWidth7;
-                        sectionPosition9 = sectionPosition8 + sectionWidth8;
-                        sectionPosition10 = sectionPosition9 + sectionWidth9;
-                        sectionPosition11 = sectionPosition10 + sectionWidth10;
-                        sectionPosition12 = sectionPosition11 + sectionWidth11;
-                        sectionPosition13 = sectionPosition12 + sectionWidth12;
-                        sectionPosition14 = 0;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-                        break;
-                    }
-                case 13:
-                    {
-                        sectionPosition8 = sectionWidth7 / 2.0;
-                        sectionPosition7 = sectionPosition8 * -1;
-                        sectionPosition6 = sectionPosition7 - sectionWidth6;
-                        sectionPosition5 = sectionPosition6 - sectionWidth5;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition9 = sectionPosition8 + sectionWidth8;
-                        sectionPosition10 = sectionPosition9 + sectionWidth9;
-                        sectionPosition11 = sectionPosition10 + sectionWidth10;
-                        sectionPosition12 = sectionPosition11 + sectionWidth11;
-                        sectionPosition13 = sectionPosition12 + sectionWidth12;
-                        sectionPosition14 = sectionPosition13 + sectionWidth13;
-                        sectionPosition15 = 0;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-
-                case 14:
-                    {
-                        sectionPosition8 = 0;
-                        sectionPosition7 = sectionWidth7 * -1;
-                        sectionPosition6 = sectionPosition7 - sectionWidth6;
-                        sectionPosition5 = sectionPosition6 - sectionWidth5;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition9 = sectionWidth8;
-                        sectionPosition10 = sectionPosition9 + sectionWidth9;
-                        sectionPosition11 = sectionPosition10 + sectionWidth10;
-                        sectionPosition12 = sectionPosition11 + sectionWidth11;
-                        sectionPosition13 = sectionPosition12 + sectionWidth12;
-                        sectionPosition14 = sectionPosition13 + sectionWidth13;
-                        sectionPosition15 = sectionPosition14 + sectionWidth14;
-                        sectionPosition16 = 0;
-                        sectionPosition17 = 0;
-                        break;
-                    }
-                case 15:
-                    {
-                        sectionPosition9 = sectionWidth8 / 2.0;
-                        sectionPosition8 = sectionPosition9 * -1;
-                        sectionPosition7 = sectionPosition8 - sectionWidth7;
-                        sectionPosition6 = sectionPosition7 - sectionWidth6;
-                        sectionPosition5 = sectionPosition6 - sectionWidth5;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition10 = sectionPosition9 + sectionWidth9;
-                        sectionPosition11 = sectionPosition10 + sectionWidth10;
-                        sectionPosition12 = sectionPosition11 + sectionWidth11;
-                        sectionPosition13 = sectionPosition12 + sectionWidth12;
-                        sectionPosition14 = sectionPosition13 + sectionWidth13;
-                        sectionPosition15 = sectionPosition14 + sectionWidth14;
-                        sectionPosition16 = sectionPosition15 + sectionWidth15;
-                        sectionPosition17 = 0;
-
-                        break;
-                    }
-
-
-                case 16:
-                    {
-                        sectionPosition9 = 0;
-                        sectionPosition8 = sectionWidth8 * -1;
-                        sectionPosition7 = sectionPosition8 - sectionWidth7;
-                        sectionPosition6 = sectionPosition7 - sectionWidth6;
-                        sectionPosition5 = sectionPosition6 - sectionWidth5;
-                        sectionPosition4 = sectionPosition5 - sectionWidth4;
-                        sectionPosition3 = sectionPosition4 - sectionWidth3;
-                        sectionPosition2 = sectionPosition3 - sectionWidth2;
-                        sectionPosition1 = sectionPosition2 - sectionWidth1;
-                        sectionPosition10 = sectionWidth9;
-                        sectionPosition11 = sectionPosition10 + sectionWidth10;
-                        sectionPosition12 = sectionPosition11 + sectionWidth11;
-                        sectionPosition13 = sectionPosition12 + sectionWidth12;
-                        sectionPosition14 = sectionPosition13 + sectionWidth13;
-                        sectionPosition15 = sectionPosition14 + sectionWidth14;
-                        sectionPosition16 = sectionPosition15 + sectionWidth15;
-                        sectionPosition17 = sectionPosition16 + sectionWidth16;
-                        break;
-                    }
-            }
+        private void nudDefaultSectionWidth_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            new FormHelp(gStr.hc_nudDefaultSectionWidth, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

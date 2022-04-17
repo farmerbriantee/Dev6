@@ -120,7 +120,7 @@ namespace AgOpenGPS
                                 lat = (double.Parse(offs[0], CultureInfo.InvariantCulture));
                                 lon = (double.Parse(offs[1], CultureInfo.InvariantCulture));
 
-                                double dist = GetDistance(lon, lat, mf.pn.longitude, mf.pn.latitude);
+                                double dist = GetDistance(lon, lat, mf.mc.longitude, mf.mc.latitude);
 
                                 if (dist < 500)
                                 {

@@ -542,92 +542,92 @@ namespace AgOpenGPS
         #region Help
         private void btnListDelete_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnListDelete, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnListDelete, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnCancel_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnCancel, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnCancel, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnNewABLine_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnNewABLine, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnNewABLine, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnListUse_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnListUse, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnListUse, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnSwapAB_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ht_btnSwapAB, gStr.gsHelp);
+            new FormHelp(gStr.ht_btnSwapAB, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnEditName_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hd_tboxNameLine, gStr.gsHelp);
+            new FormHelp(gStr.hd_tboxNameLine, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnDuplicate_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnDuplicate, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnDuplicate, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnAPoint_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnAPoint, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnAPoint, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnBPoint_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnBPoint, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnBPoint, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudHeading_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_nudHeading, gStr.gsHelp);
+            new FormHelp(gStr.ha_nudHeading, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnManual_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnManual, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnManual, gStr.gsHelp).ShowDialog(this);
         }
 
         private void textBox1_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_textBox1, gStr.gsHelp);
+            new FormHelp(gStr.ha_textBox1, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnAddTime_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnAddTime, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnAddTime, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnCancel_APlus_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnCancelCreate, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnCancelCreate, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnCancel_Name_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnCancelCreate, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnCancelCreate, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnPausePlay_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hcur_btnPausePlay, gStr.gsHelp);
+            new FormHelp(gStr.hcur_btnPausePlay, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnEnter_APlus_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnEnterContinue, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnEnterContinue, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnAdd_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnEnterContinue, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnEnterContinue, gStr.gsHelp).ShowDialog(this);
         }
         #endregion
     }

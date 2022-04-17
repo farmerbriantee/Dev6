@@ -1,12 +1,12 @@
 ﻿//Please, if you use this, share the improvements
 
+using AgOpenGPS.Properties;
 using System;
 using System.Diagnostics;
 using System.Drawing;
-using System.Windows.Forms;
-using AgOpenGPS.Properties;
 using System.Globalization;
 using System.IO;
+using System.Windows.Forms;
 
 //C:\Program Files(x86)\Arduino\hardware\tools\avr / bin / avrdude - CC:\Program Files(x86)\Arduino\hardware\tools\avr / etc / avrdude.conf 
 //- v - patmega328p - carduino - PCOM3 - b57600 - D - Uflash:w: C: \Users\FarmPC\AppData\Local\Temp\arduino_build_448484 / Autosteer_UDP_20.ino.hex:i
@@ -25,8 +25,6 @@ namespace AgOpenGPS
 
         //polygon mode for section drawing
         public bool isDrawPolygons;
-
-        public CFeatureSettings featureSettings = new CFeatureSettings();
 
         public Color sectionColor;
         public Color fieldColorDay;
@@ -108,7 +106,7 @@ namespace AgOpenGPS
 
                 lblTopData.Text = (tool.toolWidth * mToUserBig).ToString("0.00") + unitsFtM + " - " + vehicleFileName;
                 lblFix.Text = FixQuality;
-                lblAge.Text = pn.age.ToString("0.0");
+                lblAge.Text = mc.age.ToString("0.0");
 
                 if (isJobStarted)
                 {
@@ -180,7 +178,7 @@ namespace AgOpenGPS
 
                 isFlashOnOff = !isFlashOnOff;
 
-                lblSpeed.Text = (pn.avgSpeed * KMHToUser).ToString("0.0");
+                lblSpeed.Text = (mc.avgSpeed * KMHToUser).ToString("0.0");
             }
 
             //every fifth second update  ///////////////////////////   FIFTH Fifth ////////////////////////////
@@ -192,14 +190,13 @@ namespace AgOpenGPS
 
         private void IsBetweenSunriseSunset(double lat, double lon)
         {
-            CSunTimes.Instance.CalculateSunRiseSetTimes(pn.latitude, pn.longitude, DateTime.Today, ref sunrise, ref sunset);
+            CSunTimes.Instance.CalculateSunRiseSetTimes(mc.latitude, mc.longitude, DateTime.Today, ref sunrise, ref sunset);
             //isDay = (DateTime.Now.Ticks < sunset.Ticks && DateTime.Now.Ticks > sunrise.Ticks);
         }
 
         public void LoadSettings()
         {
             isMetric = Settings.Default.setMenu_isMetric;
-
             SetUserScales();
 
             SetFeaturesOnOff();
@@ -269,39 +266,28 @@ namespace AgOpenGPS
             isRTK = Properties.Settings.Default.setGPS_isRTK;
             isRTK_KillAutosteer = Properties.Settings.Default.setGPS_isRTK_KillAutoSteer;
 
-            pn.ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
-            pn.headingTrueDualOffset = Properties.Settings.Default.setGPS_dualHeadingOffset;
-            pn.isToolSteering = Properties.Vehicle.Default.setTool_isToolSteering;
+            mc.ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
+            mc.headingTrueDualOffset = Properties.Settings.Default.setGPS_dualHeadingOffset;
 
             guidanceLookAheadTime = Properties.Settings.Default.setAS_guidanceLookAheadTime;
 
-            gyd.sideHillCompFactor = Properties.Settings.Default.setAS_sideHillComp;
-
-            ahrs = new CAHRS();
-
-            //Set width of section and positions for each section
-            SectionSetPosition();
+            mc.LoadSettings();
+            vehicle.LoadSettings();
+            tool.LoadSettings();
+            mc.LoadSettings();
 
             LineUpManualBtns();
 
-            //fast or slow section update
-            isFastSections = Properties.Vehicle.Default.setSection_isFast;
-
+            gyd.uTurnSmoothing = Settings.Default.setAS_uTurnSmoothing;
             gyd.rowSkipsWidth = Properties.Vehicle.Default.set_youSkipWidth;
             cboxpRowWidth.SelectedIndex = gyd.rowSkipsWidth - 1;
             gyd.Set_Alternate_skips();
-
-            //workswitch stuff
-            mc.isWorkSwitchEnabled = Settings.Default.setF_IsWorkSwitchEnabled;
-            mc.isWorkSwitchActiveLow = Settings.Default.setF_IsWorkSwitchActiveLow;
-            mc.isWorkSwitchManual = Settings.Default.setF_IsWorkSwitchManual;
-            mc.isSteerControlsManual = Settings.Default.setF_steerControlsManual;
+            
 
             minFixStepDist = Settings.Default.setF_minFixStep;
 
             fd.workedAreaTotalUser = Settings.Default.setF_UserTotalArea;
 
-            gyd.uTurnSmoothing = Settings.Default.setAS_uTurnSmoothing;
 
             //load the lightbar resolution
             lightbarCmPerPixel = Properties.Settings.Default.setDisplay_lightbarCmPerPixel;
@@ -316,51 +302,41 @@ namespace AgOpenGPS
             if (Properties.Settings.Default.setDisplay_isStartFullScreen)
                 this.WindowState = FormWindowState.Maximized;
 
-            isTramOnBackBuffer = Properties.Settings.Default.setTram_isTramOnBackBuffer;
-
 
             //night mode
             isDay = !Properties.Settings.Default.setDisplay_isDayMode;
             SwapDayNightMode();
-
-            if (!Properties.Settings.Default.setDisplay_isTermsAccepted)
-            {
-                using (var form = new Form_First())
-                {
-                    if (form.ShowDialog(this) != DialogResult.OK)
-                    {
-                        Close();
-                    }
-                }
-            }
         }
 
         public void SetFeaturesOnOff()
         {
-            tramLinesMenuField.Visible = Properties.Settings.Default.setFeatures.isTramOn;
-            headlandToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isHeadlandOn;
+            tramLinesMenuField.Visible = Properties.Settings.Default.setDisplayFeature_Tram;
+            headlandToolStripMenuItem.Visible = Properties.Settings.Default.setDisplayFeature_Headland;
             topFieldViewToolStripMenuItem.Checked = Properties.Settings.Default.setMenu_isOGLZoomOn == 1;
+            boundariesToolStripMenuItem.Visible = Properties.Settings.Default.setDisplayFeature_Boundary;
+            toolStripBtnMakeBndContour.Visible = Properties.Settings.Default.setDisplayFeature_BoundaryContour;
+            recordedPathStripMenu.Visible = Properties.Settings.Default.setDisplayFeature_RecPath;
 
-            boundariesToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isBoundaryOn;
-            //toolStripBtnMakeBndContour.Visible = Properties.Settings.Default.setFeatures.isBndContourOn;
-            recordedPathStripMenu.Visible = Properties.Settings.Default.setFeatures.isRecPathOn;
-            deleteContourPathsToolStripMenuItem.Visible = Properties.Settings.Default.setFeatures.isHideContourOn;
-            webcamToolStrip.Visible = Properties.Settings.Default.setFeatures.isWebCamOn;
-            offsetFixToolStrip.Visible = Properties.Settings.Default.setFeatures.isOffsetFixOn;
-            btnContour.Visible = Properties.Settings.Default.setFeatures.isContourOn;
-            btnAutoYouTurn.Visible = Properties.Settings.Default.setFeatures.isYouTurnOn;
-            btnStanleyPure.Visible = Properties.Settings.Default.setFeatures.isSteerModeOn;
-            btnStartAgIO.Visible = Properties.Settings.Default.setFeatures.isAgIOOn;
+            toolStripBtnField.Image = isJobStarted && Properties.Settings.Default.setDisplayFeature_SimpleCloseField ? Properties.Resources.JobClose : Properties.Resources.JobActive;
 
-            btnAutoSteer.Visible = Properties.Settings.Default.setFeatures.isAutoSteerOn;
-            btnCycleLines.Visible = Properties.Settings.Default.setFeatures.isCycleLinesOn;
-            btnManualOffOn.Visible = Properties.Settings.Default.setFeatures.isManualSectionOn;
-            btnSectionOffAutoOn.Visible = Properties.Settings.Default.setFeatures.isAutoSectionOn;
-            btnABLine.Visible = Properties.Settings.Default.setFeatures.isABLineOn;
-            btnCurve.Visible = Properties.Settings.Default.setFeatures.isCurveOn;
+            // = Properties.Settings.Default.setDisplayFeature_ABSmooth;
+            deleteContourPathsToolStripMenuItem.Visible = Properties.Settings.Default.setDisplayFeature_HideContour;
+            webcamToolStrip.Visible = Properties.Settings.Default.setDisplayFeature_Webcam;
+            offsetFixToolStrip.Visible = Properties.Settings.Default.setDisplayFeature_OffsetFix;
 
-            isUTurnOn = Properties.Settings.Default.setFeatures.isUTurnOn;
-            isLateralOn = Properties.Settings.Default.setFeatures.isLateralOn;
+            btnContour.Visible = Properties.Settings.Default.setDisplayFeature_Contour;
+            btnAutoYouTurn.Visible = Properties.Settings.Default.setDisplayFeature_YouTurn;
+            btnStanleyPure.Visible = Properties.Settings.Default.setDisplayFeature_SteerMode;
+            btnStartAgIO.Visible = Properties.Settings.Default.setDisplayFeature_AgIO;
+
+            btnSectionOffAutoOn.Visible = Properties.Settings.Default.setDisplayFeature_AutoSection;
+            btnManualOffOn.Visible = Properties.Settings.Default.setDisplayFeature_ManualSection;
+            btnCycleLines.Visible = Properties.Settings.Default.setDisplayFeature_CycleLines;
+            btnABLine.Visible = Properties.Settings.Default.setDisplayFeature_ABLine;
+            btnCurve.Visible = Properties.Settings.Default.setDisplayFeature_Curve;
+            btnAutoSteer.Visible = Properties.Settings.Default.setDisplayFeature_AutoSteer;
+            isUTurnOn = Properties.Settings.Default.setDisplayFeature_UTurn;
+            isLateralOn = Properties.Settings.Default.setDisplayFeature_Lateral;
         }
 
         public void SetAutoSteerText()
@@ -485,12 +461,11 @@ namespace AgOpenGPS
             }
 
             //turn section buttons all On
-            for (int j = 0; j < MAXSECTIONS; j++)
+            for (int j = 0; j < tool.sections.Count; j++)
             {
-                section[j].button.Top = top;
-                section[j].button.Left = Left + size.Width * j;
-                section[j].button.Size = size;
-                section[j].button.Visible = tool.numOfSections > j;
+                tool.sections[j].button.Top = top;
+                tool.sections[j].button.Left = Left + size.Width * j;
+                tool.sections[j].button.Size = size;
             }
         }
 
@@ -577,7 +552,7 @@ namespace AgOpenGPS
                         {
                             if (isTT)
                             {
-                                MessageBox.Show(gStr.h_lblSwapDirectionCancel, gStr.gsHelp);
+                                new FormHelp(gStr.h_lblSwapDirectionCancel, gStr.gsHelp).ShowDialog(this);
                                 ResetHelpBtn();
                                 return;
                             }
@@ -599,7 +574,7 @@ namespace AgOpenGPS
                         {
                             if (isTT)
                             {
-                                MessageBox.Show(gStr.h_lblManualTurnCancelTouch, gStr.gsHelp);
+                                new FormHelp(gStr.h_lblManualTurnCancelTouch, gStr.gsHelp).ShowDialog(this);
                                 ResetHelpBtn();
                                 return;
                             }
@@ -620,7 +595,7 @@ namespace AgOpenGPS
                         {
                             if (isTT)
                             {
-                                MessageBox.Show(gStr.h_lblManualTurnCancelTouch, gStr.gsHelp);
+                                new FormHelp(gStr.h_lblManualTurnCancelTouch, gStr.gsHelp).ShowDialog(this);
                                 ResetHelpBtn();
                                 return;
                             }
@@ -645,7 +620,7 @@ namespace AgOpenGPS
                         {
                             if (isTT)
                             {
-                                MessageBox.Show(gStr.h_lblLateralTurnTouch, gStr.gsHelp);
+                                new FormHelp(gStr.h_lblLateralTurnTouch, gStr.gsHelp).ShowDialog(this);
                                 ResetHelpBtn();
                                 return;
                             }
@@ -658,7 +633,7 @@ namespace AgOpenGPS
                         {
                             if (isTT)
                             {
-                                MessageBox.Show(gStr.h_lblLateralTurnTouch, gStr.gsHelp);
+                                new FormHelp(gStr.h_lblLateralTurnTouch, gStr.gsHelp).ShowDialog(this);
                                 ResetHelpBtn();
                                 return;
                             }
@@ -677,7 +652,7 @@ namespace AgOpenGPS
                 {
                     if (isTT)
                     {
-                        MessageBox.Show(gStr.h_lblVehicleDirectionResetTouch, gStr.gsHelp);        
+                        new FormHelp(gStr.h_lblVehicleDirectionResetTouch, gStr.gsHelp).ShowDialog(this);    
                         ResetHelpBtn();
                         return;
                     }
@@ -721,7 +696,7 @@ namespace AgOpenGPS
                     int sizer = oglMain.Height / 9;
                     if(point.Y > oglMain.Height-sizer && point.X > oglMain.Width - sizer)
                     {
-                        MessageBox.Show(gStr.h_lblSteerCircleTouch, gStr.gsHelp);
+                        new FormHelp(gStr.h_lblSteerCircleTouch, gStr.gsHelp).ShowDialog(this);
                         ResetHelpBtn();
                         return;
                     }
@@ -769,11 +744,8 @@ namespace AgOpenGPS
 
         #region Properties // ---------------------------------------------------------------------
 
-        public string Latitude { get { return Convert.ToString(Math.Round(pn.latitude, 7)); } }
-        public string Longitude { get { return Convert.ToString(Math.Round(pn.longitude, 7)); } }
-
-        public string SatsTracked { get { return Convert.ToString(pn.satellitesTracked); } }
-        public string HDOP { get { return Convert.ToString(pn.hdop); } }
+        public string SatsTracked { get { return Convert.ToString(mc.satellitesTracked); } }
+        public string HDOP { get { return Convert.ToString(mc.hdop); } }
         public string GPSHeading { get { return glm.toDegrees(fixHeading).ToString("0.0") + "\u00B0"; } }
 
         public string FixQuality
@@ -782,15 +754,15 @@ namespace AgOpenGPS
             {
                 if (timerSim.Enabled)
                     return "Sim: ";
-                else if (pn.fixQuality == 0) return "Invalid: ";
-                else if (pn.fixQuality == 1) return "GPS single: ";
-                else if (pn.fixQuality == 2) return "DGPS : ";
-                else if (pn.fixQuality == 3) return "PPS : ";
-                else if (pn.fixQuality == 4) return "RTK fix: ";
-                else if (pn.fixQuality == 5) return "Float: ";
-                else if (pn.fixQuality == 6) return "Estimate: ";
-                else if (pn.fixQuality == 7) return "Man IP: ";
-                else if (pn.fixQuality == 8) return "Sim: ";
+                else if (mc.fixQuality == 0) return "Invalid: ";
+                else if (mc.fixQuality == 1) return "GPS single: ";
+                else if (mc.fixQuality == 2) return "DGPS : ";
+                else if (mc.fixQuality == 3) return "PPS : ";
+                else if (mc.fixQuality == 4) return "RTK fix: ";
+                else if (mc.fixQuality == 5) return "Float: ";
+                else if (mc.fixQuality == 6) return "Estimate: ";
+                else if (mc.fixQuality == 7) return "Man IP: ";
+                else if (mc.fixQuality == 8) return "Sim: ";
                 else return "Unknown: ";
             }
         }
@@ -799,8 +771,8 @@ namespace AgOpenGPS
         {
             get
             {
-                if (ahrs.imuHeading != 99999)
-                    return Math.Round(ahrs.imuHeading, 1) + "\u00B0";
+                if (mc.imuHeading != 99999)
+                    return Math.Round(mc.imuHeading, 1) + "\u00B0";
                 else return "-";
             }
         }
@@ -808,15 +780,15 @@ namespace AgOpenGPS
         {
             get
             {
-                if (ahrs.imuRoll != 88888)
-                    return Math.Round((ahrs.imuRoll), 1) + "\u00B0";
+                if (mc.imuRoll != 88888)
+                    return Math.Round((mc.imuRoll), 1) + "\u00B0";
                 else return "-";
             }
         }
         public string SetSteerAngle { get { return ((double)(guidanceLineSteerAngle) * 0.01).ToString("0.0"); } }
         public string ActualSteerAngle { get { return ((mc.actualSteerAngleDegrees) ).ToString("0.0") ; } }
 
-        public string FixOffset { get { return ((pn.fixOffset.easting * mToUser).ToString("0") + ", " + (pn.fixOffset.northing * mToUser).ToString("0")); } }
+        public string FixOffset { get { return ((worldManager.fixOffset.easting * mToUser).ToString("0") + ", " + (worldManager.fixOffset.northing * mToUser).ToString("0")); } }
 
         #endregion properties 
     }//end class

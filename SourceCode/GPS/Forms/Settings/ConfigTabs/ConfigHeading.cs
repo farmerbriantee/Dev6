@@ -23,7 +23,7 @@ namespace AgOpenGPS
             {
                 Properties.Settings.Default.setIMU_fusionWeight = 0.2;
                 Properties.Settings.Default.Save();
-                mf.ahrs.fusionWeight = 0.2;
+                mf.mc.fusionWeight = 0.2;
             }
 
             dualHeadingOffset = Properties.Settings.Default.setGPS_dualHeadingOffset;
@@ -61,17 +61,17 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            Properties.Settings.Default.setIMU_isDualAsIMU = mf.ahrs.isDualAsIMU = cboxIsDualAsIMU.Checked;
-            Properties.Settings.Default.setIMU_fusionWeight = mf.ahrs.fusionWeight = hsbarFusion.Value * 0.002;
-            Properties.Settings.Default.setIMU_isReverseOn = mf.ahrs.isReverseOn = cboxIsReverseOn.Checked;
+            Properties.Settings.Default.setIMU_isDualAsIMU = mf.mc.isDualAsIMU = cboxIsDualAsIMU.Checked;
+            Properties.Settings.Default.setIMU_fusionWeight = mf.mc.fusionWeight = hsbarFusion.Value * 0.002;
+            Properties.Settings.Default.setIMU_isReverseOn = mf.mc.isReverseOn = cboxIsReverseOn.Checked;
 
             Properties.Settings.Default.setGPS_isRTK = mf.isRTK = cboxIsRTK.Checked;
             Properties.Settings.Default.setGPS_isRTK_KillAutoSteer = mf.isRTK_KillAutosteer = cboxIsRTK_KillAutoSteer.Checked;
-            Properties.Settings.Default.setGPS_ageAlarm = mf.pn.ageAlarm = ageAlarm;
-            Properties.Settings.Default.setGPS_forwardComp = mf.ahrs.forwardComp = forwardComp;
-            Properties.Settings.Default.setGPS_reverseComp = mf.ahrs.reverseComp = reverseComp;
+            Properties.Settings.Default.setGPS_ageAlarm = mf.mc.ageAlarm = ageAlarm;
+            Properties.Settings.Default.setGPS_forwardComp = mf.mc.forwardComp = forwardComp;
+            Properties.Settings.Default.setGPS_reverseComp = mf.mc.reverseComp = reverseComp;
             Properties.Settings.Default.SetGPS_udpWatchMsec = mf.udpWatchLimit = frameTime;
-            Properties.Settings.Default.setGPS_dualHeadingOffset = mf.pn.headingTrueDualOffset = dualHeadingOffset;
+            Properties.Settings.Default.setGPS_dualHeadingOffset = mf.mc.headingTrueDualOffset = dualHeadingOffset;
 
             Properties.Settings.Default.setF_minFixStep = mf.minFixStepDist = stepDistance;
             Properties.Vehicle.Default.setVehicle_startSpeed = mf.startSpeed = startSpeed;
@@ -123,10 +123,7 @@ namespace AgOpenGPS
 
         private void nudReverseComp_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            DialogResult result2 = MessageBox.Show(gStr.hc_nudReverseComp, gStr.gsHelp,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-
-            if (result2 == DialogResult.Yes)
+            if (new FormHelp(gStr.hc_nudReverseComp, gStr.gsHelp, true).ShowDialog() == DialogResult.Yes)
             {
                 System.Diagnostics.Process.Start("https://www.youtube.com/watch?v=rsJMRZrcuX4");
             }
@@ -134,10 +131,7 @@ namespace AgOpenGPS
 
         private void nudForwardComp_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            DialogResult result2 = MessageBox.Show(gStr.hc_nudForwardComp, gStr.gsHelp,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-
-            if (result2 == DialogResult.Yes)
+            if (new FormHelp(gStr.hc_nudForwardComp, gStr.gsHelp, true).ShowDialog() == DialogResult.Yes)
             {
                 System.Diagnostics.Process.Start("https://www.youtube.com/watch?v=rsJMRZrcuX4");
             }
@@ -145,62 +139,47 @@ namespace AgOpenGPS
 
         private void hsbarFusion_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_hsbarFusion, gStr.gsHelp);
+            new FormHelp(gStr.hc_hsbarFusion, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxIsDualAsIMU_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxIsDualAsIMU, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxIsDualAsIMU, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxIsReverseOn_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxIsReverseOn, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxIsReverseOn, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudMinFixStepDistance_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudMinFixStepDistance, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudMinFixStepDistance, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudStartSpeed_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudStartSpeed, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudStartSpeed, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxIsRTK_KillAutoSteer_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxIsRTK_KillAutoSteer, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxIsRTK_KillAutoSteer, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxIsRTK_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxIsRTK, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxIsRTK, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudMinimumFrameTime_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudMinimumFrameTime, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudMinimumFrameTime, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudAgeAlarm_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudAgeAlarm, gStr.gsHelp);
-        }
-
-        private void rbtnHeadingHDT_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_rbtnHeadingHDT, gStr.gsHelp);
-        }
-
-        private void rbtnHeadingGPS_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_rbtnHeadingGPS, gStr.gsHelp);
-        }
-
-        private void rbtnHeadingFix_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_rbtnHeadingFix, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudAgeAlarm, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

@@ -28,14 +28,14 @@ namespace AgOpenGPS
             lblEastingField.Text = mf.pivotAxlePos.easting.ToString("0.00");
             lblNorthingField.Text = mf.pivotAxlePos.northing.ToString("0.00");
 
-            lblLatitude.Text = mf.pn.latitude.ToString("0.0000000");
-            lblLongitude.Text = mf.pn.longitude.ToString("0.0000000");
+            lblLatitude.Text = mf.mc.latitude.ToString("0.0000000");
+            lblLongitude.Text = mf.mc.longitude.ToString("0.0000000");
 
             //other sat and GPS info
             lblFixQuality.Text = mf.FixQuality;
             lblSatsTracked.Text = mf.SatsTracked;
             lblHDOP.Text = mf.HDOP;
-            lblSpeed.Text = mf.pn.avgSpeed.ToString("0.0");
+            lblSpeed.Text = mf.mc.avgSpeed.ToString("0.0");
 
             //lblUturnByte.Text = Convert.ToString(mf.mc.machineData[mf.mc.mdUTurn], 2).PadLeft(6, '0');
 
@@ -44,7 +44,7 @@ namespace AgOpenGPS
             lblGPSHeading.Text = mf.GPSHeading;
             lblFixHeading.Text = (mf.fixHeading * 57.2957795).ToString("0.0");
 
-            lblAltitude.Text = (mf.pn.altitude * mf.mToUserBig).ToString("0.0");
+            lblAltitude.Text = (mf.mc.altitude * mf.mToUserBig).ToString("0.0");
         }
     }
 }

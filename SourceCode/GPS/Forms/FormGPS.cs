@@ -1,6 +1,5 @@
 ﻿//Please, if you use this, share the improvements
 
-using AgOpenGPS.Properties;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Diagnostics;
@@ -32,9 +31,6 @@ namespace AgOpenGPS
         private static extern bool ShowWindow(IntPtr hWind, int nCmdShow);
 
         #region // Class Props and instances
-
-        //maximum sections available
-        public const int MAXSECTIONS = 17;
 
         //The base directory where AgOpenGPS will be stored and fields and vehicles branch from
         public string baseDirectory;
@@ -99,16 +95,6 @@ namespace AgOpenGPS
         public CWorldManager worldManager;
 
         /// <summary>
-        /// The NMEA class that decodes it
-        /// </summary>
-        public CNMEA pn;
-
-        /// <summary>
-        /// an array of sections, so far 16 section + 1 fullWidth Section
-        /// </summary>
-        public CSection[] section;
-
-        /// <summary>
         /// TramLine class for boundary and settings
         /// </summary>
         public CTram tram;
@@ -137,11 +123,6 @@ namespace AgOpenGPS
         /// The internal simulator
         /// </summary>
         public CSim sim;
-
-        /// <summary>
-        /// Heading, Roll, Pitch, GPS, Properties
-        /// </summary>
-        public CAHRS ahrs;
 
         /// <summary>
         /// Most of the displayed field data for GUI
@@ -183,11 +164,6 @@ namespace AgOpenGPS
             //winform initialization
             InitializeComponent();
 
-            if (Settings.Default.setFeatures == null)
-            {
-                Settings.Default.setFeatures = new CFeatureSettings();
-            }
-
             ControlExtension.Draggable(oglZoom, true);
             ControlExtension.Draggable(panelDrag, true);
 
@@ -202,21 +178,7 @@ namespace AgOpenGPS
 
             tool = new CTool(this);
 
-            //create a new section and set left and right positions
-            //created whether used or not, saves restarting program
-
-            section = new CSection[MAXSECTIONS];
-            for (int j = 0; j < MAXSECTIONS; j++)
-            {
-                section[j] = new CSection(this, j);
-                Controls.Add(section[j].button);
-                section[j].button.BringToFront();
-            }
-
-            //our NMEA parser
-            pn = new CNMEA(this);
-
-            //module communication
+            // communication
             mc = new CModuleComm(this);
 
             //boundary object
@@ -224,9 +186,6 @@ namespace AgOpenGPS
 
             //nmea simulator built in.
             sim = new CSim(this);
-
-            ////all the attitude, heading, roll, pitch reference system
-            ahrs = new CAHRS();
 
             //fieldData all in one place
             fd = new CFieldData(this);
@@ -249,6 +208,18 @@ namespace AgOpenGPS
         //Initialize items before the form Loads or is visible
         private void FormGPS_Load(object sender, EventArgs e)
         {
+            if (!Properties.Settings.Default.setDisplay_isTermsAccepted)
+            {
+                using (var form = new Form_First())
+                {
+                    if (form.ShowDialog(this) != DialogResult.OK)
+                    {
+                        Close();
+                        return;
+                    }
+                }
+            }
+
             FormBorderStyle = FormBorderStyle.Sizable;
             MouseWheel += ZoomByMouseWheel;
 
@@ -260,11 +231,11 @@ namespace AgOpenGPS
             tmrWatchdog.Enabled = true;
 
             //set the language to last used
-            SetLanguage(Settings.Default.setF_culture);
+            SetLanguage(Properties.Settings.Default.setF_culture);
 
-            if (Settings.Default.setF_workingDirectory == "Default")
+            if (Properties.Settings.Default.setF_workingDirectory == "Default")
                 baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AgOpenGPS\\";
-            else baseDirectory = Settings.Default.setF_workingDirectory + "\\AgOpenGPS\\";
+            else baseDirectory = Properties.Settings.Default.setF_workingDirectory + "\\AgOpenGPS\\";
 
             //get the fields directory, if not exist, create
             fieldsDirectory = baseDirectory + "Fields\\";
@@ -277,7 +248,7 @@ namespace AgOpenGPS
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
 
             //make sure current field directory exists, null if not
-            currentFieldDirectory = Settings.Default.setF_CurrentDir;
+            currentFieldDirectory = Properties.Settings.Default.setF_CurrentDir;
 
             // load all the gui elements in gui.designer.cs
             LoadSettings();
@@ -314,7 +285,6 @@ namespace AgOpenGPS
             headlandToolStripMenuItem.Text = gStr.gsHeadland;
             deleteContourPathsToolStripMenuItem.Text = gStr.gsDeleteContourPaths;
             deleteAppliedAreaToolStripMenuItem.Text = gStr.gsDeleteAppliedArea;
-            deleteForSureToolStripMenuItem.Text = gStr.gsAreYouSure;
             webcamToolStrip.Text = gStr.gsWebCam;
             //googleEarthFlagsToolStrip.Text = gStr.gsGoogleEarth;
             offsetFixToolStrip.Text = gStr.gsOffsetFix;
@@ -376,9 +346,9 @@ namespace AgOpenGPS
                 Properties.Resources.z_Turn,Properties.Resources.z_TurnCancel,Properties.Resources.z_TurnManual,
                 Properties.Resources.z_Compass,Properties.Resources.z_Speedo,Properties.Resources.z_SpeedoNeedle,
                 Properties.Resources.z_Lift,Properties.Resources.z_SkyNight,Properties.Resources.z_SteerPointer,
-                Properties.Resources.z_SteerDot,GetTractorBrand(Settings.Default.setBrand_TBrand),Properties.Resources.z_QuestionMark,
-                Properties.Resources.z_FrontWheels,Get4WDBrandFront(Settings.Default.setBrand_WDBrand), Get4WDBrandRear(Settings.Default.setBrand_WDBrand),
-                GetHarvesterBrand(Settings.Default.setBrand_HBrand), Properties.Resources.z_LateralManual, Properties.Resources.z_bingMap
+                Properties.Resources.z_SteerDot,GetTractorBrand(Properties.Settings.Default.setBrand_TBrand),Properties.Resources.z_QuestionMark,
+                Properties.Resources.z_FrontWheels,Get4WDBrandFront(Properties.Settings.Default.setBrand_WDBrand), Get4WDBrandRear(Properties.Settings.Default.setBrand_WDBrand),
+                GetHarvesterBrand(Properties.Settings.Default.setBrand_HBrand), Properties.Resources.z_LateralManual, Properties.Resources.z_bingMap
             };
 
             texture = new uint[oglTextures.Length];
@@ -404,31 +374,31 @@ namespace AgOpenGPS
         {
             Bitmap bitmap;
             if (brand == TBrand.Case)
-                bitmap = Resources.z_TractorCase;
+                bitmap = Properties.Resources.z_TractorCase;
             else if (brand == TBrand.Claas)
-                bitmap = Resources.z_TractorClaas;
+                bitmap = Properties.Resources.z_TractorClaas;
             else if (brand == TBrand.Deutz)
-                bitmap = Resources.z_TractorDeutz;
+                bitmap = Properties.Resources.z_TractorDeutz;
             else if (brand == TBrand.Fendt)
-                bitmap = Resources.z_TractorFendt;
+                bitmap = Properties.Resources.z_TractorFendt;
             else if (brand == TBrand.JDeere)
-                bitmap = Resources.z_TractorJDeere;
+                bitmap = Properties.Resources.z_TractorJDeere;
             else if (brand == TBrand.Kubota)
-                bitmap = Resources.z_TractorKubota;
+                bitmap = Properties.Resources.z_TractorKubota;
             else if (brand == TBrand.Massey)
-                bitmap = Resources.z_TractorMassey;
+                bitmap = Properties.Resources.z_TractorMassey;
             else if (brand == TBrand.NewHolland)
-                bitmap = Resources.z_TractorNH;
+                bitmap = Properties.Resources.z_TractorNH;
             else if (brand == TBrand.Same)
-                bitmap = Resources.z_TractorSame;
+                bitmap = Properties.Resources.z_TractorSame;
             else if (brand == TBrand.Steyr)
-                bitmap = Resources.z_TractorSteyr;
+                bitmap = Properties.Resources.z_TractorSteyr;
             else if (brand == TBrand.Ursus)
-                bitmap = Resources.z_TractorUrsus;
+                bitmap = Properties.Resources.z_TractorUrsus;
             else if (brand == TBrand.Valtra)
-                bitmap = Resources.z_TractorValtra;
+                bitmap = Properties.Resources.z_TractorValtra;
             else
-                bitmap = Resources.z_TractorAoG;
+                bitmap = Properties.Resources.z_TractorAoG;
 
             return bitmap;
         }
@@ -437,15 +407,15 @@ namespace AgOpenGPS
         {
             Bitmap harvesterbitmap;
             if (brandH == HBrand.Case)
-                harvesterbitmap = Resources.z_HarvesterCase;
+                harvesterbitmap = Properties.Resources.z_HarvesterCase;
             else if (brandH == HBrand.Claas)
-                harvesterbitmap = Resources.z_HarvesterClaas;
+                harvesterbitmap = Properties.Resources.z_HarvesterClaas;
             else if (brandH == HBrand.JDeere)
-                harvesterbitmap = Resources.z_HarvesterJD;
+                harvesterbitmap = Properties.Resources.z_HarvesterJD;
             else if (brandH == HBrand.NewHolland)
-                harvesterbitmap = Resources.z_HarvesterNH;
+                harvesterbitmap = Properties.Resources.z_HarvesterNH;
             else
-                harvesterbitmap = Resources.z_HarvesterAoG;
+                harvesterbitmap = Properties.Resources.z_HarvesterAoG;
 
             return harvesterbitmap;
         }
@@ -454,15 +424,15 @@ namespace AgOpenGPS
         {
             Bitmap bitmap4WDFront;
             if (brandWDF == WDBrand.Case)
-                bitmap4WDFront = Resources.z_4WDFrontCase;
+                bitmap4WDFront = Properties.Resources.z_4WDFrontCase;
             else if (brandWDF == WDBrand.Challenger)
-                bitmap4WDFront = Resources.z_4WDFrontChallenger;
+                bitmap4WDFront = Properties.Resources.z_4WDFrontChallenger;
             else if (brandWDF == WDBrand.JDeere)
-                bitmap4WDFront = Resources.z_4WDFrontJDeere;
+                bitmap4WDFront = Properties.Resources.z_4WDFrontJDeere;
             else if (brandWDF == WDBrand.NewHolland)
-                bitmap4WDFront = Resources.z_4WDFrontNH;
+                bitmap4WDFront = Properties.Resources.z_4WDFrontNH;
             else
-                bitmap4WDFront = Resources.z_4WDFrontAoG;
+                bitmap4WDFront = Properties.Resources.z_4WDFrontAoG;
 
             return bitmap4WDFront;
         }
@@ -471,15 +441,15 @@ namespace AgOpenGPS
         {
             Bitmap bitmap4WDRear;
             if (brandWDR == WDBrand.Case)
-                bitmap4WDRear = Resources.z_4WDRearCase;
+                bitmap4WDRear = Properties.Resources.z_4WDRearCase;
             else if (brandWDR == WDBrand.Challenger)
-                bitmap4WDRear = Resources.z_4WDRearChallenger;
+                bitmap4WDRear = Properties.Resources.z_4WDRearChallenger;
             else if (brandWDR == WDBrand.JDeere)
-                bitmap4WDRear = Resources.z_4WDRearJDeere;
+                bitmap4WDRear = Properties.Resources.z_4WDRearJDeere;
             else if (brandWDR == WDBrand.NewHolland)
-                bitmap4WDRear = Resources.z_4WDRearNH;
+                bitmap4WDRear = Properties.Resources.z_4WDRearNH;
             else
-                bitmap4WDRear = Resources.z_4WDRearAoG;
+                bitmap4WDRear = Properties.Resources.z_4WDRearAoG;
 
             return bitmap4WDRear;
         }
@@ -493,25 +463,14 @@ namespace AgOpenGPS
             int machine = 0;
 
             //check if super section is on
-            if (section[tool.numOfSections].isSectionOn)
+            for (int j = 0; j < tool.sections.Count - 1; j++)
             {
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    //all the sections are on, so set them
+                //set if on, reset bit if off
+                if (tool.sections[tool.sections.Count - 1].isSectionOn || tool.sections[j].isSectionOn)
                     machine |= set;
-                    set <<= 1;
-                }
-            }
-            else
-            {
-                for (int j = 0; j < tool.numOfSections; j++)
-                {
-                    //set if on, reset bit if off
-                    if (section[j].isSectionOn) machine |= set;
 
-                    //move set and reset over 1 bit left
-                    set <<= 1;
-                }
+                //move set and reset over 1 bit left
+                set <<= 1;
             }
 
             //sections in autosteer
@@ -521,7 +480,7 @@ namespace AgOpenGPS
             //machine pgn
             p_239.pgn[p_239.sc9to16] = p_254.pgn[p_254.sc9to16];
             p_239.pgn[p_239.sc1to8] = p_254.pgn[p_254.sc1to8];
-            p_239.pgn[p_239.speed] = unchecked((byte)(pn.avgSpeed*10));
+            p_239.pgn[p_239.speed] = unchecked((byte)(mc.avgSpeed*10));
             p_239.pgn[p_239.tram] = unchecked((byte)tram.controlByte);
 
             //out serial to autosteer module  //indivdual classes load the distance and heading deltas 
@@ -599,95 +558,10 @@ namespace AgOpenGPS
             sender.BackColor = Color.AliceBlue;
         }
 
-        //function to set section positions
-        public void SectionSetPosition()
-        {
-            section[0].positionLeft = Vehicle.Default.setSection_position1 + Vehicle.Default.setVehicle_toolOffset;
-            section[0].positionRight = Vehicle.Default.setSection_position2 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[1].positionLeft = Vehicle.Default.setSection_position2 + Vehicle.Default.setVehicle_toolOffset;
-            section[1].positionRight = Vehicle.Default.setSection_position3 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[2].positionLeft = Vehicle.Default.setSection_position3 + Vehicle.Default.setVehicle_toolOffset;
-            section[2].positionRight = Vehicle.Default.setSection_position4 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[3].positionLeft = Vehicle.Default.setSection_position4 + Vehicle.Default.setVehicle_toolOffset;
-            section[3].positionRight = Vehicle.Default.setSection_position5 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[4].positionLeft = Vehicle.Default.setSection_position5 + Vehicle.Default.setVehicle_toolOffset;
-            section[4].positionRight = Vehicle.Default.setSection_position6 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[5].positionLeft = Vehicle.Default.setSection_position6 + Vehicle.Default.setVehicle_toolOffset;
-            section[5].positionRight = Vehicle.Default.setSection_position7 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[6].positionLeft = Vehicle.Default.setSection_position7 + Vehicle.Default.setVehicle_toolOffset;
-            section[6].positionRight = Vehicle.Default.setSection_position8 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[7].positionLeft = Vehicle.Default.setSection_position8 + Vehicle.Default.setVehicle_toolOffset;
-            section[7].positionRight = Vehicle.Default.setSection_position9 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[8].positionLeft = Vehicle.Default.setSection_position9 + Vehicle.Default.setVehicle_toolOffset;
-            section[8].positionRight = Vehicle.Default.setSection_position10 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[9].positionLeft = Vehicle.Default.setSection_position10 + Vehicle.Default.setVehicle_toolOffset;
-            section[9].positionRight = Vehicle.Default.setSection_position11 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[10].positionLeft = Vehicle.Default.setSection_position11 + Vehicle.Default.setVehicle_toolOffset;
-            section[10].positionRight = Vehicle.Default.setSection_position12 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[11].positionLeft = Vehicle.Default.setSection_position12 + Vehicle.Default.setVehicle_toolOffset;
-            section[11].positionRight = Vehicle.Default.setSection_position13 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[12].positionLeft = Vehicle.Default.setSection_position13 + Vehicle.Default.setVehicle_toolOffset;
-            section[12].positionRight = Vehicle.Default.setSection_position14 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[13].positionLeft = Vehicle.Default.setSection_position14 + Vehicle.Default.setVehicle_toolOffset;
-            section[13].positionRight = Vehicle.Default.setSection_position15 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[14].positionLeft = Vehicle.Default.setSection_position15 + Vehicle.Default.setVehicle_toolOffset;
-            section[14].positionRight = Vehicle.Default.setSection_position16 + Vehicle.Default.setVehicle_toolOffset;
-
-            section[15].positionLeft = Vehicle.Default.setSection_position16 + Vehicle.Default.setVehicle_toolOffset;
-            section[15].positionRight = Vehicle.Default.setSection_position17 + Vehicle.Default.setVehicle_toolOffset;
-
-            //Calculate total width and each section width
-            SectionCalcWidths();
-        }
-
-        //function to calculate the width of each section and update
-        public void SectionCalcWidths()
-        {
-            for (int j = 0; j < MAXSECTIONS; j++)
-            {
-                section[j].sectionWidth = section[j].positionRight - section[j].positionLeft;
-                section[j].rpSectionPosition = 250 + (int)Math.Round(section[j].positionLeft * 10, 0, MidpointRounding.AwayFromZero);
-                section[j].rpSectionWidth = (int)Math.Round(section[j].sectionWidth * 10, 0, MidpointRounding.AwayFromZero);
-            }
-
-            //calculate tool width based on extreme right and left values
-            tool.toolWidth = section[tool.numOfSections - 1].positionRight - section[0].positionLeft;
-
-            Vehicle.Default.setVehicle_toolWidth = tool.toolWidth;
-            Vehicle.Default.Save();
-
-            //left and right tool position
-            tool.toolFarLeftPosition = section[0].positionLeft;
-            tool.toolFarRightPosition = section[tool.numOfSections - 1].positionRight;
-
-            //now do the full width section
-            section[tool.numOfSections].sectionWidth = tool.toolWidth;
-            section[tool.numOfSections].positionLeft = tool.toolFarLeftPosition;
-            section[tool.numOfSections].positionRight = tool.toolFarRightPosition;
-            
-            //find the right side pixel position
-            tool.rpXPosition = 250 + (int)(Math.Round((tool.toolFarLeftPosition - tool.toolOffset) * 10, 0, MidpointRounding.AwayFromZero));
-            tool.rpWidth = (int)(Math.Round(tool.toolWidth * 10, 0, MidpointRounding.AwayFromZero));
-        }
-
         //request a new job
         public void JobNew()
         {
-            if (Settings.Default.setMenu_isOGLZoomOn == 1)
+            if (Properties.Settings.Default.setMenu_isOGLZoomOn == 1)
             {
                 oglZoom.BringToFront();
                 oglZoom.Width = 300;
@@ -696,10 +570,6 @@ namespace AgOpenGPS
 
             isJobStarted = true;
 
-            for (int j = 0; j < MAXSECTIONS; j++)
-            {
-                section[j].SetButtonStatus(true);
-            }
 
             FieldMenuButtonEnableDisable(true);
 
@@ -722,8 +592,23 @@ namespace AgOpenGPS
 
             lblFieldStatus.Visible = isOn;
 
+            for (int j = 0; j < tool.sections.Count - 1; j++)
+            {
+                if (!isOn)
+                {
+                    tool.sections[j].sectionOnRequest = 0;
+                    tool.sections[j].isSectionOn = false;
+                    if (tool.sections[j].isMappingOn)
+                        tool.sections[j].TurnMappingOff();
+
+                    tool.sections[j].triangleList.Clear();
+                }
+                tool.sections[j].SetButtonStatus(isOn);
+            }
             LineUpManualBtns();
-        }
+
+            toolStripBtnField.Image = (isOn && Properties.Settings.Default.setDisplayFeature_SimpleCloseField) ? Properties.Resources.JobClose : Properties.Resources.JobActive;
+        } 
 
         //close the current job
         public void JobClose()
@@ -731,7 +616,7 @@ namespace AgOpenGPS
             //reset field offsets
             if (!isKeepOffsetsOn)
             {
-                pn.fixOffset = new vec2();
+                worldManager.fixOffset = new vec2();
             }
 
             //turn off headland
@@ -755,19 +640,7 @@ namespace AgOpenGPS
             FieldMenuButtonEnableDisable(false);
 
             isJobStarted = false;
-
-            //turn section buttons all OFF
-            for (int j = 0; j < MAXSECTIONS; j++)
-            {
-                section[j].sectionOnRequest = false;
-                section[j].isSectionOn = false;
-                if (section[j].isMappingOn)
-                    section[j].TurnMappingOff();
-
-                section[j].SetButtonStatus(false);
-                section[j].triangleList.Clear();
-            }
-
+            
             //fix auto button
             setSectionBtnState(btnStates.Off);
 
@@ -791,7 +664,7 @@ namespace AgOpenGPS
             gyd.curveArr.Clear();
 
             gyd.resumeState = 0;
-            btnResumePath.Image = Resources.pathResumeStart;
+            btnResumePath.Image = Properties.Resources.pathResumeStart;
             gyd.currentPositonIndex = 0;
 
 
@@ -823,67 +696,6 @@ namespace AgOpenGPS
             worldManager.isGeoMap = false;
 
             shape.Polygons.Clear();
-        }
-
-        //Does the logic to process section on off requests
-        private void ProcessSectionOnOffRequests()
-        {
-            double timer = HzTime / (isFastSections ? 1 : 2);
-            for (int j = 0; j < tool.numOfSections; j++)
-            {
-                //SECTIONS - 
-                if (section[j].sectionOnRequest)
-                {
-                    section[j].isSectionOn = true;
-
-                    section[j].sectionOverlapTimer = (int)Math.Max(timer * tool.turnOffDelay, 1);
-
-                    if (!section[j].isMappingOn && section[j].mappingOnTimer == 0)
-                        section[j].mappingOnTimer = (int)Math.Max(timer * tool.lookAheadOnSetting + 1, 1);//tool.mappingOnDelay
-
-                    section[j].mappingOffTimer = (int)(timer * tool.lookAheadOffSetting + 2);//tool.mappingOffDelay
-                }
-                else if (section[j].sectionOverlapTimer > 0)
-                {
-                    section[j].sectionOverlapTimer--;
-                    if (section[j].isSectionOn && section[j].sectionOverlapTimer == 0)
-                        section[j].isSectionOn = false;
-                    else
-                        section[j].mappingOffTimer = (int)(timer * tool.lookAheadOffSetting + 2);//tool.mappingOffDelay
-                }
-
-                //MAPPING -
-                if (section[tool.numOfSections].sectionOnRequest)
-                {
-                    section[j].mappingOnTimer = 2;
-                    if (section[j].isMappingOn)
-                        section[j].TurnMappingOff();
-                }
-                if (section[j].mappingOnTimer > 0 && section[j].mappingOffTimer > 1)
-                {
-                    section[j].mappingOnTimer--;
-                    if (!section[j].isMappingOn && section[j].mappingOnTimer == 0)
-                        section[j].TurnMappingOn();
-                }
-                if (section[j].mappingOffTimer > 0)
-                {
-                    section[j].mappingOffTimer--;
-                    if (section[j].mappingOffTimer == 0)
-                    {
-                        section[j].mappingOnTimer = 0;
-                        if (section[j].isMappingOn)
-                            section[j].TurnMappingOff();
-                    }
-                }
-            }
-
-            if (section[tool.numOfSections].sectionOnRequest)
-            {
-                if (!section[tool.numOfSections].isMappingOn)
-                    section[tool.numOfSections].TurnMappingOn();
-            }
-            else if (section[tool.numOfSections].isMappingOn)
-                section[tool.numOfSections].TurnMappingOff();
         }
 
         //take the distance from object and convert to camera data

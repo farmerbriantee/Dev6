@@ -271,22 +271,22 @@ namespace AgOpenGPS
 
         private void btnCancel_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.ha_btnCancel, gStr.gsHelp);
+            new FormHelp(gStr.ha_btnCancel, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnNoSave_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.he_btnNoSave, gStr.gsHelp);
+            new FormHelp(gStr.he_btnNoSave, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnOK_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.he_btnOK, gStr.gsHelp);
+            new FormHelp(gStr.he_btnOK, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnContourPriority_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_btnSnapToPivot, gStr.gsHelp);
+            new FormHelp(gStr.h_btnSnapToPivot, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

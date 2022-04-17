@@ -21,7 +21,7 @@ namespace AgOpenGPS
 
         //is this section on or off
         public bool isSectionOn = false;
-        public bool sectionOnRequest = false;
+        public int sectionOnRequest = 0;
         public int sectionOverlapTimer = 0;
 
         //mapping
@@ -31,9 +31,6 @@ namespace AgOpenGPS
         public int mappingOffTimer = 0;
         public int mappingOnDelay = 0;
         public int mappingOffDelay = 0;
-
-        public double speedPixels = 0;
-
 
         //the left side is always negative, right side is positive
         //so a section on the left side only would be -8, -4
@@ -45,7 +42,6 @@ namespace AgOpenGPS
 
         public double positionLeft = -4;
         public double positionRight = 4;
-        public double sectionWidth = 0;
 
         //used by readpixel to determine color in pixel array
         public int rpSectionWidth = 0;
@@ -72,9 +68,9 @@ namespace AgOpenGPS
 
             button = new Button();
 
-            button.BackColor = System.Drawing.Color.Silver;
+            button.BackColor = mf.isJobStarted ? (mf.isDay ? button.BackColor = Color.Red : button.BackColor = Color.Crimson) : Color.Silver;
             button.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            button.Enabled = false;
+            button.Enabled = mf.isJobStarted;
             button.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveCaptionText;
             button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             button.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -133,6 +129,8 @@ namespace AgOpenGPS
         public void SetButtonStatus(bool enable)
         {
             button.Enabled = enable;
+            button.BackColor = enable ? (mf.isDay ? button.BackColor = Color.Red : button.BackColor = Color.Crimson) : Color.Silver;
+
             UpdateButton(btnStates.Off);
         }
 
@@ -149,7 +147,7 @@ namespace AgOpenGPS
                 //starting a new patch chunk so create a new triangle list
                 triangleList = new List<vec2>();
 
-                if (!mf.tool.isMultiColoredSections)
+                if (index < 0 || !mf.tool.isMultiColoredSections)
                 {
                     triangleList.Add(new vec2(mf.sectionColor.R, mf.sectionColor.G));
                     triangleList.Add(new vec2(mf.sectionColor.B, index));
@@ -239,7 +237,7 @@ namespace AgOpenGPS
                 triangleList = new List<vec2>();
 
                 //Add Patch colour
-                if (!mf.tool.isMultiColoredSections)
+                if (index < 0 || !mf.tool.isMultiColoredSections)
                 {
                     triangleList.Add(new vec2(mf.sectionColor.R, mf.sectionColor.G));
                     triangleList.Add(new vec2(mf.sectionColor.B, index));

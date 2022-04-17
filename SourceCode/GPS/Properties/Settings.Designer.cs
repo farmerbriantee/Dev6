@@ -830,17 +830,6 @@ namespace AgOpenGPS.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::AgOpenGPS.CFeatureSettings setFeatures {
-            get {
-                return ((global::AgOpenGPS.CFeatureSettings)(this["setFeatures"]));
-            }
-            set {
-                this["setFeatures"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool setIMU_isDualAsIMU {
             get {
@@ -1245,6 +1234,282 @@ namespace AgOpenGPS.Properties {
             }
             set {
                 this["setVehicle_panicStopSpeed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setF_IsSteerSwitchEnabled {
+            get {
+                return ((bool)(this["setF_IsSteerSwitchEnabled"]));
+            }
+            set {
+                this["setF_IsSteerSwitchEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_Tram {
+            get {
+                return ((bool)(this["setDisplayFeature_Tram"]));
+            }
+            set {
+                this["setDisplayFeature_Tram"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_Headland {
+            get {
+                return ((bool)(this["setDisplayFeature_Headland"]));
+            }
+            set {
+                this["setDisplayFeature_Headland"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_Boundary {
+            get {
+                return ((bool)(this["setDisplayFeature_Boundary"]));
+            }
+            set {
+                this["setDisplayFeature_Boundary"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_BoundaryContour {
+            get {
+                return ((bool)(this["setDisplayFeature_BoundaryContour"]));
+            }
+            set {
+                this["setDisplayFeature_BoundaryContour"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_RecPath {
+            get {
+                return ((bool)(this["setDisplayFeature_RecPath"]));
+            }
+            set {
+                this["setDisplayFeature_RecPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_ABSmooth {
+            get {
+                return ((bool)(this["setDisplayFeature_ABSmooth"]));
+            }
+            set {
+                this["setDisplayFeature_ABSmooth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_HideContour {
+            get {
+                return ((bool)(this["setDisplayFeature_HideContour"]));
+            }
+            set {
+                this["setDisplayFeature_HideContour"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_Webcam {
+            get {
+                return ((bool)(this["setDisplayFeature_Webcam"]));
+            }
+            set {
+                this["setDisplayFeature_Webcam"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_OffsetFix {
+            get {
+                return ((bool)(this["setDisplayFeature_OffsetFix"]));
+            }
+            set {
+                this["setDisplayFeature_OffsetFix"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_Contour {
+            get {
+                return ((bool)(this["setDisplayFeature_Contour"]));
+            }
+            set {
+                this["setDisplayFeature_Contour"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_YouTurn {
+            get {
+                return ((bool)(this["setDisplayFeature_YouTurn"]));
+            }
+            set {
+                this["setDisplayFeature_YouTurn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_SteerMode {
+            get {
+                return ((bool)(this["setDisplayFeature_SteerMode"]));
+            }
+            set {
+                this["setDisplayFeature_SteerMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_AgIO {
+            get {
+                return ((bool)(this["setDisplayFeature_AgIO"]));
+            }
+            set {
+                this["setDisplayFeature_AgIO"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_AutoSection {
+            get {
+                return ((bool)(this["setDisplayFeature_AutoSection"]));
+            }
+            set {
+                this["setDisplayFeature_AutoSection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_ManualSection {
+            get {
+                return ((bool)(this["setDisplayFeature_ManualSection"]));
+            }
+            set {
+                this["setDisplayFeature_ManualSection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_CycleLines {
+            get {
+                return ((bool)(this["setDisplayFeature_CycleLines"]));
+            }
+            set {
+                this["setDisplayFeature_CycleLines"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_ABLine {
+            get {
+                return ((bool)(this["setDisplayFeature_ABLine"]));
+            }
+            set {
+                this["setDisplayFeature_ABLine"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_Curve {
+            get {
+                return ((bool)(this["setDisplayFeature_Curve"]));
+            }
+            set {
+                this["setDisplayFeature_Curve"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_AutoSteer {
+            get {
+                return ((bool)(this["setDisplayFeature_AutoSteer"]));
+            }
+            set {
+                this["setDisplayFeature_AutoSteer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_UTurn {
+            get {
+                return ((bool)(this["setDisplayFeature_UTurn"]));
+            }
+            set {
+                this["setDisplayFeature_UTurn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplayFeature_Lateral {
+            get {
+                return ((bool)(this["setDisplayFeature_Lateral"]));
+            }
+            set {
+                this["setDisplayFeature_Lateral"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setDisplayFeature_SimpleCloseField {
+            get {
+                return ((bool)(this["setDisplayFeature_SimpleCloseField"]));
+            }
+            set {
+                this["setDisplayFeature_SimpleCloseField"] = value;
             }
         }
     }

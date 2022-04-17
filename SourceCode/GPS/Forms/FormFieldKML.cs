@@ -89,7 +89,7 @@ namespace AgOpenGPS
 
                 if ((!string.IsNullOrEmpty(directoryName)) && (Directory.Exists(directoryName)))
                 {
-                    MessageBox.Show(gStr.gsChooseADifferentName, gStr.gsDirectoryExists, MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                   MessageBox.Show(gStr.gsChooseADifferentName, gStr.gsDirectoryExists, MessageBoxButtons.OK, MessageBoxIcon.Stop);
                     return;
                 }
                 else
@@ -99,25 +99,25 @@ namespace AgOpenGPS
 
                     if (!basedOnKML)
                     {
-                        mf.pn.latStart = mf.pn.latitude;
-                        mf.pn.lonStart = mf.pn.longitude;
+                        mf.worldManager.latStart = mf.mc.latitude;
+                        mf.worldManager.lonStart = mf.mc.longitude;
                     }
                     else
                     {
-                        mf.pn.latStart = latK;
-                        mf.pn.lonStart = lonK;
+                        mf.worldManager.latStart = latK;
+                        mf.worldManager.lonStart = lonK;
                     }
 
                     if (mf.timerSim.Enabled)
                     {
-                        Properties.Settings.Default.setGPS_SimLatitude = mf.pn.latStart;
-                        Properties.Settings.Default.setGPS_SimLongitude = mf.pn.lonStart;
+                        Properties.Settings.Default.setGPS_SimLatitude = mf.worldManager.latStart;
+                        Properties.Settings.Default.setGPS_SimLongitude = mf.worldManager.lonStart;
                         Properties.Settings.Default.Save();
 
                         mf.sim.resetSim();
                     }
 
-                    mf.pn.SetLocalMetersPerDegree();
+                    mf.worldManager.SetLocalMetersPerDegree();
 
 
                     //make sure directory exists, or create it
@@ -246,7 +246,7 @@ namespace AgOpenGPS
                                     double.TryParse(fix[0], NumberStyles.Float, CultureInfo.InvariantCulture, out lonK);
                                     double.TryParse(fix[1], NumberStyles.Float, CultureInfo.InvariantCulture, out latK);
 
-                                    mf.pn.ConvertWGS84ToLocal(latK, lonK, out northing, out easting);
+                                    mf.worldManager.ConvertWGS84ToLocal(latK, lonK, out northing, out easting);
 
                                     //add the point to boundary
                                     New.fenceLine.points.Add(new vec2(easting, northing));

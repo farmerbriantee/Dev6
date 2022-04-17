@@ -20,11 +20,9 @@ namespace AgOpenGPS
 
         //data buffer for pixels read from off screen buffer
         private byte[] grnPixels = new byte[150001];
-        public bool isFastSections = false;
         private int bbCounter = 0, deadCam = 0;
         private double maxFieldX, maxFieldY, minFieldX, minFieldY;
 
-        public bool isTramOnBackBuffer = false;
         public double fieldCenterX, fieldCenterY, maxFieldDistance, maxCrossFieldLength, avgPivDistance, avgPivDistanceTool;
 
         // When oglMain is created
@@ -183,26 +181,26 @@ namespace AgOpenGPS
                     }
                 }
 
-                for (int j = 0; j < tool.numSuperSection; j++)
+                for (int j = 0; j < tool.sections.Count; j++)
                 {
-                    if (section[j].isMappingOn && section[j].triangleList.Count > 3)
+                    if (tool.sections[j].isMappingOn && tool.sections[j].triangleList.Count > 3)
                     {
-                        GL.Color4((byte)section[j].triangleList[0].easting, (byte)section[j].triangleList[0].northing, (byte)section[j].triangleList[1].easting, (byte)(isDay ? 152 : 76));
+                        GL.Color4((byte)tool.sections[j].triangleList[0].easting, (byte)tool.sections[j].triangleList[0].northing, (byte)tool.sections[j].triangleList[1].easting, (byte)(isDay ? 152 : 76));
 
                         //draw the triangle in each triangle strip
                         GL.Begin(PrimitiveType.TriangleStrip);
 
-                        for (int i = 2; i < section[j].triangleList.Count; i++) GL.Vertex3(section[j].triangleList[i].easting, section[j].triangleList[i].northing, 0);
+                        for (int i = 2; i < tool.sections[j].triangleList.Count; i++) GL.Vertex3(tool.sections[j].triangleList[i].easting, tool.sections[j].triangleList[i].northing, 0);
 
                         //left side of triangle
-                        vec2 pt = new vec2((cosSectionHeading * section[j].positionLeft) + toolPos.easting,
-                                (sinSectionHeading * section[j].positionLeft) + toolPos.northing);
+                        vec2 pt = new vec2((cosSectionHeading * (tool.sections[j].positionLeft + tool.toolOffset)) + toolPos.easting,
+                                (sinSectionHeading * (tool.sections[j].positionLeft + tool.toolOffset)) + toolPos.northing);
 
                         GL.Vertex3(pt.easting, pt.northing, 0);
 
                         //Right side of triangle
-                        pt = new vec2((cosSectionHeading * section[j].positionRight) + toolPos.easting,
-                           (sinSectionHeading * section[j].positionRight) + toolPos.northing);
+                        pt = new vec2((cosSectionHeading * (tool.sections[j].positionRight + tool.toolOffset)) + toolPos.easting,
+                           (sinSectionHeading * (tool.sections[j].positionRight + tool.toolOffset)) + toolPos.northing);
 
                         GL.Vertex3(pt.easting, pt.northing, 0);
                         GL.End();
@@ -315,18 +313,18 @@ namespace AgOpenGPS
                     vehicle.DrawVehicle();
                 GL.PopMatrix();
 
-                if (worldManager.camSetDistance > -75 && pn.isToolSteering)
+                if (worldManager.camSetDistance > -75 && tool.isSteering)
                 {
                     GL.PointSize(8.0f);
                     GL.Color3(0.0f, 0.0f, 0.0f);
                     GL.Begin(PrimitiveType.Points);
-                    GL.Vertex3(pn.fixTool.easting, pn.fixTool.northing, 0.2);
+                    GL.Vertex3(mc.fixTool.easting, mc.fixTool.northing, 0.2);
                     GL.End();
 
                     GL.PointSize(4.0f);
                     GL.Color3(0.20f, 1.0f, 1.0f);
                     GL.Begin(PrimitiveType.Points);
-                    GL.Vertex3(pn.fixTool.easting, pn.fixTool.northing, 0.2);
+                    GL.Vertex3(mc.fixTool.easting, mc.fixTool.northing, 0.2);
                     GL.End();
                 }
 
@@ -353,11 +351,11 @@ namespace AgOpenGPS
                     if (vehicleGPSWatchdog < 11)
                         DrawLightBarText();
 
-                    if (pn.isToolSteering)
+                    if (tool.isSteering)
                         DrawLightBarTextTool();
                 }
 
-                if (ahrs.imuRoll != 88888)
+                if (mc.imuRoll != 88888)
                     DrawRollBar();
 
                 if (bnd.bndList.Count > 0 && gyd.isYouTurnBtnOn) DrawUTurnBtn();
@@ -377,7 +375,7 @@ namespace AgOpenGPS
 
                 if (isRTK)
                 {
-                    if (pn.fixQuality != 4)
+                    if (mc.fixQuality != 4)
                     {
                         DrawLostRTK();
                         if (isRTK_KillAutosteer && isAutoSteerBtnOn)
@@ -385,7 +383,7 @@ namespace AgOpenGPS
                     }
                 }
 
-                if (pn.age > pn.ageAlarm) DrawAge();
+                if (mc.age > mc.ageAlarm) DrawAge();
 
                 GL.Flush();//finish openGL commands
                 GL.PopMatrix();//  Pop the modelview.
@@ -437,36 +435,40 @@ namespace AgOpenGPS
             bool Needsupdate = true;
 
             //determine farthest lookahead - is the height of the readpixel line
-            int rpHeight = (int)Math.Max(Math.Max((vehicle.isHydLiftOn ? Math.Max(vehicle.hydLiftLookAheadDistanceRight, vehicle.hydLiftLookAheadDistanceLeft) : 0), Math.Max(Math.Max(tool.lookAheadDistanceOnPixelsRight, tool.lookAheadDistanceOnPixelsLeft), Math.Max(tool.lookAheadBoundaryOnPixelsRight, tool.lookAheadBoundaryOnPixelsLeft)) + 1) + 0.5, 1);
-            int rpHeight2 = (int)Math.Max(vehicle.isHydLiftOn ? -1 : Math.Min(Math.Min(tool.lookAheadDistanceOffPixelsRight, tool.lookAheadDistanceOffPixelsLeft),Math.Min(tool.lookAheadBoundaryOffPixelsRight, tool.lookAheadBoundaryOffPixelsLeft)) - 1.5, -1);
+            int rpHeight = (int)Math.Max(tool.lookAheadMax + 1.5, 1.0);
+            int rpHeight2 = (int)Math.Max(Math.Min(tool.lookAheadMin - 1.5, rpHeight - 1), -1.0);
 
             int grnPixelsLength = tool.rpWidth * (rpHeight - rpHeight2);
 
-            for (int j = 0; j < tool.numOfSections; j++)
+            for (int j = 0; j < tool.sections.Count - 1; j++)
             {
-                if (section[j].sectionState == btnStates.On)
+                if (j == 13)
                 {
-                    section[j].sectionOnRequest = true;
+
                 }
-                else if (section[j].sectionState == btnStates.Off)
+                if (tool.sections[j].sectionState == btnStates.On)
                 {
-                    section[j].sectionOnRequest = false;
-                    if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
-                    isSuperSectionAllowedOn &= section[j].mappingOffTimer > 1;
+                    tool.sections[j].sectionOnRequest = 2;
                 }
-                else if (section[j].sectionState == btnStates.Auto)
+                else if (tool.sections[j].sectionState == btnStates.Off)
+                {
+                    tool.sections[j].sectionOnRequest = 0;
+                    if (tool.sections[j].sectionOverlapTimer > 0) tool.sections[j].sectionOverlapTimer = 1;
+                    isSuperSectionAllowedOn &= tool.sections[j].mappingOffTimer > 1;
+                }
+                else if (tool.sections[j].sectionState == btnStates.Auto)
                 {
                     double speeddif = (tool.toolFarRightSpeed - tool.toolFarLeftSpeed) / tool.rpWidth;
 
-                    int start = section[j].rpSectionPosition - section[0].rpSectionPosition;
-                    int end = start + section[j].rpSectionWidth;
+                    int start = tool.sections[j].rpSectionPosition - tool.sections[0].rpSectionPosition;
+                    int end = start + tool.sections[j].rpSectionWidth;
 
-                    double Centersp = tool.toolFarLeftSpeed + speeddif * (start + section[j].rpSectionWidth / 2.0);
+                    double Centersp = tool.toolFarLeftSpeed + speeddif * (start + tool.sections[j].rpSectionWidth / 2.0);
 
-                    if (Centersp * 3.6 <= vehicle.slowSpeedCutoff)
+                    if (Centersp * 3.6 <= tool.slowSpeedCutoff)
                     {
-                        section[j].sectionOnRequest = false;
-                        if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
+                        tool.sections[j].sectionOnRequest = 0;
+                        if (tool.sections[j].sectionOverlapTimer > 0) tool.sections[j].sectionOverlapTimer = 1;
                         isSuperSectionAllowedOn = false;
                     }
                     else
@@ -487,51 +489,58 @@ namespace AgOpenGPS
 
                         int totalOn = 0;
                         int totalInBound = 0;
-
                         for (int pos = start; pos < end; pos++)
                         {
-                            int StartHeight = (int)Math.Round((tool.lookAheadDistanceOffPixelsLeft - (rpHeight2 + 1)) + (mOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
-                            int StopHeight = (int)Math.Round((tool.lookAheadDistanceOnPixelsLeft - rpHeight2) + (mOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
-                            int StartBound = (int)Math.Round((tool.lookAheadBoundaryOffPixelsLeft - (rpHeight2 + 1)) + (mBoundOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
-                            int StopBound = (int)Math.Round((tool.lookAheadBoundaryOnPixelsLeft - rpHeight2) + (mBoundOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int OffHeight = (int)Math.Round((tool.lookAheadDistanceOffPixelsLeft - (rpHeight2 + 1)) + (mOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int OnHeight = (int)Math.Round((tool.lookAheadDistanceOnPixelsLeft - rpHeight2) + (mOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int OffBound = (int)Math.Round((tool.lookAheadBoundaryOffPixelsLeft - (rpHeight2 + 1)) + (mBoundOff * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+                            int OnBound = (int)Math.Round((tool.lookAheadBoundaryOnPixelsLeft - rpHeight2) + (mBoundOn * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
                             int StopHydHeight = (int)Math.Round((vehicle.hydLiftLookAheadDistanceLeft - rpHeight2) + (mHyd * pos), MidpointRounding.AwayFromZero) * tool.rpWidth + pos;
+
+                            int startAddress = Math.Max(0, Math.Min(Math.Min(OnHeight, OffHeight), Math.Min(OffBound, OnBound)));
+                            int stopAddress = Math.Max(Math.Max(OnHeight, OffHeight), Math.Max(OffBound, OnBound));
+                            if (isToolInHeadland)
+                            {
+                                startAddress = pos;
+                                stopAddress = Math.Max(stopAddress, StopHydHeight);
+                            }
 
                             int taggedOn = 0;
                             int taggedOff = 0;
                             int taggedOutBound = 0;
                             int taggedInBound = 0;
 
-                            for (int a = isToolInHeadland ? pos : StartHeight; (isToolInHeadland ? a <= StopHydHeight : a <= StopHeight); a += tool.rpWidth)
+                            for (int a = startAddress; a <= stopAddress; a += tool.rpWidth)
                             {
-                                if (a >= 0 && a < grnPixelsLength)
+                                if (a >= 0 && a <= grnPixelsLength)
                                 {
                                     int Procent5 = grnPixels[a] % 5;
-                                    if (a >= StartHeight && a <= StartHeight + tool.rpWidth)
+                                    if (a >= OffHeight && a <= OffHeight + tool.rpWidth)
                                     {
                                         if (!(grnPixels[a] == 250 || grnPixels[a] == 245 || grnPixels[a] == 240 || grnPixels[a] == 235))
                                         {
                                             ++taggedOff;
                                         }
                                     }
-                                    if (a >= StopHeight - tool.rpWidth && a <= StopHeight)
+                                    if (a >= OnHeight - tool.rpWidth && a <= OnHeight)
                                     {
-                                        if (bnd.bndList.Count == 0 ? grnPixels[a] == 252 : (grnPixels[a] == 250 || grnPixels[a] == 245 || grnPixels[a] == 240 || grnPixels[a] == 235))
+                                        if (grnPixels[a] == 250 || grnPixels[a] == 245 || grnPixels[a] == 240 || grnPixels[a] == 235)
                                         {
                                             ++taggedOn;
                                         }
                                     }
 
 
-                                    if (a >= StartBound && a <= StartBound + tool.rpWidth)
+                                    if (a >= OffBound && a <= OffBound + tool.rpWidth)
                                     {
                                         if (Procent5 == 2 || Procent5 == 1)//when outside fence dont wait for sectionOverlapTimer
                                         {
                                             ++taggedOutBound;
                                         }
                                     }
-                                    if (a >= StopBound - tool.rpWidth && a <= StopBound)
+                                    if (a >= OnBound - tool.rpWidth && a <= OnBound)
                                     {
-                                        if (bnd.bndList.Count == 0 || Procent5 < 1 || Procent5 > 2)
+                                        if (Procent5 < 1 || Procent5 > 2)
                                         {
                                             ++taggedInBound;
                                         }
@@ -546,28 +555,31 @@ namespace AgOpenGPS
                                     }
                                 }
                             }
-                            if ((taggedOn > 0 && taggedOn >= taggedOff) || (taggedOff == 0 && section[j].sectionOnRequest))
+                            if ((taggedOn > 0 && (OnHeight < OffHeight ? (taggedOn > taggedOff) : (taggedOn >= taggedOff))) || (taggedOff == 0 && tool.sections[j].sectionOnRequest > 0))
                                 totalOn++;
-                            if (taggedInBound >= taggedOutBound)
+
+                            if (OnBound < OffBound ? (taggedInBound > taggedOutBound) : (taggedInBound >= taggedOutBound))
                                 totalInBound++;
                         }
 
-                        if (totalInBound == 0 || (double)totalInBound / section[j].rpSectionWidth < 1 - tool.boundOverlap)
+                        if (totalInBound == 0 || (double)totalInBound / tool.sections[j].rpSectionWidth < 1 - tool.boundOverlap)
                         {
-                            section[j].sectionOnRequest = false;
-                            if (section[j].sectionOverlapTimer > 0) section[j].sectionOverlapTimer = 1;
+                            tool.sections[j].sectionOnRequest = 0;
+                            if (tool.sections[j].sectionOverlapTimer > 0) tool.sections[j].sectionOverlapTimer = 1;
                         }
-                        else
-                            section[j].sectionOnRequest = totalOn > 0 && ((double)totalOn / section[j].rpSectionWidth >= 1 - tool.minOverlap * 0.01);
+                        else if ((totalOn > 0 && ((double)totalOn / tool.sections[j].rpSectionWidth >= 1 - tool.maxOverlap * 0.01)))
+                        {
+                            tool.sections[j].sectionOnRequest = 2;
+                        }
 
-                        isSuperSectionAllowedOn &= (section[j].mappingOnTimer < 2 && (section[j].mappingOffTimer > 1 || section[j].sectionOverlapTimer + section[j].mappingOffTimer > (section[j].sectionOnRequest ? 1 : 2))) || (section[j].sectionOnRequest && (section[j].isMappingOn || section[j].mappingOnTimer == 1 || HzTime * tool.lookAheadOnSetting < 1));
+                        isSuperSectionAllowedOn &= (tool.sections[j].mappingOnTimer < 2 && (tool.sections[j].mappingOffTimer > 1 || tool.sections[j].sectionOverlapTimer + tool.sections[j].mappingOffTimer > (tool.sections[j].sectionOnRequest > 0 ? 1 : 2))) || (tool.sections[j].sectionOnRequest > 0 && (tool.sections[j].isMappingOn || tool.sections[j].mappingOnTimer == 1 || HzTime * tool.lookAheadOnSetting < 1));
                     }
                 }
             }
-            section[tool.numOfSections].sectionOnRequest = isSuperSectionAllowedOn;
+            tool.sections[tool.sections.Count - 1].sectionOnRequest = isSuperSectionAllowedOn ? 2 : 0;
 
             tram.controlByte = 0;
-            if (tram.displayMode != 0 && isTramOnBackBuffer)
+            if (tram.displayMode != 0 && tram.isTramOnBackBuffer)
             {
                 int offset = 0;
                 if (Needsupdate)
@@ -593,7 +605,7 @@ namespace AgOpenGPS
 
             if (!Needsupdate)//set hydraulics based on tool in headland or not
             {
-                if (vehicle.isHydLiftOn && pn.avgSpeed > 0.2 && autoBtnState == btnStates.Auto)
+                if (vehicle.isHydLiftOn && mc.avgSpeed > 0.2 && autoBtnState == btnStates.Auto)
                 {
                     if (totalHead > 0 && taggedHead >= totalHead)
                     {
@@ -615,18 +627,9 @@ namespace AgOpenGPS
                     }
                 }
             }
-
-            //Checks the workswitch if required
-            mc.CheckWorkAndSteerSwitch();
-
-            //Determine if sections want to be on or off
-            ProcessSectionOnOffRequests();
-
-            //send the byte out to section machines
-            BuildMachineByte();
         }
 
-        private void UpdateBackBuffer(int rpHeight, int rpHeight2, bool tramOnly, bool Test, double X = double.NaN, double Y = double.NaN)
+        private void UpdateBackBuffer(int rpHeight, int rpHeight2, bool tramOnly, bool Test)
         {
             oglBack.MakeCurrent();
 
@@ -642,9 +645,9 @@ namespace AgOpenGPS
                 GL.Rotate(glm.toDegrees(toolPos.heading), 0, 0, 1);
 
                 //translate to that spot in the world
-                GL.Translate(-toolPos.easting - Math.Cos(toolPos.heading) * tool.toolOffset, -toolPos.northing - Math.Sin(toolPos.heading) * tool.toolOffset, 0);
-
-                GL.Color3((byte)0, (byte)252, (byte)0);
+                GL.Translate(-toolPos.easting - Math.Cos(toolPos.heading) * tool.toolOffset, -toolPos.northing + Math.Sin(toolPos.heading) * tool.toolOffset, 0);
+                
+                GL.Color3((byte)0, (byte)(bnd.bndList.Count == 0 ? 250 : 252), (byte)0);
                 GL.Begin(PrimitiveType.TriangleStrip);
 
                 GL.Vertex3(toolPos.easting - 200, toolPos.northing - 200, 0);
@@ -657,14 +660,15 @@ namespace AgOpenGPS
             else
             {
                 //translate to that spot in the world
-                GL.Translate(-X, -Y, 0);
+                GL.Translate(-rpHeight, -rpHeight2, 0);
 
-                GL.Color3((byte)0, (byte)252, (byte)0);
+                GL.Color3((byte)0, (byte)(bnd.bndList.Count == 0 ? 250 : 252), (byte)0);
                 GL.Begin(PrimitiveType.TriangleStrip);
-                GL.Vertex3(X - 200, Y - 200, 0);
-                GL.Vertex3(X + 200, Y - 200, 0);
-                GL.Vertex3(X - 200, Y + 200, 0);
-                GL.Vertex3(X + 200, Y + 200, 0);
+                GL.Vertex3(rpHeight - 100, rpHeight2 - 100, 0);
+                GL.Vertex3(rpHeight - 100, rpHeight2 + 100, 0);
+                GL.Vertex3(rpHeight + 100, rpHeight2 - 100, 0);
+                GL.Vertex3(rpHeight + 100, rpHeight2 + 100, 0);
+
                 GL.End();
             }
 
@@ -707,7 +711,7 @@ namespace AgOpenGPS
             GL.BlendEquation(BlendEquationMode.FuncReverseSubtract);
 
             //draw 245 green for the tram tracks
-            if (isTramOnBackBuffer && tram.displayMode != 0)
+            if (tram.isTramOnBackBuffer && tram.displayMode != 0)
             {
                 GL.Color4((byte)0, (byte)5, (byte)0, (byte)0);
                 GL.LineWidth(8);
@@ -728,27 +732,27 @@ namespace AgOpenGPS
                     }
                 }
 
-                for (int j = 0; j < tool.numSuperSection; j++)
+                for (int j = 0; j < tool.sections.Count; j++)
                 {
-                    int patchCount = section[j].triangleList.Count;
+                    int patchCount = tool.sections[j].triangleList.Count;
                     // the follow up to sections patches
-                    if (section[j].isMappingOn && patchCount > 3)
+                    if (tool.sections[j].isMappingOn && patchCount > 3)
                     {
                         //draw the triangle in each triangle strip
                         GL.Begin(PrimitiveType.TriangleStrip);
 
                         for (int k = 2; k < patchCount; k++)
                         {
-                            GL.Vertex3(section[j].triangleList[k].easting, section[j].triangleList[k].northing, 0);
+                            GL.Vertex3(tool.sections[j].triangleList[k].easting, tool.sections[j].triangleList[k].northing, 0);
                         }
-                        GL.Vertex3(section[j].leftPoint.easting, section[j].leftPoint.northing, 0);
-                        GL.Vertex3(section[j].rightPoint.easting, section[j].rightPoint.northing, 0);
+                        GL.Vertex3(tool.sections[j].leftPoint.easting - Math.Sin(toolPos.heading) * 0.1, tool.sections[j].leftPoint.northing - Math.Cos(toolPos.heading) * 0.1, 0);
+                        GL.Vertex3(tool.sections[j].rightPoint.easting - Math.Sin(toolPos.heading) * 0.1, tool.sections[j].rightPoint.northing - Math.Cos(toolPos.heading) * 0.1, 0);
 
                         GL.End();
                     }
                 }
             }
-            
+
             //finish it up - we need to read the ram of video card
             GL.Flush();
             if (!Test)
@@ -766,13 +770,16 @@ namespace AgOpenGPS
             //tram           = -5 max 3x overlap
             //section        = -20 max 11x overlap
 
-            if (Debugger.IsAttached && false)
+            if (Debugger.IsAttached)
             {
-                //Paint to context for troubleshooting
-                oglBack.BringToFront();
-                oglBack.SwapBuffers();
+                if (!Debugger.IsAttached || false)
+                {
+                    //Paint to context for troubleshooting
+                    oglBack.BringToFront();
+                    oglBack.SwapBuffers();
+                }
+                else oglBack.SendToBack();
             }
-            else oglBack.SendToBack();
         }
 
         private void oglZoom_Load(object sender, EventArgs e)
@@ -805,7 +812,7 @@ namespace AgOpenGPS
             {
                 if (Debugger.IsAttached && false)
                 {
-                    double total = grnPixels.Length;
+                    double total = 0;
                     double outside = 0;
                     double ininner = 0;
                     double infield = 0;
@@ -826,13 +833,13 @@ namespace AgOpenGPS
                     double section11x = 0;
                     double unknown = 0;
 
-                    for (double X = minFieldX; X <= maxFieldX + 25; X += 50)
+                    for (int X = (int)(minFieldX - 1); X <= maxFieldX + 25; X += 50)
                     {
-                        for (double Y = minFieldY; Y <= maxFieldY + 15; Y+=30)
+                        for (int Y = (int)(minFieldY - 1); Y <= maxFieldY + 15; Y += 30)
                         {
-                            UpdateBackBuffer(0, 0, false, true, X, Y);
+                            UpdateBackBuffer(X, Y, false, true);
 
-                            total += grnPixels.Length;
+                            total += grnPixels.Length - 1;
                             for (int a = 0; a < grnPixels.Length; a++)
                             {
                                 int dfdf = grnPixels[a];
@@ -1363,7 +1370,7 @@ namespace AgOpenGPS
             GL.Vertex2(wiid + 30, 0);
             GL.End();
 
-            GL.Rotate(ahrs.imuRoll, 0.0f, 0.0f, 1.0f);
+            GL.Rotate(mc.imuRoll, 0.0f, 0.0f, 1.0f);
 
             GL.Color3(0.74f, 0.74f, 0.14f);
             GL.LineWidth(2);
@@ -1375,7 +1382,7 @@ namespace AgOpenGPS
             GL.Vertex2(wiid - 10, 15);
             GL.End();
 
-            string head = ahrs.imuRoll.ToString("0.0");
+            string head = mc.imuRoll.ToString("0.0");
             int center = -(int)(((head.Length) * 6));
 
             font.DrawText(center, 0, head, 0.8);
@@ -1529,12 +1536,12 @@ namespace AgOpenGPS
 
             font.DrawText(center+10, 20, (fixHeading * 57.2957795).ToString("0.0"), 1);
 
-            if (ahrs.imuHeading != 99999)
+            if (mc.imuHeading != 99999)
             {
                 if (!isSuperSlow) GL.Color3(0.98f, 0.972f, 0.59903f);
                 else GL.Color3(0.298f, 0.972f, 0.99903f);
 
-                font.DrawText(center, 80, "IMU:" + ahrs.imuHeading.ToString("0.0"), 0.8);
+                font.DrawText(center, 80, "IMU:" + mc.imuHeading.ToString("0.0"), 0.8);
                 //font.DrawText(center, 110, "R:" + ahrs.imuRoll.ToString("0.0"), 0.8);
                 //font.DrawText(center, 135, "Y:" + ahrs.imuYawRate.ToString("0.0"), 0.8);
             }
@@ -1667,11 +1674,11 @@ namespace AgOpenGPS
             GL.BindTexture(TextureTarget.Texture2D, texture[8]);        // Select Our Texture
 
             double angle = 0;
-            double aveSpd = Math.Abs(pn.avgSpeed * KMHToUser);
+            double aveSpd = Math.Abs(mc.avgSpeed * KMHToUser);
             if (aveSpd > 20) aveSpd = 20;
             angle = (aveSpd - 10) * 15;
 
-            if (pn.avgSpeed > -0.1) GL.Color3(0.850f, 0.950f, 0.30f);
+            if (mc.avgSpeed > -0.1) GL.Color3(0.850f, 0.950f, 0.30f);
             else GL.Color3(0.952f, 0.0f, 0.0f);
 
             GL.Rotate(angle, 0, 0, 1);
@@ -1697,7 +1704,7 @@ namespace AgOpenGPS
         private void DrawAge()
         {
             GL.Color3(0.9752f, 0.52f, 0.0f);
-            font.DrawText(oglMain.Width / 4, 60, "Age:" + pn.age.ToString("0.0"), 1.5);
+            font.DrawText(oglMain.Width / 4, 60, "Age:" + mc.age.ToString("0.0"), 1.5);
         }
 
         private void CalcFrustum()

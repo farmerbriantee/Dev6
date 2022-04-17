@@ -77,21 +77,13 @@ namespace AgOpenGPS
             {
                 if (lvVehicles.SelectedItems.Count > 0)
                 {
-                    DialogResult result3 = MessageBox.Show(
-                        "Load: " + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML",
-                        gStr.gsSaveAndReturn,
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button2);
+                    DialogResult result3 = new FormHelp("Load: " + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML", gStr.gsSaveAndReturn, true).ShowDialog(this);
                     if (result3 == DialogResult.Yes)
                     {
                         SettingsIO.ImportAll(mf.vehiclesDirectory + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML");
                         mf.vehicleFileName = lvVehicles.SelectedItems[0].SubItems[0].Text;
                         Properties.Vehicle.Default.setVehicle_vehicleName = mf.vehicleFileName;
                         Properties.Vehicle.Default.Save();
-
-                        mf.vehicle = new CVehicle(mf);
-                        mf.tool = new CTool(mf);
 
                         //reset AOG
                         mf.LoadSettings();
@@ -199,12 +191,7 @@ namespace AgOpenGPS
         {
             if (lvVehicles.SelectedItems.Count > 0)
             {
-                DialogResult result3 = MessageBox.Show(
-                    "Overwrite: " + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML",
-                    gStr.gsSaveAndReturn,
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2);
+                DialogResult result3 = new FormHelp("Overwrite: " + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML", gStr.gsSaveAndReturn, true).ShowDialog(this);
                 if (result3 == DialogResult.Yes)
                 {
                     SettingsIO.ExportAll(mf.vehiclesDirectory + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML");
@@ -217,12 +204,7 @@ namespace AgOpenGPS
         {
             if (lvVehicles.SelectedItems.Count > 0)
             {
-                DialogResult result3 = MessageBox.Show(
-                "Delete: " + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML",
-                gStr.gsSaveAndReturn,
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Error,
-                MessageBoxDefaultButton.Button2);
+                DialogResult result3 = new FormHelp("Delete: " + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML", gStr.gsSaveAndReturn, true).ShowDialog(this);
                 if (result3 == DialogResult.Yes)
                 {
                     File.Delete(mf.vehiclesDirectory + lvVehicles.SelectedItems[0].SubItems[0].Text + ".XML");
@@ -272,97 +254,97 @@ namespace AgOpenGPS
 
         private void chkDisplaySky_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplaySky, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplaySky, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayDayNight_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayDayNight, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayDayNight, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayLightbar_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayLightbar, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayLightbar, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayPolygons_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayPolygons, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayPolygons, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayGrid_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayGrid, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayGrid, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayStartFullScreen_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayStartFullScreen, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayStartFullScreen, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayKeyboard_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayKeyboard, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayKeyboard, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayLogNMEA_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayLogNMEA, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayLogNMEA, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplaySpeedo_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplaySpeedo, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplaySpeedo, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayExtraGuides_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayExtraGuides, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayExtraGuides, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkDisplayFloor_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkDisplayFloor, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkDisplayFloor, gStr.gsHelp).ShowDialog(this);
         }
 
         private void rbtnDisplayMetric_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_rbtnDisplayMetric, gStr.gsHelp);
+            new FormHelp(gStr.hc_rbtnDisplayMetric, gStr.gsHelp).ShowDialog(this);
         }
 
         private void rbtnDisplayImperial_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_rbtnDisplayImperial, gStr.gsHelp);
+            new FormHelp(gStr.hc_rbtnDisplayImperial, gStr.gsHelp).ShowDialog(this);
         }
 
         private void lvVehicles_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_ListViewVehicles, gStr.gsHelp);
+            new FormHelp(gStr.hc_ListViewVehicles, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnVehicleLoad_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_btnVehicleLoad, gStr.gsHelp);
+            new FormHelp(gStr.hc_btnVehicleLoad, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnVehicleSaveAs_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_btnVehicleSaveAs, gStr.gsHelp);
+            new FormHelp(gStr.hc_btnVehicleSaveAs, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnVehicleDelete_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_btnVehicleDelete, gStr.gsHelp);
+            new FormHelp(gStr.hc_btnVehicleDelete, gStr.gsHelp).ShowDialog(this);
         }
 
         private void tboxVehicleNameSave_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_tboxVehicleNameSave, gStr.gsHelp);
+            new FormHelp(gStr.hc_tboxVehicleNameSave, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnVehicleSave_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_btnVehicleSave, gStr.gsHelp);
+            new FormHelp(gStr.hc_btnVehicleSave, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

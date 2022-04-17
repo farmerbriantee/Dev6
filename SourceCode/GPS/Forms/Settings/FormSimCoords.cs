@@ -40,15 +40,15 @@ namespace AgOpenGPS
                 Close();
             }
 
-            mf.pn.latStart = (double)nudLatitude.Value;
-            mf.pn.lonStart = (double)nudLongitude.Value;
+            mf.worldManager.latStart = (double)nudLatitude.Value;
+            mf.worldManager.lonStart = (double)nudLongitude.Value;
 
-            mf.pn.SetLocalMetersPerDegree();
+            mf.worldManager.SetLocalMetersPerDegree();
 
             mf.sim.resetSim();
 
-            Properties.Settings.Default.setGPS_SimLatitude = mf.pn.latStart;
-            Properties.Settings.Default.setGPS_SimLongitude = mf.pn.lonStart;
+            Properties.Settings.Default.setGPS_SimLatitude = mf.worldManager.latStart;
+            Properties.Settings.Default.setGPS_SimLongitude = mf.worldManager.lonStart;
             Properties.Settings.Default.Save();
             Close();
         }

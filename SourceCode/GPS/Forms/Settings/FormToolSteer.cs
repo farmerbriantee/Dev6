@@ -23,20 +23,20 @@ namespace AgOpenGPS
 
         private void FormSteer_Load(object sender, EventArgs e)
         {
-            AntennaHeight = Properties.Vehicle.Default.setTool_antennaHeight;
+            AntennaHeight = mf.tool.AntennaHeight;
             nudToolAntennaHeight.Text = (AntennaHeight * mf.mToUser).ToString("0");
 
-            AntennaOffset = Properties.Vehicle.Default.setTool_antennaOffset;
+            AntennaOffset = mf.tool.AntennaOffset;
             nudToolAntennaOffset.Text = (AntennaOffset * mf.mToUser).ToString("0");
 
-            cboxToolOnlyGPS.Checked = Properties.Vehicle.Default.setTool_isToolSteering;
+            cboxToolOnlyGPS.Checked = mf.tool.isSteering;
 
             //WAS Zero, CPD
             hsbarWasOffset.ValueChanged -= hsbarSteerAngleSensorZero_ValueChanged;
             hsbarCountsPerDegree.ValueChanged -= hsbarCountsPerDegree_ValueChanged;
 
-            hsbarWasOffset.Value = Properties.Vehicle.Default.setTool_wasOffset;
-            hsbarCountsPerDegree.Value = Properties.Vehicle.Default.setTool_wasCounts;
+            hsbarWasOffset.Value = Properties.Vehicle.Default.Tool_wasOffset;
+            hsbarCountsPerDegree.Value = Properties.Vehicle.Default.Tool_wasCounts;
 
             lblCountsPerDegree.Text = hsbarCountsPerDegree.Value.ToString();
 
@@ -48,10 +48,10 @@ namespace AgOpenGPS
             hsbarMinPWM.ValueChanged -= hsbarMinPWM_ValueChanged;
             hsbarProportionalGain.ValueChanged -= hsbarProportionalGain_ValueChanged;
 
-            hsbarMinPWM.Value = Properties.Vehicle.Default.setTool_MinPWM; ;
+            hsbarMinPWM.Value = Properties.Vehicle.Default.Tool_MinPWM;
             lblMinPWM.Text = hsbarMinPWM.Value.ToString();
 
-            hsbarProportionalGain.Value = Properties.Vehicle.Default.setTool_P; 
+            hsbarProportionalGain.Value = Properties.Vehicle.Default.Tool_P; 
             lblProportionalGain.Text = hsbarProportionalGain.Value.ToString();
 
             hsbarMinPWM.ValueChanged += hsbarMinPWM_ValueChanged;
@@ -62,10 +62,10 @@ namespace AgOpenGPS
             hsbarWindupLimit.ValueChanged -= hsbarWindupLimit_ValueChanged;
             hsbarHighSteerPWM.ValueChanged -= hsbarHighSteerPWM_ValueChanged;
 
-            hsbarWindupLimit.Value = Properties.Vehicle.Default.setTool_windupLimit;
+            hsbarWindupLimit.Value = Properties.Vehicle.Default.Tool_windupLimit;
             lblWindupLimit.Text = hsbarWindupLimit.Value.ToString();
 
-            hsbarHighSteerPWM.Value = Properties.Vehicle.Default.setTool_HighPWM;
+            hsbarHighSteerPWM.Value = Properties.Vehicle.Default.Tool_HighPWM;
             lblHighSteerPWM.Text = hsbarHighSteerPWM.Value.ToString();
 
             hsbarWindupLimit.ValueChanged += hsbarWindupLimit_ValueChanged;
@@ -76,13 +76,13 @@ namespace AgOpenGPS
             //hsbarSideHillComp.ValueChanged -= hsbarSideHillComp_ValueChanged;
             hsbarIntegral.ValueChanged -= hsbarIntegral_ValueChanged;
 
-            hsbarMaxSteerAngle.Value = (Int16)Properties.Vehicle.Default.setTool_maxSteerAngle;
+            hsbarMaxSteerAngle.Value = (Int16)Properties.Vehicle.Default.Tool_maxSteerAngle;
             lblMaxSteerAngle.Text = hsbarMaxSteerAngle.Value.ToString();
 
             //hsbarSideHillComp.Value = (int)(Properties.Vehicle.Default.setTool_sideHillComp);
             //lblSideHillComp.Text = hsbarSideHillComp.Value.ToString();
 
-            hsbarIntegral.Value = (int)(Properties.Vehicle.Default.setTool_I);
+            hsbarIntegral.Value = (int)(Properties.Vehicle.Default.Tool_I);
             lblPureIntegral.Text = hsbarIntegral.Value.ToString();
 
             hsbarMaxSteerAngle.ValueChanged += hsbarMaxSteerAngle_ValueChanged;
@@ -150,17 +150,17 @@ namespace AgOpenGPS
             if (toSend && counter > 4)
             {
                 //Fixx
-                Properties.Vehicle.Default.setTool_maxSteerAngle = mf.p_232.pgn[mf.p_232.maxSteer] = unchecked((byte)hsbarMaxSteerAngle.Value);
-                Properties.Vehicle.Default.setTool_wasCounts = mf.p_232.pgn[mf.p_232.wasCounts] = unchecked((byte)hsbarCountsPerDegree.Value);
+                Properties.Vehicle.Default.Tool_maxSteerAngle = mf.p_232.pgn[mf.p_232.maxSteer] = unchecked((byte)hsbarMaxSteerAngle.Value);
+                Properties.Vehicle.Default.Tool_wasCounts = mf.p_232.pgn[mf.p_232.wasCounts] = unchecked((byte)hsbarCountsPerDegree.Value);
 
-                Properties.Vehicle.Default.setTool_wasOffset = mf.p_232.pgn[mf.p_232.wasOffset] = unchecked((byte)hsbarWasOffset.Value);
+                Properties.Vehicle.Default.Tool_wasOffset = mf.p_232.pgn[mf.p_232.wasOffset] = unchecked((byte)hsbarWasOffset.Value);
 
-                Properties.Vehicle.Default.setTool_HighPWM = mf.p_232.pgn[mf.p_232.highPWM] = unchecked((byte)hsbarHighSteerPWM.Value);
-                Properties.Vehicle.Default.setTool_windupLimit = mf.p_232.pgn[mf.p_232.windup] = unchecked((byte)hsbarWindupLimit.Value);
-                Properties.Vehicle.Default.setTool_P = mf.p_232.pgn[mf.p_232.P] = unchecked((byte)hsbarProportionalGain.Value);
-                Properties.Vehicle.Default.setTool_MinPWM = mf.p_232.pgn[mf.p_232.minPWM] = unchecked((byte)hsbarMinPWM.Value);
+                Properties.Vehicle.Default.Tool_HighPWM = mf.p_232.pgn[mf.p_232.highPWM] = unchecked((byte)hsbarHighSteerPWM.Value);
+                Properties.Vehicle.Default.Tool_windupLimit = mf.p_232.pgn[mf.p_232.windup] = unchecked((byte)hsbarWindupLimit.Value);
+                Properties.Vehicle.Default.Tool_P = mf.p_232.pgn[mf.p_232.P] = unchecked((byte)hsbarProportionalGain.Value);
+                Properties.Vehicle.Default.Tool_MinPWM = mf.p_232.pgn[mf.p_232.minPWM] = unchecked((byte)hsbarMinPWM.Value);
                 
-                Properties.Vehicle.Default.setTool_I = mf.p_232.pgn[mf.p_232.I] = unchecked((byte)hsbarIntegral.Value);
+                Properties.Vehicle.Default.Tool_I = mf.p_232.pgn[mf.p_232.I] = unchecked((byte)hsbarIntegral.Value);
 
                 mf.SendPgnToLoop(mf.p_232.pgn);
                 toSend = false;
@@ -174,8 +174,8 @@ namespace AgOpenGPS
 
         private void FormSteer_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Properties.Vehicle.Default.setTool_antennaHeight = mf.tool.toolAntennaHeight = AntennaHeight;
-            Properties.Vehicle.Default.setTool_antennaOffset = mf.tool.toolAntennaOffset = AntennaOffset;
+            Properties.Vehicle.Default.Tool_antennaHeight = mf.tool.AntennaHeight = AntennaHeight;
+            Properties.Vehicle.Default.Tool_antennaOffset = mf.tool.AntennaOffset = AntennaOffset;
 
 
             mf.vehicle.isInFreeDriveMode = false;
@@ -376,181 +376,106 @@ namespace AgOpenGPS
 
         private void cboxToolOnlyGPS_Click(object sender, EventArgs e)
         {
-            Properties.Vehicle.Default.setTool_isToolSteering = mf.pn.isToolSteering = cboxToolOnlyGPS.Checked;
+            Properties.Vehicle.Default.Tool_isTooLSteering = mf.tool.isSteering = cboxToolOnlyGPS.Checked;
             Properties.Settings.Default.Save();
         }
 
         #region Help
 
-        private void btnZeroWAS_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_btnZeroWAS, gStr.gsHelp);
-        }
-
         private void hsbarWasOffset_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarWasOffset, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarWasOffset, gStr.gsHelp).ShowDialog(this);
         }
 
         private void hsbarCountsPerDegree_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarCountsPerDegree, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarCountsPerDegree, gStr.gsHelp).ShowDialog(this);
 
-        }
-
-        private void hsbarAckerman_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_hsbarAckerman, gStr.gsHelp);
         }
 
         private void hsbarMaxSteerAngle_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarMaxSteerAngle, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarMaxSteerAngle, gStr.gsHelp).ShowDialog(this);
         }
 
         private void hsbarProportionalGain_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarProportionalGain, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarProportionalGain, gStr.gsHelp).ShowDialog(this);
         }
 
         private void hsbarHighSteerPWM_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarHighSteerPWM, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarHighSteerPWM, gStr.gsHelp).ShowDialog(this);
         }
 
         private void hsbarLowSteerPWM_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarLowSteerPWM, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarLowSteerPWM, gStr.gsHelp).ShowDialog(this);
         }
 
         private void hsbarMinPWM_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarMinPWM, gStr.gsHelp);
-        }
-
-        private void hsbarStanleyGain_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_hsbarStanleyGain, gStr.gsHelp);
-        }
-
-        private void hsbarHeadingErrorGain_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_hsbarHeadingErrorGain, gStr.gsHelp);
-        }
-
-        private void hsbarIntegral_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_hsbarIntegral, gStr.gsHelp);
-        }
-
-        private void hsbarLookAhead_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_hsbarLookAhead, gStr.gsHelp);
-        }
-
-        private void hsbarLookAheadMult_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_hsbarLookAheadMult, gStr.gsHelp);
-        }
-
-        private void hsbarSideHillComp_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_hsbarSideHillComp, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarMinPWM, gStr.gsHelp).ShowDialog(this);
         }
 
         private void hsbarIntegralPurePursuit_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_hsbarIntegralPurePursuit, gStr.gsHelp);
+            new FormHelp(gStr.h_hsbarIntegralPurePursuit, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnFreeDrive_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_btnFreeDrive, gStr.gsHelp);
+            new FormHelp(gStr.h_btnFreeDrive, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnSteerAngleDown_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_btnSteerAngleDown, gStr.gsHelp);
+            new FormHelp(gStr.h_btnSteerAngleDown, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnSteerAngleUp_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_btnSteerAngleUp, gStr.gsHelp);
+            new FormHelp(gStr.h_btnSteerAngleUp, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnFreeDriveZero_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.h_btnFreeDriveZero, gStr.gsHelp);
-        }
-
-        private void btnStartSA_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.h_btnStartSA, gStr.gsHelp);
+            new FormHelp(gStr.h_btnFreeDriveZero, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkInvertWAS_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkInvertWAS, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkInvertWAS, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkInvertSteer_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkInvertSteer, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkInvertSteer, gStr.gsHelp).ShowDialog(this);
         }
 
         private void chkSteerInvertRelays_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_chkSteerInvertRelays, gStr.gsHelp);
+            new FormHelp(gStr.hc_chkSteerInvertRelays, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxDanfoss_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxDanfoss, gStr.gsHelp);
-        }
-
-        private void cboxEncoder_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_cboxEncoder, gStr.gsHelp);
-        }
-
-        private void cboxPressureSensor_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_cboxPressureSensor, gStr.gsHelp);
-        }
-
-        private void cboxCurrentSensor_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_cboxCurrentSensor, gStr.gsHelp);
-        }
-
-        private void nudMaxCounts_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_nudMaxCounts, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxDanfoss, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxMotorDrive_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxMotorDrive, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxMotorDrive, gStr.gsHelp).ShowDialog(this);
         }
 
         private void cboxConv_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxConv, gStr.gsHelp);
-        }
-
-        private void cboxSteerEnable_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_cboxSteerEnable, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxConv, gStr.gsHelp).ShowDialog(this);
         }
 
         private void pboxSendSteer_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_pboxSendSteer, gStr.gsHelp);
-        }
-
-        private void btnSendSteerConfigPGN_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_btnSendSteerConfigPGN, gStr.gsHelp);
+            new FormHelp(gStr.hc_pboxSendSteer, gStr.gsHelp).ShowDialog(this);
         }
 
         #endregion

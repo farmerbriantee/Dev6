@@ -36,18 +36,6 @@ namespace AgOpenGPS
             PanicStopSpeed = Properties.Settings.Default.setVehicle_panicStopSpeed;
             nudPanicStopSpeed.Text = (PanicStopSpeed * mf.KMHToUser).ToString("0.0");
 
-            cboxAutoSteerAuto.Checked = Properties.Settings.Default.setAS_isAutoSteerAutoOn;
-            if (Properties.Settings.Default.setAS_isAutoSteerAutoOn)
-            {
-                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOn;
-                cboxAutoSteerAuto.Text = "Remote";
-            }
-            else
-            {
-                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOff;
-                cboxAutoSteerAuto.Text = gStr.gsManual;
-            }
-
             label20.Text = mf.unitsInCm;
             label79.Text = mf.unitsFtM;
             label102.Text = mf.unitsInCm;
@@ -55,30 +43,14 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            Properties.Settings.Default.setAS_isAutoSteerAutoOn = mf.ahrs.isAutoSteerAuto = cboxAutoSteerAuto.Checked;
-            mf.SetAutoSteerText();
             Properties.Settings.Default.setDisplay_lightbarCmPerPixel = mf.lightbarCmPerPixel = lightbarCmPerPixel;
             Properties.Settings.Default.setDisplay_lineWidth = mf.gyd.lineWidth = lineWidth;
             Properties.Settings.Default.setAB_lineLength = mf.gyd.abLength = lineLength;
             Properties.Settings.Default.setAS_snapDistance = snapDistance;
             Properties.Settings.Default.setAS_guidanceLookAheadTime = mf.guidanceLookAheadTime = lookAheadTime;
-            Properties.Settings.Default.setVehicle_panicStopSpeed = mf.pn.panicStopSpeed = PanicStopSpeed;
+            Properties.Settings.Default.setVehicle_panicStopSpeed = mf.mc.panicStopSpeed = PanicStopSpeed;
 
             Properties.Settings.Default.Save();
-        }
-
-        private void cboxAutoSteerAuto_Click(object sender, EventArgs e)
-        {
-            if (cboxAutoSteerAuto.Checked)
-            {
-                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOn;
-                cboxAutoSteerAuto.Text = "Remote";
-            }
-            else
-            {
-                cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOff;
-                cboxAutoSteerAuto.Text = gStr.gsManual;
-            }
         }
 
         private void nudLightbarCmPerPixel_Click(object sender, EventArgs e)
@@ -111,34 +83,29 @@ namespace AgOpenGPS
             mf.KeypadToButton(ref nudPanicStopSpeed, ref PanicStopSpeed, 0.0, 100.0, 1, mf.KMHToUser, mf.userToKMH);
         }
 
-        private void cboxAutoSteerAuto_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            MessageBox.Show(gStr.hc_cboxAutoSteerAuto, gStr.gsHelp);
-        }
-
         private void nudLightbarCmPerPixel_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudLightbarCmPerPixel, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudLightbarCmPerPixel, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudABLength_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudABLength, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudABLength, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudLineWidth_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudLineWidth, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudLineWidth, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudSnapDistance_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudSnapDistance, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudSnapDistance, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudGuidanceLookAhead_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudGuidanceLookAhead, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudGuidanceLookAhead, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

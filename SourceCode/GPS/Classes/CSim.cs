@@ -31,20 +31,20 @@ namespace AgOpenGPS
             heading = Math.Atan2(frontWheel.easting, frontWheel.northing);
 
             bool VehicleGPS = true;
-            bool ToolGPS = mf.pn.isToolSteering;
+            bool ToolGPS = mf.tool.isSteering;
 
             if (VehicleGPS)
             {
                 mf.vehicleGPSWatchdog = 0;
                 if (mf.toolGPSWatchdog < 20) mf.toolGPSWatchdog++;
 
-                mf.pn.fix.easting = easting + (Math.Sin(heading) * mf.vehicle.antennaPivot);
-                mf.pn.fix.northing = northing + (Math.Cos(heading) * mf.vehicle.antennaPivot);
+                mf.mc.fix.easting = easting + (Math.Sin(heading) * mf.vehicle.antennaPivot);
+                mf.mc.fix.northing = northing + (Math.Cos(heading) * mf.vehicle.antennaPivot);
 
-                mf.pn.ConvertLocalToWGS84(mf.pn.fix.northing, mf.pn.fix.easting, out mf.pn.latitude, out mf.pn.longitude);
+                mf.worldManager.ConvertLocalToWGS84(mf.mc.fix.northing, mf.mc.fix.easting, out mf.mc.latitude, out mf.mc.longitude);
 
-                mf.pn.headingTrue = mf.pn.headingTrueDual = glm.toDegrees(heading);
-                if (mf.ahrs.isDualAsIMU) mf.pn.headingTrueDual = double.MaxValue;
+                mf.mc.headingTrue = mf.mc.headingTrueDual = glm.toDegrees(heading);
+                if (mf.mc.isDualAsIMU) mf.mc.headingTrueDual = double.MaxValue;
             }
 
             if (ToolGPS)
@@ -58,23 +58,23 @@ namespace AgOpenGPS
                 {
                     if (mf.tool.isToolTrailing)
                     {
-                        mf.pn.fixTool.easting = easting + (Math.Sin(heading) * (mf.tool.hitchLength + mf.tool.toolTrailingHitchLength)) + (Math.Cos(heading) * shiftpos);
-                        mf.pn.fixTool.northing = northing + (Math.Cos(heading) * (mf.tool.hitchLength + mf.tool.toolTrailingHitchLength)) - (Math.Sin(heading) * shiftpos);
+                        mf.mc.fixTool.easting = easting + (Math.Sin(heading) * (mf.tool.hitchLength + mf.tool.toolTrailingHitchLength)) + (Math.Cos(heading) * shiftpos);
+                        mf.mc.fixTool.northing = northing + (Math.Cos(heading) * (mf.tool.hitchLength + mf.tool.toolTrailingHitchLength)) - (Math.Sin(heading) * shiftpos);
                     }
                     else
                     {
-                        mf.pn.fixTool.easting = easting + (Math.Sin(heading) * mf.tool.hitchLength) + (Math.Cos(heading) * shiftpos);
-                        mf.pn.fixTool.northing = northing + (Math.Cos(heading) * mf.tool.hitchLength) - (Math.Sin(heading) * shiftpos);
+                        mf.mc.fixTool.easting = easting + (Math.Sin(heading) * mf.tool.hitchLength) + (Math.Cos(heading) * shiftpos);
+                        mf.mc.fixTool.northing = northing + (Math.Cos(heading) * mf.tool.hitchLength) - (Math.Sin(heading) * shiftpos);
                     }
                 }
                 else
                 {
-                    mf.pn.fixTool.easting = easting;
-                    mf.pn.fixTool.northing = northing;
+                    mf.mc.fixTool.easting = easting;
+                    mf.mc.fixTool.northing = northing;
                 }
             
-                mf.pn.headingTrueDualTool = glm.toDegrees(heading);
-                mf.pn.ConvertLocalToWGS84(mf.pn.fixTool.northing, mf.pn.fixTool.easting, out mf.pn.latitudeTool, out mf.pn.longitudeTool);
+                mf.mc.headingTrueDualTool = glm.toDegrees(heading);
+                mf.worldManager.ConvertLocalToWGS84(mf.mc.fixTool.northing, mf.mc.fixTool.easting, out mf.mc.latitudeTool, out mf.mc.longitudeTool);
             }
 
             mf.sentenceCounter = 0;
@@ -87,8 +87,8 @@ namespace AgOpenGPS
             northing = 0;
             heading = 0;
             
-            mf.pn.latitude = mf.pn.latStart;
-            mf.pn.longitude = mf.pn.lonStart;
+            mf.mc.latitude = mf.worldManager.latStart;
+            mf.mc.longitude = mf.worldManager.lonStart;
         }
     }
 }

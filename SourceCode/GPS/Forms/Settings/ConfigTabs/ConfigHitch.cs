@@ -17,14 +17,14 @@ namespace AgOpenGPS
 
         private void ConfigHitch_Load(object sender, EventArgs e)
         {
-            drawbarLength = Math.Abs(Properties.Vehicle.Default.setVehicle_hitchLength);
+            drawbarLength = Math.Abs(mf.tool.hitchLength);
             nudDrawbarLength.Text = (drawbarLength * mf.mToUser).ToString("0");
-            trailingHitchLength = Math.Abs(Properties.Vehicle.Default.setTool_toolTrailingHitchLength);
+            trailingHitchLength = Math.Abs(mf.tool.toolTrailingHitchLength);
             nudTrailingHitchLength.Text = (trailingHitchLength * mf.mToUser).ToString("0");
-            tankHitch = Math.Abs(Properties.Vehicle.Default.setVehicle_tankTrailingHitchLength);
+            tankHitch = Math.Abs(mf.tool.toolTankTrailingHitchLength);
             nudTankHitch.Text = (tankHitch * mf.mToUser).ToString("0");
 
-            if (Properties.Vehicle.Default.setTool_isToolFront)
+            if (mf.tool.isToolFrontFixed)
             {
                 nudTrailingHitchLength.Visible = false;
                 nudDrawbarLength.Visible = true;
@@ -36,7 +36,7 @@ namespace AgOpenGPS
 
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageFront;
             }
-            else if (Properties.Vehicle.Default.setTool_isToolTBT)
+            else if (mf.tool.isToolTBT)
             {
                 nudTrailingHitchLength.Visible = true;
                 nudDrawbarLength.Visible = true;
@@ -48,7 +48,7 @@ namespace AgOpenGPS
 
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageTBT;
             }
-            else if (Properties.Vehicle.Default.setTool_isToolRearFixed)
+            else if (mf.tool.isToolRearFixed)
             {
                 nudTrailingHitchLength.Visible = false;
                 nudDrawbarLength.Visible = true;
@@ -60,7 +60,7 @@ namespace AgOpenGPS
 
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageRear;
             }
-            else if (Properties.Vehicle.Default.setTool_isToolTrailing)
+            else if (mf.tool.isToolTrailing)
             {
                 nudTrailingHitchLength.Visible = true;
                 nudDrawbarLength.Visible = true;
@@ -76,11 +76,11 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            Properties.Vehicle.Default.setTool_toolTrailingHitchLength = mf.tool.toolTrailingHitchLength = -trailingHitchLength;
-            Properties.Vehicle.Default.setVehicle_tankTrailingHitchLength = mf.tool.toolTankTrailingHitchLength = -tankHitch;
+            Properties.Vehicle.Default.Tool_TrailingHitchLength = mf.tool.toolTrailingHitchLength = -trailingHitchLength;
+            Properties.Vehicle.Default.Tool_TankTrailingHitchLength = mf.tool.toolTankTrailingHitchLength = -tankHitch;
 
             mf.tool.hitchLength = drawbarLength;
-            if (!Properties.Vehicle.Default.setTool_isToolFront)
+            if (!Properties.Vehicle.Default.Tool_isToolFront)
             {
                 mf.tool.hitchLength *= -1;
             }

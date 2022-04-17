@@ -59,13 +59,11 @@
             // 
             this.lblFilename.AutoSize = true;
             this.lblFilename.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
-            this.lblFilename.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFilename.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.lblFilename.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblFilename.Location = new System.Drawing.Point(20, 97);
+            this.lblFilename.Location = new System.Drawing.Point(23, 100);
             this.lblFilename.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblFilename.Name = "lblFilename";
-            this.lblFilename.Size = new System.Drawing.Size(83, 19);
+            this.lblFilename.Size = new System.Drawing.Size(96, 23);
             this.lblFilename.TabIndex = 147;
             this.lblFilename.Text = "Filename";
             // 
@@ -73,6 +71,7 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
             this.panel1.Controls.Add(this.label4);
+            this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.btnLoadKML);
@@ -81,9 +80,9 @@
             this.panel1.Controls.Add(this.cboxAddDate);
             this.panel1.Controls.Add(this.btnSerialCancel);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(2, 2);
+            this.panel1.Location = new System.Drawing.Point(5, 5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(622, 379);
+            this.panel1.Size = new System.Drawing.Size(616, 373);
             this.panel1.TabIndex = 148;
             // 
             // label4
@@ -127,75 +126,57 @@
             // 
             // btnLoadKML
             // 
-            this.btnLoadKML.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLoadKML.BackColor = System.Drawing.Color.Transparent;
             this.btnLoadKML.FlatAppearance.BorderColor = System.Drawing.Color.LightGray;
             this.btnLoadKML.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLoadKML.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.btnLoadKML.Image = global::AgOpenGPS.Properties.Resources.BoundaryLoadFromGE;
-            this.btnLoadKML.Location = new System.Drawing.Point(109, 267);
+            this.btnLoadKML.Location = new System.Drawing.Point(103, 261);
             this.btnLoadKML.Name = "btnLoadKML";
-            this.btnLoadKML.Size = new System.Drawing.Size(83, 79);
+            this.btnLoadKML.Size = new System.Drawing.Size(90, 90);
             this.btnLoadKML.TabIndex = 3;
-            this.btnLoadKML.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnLoadKML.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnLoadKML.UseVisualStyleBackColor = false;
             this.btnLoadKML.Click += new System.EventHandler(this.btnLoadKML_Click);
             // 
             // cboxAddTime
             // 
             this.cboxAddTime.Appearance = System.Windows.Forms.Appearance.Button;
-            this.cboxAddTime.BackColor = System.Drawing.Color.Transparent;
-            this.cboxAddTime.FlatAppearance.BorderColor = System.Drawing.Color.Aqua;
             this.cboxAddTime.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
             this.cboxAddTime.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cboxAddTime.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxAddTime.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.cboxAddTime.Image = global::AgOpenGPS.Properties.Resources.JobNameTime;
             this.cboxAddTime.Location = new System.Drawing.Point(195, 137);
             this.cboxAddTime.Name = "cboxAddTime";
-            this.cboxAddTime.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.cboxAddTime.Size = new System.Drawing.Size(83, 79);
+            this.cboxAddTime.Size = new System.Drawing.Size(90, 90);
             this.cboxAddTime.TabIndex = 2;
-            this.cboxAddTime.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.cboxAddTime.UseVisualStyleBackColor = false;
             // 
             // btnSave
             // 
-            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
             this.btnSave.Enabled = false;
             this.btnSave.FlatAppearance.BorderSize = 0;
             this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSave.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.btnSave.Image = global::AgOpenGPS.Properties.Resources.OK64;
-            this.btnSave.Location = new System.Drawing.Point(524, 268);
+            this.btnSave.Location = new System.Drawing.Point(518, 262);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(83, 79);
+            this.btnSave.Size = new System.Drawing.Size(90, 90);
             this.btnSave.TabIndex = 3;
-            this.btnSave.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnSave.UseVisualStyleBackColor = false;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // cboxAddDate
             // 
             this.cboxAddDate.Appearance = System.Windows.Forms.Appearance.Button;
-            this.cboxAddDate.BackColor = System.Drawing.Color.Transparent;
             this.cboxAddDate.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
             this.cboxAddDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cboxAddDate.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxAddDate.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.cboxAddDate.Image = global::AgOpenGPS.Properties.Resources.JobNameCalendar;
             this.cboxAddDate.Location = new System.Drawing.Point(49, 137);
             this.cboxAddDate.Name = "cboxAddDate";
-            this.cboxAddDate.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.cboxAddDate.Size = new System.Drawing.Size(83, 79);
+            this.cboxAddDate.Size = new System.Drawing.Size(90, 90);
             this.cboxAddDate.TabIndex = 1;
-            this.cboxAddDate.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.cboxAddDate.UseVisualStyleBackColor = false;
             // 
             // btnSerialCancel
             // 
-            this.btnSerialCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSerialCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
             this.btnSerialCancel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnSerialCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -204,11 +185,10 @@
             this.btnSerialCancel.Font = new System.Drawing.Font("Tahoma", 12F);
             this.btnSerialCancel.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.btnSerialCancel.Image = global::AgOpenGPS.Properties.Resources.Cancel64;
-            this.btnSerialCancel.Location = new System.Drawing.Point(380, 267);
+            this.btnSerialCancel.Location = new System.Drawing.Point(374, 261);
             this.btnSerialCancel.Name = "btnSerialCancel";
-            this.btnSerialCancel.Size = new System.Drawing.Size(77, 79);
+            this.btnSerialCancel.Size = new System.Drawing.Size(90, 90);
             this.btnSerialCancel.TabIndex = 4;
-            this.btnSerialCancel.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnSerialCancel.UseVisualStyleBackColor = false;
             this.btnSerialCancel.Click += new System.EventHandler(this.btnSerialCancel_Click);
             // 
@@ -216,12 +196,10 @@
             // 
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(70)))));
-            this.label1.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label1.Location = new System.Drawing.Point(20, 31);
+            this.label1.Location = new System.Drawing.Point(18, 23);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(155, 23);
+            this.label1.Size = new System.Drawing.Size(174, 23);
             this.label1.TabIndex = 4;
             this.label1.Text = "Enter Field Name";
             // 
@@ -231,16 +209,15 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.Cyan;
             this.ClientSize = new System.Drawing.Size(626, 383);
-            this.ControlBox = false;
             this.Controls.Add(this.lblFilename);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.tboxFieldName);
             this.Controls.Add(this.panel1);
-            this.Font = new System.Drawing.Font("Tahoma", 14.25F);
+            this.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "FormFieldKML";
-            this.Padding = new System.Windows.Forms.Padding(2);
+            this.Padding = new System.Windows.Forms.Padding(5);
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Create New Field ";

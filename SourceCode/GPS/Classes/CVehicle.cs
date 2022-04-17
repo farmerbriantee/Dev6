@@ -10,10 +10,8 @@ namespace AgOpenGPS
         private readonly FormGPS mf;
 
         public bool isSteerAxleAhead, isPivotBehindAntenna;
-        public double antennaHeight, antennaPivot;
+        public double antennaHeight, antennaPivot, antennaOffset;
         public double wheelbase, minTurningRadius;
-        public double antennaOffset, slowSpeedCutoff = 0;
-        //min vehicle speed allowed before turning shit off
 
         //autosteer values
         public double goalPointLookAhead, goalPointLookAheadMult;
@@ -40,7 +38,10 @@ namespace AgOpenGPS
         {
             //constructor
             mf = _f;
+        }
 
+        public void LoadSettings()
+        {
             isPivotBehindAntenna = Properties.Vehicle.Default.setVehicle_isPivotBehindAntenna;
             antennaHeight = Properties.Vehicle.Default.setVehicle_antennaHeight;
             antennaPivot = Properties.Vehicle.Default.setVehicle_antennaPivot;
@@ -49,8 +50,6 @@ namespace AgOpenGPS
             wheelbase = Properties.Vehicle.Default.setVehicle_wheelbase;
             minTurningRadius = Properties.Vehicle.Default.setVehicle_minTurningRadius;
             isSteerAxleAhead = Properties.Vehicle.Default.setVehicle_isSteerAxleAhead;
-
-            slowSpeedCutoff = Properties.Vehicle.Default.setVehicle_slowSpeedCutoff;
 
             goalPointLookAhead = Properties.Vehicle.Default.setVehicle_goalPointLookAhead;
             goalPointLookAheadMult = Properties.Vehicle.Default.setVehicle_goalPointLookAheadMult;
@@ -76,7 +75,7 @@ namespace AgOpenGPS
         public double UpdateGoalPointDistance()
         {
             //how far should goal point be away  - speed * seconds * kmph -> m/s then limit min value
-            double goalPointDistance = mf.pn.avgSpeed * goalPointLookAhead * 0.05 * goalPointLookAheadMult;
+            double goalPointDistance = mf.mc.avgSpeed * goalPointLookAhead * 0.05 * goalPointLookAheadMult;
             goalPointDistance += goalPointLookAhead;
 
             if (goalPointDistance < 1) goalPointDistance = 1;
@@ -390,7 +389,7 @@ namespace AgOpenGPS
                 GL.PointSize(8.0f);
                 GL.Color3(0.0f, 0.0f, 0.0f);
                 GL.Begin(PrimitiveType.Points);
-                if (mf.pn.headingTrueDual == double.MaxValue)
+                if (mf.mc.headingTrueDual == double.MaxValue)
                 {
                     GL.Vertex3(0, antennaPivot, 0.1);
                 }
@@ -404,7 +403,7 @@ namespace AgOpenGPS
                 GL.PointSize(4.0f);
                 GL.Begin(PrimitiveType.Points);
                 GL.Color3(0.20f, 1.0f, 1.0f);
-                if (mf.pn.headingTrueDual == double.MaxValue)
+                if (mf.mc.headingTrueDual == double.MaxValue)
                 {
                     GL.Vertex3(0, antennaPivot, 0.1);
                 }

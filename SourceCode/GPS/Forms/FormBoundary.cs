@@ -184,13 +184,7 @@ namespace AgOpenGPS
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            DialogResult result3 = MessageBox.Show(gStr.gsCompletelyDeleteBoundary,
-                gStr.gsDeleteForSure,
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-
-            if (result3 == DialogResult.Yes)
+            if (new FormHelp(gStr.gsCompletelyDeleteBoundary, gStr.gsDeleteForSure, true).ShowDialog(this) == DialogResult.Yes)
             {
 
                 btnDelete.Enabled = false;
@@ -230,7 +224,7 @@ namespace AgOpenGPS
         {
             //save new copy of kml with selected flag and view in GoogleEarth
 
-            mf.FileMakeKMLFromCurrentPosition(mf.pn.latitude, mf.pn.longitude);
+            mf.FileMakeKMLFromCurrentPosition(mf.mc.latitude, mf.mc.longitude);
             System.Diagnostics.Process.Start(mf.fieldsDirectory + mf.currentFieldDirectory + "\\CurrentPosition.KML");
             isClosing = true;
             Close();
@@ -238,19 +232,9 @@ namespace AgOpenGPS
 
         private void btnDeleteAll_Click(object sender, EventArgs e)
         {
-            DialogResult result3 = MessageBox.Show(gStr.gsCompletelyDeleteBoundary,
-                gStr.gsDeleteForSure,
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-
-            if (result3 == DialogResult.Yes)
+            if (new FormHelp(gStr.gsCompletelyDeleteBoundary, gStr.gsDeleteForSure, true).ShowDialog(this) == DialogResult.Yes)
             {
                 ResetAllBoundary();
-            }
-            else
-            {
-                mf.TimedMessageBox(1500, gStr.gsNothingDeleted, gStr.gsActionHasBeenCancelled);
             }
         }
 
@@ -361,7 +345,7 @@ namespace AgOpenGPS
                                         double.TryParse(fix[0], NumberStyles.Float, CultureInfo.InvariantCulture, out lonK);
                                         double.TryParse(fix[1], NumberStyles.Float, CultureInfo.InvariantCulture, out latK);
 
-                                        mf.pn.ConvertWGS84ToLocal(latK, lonK, out norting, out easting);
+                                        mf.worldManager.ConvertWGS84ToLocal(latK, lonK, out norting, out easting);
 
                                         //add the point to boundary
                                         New.fenceLine.points.Add(new vec2(easting, norting));
@@ -434,12 +418,7 @@ namespace AgOpenGPS
 
         private void btnRestart_Click(object sender, EventArgs e)
         {
-            DialogResult result3 = MessageBox.Show(gStr.gsCompletelyDeleteBoundary,
-                                    gStr.gsDeleteForSure,
-                                    MessageBoxButtons.YesNo,
-                                    MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button2);
-            if (result3 == DialogResult.Yes)
+            if (new FormHelp(gStr.gsCompletelyDeleteBoundary, gStr.gsDeleteForSure, true).ShowDialog(this) == DialogResult.Yes)
             {
                 mf.bnd.bndBeingMadePts.Clear();
                 lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
@@ -542,67 +521,67 @@ namespace AgOpenGPS
 
         private void btnDelete_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnDelete, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnDelete, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnDeleteAll_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnDeleteAll, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnDeleteAll, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnOpenGoogleEarth_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnOpenGoogleEarth, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnOpenGoogleEarth, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnAdd_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnAdd, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnAdd, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnCancel_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnCancel, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnCancel, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnGetKML_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnGetKML, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnGetKML, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudOffset_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_nudOffset, gStr.gsHelp);
+            new FormHelp(gStr.hb_nudOffset, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnLeftRight_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnLeftRight, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnLeftRight, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnDeleteLast_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnDeleteLast, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnDeleteLast, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnAddPoint_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnAddPoint, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnAddPoint, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnRestart_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnRestart, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnRestart, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnPausePlay_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnPausePlay, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnPausePlay, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnStop_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnStop, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnStop, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnBingMaps_Click(object sender, EventArgs e)
@@ -615,17 +594,17 @@ namespace AgOpenGPS
 
         private void btnDriveOrExt_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnDriveOrExt, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnDriveOrExt, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnLoadMultiBoundaryFromGE_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnLoadMultiBoundaryFromGE, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnLoadMultiBoundaryFromGE, gStr.gsHelp).ShowDialog(this);
         }
 
         private void btnLoadBoundaryFromGE_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hb_btnLoadBoundaryFromGE, gStr.gsHelp);
+            new FormHelp(gStr.hb_btnLoadBoundaryFromGE, gStr.gsHelp).ShowDialog(this);
         }
 
         #endregion
@@ -634,9 +613,9 @@ namespace AgOpenGPS
 
 /*
             
-            MessageBox.Show(gStr, gStr.gsHelp);
+            new FormHelp(gStr, gStr.gsHelp).ShowDialog(this)
 
-            DialogResult result2 = MessageBox.Show(gStr, gStr.gsHelp,
+            DialogResult result2 = new FormHelp(gStr, gStr.gsHelp,
                 MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
             if (result2 == DialogResult.Yes)

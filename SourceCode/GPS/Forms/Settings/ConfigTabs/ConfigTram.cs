@@ -28,7 +28,7 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            Properties.Settings.Default.setTram_isTramOnBackBuffer = mf.isTramOnBackBuffer = cboxTramOnBackBuffer.Checked;
+            Properties.Settings.Default.setTram_isTramOnBackBuffer = mf.tram.isTramOnBackBuffer = cboxTramOnBackBuffer.Checked;
 
             Properties.Settings.Default.setTram_tramWidth = mf.tram.tramWidth = tramWidth;
             mf.tram.isOuter = ((int)(tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
@@ -43,12 +43,12 @@ namespace AgOpenGPS
 
         private void cboxTramOnBackBuffer_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_cboxTramOnBackBuffer, gStr.gsHelp);
+            new FormHelp(gStr.hc_cboxTramOnBackBuffer, gStr.gsHelp).ShowDialog(this);
         }
 
         private void nudTramWidth_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
-            MessageBox.Show(gStr.hc_nudTramWidth, gStr.gsHelp);
+            new FormHelp(gStr.hc_nudTramWidth, gStr.gsHelp).ShowDialog(this);
         }
     }
 }

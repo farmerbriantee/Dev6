@@ -54,36 +54,36 @@ namespace AgOpenGPS
 
                         if ((data[27] & 0x81) == 0x81)
                         {
-                            pn.fixQuality = 4;
+                            mc.fixQuality = 4;
                             EnableHeadRoll = true;
                         }
                         else if ((data[27] & 0x41) == 0x41)
                         {
-                            pn.fixQuality = 5;
+                            mc.fixQuality = 5;
                             EnableHeadRoll = true;
                         }
                         else
                         {
-                            pn.fixQuality = 1;
+                            mc.fixQuality = 1;
                             EnableHeadRoll = false;
                         }
 
-                        pn.satellitesTracked = data[29];
+                        mc.satellitesTracked = data[29];
 
-                        pn.longitude = (data[30] | (data[31] << 8) | (data[32] << 16) | (data[33] << 24)) * 0.0000001;//to deg
-                        pn.latitude = (data[34] | (data[35] << 8) | (data[36] << 16) | (data[37] << 24)) * 0.0000001;//to deg
+                        mc.longitude = (data[30] | (data[31] << 8) | (data[32] << 16) | (data[33] << 24)) * 0.0000001;//to deg
+                        mc.latitude = (data[34] | (data[35] << 8) | (data[36] << 16) | (data[37] << 24)) * 0.0000001;//to deg
 
                         //Height above ellipsoid
-                        pn.altitude = (data[38] | (data[39] << 8) | (data[40] << 16) | (data[41] << 24)) * 0.001;//to meters
+                        mc.altitude = (data[38] | (data[39] << 8) | (data[40] << 16) | (data[41] << 24)) * 0.001;//to meters
                         // Height above mean sea level
-                        pn.altitude = (data[42] | (data[43] << 8) | (data[44] << 16) | (data[45] << 24)) * 0.001;//to meters
+                        mc.altitude = (data[42] | (data[43] << 8) | (data[44] << 16) | (data[45] << 24)) * 0.001;//to meters
 
-                        pn.hdop = (data[82] | (data[83] << 8) | (data[84] << 16) | (data[85] << 24)) * 0.01;
+                        mc.hdop = (data[82] | (data[83] << 8) | (data[84] << 16) | (data[85] << 24)) * 0.01;
 
-                        if (pn.longitude != 0)
+                        if (mc.longitude != 0)
                         {
-                            pn.speed = (data[66] | (data[67] << 8) | (data[68] << 16) | (data[69] << 24)) * 0.0036;// mm/s to km/h
-                            pn.ConvertWGS84ToLocal(pn.latitude, pn.longitude, out pn.fix.northing, out pn.fix.easting);
+                            mc.speed = (data[66] | (data[67] << 8) | (data[68] << 16) | (data[69] << 24)) * 0.0036;// mm/s to km/h
+                            worldManager.ConvertWGS84ToLocal(mc.latitude, mc.longitude, out mc.fix.northing, out mc.fix.easting);
 
                             sentenceCounter = 0;
                             UpdateFixPosition();
@@ -91,7 +91,7 @@ namespace AgOpenGPS
                         else
                         {
                             EnableHeadRoll = false;
-                            pn.fixQuality = 0;
+                            mc.fixQuality = 0;
                         }
                     }
                 }
@@ -128,25 +128,25 @@ namespace AgOpenGPS
                                 //if (ahrs.isRollInvert)
                                 //    ahrs.imuRoll *= -1;
 
-                                if (ahrs.isRollInvert) rollK *= -1.0;
-                                rollK -= ahrs.rollZero;
-                                ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
+                                if (mc.isRollInvert) rollK *= -1.0;
+                                rollK -= mc.rollZero;
+                                mc.imuRoll = mc.imuRoll * mc.rollFilter + rollK * (1 - mc.rollFilter);
 
                                 //D = d / 2 * cos(roll) + h * sin(roll) * cos(pitch)
                             }
 
-                            pn.headingTrueDual = (data[30] | (data[31] << 8) | (data[32] << 16) | (data[33] << 24)) * 0.00001 + pn.headingTrueDualOffset;
+                            mc.headingTrueDual = (data[30] | (data[31] << 8) | (data[32] << 16) | (data[33] << 24)) * 0.00001 + mc.headingTrueDualOffset;
 
-                            if (ahrs.isDualAsIMU)
+                            if (mc.isDualAsIMU)
                             {
-                                ahrs.imuHeading = pn.headingTrueDual;
-                                pn.headingTrueDual = double.MaxValue;
+                                mc.imuHeading = mc.headingTrueDual;
+                                mc.headingTrueDual = double.MaxValue;
                             }
                         }
                         else //Bad Quality
                         {
-                            ahrs.imuRoll = 88888;
-                            pn.headingTrueDual = double.MaxValue;
+                            mc.imuRoll = 88888;
+                            mc.headingTrueDual = double.MaxValue;
                         }
                     }
                 }
@@ -173,7 +173,7 @@ namespace AgOpenGPS
                                 if (udpWatch.ElapsedMilliseconds < udpWatchLimit)
                                 {
                                     udpWatchCounts++;
-                                    if (isLogNMEA) pn.logNMEASentence.Append("*** "
+                                    if (isLogNMEA) mc.logNMEASentence.Append("*** "
                                         + DateTime.UtcNow.ToString("ss.ff -> ", CultureInfo.InvariantCulture)
                                         + udpWatch.ElapsedMilliseconds + "\r\n");
                                     return;
@@ -193,32 +193,32 @@ namespace AgOpenGPS
                                     if (timerSim.Enabled)
                                         DisableSim();
 
-                                    pn.longitude = Lon;
-                                    pn.latitude = Lat;
+                                    mc.longitude = Lon;
+                                    mc.latitude = Lat;
 
-                                    pn.ConvertWGS84ToLocal(Lat, Lon, out pn.fix.northing, out pn.fix.easting);
+                                    worldManager.ConvertWGS84ToLocal(Lat, Lon, out mc.fix.northing, out mc.fix.easting);
 
                                     //From dual antenna heading sentences
                                     float temp = BitConverter.ToSingle(data, 21);
                                     if (temp != float.MaxValue)
                                     {
-                                        pn.headingTrueDual = temp + pn.headingTrueDualOffset;
-                                        if (pn.headingTrueDual < 0) pn.headingTrueDual += 360;
-                                        if (ahrs.isDualAsIMU)
+                                        mc.headingTrueDual = temp + mc.headingTrueDualOffset;
+                                        if (mc.headingTrueDual < 0) mc.headingTrueDual += 360;
+                                        if (mc.isDualAsIMU)
                                         {
-                                            ahrs.imuHeading = temp;
-                                            pn.headingTrueDual = double.MaxValue;
+                                            mc.imuHeading = temp;
+                                            mc.headingTrueDual = double.MaxValue;
                                         }
                                     }
                                     else
                                     {
-                                        pn.headingTrueDual = double.MaxValue;
+                                        mc.headingTrueDual = double.MaxValue;
                                     }
 
                                     //from single antenna sentences (VTG,RMC)
                                     temp = BitConverter.ToSingle(data, 25);
                                     if (temp != float.MaxValue)
-                                        pn.headingTrue = temp;
+                                        mc.headingTrue = temp;
 
                                     temp = BitConverter.ToSingle(data, 29);
                                     if (temp != float.MaxValue)
@@ -232,69 +232,69 @@ namespace AgOpenGPS
                                     temp = BitConverter.ToSingle(data, 33);
                                     if (temp != float.MaxValue)
                                     {
-                                        if (ahrs.isRollInvert) temp *= -1;
-                                        ahrs.imuRoll = temp - ahrs.rollZero;
+                                        if (mc.isRollInvert) temp *= -1;
+                                        mc.imuRoll = temp - mc.rollZero;
                                     }
                                     if (temp == float.MinValue)
-                                        ahrs.imuRoll = 0;
+                                        mc.imuRoll = 0;
 
                                     //altitude in meters
                                     temp = BitConverter.ToSingle(data, 37);
                                     if (temp != float.MaxValue)
-                                        pn.altitude = temp;
+                                        mc.altitude = temp;
 
                                     ushort sats = BitConverter.ToUInt16(data, 41);
                                     if (sats != ushort.MaxValue)
-                                        pn.satellitesTracked = sats;
+                                        mc.satellitesTracked = sats;
 
                                     byte fix = data[43];
                                     if (fix != byte.MaxValue)
-                                        pn.fixQuality = fix;
+                                        mc.fixQuality = fix;
 
                                     ushort hdop = BitConverter.ToUInt16(data, 44);
                                     if (hdop != ushort.MaxValue)
-                                        pn.hdop = hdop * 0.01;
+                                        mc.hdop = hdop * 0.01;
 
                                     ushort age = BitConverter.ToUInt16(data, 46);
                                     if (age != ushort.MaxValue)
-                                        pn.age = age * 0.01;
+                                        mc.age = age * 0.01;
 
                                     ushort imuHead = BitConverter.ToUInt16(data, 48);
                                     if (imuHead != ushort.MaxValue)
                                     {
-                                        ahrs.imuHeading = imuHead;
-                                        ahrs.imuHeading *= 0.1;
+                                        mc.imuHeading = imuHead;
+                                        mc.imuHeading *= 0.1;
                                     }
 
                                     short imuRol = BitConverter.ToInt16(data, 50);
                                     if (imuRol != short.MaxValue)
                                     {
                                         double rollK = imuRol;
-                                        if (ahrs.isRollInvert) rollK *= -0.1;
+                                        if (mc.isRollInvert) rollK *= -0.1;
                                         else rollK *= 0.1;
-                                        rollK -= ahrs.rollZero;
-                                        ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
+                                        rollK -= mc.rollZero;
+                                        mc.imuRoll = mc.imuRoll * mc.rollFilter + rollK * (1 - mc.rollFilter);
                                     }
 
                                     short imuPich = BitConverter.ToInt16(data, 52);
                                     if (imuPich != short.MaxValue)
                                     {
-                                        ahrs.imuPitch = imuPich;
+                                        mc.imuPitch = imuPich;
                                     }
 
                                     short imuYaw = BitConverter.ToInt16(data, 54);
                                     if (imuYaw != short.MaxValue)
                                     {
-                                        ahrs.imuYawRate = imuYaw;
+                                        mc.imuYawRate = imuYaw;
                                     }
 
                                     sentenceCounter = 0;
 
                                     if (isLogNMEA)
-                                        pn.logNMEASentence.Append(
+                                        mc.logNMEASentence.Append(
                                             DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " " +
                                             Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
-                                            pn.headingTrueDual.ToString("0.0") + "\r\n"
+                                            mc.headingTrueDual.ToString("0.0") + "\r\n"
                                             );
 
                                     UpdateFixPosition();
@@ -307,48 +307,48 @@ namespace AgOpenGPS
                                 double Lon = BitConverter.ToDouble(data, 5);
                                 double Lat = BitConverter.ToDouble(data, 13);
 
-                                if (pn.isToolSteering && Lon != double.MaxValue && Lat != double.MaxValue)
+                                if (tool.isSteering && Lon != double.MaxValue && Lat != double.MaxValue)
                                 {
                                     if (vehicleGPSWatchdog < 20) vehicleGPSWatchdog++;
                                     toolGPSWatchdog = 0;
 
-                                    pn.longitudeTool = Lon;
-                                    pn.latitudeTool = Lat;
-                                    pn.ConvertWGS84ToLocal(Lat, Lon, out pn.fixTool.northing, out pn.fixTool.easting);
+                                    mc.longitudeTool = Lon;
+                                    mc.latitudeTool = Lat;
+                                    worldManager.ConvertWGS84ToLocal(Lat, Lon, out mc.fixTool.northing, out mc.fixTool.easting);
 
                                     ushort sats = BitConverter.ToUInt16(data, 21);
                                     if (sats != ushort.MaxValue)
-                                        pn.satellitesTrackedTool = sats;
+                                        mc.satellitesTrackedTool = sats;
 
                                     byte fix = data[23];
                                     if (fix != byte.MaxValue)
-                                        pn.fixQualityTool = fix;
+                                        mc.fixQualityTool = fix;
 
                                     ushort hdop = BitConverter.ToUInt16(data, 24);
                                     if (hdop != ushort.MaxValue)
-                                        pn.hdopTool = hdop * 0.01;
+                                        mc.hdopTool = hdop * 0.01;
 
                                     ushort age = BitConverter.ToUInt16(data, 26);
                                     if (age != ushort.MaxValue)
-                                        pn.ageTool = age * 0.01;
+                                        mc.ageTool = age * 0.01;
 
                                     short imuRoll = BitConverter.ToInt16(data, 28);
                                     if (imuRoll != short.MaxValue)
                                     {
                                         double rollK = imuRoll;
-                                        if (ahrs.isRollInvert) rollK *= -0.1;
+                                        if (mc.isRollInvert) rollK *= -0.1;
                                         else rollK *= 0.1;
-                                        rollK -= ahrs.rollZeroTool;
-                                        ahrs.imuRollTool = rollK;
+                                        rollK -= mc.rollZeroTool;
+                                        mc.imuRollTool = rollK;
                                     }
 
                                     //From dual antenna heading sentences
                                     float temp = BitConverter.ToSingle(data, 30);
                                     if (temp != float.MaxValue)
                                     {
-                                        pn.headingTrueDualTool = temp;// + pn.headingTrueDualOffset;
-                                        if (pn.headingTrueDualTool < 0) pn.headingTrueDualTool += 360;
-                                        if (ahrs.isDualAsIMU) ahrs.imuHeadingTool = temp;
+                                        mc.headingTrueDualTool = temp;// + pn.headingTrueDualOffset;
+                                        if (mc.headingTrueDualTool < 0) mc.headingTrueDualTool += 360;
+                                        if (mc.isDualAsIMU) mc.imuHeadingTool = temp;
                                     }
 
                                     sentenceCounter = 0;//or when vehicleGPSWatchdog > 10 only?
@@ -371,17 +371,17 @@ namespace AgOpenGPS
                                 double head253 = (Int16)((data[8] << 8) + data[7]);
                                 if (head253 != 9999)
                                 {
-                                    ahrs.imuHeading = head253 * 0.1;
+                                    mc.imuHeading = head253 * 0.1;
                                 }
 
                                 //Roll
                                 double rollK = (Int16)((data[10] << 8) + data[9]);
                                 if (rollK != 8888)
                                 {
-                                    if (ahrs.isRollInvert) rollK *= -0.1;
+                                    if (mc.isRollInvert) rollK *= -0.1;
                                     else rollK *= 0.1;
-                                    rollK -= ahrs.rollZero;
-                                    ahrs.imuRoll = ahrs.imuRoll * ahrs.rollFilter + rollK * (1 - ahrs.rollFilter);
+                                    rollK -= mc.rollZero;
+                                    mc.imuRoll = mc.imuRoll * mc.rollFilter + rollK * (1 - mc.rollFilter);
                                 }
                                 //else ahrs.imuRoll = 88888;
 
@@ -396,7 +396,7 @@ namespace AgOpenGPS
                                 mc.pwmDisplay = data[12];
 
                                 if (isLogNMEA)
-                                    pn.logNMEASentence.Append(
+                                    mc.logNMEASentence.Append(
                                         DateTime.UtcNow.ToString("mm:ss.ff", CultureInfo.InvariantCulture) + " AS " +
                                         //Lat.ToString("0.0000000") + " " + Lon.ToString("0.0000000") + " " +
                                         //pn.speed.ToString("0.0") + " " + ahrs.imuRoll.ToString("0.0") + " " +
@@ -459,7 +459,7 @@ namespace AgOpenGPS
                                     int idx2 = mc.swOffGr0;
                                     int idx3 = 1;
 
-                                    for (int j = 0; j < tool.numOfSections; j++)
+                                    for (int j = 0; j < tool.sections.Count - 1; j++)
                                     {
                                         if (j == 8)
                                         {
@@ -470,7 +470,7 @@ namespace AgOpenGPS
                                         }
 
                                         //do nothing if bit isn't set [only works fully when BBBBB is deleted]
-                                        btnStates status = section[j].sectionState;
+                                        btnStates status = tool.sections[j].sectionState;
 
                                         if ((data[idx1] & set) == set)
                                         {
@@ -488,7 +488,7 @@ namespace AgOpenGPS
 
                                         set <<= 1;
 
-                                        section[j].UpdateButton(status);
+                                        tool.sections[j].UpdateButton(status);
                                     }
 
                                     //only needed for BBBBB
