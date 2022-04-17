@@ -1,6 +1,8 @@
 ﻿using AgOpenGPS.Properties;
 using Microsoft.Win32;
 using System;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -40,6 +42,25 @@ namespace AgOpenGPS
 
             if (Mutex.WaitOne(TimeSpan.Zero, true))
             {
+                /*
+                AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+                {
+                    String resourceName = "AgOpenGPS.References." + new AssemblyName(args.Name).Name + ".dll";
+                    String assemblyName = Assembly.GetExecutingAssembly().FullName;
+                    Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+                    if (stream != null)
+                    {
+                        using (stream)
+                        {
+                            Byte[] assemblyData = new Byte[stream.Length];
+                            stream.Read(assemblyData, 0, assemblyData.Length);
+                            return Assembly.Load(assemblyData);
+                        }
+                    }
+                    return null;
+                };
+                */
+
                 Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(Properties.Settings.Default.setF_culture);
                 Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(Properties.Settings.Default.setF_culture);
                 Application.EnableVisualStyles();
