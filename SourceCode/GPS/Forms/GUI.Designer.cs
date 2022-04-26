@@ -196,6 +196,22 @@ namespace AgOpenGPS
 
         public void LoadSettings()
         {
+            //set the language to last used
+            SetLanguage(Properties.Settings.Default.setF_culture);
+
+            //get the fields directory, if not exist, create
+            fieldsDirectory = baseDirectory + "Fields\\";
+            string dir = Path.GetDirectoryName(fieldsDirectory);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
+
+            //get the fields directory, if not exist, create
+            vehiclesDirectory = baseDirectory + "Vehicles\\";
+            dir = Path.GetDirectoryName(vehiclesDirectory);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
+
+            //make sure current field directory exists, null if not
+            currentFieldDirectory = Properties.Settings.Default.setF_CurrentDir;
+
             isMetric = Settings.Default.setMenu_isMetric;
             SetUserScales();
 
@@ -295,13 +311,6 @@ namespace AgOpenGPS
             //Stanley guidance
             isStanleyUsed = Properties.Vehicle.Default.setVehicle_isStanleyUsed;
             btnStanleyPure.Image = isStanleyUsed ? Resources.ModeStanley : Resources.ModePurePursuit;
-
-            Location = Settings.Default.setWindow_Location;
-            Size = Settings.Default.setWindow_Size;
-
-            if (Properties.Settings.Default.setDisplay_isStartFullScreen)
-                this.WindowState = FormWindowState.Maximized;
-
 
             //night mode
             isDay = !Properties.Settings.Default.setDisplay_isDayMode;
@@ -419,26 +428,29 @@ namespace AgOpenGPS
 
         private void FixPanelsAndMenus()
         {
-            menuStrip1.Left = this.Padding.Left;
-            menuStrip1.Top = this.Padding.Top;
-            lblAge.Top = this.Padding.Top;
-            label1.Top = this.Padding.Top;
-            lblFix.Top = 40 + this.Padding.Top;
+            if (this.WindowState != FormWindowState.Minimized)
+            {
+                menuStrip1.Left = this.Padding.Left;
+                menuStrip1.Top = this.Padding.Top;
+                lblAge.Top = this.Padding.Top;
+                label1.Top = this.Padding.Top;
+                lblFix.Top = 40 + this.Padding.Top;
 
-            lblTopData.Top = this.Padding.Top;
-            lblCurveLineName.Top = this.Padding.Top;
-            lblCurrentField.Top = 17 + this.Padding.Top;
-            lblFieldStatus.Top = 34 + this.Padding.Top;
+                lblTopData.Top = this.Padding.Top;
+                lblCurveLineName.Top = this.Padding.Top;
+                lblCurrentField.Top = 17 + this.Padding.Top;
+                lblFieldStatus.Top = 34 + this.Padding.Top;
 
-            panelCaptionBar.Top = this.Padding.Top;
-            panelCaptionBar.Left = Width - 360 - this.Padding.Right;
+                panelCaptionBar.Top = this.Padding.Top;
+                panelCaptionBar.Left = Width - 360 - this.Padding.Right;
 
-            panelMain.Top = 60 + this.Padding.Top;
-            panelMain.Left = this.Padding.Left;
-            panelMain.Width = Width - this.Padding.Horizontal;
-            panelMain.Height = Height - 60 - this.Padding.Vertical;
+                panelMain.Top = 60 + this.Padding.Top;
+                panelMain.Left = this.Padding.Left;
+                panelMain.Width = Width - this.Padding.Horizontal;
+                panelMain.Height = Height - 60 - this.Padding.Vertical;
 
-            LineUpManualBtns();
+                LineUpManualBtns();
+            }
         }
 
         //line up section On Off Auto buttons based on how many there are
@@ -487,9 +499,6 @@ namespace AgOpenGPS
             Properties.Settings.Default.setDisplay_camZoom = worldManager.zoomValue;
 
             Settings.Default.setF_UserTotalArea = fd.workedAreaTotalUser;
-
-            //Settings.Default.setDisplay_panelSnapLocation = panelSnap.Location;
-            Settings.Default.setDisplay_panelSimLocation = panelSim.Location;
 
             Settings.Default.Save();
         }

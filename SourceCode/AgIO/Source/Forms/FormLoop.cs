@@ -1,4 +1,5 @@
 ﻿using AgIO.Properties;
+using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -21,6 +22,17 @@ namespace AgIO
         public FormLoop()
         {
             InitializeComponent();
+
+            RegistryKey Key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
+            object Path = Key.GetValue("WorkDir");
+            if (Path == null)
+                baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AgOpenGPS\\";
+            else
+                baseDirectory = Path.ToString() + "\\AgOpenGPS\\";
+            Key.Close();
+
+            Portable.PortableSettingsProvider.ApplicationSettingsFile = baseDirectory + "AgOpenGPS.config";
+            Portable.PortableSettingsProvider.ApplyProvider(Properties.Settings.Default);
         }
 
         //used to send communication check pgn= C8 or 200
@@ -47,10 +59,6 @@ namespace AgIO
         //First run
         private void FormLoop_Load(object sender, EventArgs e)
         {
-            if (Settings.Default.setF_workingDirectory == "Default")
-                baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AgOpenGPS\\";
-            else baseDirectory = Settings.Default.setF_workingDirectory + "\\AgOpenGPS\\";
-
             //get the fields directory, if not exist, create
             commDirectory = baseDirectory + "AgIO\\";
             string dir = Path.GetDirectoryName(commDirectory);

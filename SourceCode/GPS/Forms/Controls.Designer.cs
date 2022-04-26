@@ -6,7 +6,6 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
-using AgOpenGPS.Forms;
 using AgOpenGPS.Properties;
 using Microsoft.Win32;
 
@@ -547,23 +546,22 @@ namespace AgOpenGPS
 
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.ShowNewFolderButton = true;
-            fbd.Description = "Currently: " + Settings.Default.setF_workingDirectory;
+            fbd.Description = "Currently: " + new DirectoryInfo(baseDirectory).Parent.FullName;
 
-            if (Settings.Default.setF_workingDirectory == "Default") fbd.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            else fbd.SelectedPath = Settings.Default.setF_workingDirectory;
+            fbd.SelectedPath = new DirectoryInfo(baseDirectory).Parent.FullName;
 
             if (fbd.ShowDialog(this) == DialogResult.OK)
             {
+                RegistryKey Key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
                 if (fbd.SelectedPath != Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments))
                 {
-                    Settings.Default.setF_workingDirectory = fbd.SelectedPath;
+                    Key.SetValue("WorkDir", fbd.SelectedPath);
                 }
                 else
                 {
-                    Settings.Default.setF_workingDirectory = "Default";
+                    Key.DeleteValue("WorkDir", false);
                 }
-                Settings.Default.Save();
-
+                Key.Close();
                 //restart program
                 new FormHelp(gStr.gsProgramWillExitPleaseRestart, "").ShowDialog(this);
                 Close();
@@ -596,45 +594,15 @@ namespace AgOpenGPS
             {
                 if (new FormHelp(gStr.gsReallyResetEverything, gStr.gsResetAll, true).ShowDialog(this) == DialogResult.Yes)
                 {
-                    ////opening the subkey
-                    RegistryKey regKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\AgOpenGPS");
+                    //deleting "WorkDir" subkey
+                    RegistryKey Key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
+                    Key.DeleteValue("WorkDir", false);
+                    Key.Close();
 
-                    if (regKey == null)
-                    {
-                        RegistryKey Key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
+                    Properties.Settings.Default.Reset();
+                    Properties.Vehicle.Default.Reset();
 
-                        //storing the values
-                        Key.SetValue("Language", "en");
-                        Key.Close();
-                    }
-                    else
-                    {
-                        //adding or editing "Language" subkey to the "SOFTWARE" subkey  
-                        RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
-
-                        //storing the values  
-                        key.SetValue("Language", "en");
-                        key.Close();
-                    }
-
-                    Settings.Default.Reset();
-                    Settings.Default.Save();
-
-                    Vehicle.Default.Reset();
-                    Vehicle.Default.Save();
-
-                    bool restart = (Settings.Default.setF_workingDirectory == "Default");
-
-                    Settings.Default.setF_culture = "en";
-                    Settings.Default.setF_workingDirectory = "Default";
-                    Settings.Default.Save();
-                    if (restart)
-                    {
-                        new FormHelp(gStr.gsProgramWillExitPleaseRestart, "").ShowDialog(this);
-                        System.Environment.Exit(1);
-                    }
-                    else
-                        LoadSettings();
+                    LoadSettings();
                 }
             }
         }
@@ -673,55 +641,29 @@ namespace AgOpenGPS
 
         private void simulatorOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (isJobStarted)
+            if (!panelSim.Visible && isJobStarted)
             {
                 TimedMessageBox(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
-                return;
+                simulatorOnToolStripMenuItem.Checked = panelSim.Visible;
             }
-            if (simulatorOnToolStripMenuItem.Checked)
+            else if (!panelSim.Visible && sentenceCounter < 299)
             {
-                if (sentenceCounter < 299)
-                {
-                    TimedMessageBox(2000, "Conected", "GPS");
-                    simulatorOnToolStripMenuItem.Checked = false;
-                    return;
-                }
-
-                simulatorOnToolStripMenuItem.Checked = true;
-                panelSim.Visible = true;
-                timerSim.Enabled = true;
-                //DialogResult result3 = new FormHelp(gStr.gsAgOpenGPSWillExitPlzRestart, gStr.gsTurningOnSimulator, MessageBoxButtons.OK);
-                Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
-                Settings.Default.Save();
-
-                isFirstFixPositionSet = false;
-                isFirstHeadingSet = false;
-                isGPSPositionInitialized = false;
-                startCounter = 0;
-
-                //System.Environment.Exit(1);
+                TimedMessageBox(2000, "Conected", "GPS");
+                simulatorOnToolStripMenuItem.Checked = panelSim.Visible;
             }
             else
             {
-                panelSim.Visible = false;
-                timerSim.Enabled = false;
-                simulatorOnToolStripMenuItem.Checked = false;
-                //TimedMessageBox(3000, "Simulator Turning Off", "Application will Exit");
-                //DialogResult result3 = new FormHelp(gStr.gsAgOpenGPSWillExitPlzRestart, gStr.gsTurningOffSimulator, MessageBoxButtons.OK);
-                Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
-                Settings.Default.Save();
-
-                //worldGrid.CreateWorldGrid(0, 0);
+                simulatorOnToolStripMenuItem.Checked = panelSim.Visible = timerSim.Enabled = !panelSim.Visible;
                 isFirstFixPositionSet = false;
                 isGPSPositionInitialized = false;
                 isFirstHeadingSet = false;
                 startCounter = 0;
-
-                //System.Environment.Exit(1);
             }
-
-            Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
-            Settings.Default.Save();
+            if (Properties.Settings.Default.setMenu_isSimulatorOn != simulatorOnToolStripMenuItem.Checked)
+            {
+                Properties.Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
+                Properties.Settings.Default.Save();
+            }
         }
 
         private void colorsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -874,18 +816,14 @@ namespace AgOpenGPS
                     break;
             }
 
-            Settings.Default.setF_culture = lang;
-            Settings.Default.Save();
+            if (Properties.Settings.Default.setF_culture != lang)
+            {
+                Properties.Settings.Default.setF_culture = lang;
+                Properties.Settings.Default.Save();
+            }
 
-            //adding or editing "Language" subkey to the "SOFTWARE" subkey  
-            RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
-
-            //storing the values  
-            key.SetValue("Language", lang);
-            key.Close();
-
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(Properties.Settings.Default.setF_culture);
-            Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(Properties.Settings.Default.setF_culture);
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(lang);
 
             SetGuiText();
         }

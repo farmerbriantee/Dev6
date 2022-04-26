@@ -1,5 +1,5 @@
 ﻿
-namespace AgOpenGPS.Forms
+namespace AgOpenGPS
 {
     partial class FormRecordName
     {

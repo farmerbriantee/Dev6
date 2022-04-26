@@ -62,9 +62,6 @@
     <Setting Name="setF_culture" Type="System.String" Scope="User">
       <Value Profile="(Default)">en</Value>
     </Setting>
-    <Setting Name="setF_workingDirectory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Default</Value>
-    </Setting>
     <Setting Name="setDisplay_lightbarCmPerPixel" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4</Value>
     </Setting>

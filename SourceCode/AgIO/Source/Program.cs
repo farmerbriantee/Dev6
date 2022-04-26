@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -15,31 +14,8 @@ namespace AgIO
         [STAThread]
         private static void Main()
         {
-            ////opening the subkey
-            RegistryKey regKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\AgOpenGPS");
-
-            ////create default keys if not existing
-            if (regKey == null)
-            {
-                RegistryKey Key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
-
-                //storing the values
-                Key.SetValue("Language", "en");
-                Key.Close();
-
-                Properties.Settings.Default.setF_culture = "en";
-                Properties.Settings.Default.Save();
-            }
-            else
-            {
-                Properties.Settings.Default.setF_culture = regKey.GetValue("Language").ToString();
-                Properties.Settings.Default.Save();
-                regKey.Close();
-            }
-
             if (Mutex.WaitOne(TimeSpan.Zero, true))
             {
-
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new FormLoop());

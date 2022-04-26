@@ -1,5 +1,6 @@
 ﻿//Please, if you use this, share the improvements
 
+using Microsoft.Win32;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Diagnostics;
@@ -164,6 +165,17 @@ namespace AgOpenGPS
             //winform initialization
             InitializeComponent();
 
+            RegistryKey Key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
+            object Path = Key.GetValue("WorkDir");
+            if (Path == null)
+                baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AgOpenGPS\\";
+            else
+                baseDirectory = Path.ToString() + "\\AgOpenGPS\\";
+            Key.Close();
+
+            Portable.PortableSettingsProvider.ApplicationSettingsFile = baseDirectory + "AgOpenGPS.config";
+            Portable.PortableSettingsProvider.ApplyProvider(Properties.Settings.Default, Properties.Vehicle.Default);
+
             ControlExtension.Draggable(oglZoom, true);
             ControlExtension.Draggable(panelDrag, true);
 
@@ -219,7 +231,7 @@ namespace AgOpenGPS
                     }
                 }
             }
-
+            
             FormBorderStyle = FormBorderStyle.Sizable;
             MouseWheel += ZoomByMouseWheel;
 
@@ -230,25 +242,11 @@ namespace AgOpenGPS
             pictureboxStart.Dock = System.Windows.Forms.DockStyle.Fill;
             tmrWatchdog.Enabled = true;
 
-            //set the language to last used
-            SetLanguage(Properties.Settings.Default.setF_culture);
+            Location = Properties.Settings.Default.setWindow_Location;
+            Size = Properties.Settings.Default.setWindow_Size;
 
-            if (Properties.Settings.Default.setF_workingDirectory == "Default")
-                baseDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\AgOpenGPS\\";
-            else baseDirectory = Properties.Settings.Default.setF_workingDirectory + "\\AgOpenGPS\\";
-
-            //get the fields directory, if not exist, create
-            fieldsDirectory = baseDirectory + "Fields\\";
-            string dir = Path.GetDirectoryName(fieldsDirectory);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
-
-            //get the fields directory, if not exist, create
-            vehiclesDirectory = baseDirectory + "Vehicles\\";
-            dir = Path.GetDirectoryName(vehiclesDirectory);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
-
-            //make sure current field directory exists, null if not
-            currentFieldDirectory = Properties.Settings.Default.setF_CurrentDir;
+            if (Properties.Settings.Default.setDisplay_isStartFullScreen)
+                this.WindowState = FormWindowState.Maximized;
 
             // load all the gui elements in gui.designer.cs
             LoadSettings();
@@ -259,7 +257,7 @@ namespace AgOpenGPS
             Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
             FixPanelsAndMenus();
 
-            this.Resize += new System.EventHandler(this.FormGPS_Resize); 
+            this.Resize += new System.EventHandler(this.FormGPS_Resize);
         }
 
         private void SetGuiText()
