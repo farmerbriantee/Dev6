@@ -604,7 +604,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>gStr.uk.resx</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="Properties\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -846,6 +846,9 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="..\.editorconfig">
+      <Link>Properties\.editorconfig</Link>
+    </None>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
