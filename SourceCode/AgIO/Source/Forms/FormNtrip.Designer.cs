@@ -31,14 +31,12 @@
             this.components = new System.ComponentModel.Container();
             this.tboxCasterIP = new System.Windows.Forms.TextBox();
             this.nudCasterPort = new System.Windows.Forms.NumericUpDown();
-            this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.tboxHostName = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.nudSendToUDPPort = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.tboxUserName = new System.Windows.Forms.TextBox();
             this.tboxUserPassword = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -71,6 +69,8 @@
             this.label20 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.listboxIP = new System.Windows.Forms.ListBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
@@ -99,9 +99,10 @@
             this.tboxCasterIP.Location = new System.Drawing.Point(83, 458);
             this.tboxCasterIP.Name = "tboxCasterIP";
             this.tboxCasterIP.ReadOnly = true;
-            this.tboxCasterIP.Size = new System.Drawing.Size(157, 33);
+            this.tboxCasterIP.Size = new System.Drawing.Size(170, 33);
             this.tboxCasterIP.TabIndex = 79;
             this.tboxCasterIP.Text = "192.168.188.255";
+            this.tboxCasterIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tboxCasterIP.Validating += new System.ComponentModel.CancelEventHandler(this.tboxCasterIP_Validating);
             // 
             // nudCasterPort
@@ -129,16 +130,6 @@
             0,
             0});
             this.nudCasterPort.Enter += new System.EventHandler(this.NudCasterPort_Enter);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(434, 436);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(57, 25);
-            this.label6.TabIndex = 81;
-            this.label6.Text = "Port:";
             // 
             // label5
             // 
@@ -183,15 +174,15 @@
             // nudSendToUDPPort
             // 
             this.nudSendToUDPPort.BackColor = System.Drawing.Color.AliceBlue;
-            this.nudSendToUDPPort.Font = new System.Drawing.Font("Tahoma", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.nudSendToUDPPort.Location = new System.Drawing.Point(567, 169);
+            this.nudSendToUDPPort.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudSendToUDPPort.Location = new System.Drawing.Point(569, 200);
             this.nudSendToUDPPort.Maximum = new decimal(new int[] {
             65535,
             0,
             0,
             0});
             this.nudSendToUDPPort.Name = "nudSendToUDPPort";
-            this.nudSendToUDPPort.Size = new System.Drawing.Size(121, 40);
+            this.nudSendToUDPPort.Size = new System.Drawing.Size(141, 46);
             this.nudSendToUDPPort.TabIndex = 74;
             this.nudSendToUDPPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.nudSendToUDPPort.Value = new decimal(new int[] {
@@ -210,16 +201,6 @@
             this.label10.Size = new System.Drawing.Size(27, 23);
             this.label10.TabIndex = 76;
             this.label10.Text = "IP";
-            // 
-            // label7
-            // 
-            this.label7.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(537, 127);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(180, 31);
-            this.label7.TabIndex = 99;
-            this.label7.Text = "To UDP Port";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             // 
             // tboxUserName
             // 
@@ -329,7 +310,7 @@
             // 
             this.btnGetIP.BackColor = System.Drawing.SystemColors.MenuBar;
             this.btnGetIP.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGetIP.Location = new System.Drawing.Point(83, 381);
+            this.btnGetIP.Location = new System.Drawing.Point(83, 387);
             this.btnGetIP.Name = "btnGetIP";
             this.btnGetIP.Size = new System.Drawing.Size(157, 40);
             this.btnGetIP.TabIndex = 109;
@@ -538,7 +519,7 @@
             this.checkBoxusetcp.FlatAppearance.CheckedBackColor = System.Drawing.Color.Teal;
             this.checkBoxusetcp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.checkBoxusetcp.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.checkBoxusetcp.Location = new System.Drawing.Point(45, 148);
+            this.checkBoxusetcp.Location = new System.Drawing.Point(45, 139);
             this.checkBoxusetcp.Name = "checkBoxusetcp";
             this.checkBoxusetcp.Size = new System.Drawing.Size(129, 41);
             this.checkBoxusetcp.TabIndex = 132;
@@ -608,6 +589,8 @@
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.Azure;
+            this.tabPage1.Controls.Add(this.label6);
+            this.tabPage1.Controls.Add(this.label7);
             this.tabPage1.Controls.Add(this.listboxIP);
             this.tabPage1.Controls.Add(this.tboxUserPassword);
             this.tabPage1.Controls.Add(this.btnGetSourceTable);
@@ -622,7 +605,6 @@
             this.tabPage1.Controls.Add(this.tboxCasterIP);
             this.tabPage1.Controls.Add(this.tboxEnterURL);
             this.tabPage1.Controls.Add(this.nudCasterPort);
-            this.tabPage1.Controls.Add(this.label6);
             this.tabPage1.Controls.Add(this.label4);
             this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Controls.Add(this.label10);
@@ -634,6 +616,26 @@
             this.tabPage1.Size = new System.Drawing.Size(733, 515);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Source";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(489, 470);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(123, 23);
+            this.label6.TabIndex = 146;
+            this.label6.Text = "Default: 2101";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.Location = new System.Drawing.Point(494, 395);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(123, 25);
+            this.label7.TabIndex = 145;
+            this.label7.Text = "Caster Port:";
             // 
             // listboxIP
             // 
@@ -656,7 +658,6 @@
             this.tabPage2.Controls.Add(this.label1);
             this.tabPage2.Controls.Add(this.cboxToSerial);
             this.tabPage2.Controls.Add(this.cboxToUDP);
-            this.tabPage2.Controls.Add(this.label7);
             this.tabPage2.Controls.Add(this.nudSendToUDPPort);
             this.tabPage2.Controls.Add(this.label19);
             this.tabPage2.Controls.Add(this.label9);
@@ -683,11 +684,11 @@
             // label1
             // 
             this.label1.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(434, 33);
+            this.label1.Location = new System.Drawing.Point(440, 61);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(240, 31);
             this.label1.TabIndex = 142;
-            this.label1.Text = "Sending NTRIP";
+            this.label1.Text = "Send To GPS Using:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             // 
             // cboxToSerial
@@ -696,18 +697,17 @@
             this.cboxToSerial.Appearance = System.Windows.Forms.Appearance.Button;
             this.cboxToSerial.BackColor = System.Drawing.Color.Salmon;
             this.cboxToSerial.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.cboxToSerial.Checked = true;
-            this.cboxToSerial.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cboxToSerial.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.cboxToSerial.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cboxToSerial.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxToSerial.Location = new System.Drawing.Point(395, 82);
+            this.cboxToSerial.Image = global::AgIO.Properties.Resources.NtripToSerial;
+            this.cboxToSerial.Location = new System.Drawing.Point(395, 106);
             this.cboxToSerial.Name = "cboxToSerial";
             this.cboxToSerial.Size = new System.Drawing.Size(150, 50);
             this.cboxToSerial.TabIndex = 140;
-            this.cboxToSerial.Text = "To Serial";
             this.cboxToSerial.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.cboxToSerial.UseVisualStyleBackColor = false;
+            this.cboxToSerial.Click += new System.EventHandler(this.cboxToSerial_Click);
             // 
             // cboxToUDP
             // 
@@ -715,18 +715,17 @@
             this.cboxToUDP.Appearance = System.Windows.Forms.Appearance.Button;
             this.cboxToUDP.BackColor = System.Drawing.Color.Salmon;
             this.cboxToUDP.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.cboxToUDP.Checked = true;
-            this.cboxToUDP.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cboxToUDP.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.cboxToUDP.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cboxToUDP.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxToUDP.Location = new System.Drawing.Point(395, 164);
+            this.cboxToUDP.Image = global::AgIO.Properties.Resources.NtripToUDP;
+            this.cboxToUDP.Location = new System.Drawing.Point(395, 197);
             this.cboxToUDP.Name = "cboxToUDP";
             this.cboxToUDP.Size = new System.Drawing.Size(150, 50);
             this.cboxToUDP.TabIndex = 141;
-            this.cboxToUDP.Text = "To UDP";
             this.cboxToUDP.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.cboxToUDP.UseVisualStyleBackColor = false;
+            this.cboxToUDP.Click += new System.EventHandler(this.cboxToUDP_Click);
             // 
             // tabPage3
             // 
@@ -761,11 +760,11 @@
             // labelRtcmPort
             // 
             this.labelRtcmPort.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelRtcmPort.Location = new System.Drawing.Point(48, 295);
+            this.labelRtcmPort.Location = new System.Drawing.Point(48, 280);
             this.labelRtcmPort.Name = "labelRtcmPort";
-            this.labelRtcmPort.Size = new System.Drawing.Size(121, 47);
+            this.labelRtcmPort.Size = new System.Drawing.Size(121, 62);
             this.labelRtcmPort.TabIndex = 137;
-            this.labelRtcmPort.Text = "UDP Send Packet Size";
+            this.labelRtcmPort.Text = "UDP Send Packet Burst \r\nDefault 256 bytes\r\n";
             this.labelRtcmPort.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // cboxIsNTRIPOn
@@ -773,18 +772,17 @@
             this.cboxIsNTRIPOn.Appearance = System.Windows.Forms.Appearance.Button;
             this.cboxIsNTRIPOn.BackColor = System.Drawing.Color.Salmon;
             this.cboxIsNTRIPOn.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.cboxIsNTRIPOn.Checked = true;
-            this.cboxIsNTRIPOn.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cboxIsNTRIPOn.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.cboxIsNTRIPOn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cboxIsNTRIPOn.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cboxIsNTRIPOn.Location = new System.Drawing.Point(237, 586);
+            this.cboxIsNTRIPOn.Location = new System.Drawing.Point(342, 588);
             this.cboxIsNTRIPOn.Name = "cboxIsNTRIPOn";
             this.cboxIsNTRIPOn.Size = new System.Drawing.Size(150, 50);
             this.cboxIsNTRIPOn.TabIndex = 92;
             this.cboxIsNTRIPOn.Text = "NTRIP On";
             this.cboxIsNTRIPOn.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.cboxIsNTRIPOn.UseVisualStyleBackColor = false;
+            this.cboxIsNTRIPOn.Click += new System.EventHandler(this.cboxIsNTRIPOn_Click);
             // 
             // btnSerialCancel
             // 
@@ -795,7 +793,7 @@
             this.btnSerialCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSerialCancel.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSerialCancel.Image = global::AgIO.Properties.Resources.Cancel64;
-            this.btnSerialCancel.Location = new System.Drawing.Point(469, 581);
+            this.btnSerialCancel.Location = new System.Drawing.Point(529, 581);
             this.btnSerialCancel.Name = "btnSerialCancel";
             this.btnSerialCancel.Size = new System.Drawing.Size(105, 64);
             this.btnSerialCancel.TabIndex = 95;
@@ -823,7 +821,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.Window;
+            this.BackColor = System.Drawing.Color.WhiteSmoke;
             this.ClientSize = new System.Drawing.Size(767, 648);
             this.ControlBox = false;
             this.Controls.Add(this.tabControl1);
@@ -858,7 +856,6 @@
         private System.Windows.Forms.CheckBox cboxIsNTRIPOn;
         private System.Windows.Forms.TextBox tboxCasterIP;
         private System.Windows.Forms.NumericUpDown nudCasterPort;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox tboxHostName;
@@ -867,7 +864,6 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button btnSerialCancel;
         private System.Windows.Forms.Button btnSerialOK;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox tboxUserName;
         private System.Windows.Forms.TextBox tboxUserPassword;
         private System.Windows.Forms.Label label3;
@@ -908,5 +904,7 @@
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.ComboBox comboboxPacketSize;
         private System.Windows.Forms.Label labelRtcmPort;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
     }
 }

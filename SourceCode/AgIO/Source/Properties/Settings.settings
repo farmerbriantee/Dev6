@@ -9,7 +9,28 @@
       <Value Profile="(Default)">9600</Value>
     </Setting>
     <Setting Name="setUDP_isOn" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="setPort_wasSteerModuleConnected" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="setPort_portNameSteer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Steer*</Value>
+    </Setting>
+    <Setting Name="setPort_wasModule3Connected" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="setPort_portNameTool" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Tool**</Value>
+    </Setting>
+    <Setting Name="setIP_thisPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">9999</Value>
+    </Setting>
+    <Setting Name="setIP_autoSteerIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.1.255</Value>
+    </Setting>
+    <Setting Name="setIP_autoSteerPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">8888</Value>
     </Setting>
     <Setting Name="setNTRIP_casterIP" Type="System.String" Scope="User">
       <Value Profile="(Default)">69.75.31.235</Value>
@@ -65,6 +86,33 @@
     <Setting Name="setF_culture" Type="System.String" Scope="User">
       <Value Profile="(Default)">en</Value>
     </Setting>
+    <Setting Name="setGPS_SimLatitude" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="setGPS_SimLongitude" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="setComm_commName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="setPort_portNameGPS2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">GPS2</Value>
+    </Setting>
+    <Setting Name="setPort_baudRateGPS2" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">9600</Value>
+    </Setting>
+    <Setting Name="setPort_portNameMachine" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Mach**</Value>
+    </Setting>
+    <Setting Name="setPort_wasMachineModuleConnected" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="setPort_wasIMUConnected" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="setPort_portNameIMU" Type="System.String" Scope="User">
+      <Value Profile="(Default)">IMU</Value>
+    </Setting>
     <Setting Name="setPort_wasGPSConnected" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -86,9 +134,6 @@
     <Setting Name="setUDP_isSendNMEAToUDP" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="setGPS_lastSentence" Type="System.String" Scope="User">
-      <Value Profile="(Default)">GGA</Value>
-    </Setting>
     <Setting Name="setPort_portNameRtcm" Type="System.String" Scope="User">
       <Value Profile="(Default)">RTCM</Value>
     </Setting>
@@ -98,17 +143,35 @@
     <Setting Name="setPort_wasRtcmConnected" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="setUDP_isUsePluginApp" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="setNTRIP_sendToSerial" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="setNTRIP_sendToUDP" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="setIP_localAOG" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.1.10</Value>
+    </Setting>
+    <Setting Name="setUDP_isUsePluginApp" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="setIP_localNTRIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.1.10</Value>
+    </Setting>
     <Setting Name="setNTRIP_packetSize" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">256</Value>
+    </Setting>
+    <Setting Name="setMod_isIMUConnected" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="setMod_isMachineConnected" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="setMod_isSteerConnected" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="setPass_isOn" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

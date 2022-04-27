@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Windows.Forms;
 
 namespace AgIO
@@ -11,9 +12,7 @@ namespace AgIO
 
             InitializeComponent();
 
-            //this.Text = gStr.gsEnteraValue;
             this.Text = "Enter Something";
-            //fill in the display
             keyboardString.Text = currentString.ToString();
         }
 
@@ -22,6 +21,29 @@ namespace AgIO
             keyboardString.SelectionStart = keyboardString.Text.Length;
             keyboardString.SelectionLength = 0;
             keyboard1.Focus();
+
+            //opening the subkey
+            RegistryKey regKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\AgOpenGPS");
+
+            //create default keys if not existing
+            if (regKey == null)
+            {
+                RegistryKey Key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\AgOpenGPS");
+
+                //storing the values
+                Key.SetValue("Language", "en");
+                Key.Close();
+
+                Properties.Settings.Default.setF_culture = "en";
+                Properties.Settings.Default.Save();
+            }
+            else
+            {
+                Properties.Settings.Default.setF_culture = regKey.GetValue("Language").ToString();
+                Properties.Settings.Default.Save();
+                regKey.Close();
+            }
+
 
             string language = Properties.Settings.Default.setF_culture;
             if (language == "fr")

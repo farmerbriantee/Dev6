@@ -49,13 +49,97 @@ namespace AgIO.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool setUDP_isOn {
             get {
                 return ((bool)(this["setUDP_isOn"]));
             }
             set {
                 this["setUDP_isOn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setPort_wasSteerModuleConnected {
+            get {
+                return ((bool)(this["setPort_wasSteerModuleConnected"]));
+            }
+            set {
+                this["setPort_wasSteerModuleConnected"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Steer*")]
+        public string setPort_portNameSteer {
+            get {
+                return ((string)(this["setPort_portNameSteer"]));
+            }
+            set {
+                this["setPort_portNameSteer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setPort_wasModule3Connected {
+            get {
+                return ((bool)(this["setPort_wasModule3Connected"]));
+            }
+            set {
+                this["setPort_wasModule3Connected"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Tool**")]
+        public string setPort_portNameTool {
+            get {
+                return ((string)(this["setPort_portNameTool"]));
+            }
+            set {
+                this["setPort_portNameTool"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9999")]
+        public int setIP_thisPort {
+            get {
+                return ((int)(this["setIP_thisPort"]));
+            }
+            set {
+                this["setIP_thisPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.255")]
+        public string setIP_autoSteerIP {
+            get {
+                return ((string)(this["setIP_autoSteerIP"]));
+            }
+            set {
+                this["setIP_autoSteerIP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8888")]
+        public int setIP_autoSteerPort {
+            get {
+                return ((int)(this["setIP_autoSteerPort"]));
+            }
+            set {
+                this["setIP_autoSteerPort"] = value;
             }
         }
         
@@ -277,6 +361,114 @@ namespace AgIO.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double setGPS_SimLatitude {
+            get {
+                return ((double)(this["setGPS_SimLatitude"]));
+            }
+            set {
+                this["setGPS_SimLatitude"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double setGPS_SimLongitude {
+            get {
+                return ((double)(this["setGPS_SimLongitude"]));
+            }
+            set {
+                this["setGPS_SimLongitude"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string setComm_commName {
+            get {
+                return ((string)(this["setComm_commName"]));
+            }
+            set {
+                this["setComm_commName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("GPS2")]
+        public string setPort_portNameGPS2 {
+            get {
+                return ((string)(this["setPort_portNameGPS2"]));
+            }
+            set {
+                this["setPort_portNameGPS2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9600")]
+        public int setPort_baudRateGPS2 {
+            get {
+                return ((int)(this["setPort_baudRateGPS2"]));
+            }
+            set {
+                this["setPort_baudRateGPS2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Mach**")]
+        public string setPort_portNameMachine {
+            get {
+                return ((string)(this["setPort_portNameMachine"]));
+            }
+            set {
+                this["setPort_portNameMachine"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setPort_wasMachineModuleConnected {
+            get {
+                return ((bool)(this["setPort_wasMachineModuleConnected"]));
+            }
+            set {
+                this["setPort_wasMachineModuleConnected"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setPort_wasIMUConnected {
+            get {
+                return ((bool)(this["setPort_wasIMUConnected"]));
+            }
+            set {
+                this["setPort_wasIMUConnected"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("IMU")]
+        public string setPort_portNameIMU {
+            get {
+                return ((string)(this["setPort_portNameIMU"]));
+            }
+            set {
+                this["setPort_portNameIMU"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool setPort_wasGPSConnected {
             get {
@@ -360,18 +552,6 @@ namespace AgIO.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("GGA")]
-        public string setGPS_lastSentence {
-            get {
-                return ((string)(this["setGPS_lastSentence"]));
-            }
-            set {
-                this["setGPS_lastSentence"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("RTCM")]
         public string setPort_portNameRtcm {
             get {
@@ -408,19 +588,7 @@ namespace AgIO.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool setUDP_isUsePluginApp {
-            get {
-                return ((bool)(this["setUDP_isUsePluginApp"]));
-            }
-            set {
-                this["setUDP_isUsePluginApp"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool setNTRIP_sendToSerial {
             get {
                 return ((bool)(this["setNTRIP_sendToSerial"]));
@@ -444,6 +612,42 @@ namespace AgIO.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.10")]
+        public string setIP_localAOG {
+            get {
+                return ((string)(this["setIP_localAOG"]));
+            }
+            set {
+                this["setIP_localAOG"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setUDP_isUsePluginApp {
+            get {
+                return ((bool)(this["setUDP_isUsePluginApp"]));
+            }
+            set {
+                this["setUDP_isUsePluginApp"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.10")]
+        public string setIP_localNTRIP {
+            get {
+                return ((string)(this["setIP_localNTRIP"]));
+            }
+            set {
+                this["setIP_localNTRIP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("256")]
         public int setNTRIP_packetSize {
             get {
@@ -451,6 +655,54 @@ namespace AgIO.Properties {
             }
             set {
                 this["setNTRIP_packetSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setMod_isIMUConnected {
+            get {
+                return ((bool)(this["setMod_isIMUConnected"]));
+            }
+            set {
+                this["setMod_isIMUConnected"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setMod_isMachineConnected {
+            get {
+                return ((bool)(this["setMod_isMachineConnected"]));
+            }
+            set {
+                this["setMod_isMachineConnected"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setMod_isSteerConnected {
+            get {
+                return ((bool)(this["setMod_isSteerConnected"]));
+            }
+            set {
+                this["setMod_isSteerConnected"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool setPass_isOn {
+            get {
+                return ((bool)(this["setPass_isOn"]));
+            }
+            set {
+                this["setPass_isOn"] = value;
             }
         }
     }
