@@ -1671,7 +1671,7 @@
             this.HelpButton = true;
             this.MaximumSize = new System.Drawing.Size(908, 627);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(378, 462);
+            this.MinimumSize = new System.Drawing.Size(378, 460);
             this.Name = "FormSteer";
             this.Padding = new System.Windows.Forms.Padding(2);
             this.ShowIcon = false;

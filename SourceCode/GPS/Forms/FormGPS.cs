@@ -61,19 +61,14 @@ namespace AgOpenGPS
         public uint[] texture;
 
         public string currentVersionStr = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        //create instance of a stopwatch for timing of frames and NMEA hz determination
-        private readonly Stopwatch swFrame = new Stopwatch();
 
         public double secondsSinceStart;
-
-        //Time to do fix position update and draw routine
-        public double frameTime = 0;
 
         //create instance of a stopwatch for timing of frames and NMEA hz determination
         private readonly Stopwatch swHz = new Stopwatch();
 
         //Time to do fix position update and draw routine
-        private double HzTime = 5;
+        public double frameTime = 0, rawHz = 0.5, HzTime = 5;
 
         //For field saving in background
         private int secondsCounter = 1;

@@ -25,6 +25,7 @@ namespace AgOpenGPS
             this.label3.Text = gStr.gsAgressiveness;
             this.label5.Text = gStr.gsOvershootReduction;
             this.Text = gStr.gsAutoSteerConfiguration;
+            Size = MinimumSize;
         }
 
         private void FormSteer_Load(object sender, EventArgs e)

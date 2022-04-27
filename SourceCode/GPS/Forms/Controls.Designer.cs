@@ -1010,6 +1010,17 @@ namespace AgOpenGPS
             Properties.Vehicle.Default.Save();
         }
 
+        private void btnResetToolHeading_Click(object sender, EventArgs e)
+        {
+            tankPos.heading = fixHeading;
+            tankPos.easting = hitchPos.easting + (Math.Sin(tankPos.heading) * (tool.toolTankTrailingHitchLength));
+            tankPos.northing = hitchPos.northing + (Math.Cos(tankPos.heading) * (tool.toolTankTrailingHitchLength));
+
+            toolPos.heading = tankPos.heading;
+            toolPos.easting = tankPos.easting + (Math.Sin(toolPos.heading) * (tool.toolTrailingHitchLength));
+            toolPos.northing = tankPos.northing + (Math.Cos(toolPos.heading) * (tool.toolTrailingHitchLength));
+        }
+
         private void btnHeadlandOnOff_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -1303,6 +1314,12 @@ namespace AgOpenGPS
             {
                 using (var form = new FormJob(this))
                 {
+                    if (!isFirstFixPositionSet || sentenceCounter > 299 || mc.latitude == 0 || mc.longitude == 0)
+                    {
+                        TimedMessageBox(2500, "No GPS", "You are lost with no GPS, Fix that First");
+                        return;
+                    }
+
                     var result = form.ShowDialog(this);
                     if (result == DialogResult.Yes)
                     {

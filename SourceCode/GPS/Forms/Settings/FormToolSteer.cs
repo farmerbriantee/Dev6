@@ -19,6 +19,7 @@ namespace AgOpenGPS
             mf = callingForm as FormGPS;
             InitializeComponent();
             this.Text = gStr.gsAutoSteerConfiguration;
+            Size = MinimumSize;
         }
 
         private void FormSteer_Load(object sender, EventArgs e)
@@ -137,7 +138,7 @@ namespace AgOpenGPS
             }
 
             lblToolDistanceSet.Text = mf.vehicle.driveFreeToolDistance.ToString("0.0");
-            lblToolDistanceActual.Text = mf.mc.toolActualDistance.ToString("N1");
+            lblToolDistanceActual.Text = mf.mc.toolActualDistance.ToString("0.0");
             lblActualSteerAngleUpper.Text = lblToolDistanceActual.Text;
 
             double err = (mf.mc.toolActualDistance - mf.vehicle.driveFreeToolDistance);

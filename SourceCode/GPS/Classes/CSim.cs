@@ -21,12 +21,12 @@ namespace AgOpenGPS
         {
             steerAngle = _st;
 
-            easting += Math.Sin(heading) * stepDistance * mf.fixUpdateTime;
-            northing += Math.Cos(heading) * stepDistance * mf.fixUpdateTime;
+            easting += Math.Sin(heading) * stepDistance / mf.HzTime;
+            northing += Math.Cos(heading) * stepDistance / mf.HzTime;
 
             vec2 frontWheel;
-            frontWheel.easting = (Math.Sin(heading) * mf.vehicle.wheelbase) + Math.Sin(heading + glm.toRadians(steerAngle)) * stepDistance * mf.fixUpdateTime;
-            frontWheel.northing = (Math.Cos(heading) * mf.vehicle.wheelbase) + Math.Cos(heading + glm.toRadians(steerAngle)) * stepDistance * mf.fixUpdateTime;
+            frontWheel.easting = (Math.Sin(heading) * mf.vehicle.wheelbase) + Math.Sin(heading + glm.toRadians(steerAngle)) * stepDistance / mf.HzTime;
+            frontWheel.northing = (Math.Cos(heading) * mf.vehicle.wheelbase) + Math.Cos(heading + glm.toRadians(steerAngle)) * stepDistance / mf.HzTime;
 
             heading = Math.Atan2(frontWheel.easting, frontWheel.northing);
 

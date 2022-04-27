@@ -2,6 +2,7 @@
 //Copyright BrianTee, copy right out of it.
 
 using System;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace AgOpenGPS
@@ -17,13 +18,16 @@ namespace AgOpenGPS
 
             lblSunrise.Text = mf.sunrise.ToString("HH:mm");
             lblSunset.Text = mf.sunset.ToString("HH:mm");
+            lblVersion.Text = Application.ProductVersion.ToString(CultureInfo.InvariantCulture);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
             lblTram.Text = mf.tram.controlByte.ToString();
 
-            lblHz.Text = mf.fixUpdateHz + " ~ " + mf.frameTime.ToString("0.0");
+            lblFrameTime.Text = mf.frameTime.ToString("0.0");
+            lblTimeSlice.Text = mf.rawHz.ToString("0.000");
+            lblHz.Text = mf.HzTime.ToString("0.0");
 
             lblEastingField.Text = mf.pivotAxlePos.easting.ToString("0.00");
             lblNorthingField.Text = mf.pivotAxlePos.northing.ToString("0.00");

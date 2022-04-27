@@ -170,11 +170,11 @@ namespace AgOpenGPS
         }
 
         //Does the logic to process section on off requests
-        public void ProcessSectionOnOffRequests(double Hz)
+        public void ProcessSectionOnOffRequests()
         {
             if (sections.Count > 0)
             {
-                double timer = Hz / (isFastSections ? 1 : 2);
+                double timer = mf.HzTime / (isFastSections ? 1 : 2);
                 for (int j = 0; j < sections.Count - 1; j++)
                 {
                     //SECTIONS - 

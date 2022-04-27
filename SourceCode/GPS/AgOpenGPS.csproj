@@ -187,8 +187,14 @@
     <EmbeddedResource Include="Forms\FormMap.resx">
       <DependentUpon>FormMap.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Form_About.es.resx">
+      <DependentUpon>Form_About.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\Form_About.fr.resx">
       <DependentUpon>Form_About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Form_First.es.resx">
+      <DependentUpon>Form_First.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Form_First.fr.resx">
       <DependentUpon>Form_First.cs</DependentUpon>
@@ -799,6 +805,7 @@
     <EmbeddedResource Include="gStr.es.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>gStr.es.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="gStr.fr.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -840,8 +847,8 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config">
-		<SubType>Designer</SubType>
-	</None>
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -882,6 +889,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AOG.ico" />
+    <None Include="btnImages\ResetTool.png" />
     <None Include="btnImages\Images\z_bingMap.png" />
     <None Include="btnImages\Marker.png" />
     <None Include="btnImages\MapGray.png" />

@@ -1010,7 +1010,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(890, 611);
+            this.ClientSize = new System.Drawing.Size(892, 613);
             this.Controls.Add(this.cboxToolOnlyGPS);
             this.Controls.Add(this.lblAntennaOffset);
             this.Controls.Add(this.lblAntennaHeight);

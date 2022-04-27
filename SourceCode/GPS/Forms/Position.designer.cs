@@ -22,10 +22,6 @@ namespace AgOpenGPS
         //guidance line look ahead
         public double guidanceLookAheadTime = 2;
 
-        //how many fix updates per sec
-        public int fixUpdateHz = 10;
-        public double fixUpdateTime = 0.1;
-
         public vec2 pivotAxlePos = new vec2(0, 0);
         public vec2 steerAxlePos = new vec2(0, 0);
         public vec3 toolPos = new vec3(0, 0, 0);
@@ -70,8 +66,6 @@ namespace AgOpenGPS
         public vecFix2Fix[] stepFixPts = new vecFix2Fix[totalFixSteps];
         public double distanceCurrentStepFix = 0, minFixStepDist = 1, startSpeed = 0.5;
 
-        private double nowHz = 0;
-
         public bool isRTK, isRTK_KillAutosteer;
 
         public double uncorrectedEastingGraph = 0;
@@ -80,33 +74,21 @@ namespace AgOpenGPS
         public void UpdateFixPosition()
         {
             //Measure the frequency of the GPS updates
-            swHz.Stop();
-            nowHz = ((double)System.Diagnostics.Stopwatch.Frequency) / (double)swHz.ElapsedTicks;
-
-            //simple comp filter
-            if (nowHz < 20) HzTime = 0.97 * HzTime + 0.03 * nowHz;
-
-            if(timerSim.Enabled && Debugger.IsAttached)
-                HzTime = 10;
-
-            //auto set gps freq
-            fixUpdateHz = (int)(HzTime + 0.5);
-            fixUpdateTime = 1 / HzTime;
-
-            if (Debugger.IsAttached)
-            {
-                //fixUpdateHz = 10;
-                //fixUpdateTime = 0.1;
-            }
-
+            rawHz = ((double)System.Diagnostics.Stopwatch.Frequency) / (double)swHz.ElapsedTicks;
+            //start the watch and time till it finishes
             swHz.Reset();
             swHz.Start();
 
-            //start the watch and time till it finishes
-            swFrame.Reset();
-            swFrame.Start();
+            if (rawHz > 100) rawHz = 100;
+            if (rawHz < 0.5) rawHz = 0.5;
+            //simple comp filter
+            HzTime = 0.97 * HzTime + 0.03 * rawHz;
+
+            if (timerSim.Enabled && Debugger.IsAttached)
+                HzTime = 10;
 
             startCounter++;
+            secondsSinceStart = (DateTime.Now - Process.GetCurrentProcess().StartTime).TotalSeconds;
 
             if (!isGPSPositionInitialized)
             {
@@ -484,7 +466,7 @@ namespace AgOpenGPS
             if (mc.speed == double.MaxValue)
             {
                 double distance = glm.Distance(oldpivotAxlePos, pivotAxlePos);
-                mc.avgSpeed = (mc.avgSpeed * 0.5) + (distance * 3.6 * 0.5) * HzTime;
+                mc.avgSpeed = (mc.avgSpeed * 0.8) + (distance * 3.6 * 0.2) * HzTime;
             }
             else
             {
@@ -677,7 +659,7 @@ namespace AgOpenGPS
                 SendPgnToLoop(p_239.pgn);
 
                 //Determine if sections want to be on or off
-                tool.ProcessSectionOnOffRequests(HzTime);
+                tool.ProcessSectionOnOffRequests();
             }
 
             //section on off and points, contour points
@@ -740,14 +722,11 @@ namespace AgOpenGPS
                 tmrWatchdog.Enabled = true;
             }
 
-            //end of UppdateFixPosition
-            swFrame.Stop();
-
             //stop the timer and calc how long it took to do calcs and draw
-            double frameTimeRough = (double)swFrame.ElapsedTicks / (double)System.Diagnostics.Stopwatch.Frequency * 1000;
+            double frameTimeRough = (double)(swHz.ElapsedTicks * 1000.0) / (double)System.Diagnostics.Stopwatch.Frequency;
 
-            if (frameTimeRough > 30) frameTimeRough = 30;
-            frameTime = frameTime * 0.99 + frameTimeRough * 0.01;
+            if (frameTimeRough > 50) frameTimeRough = 50;
+            frameTime = frameTime * 0.9 + frameTimeRough * 0.1;
         }
 
         //all the hitch, pivot, section, trailing hitch, headings and fixes
@@ -982,7 +961,7 @@ namespace AgOpenGPS
             left = tool.leftPoint - lastLeftPoint;
 
             //get the speed for left side only once
-            leftSpeed = left.GetLength() / fixUpdateTime;
+            leftSpeed = left.GetLength() * HzTime;
             if (leftSpeed > 27.7778) leftSpeed = 27.7778;
 
             //Is section outer going forward or backward
@@ -1006,7 +985,7 @@ namespace AgOpenGPS
             right = tool.rightPoint - lastRightPoint;
 
             //grab vector length and convert to meters/sec/10 pixels per meter                
-            rightSpeed = right.GetLength() / fixUpdateTime;
+            rightSpeed = right.GetLength() * HzTime;
             if (rightSpeed > 27.7778) rightSpeed = 27.7778;
 
             if (Math.PI - Math.Abs(Math.Abs(right.HeadingXZ() - toolPos.heading) - Math.PI) > glm.PIBy2)
@@ -1030,8 +1009,8 @@ namespace AgOpenGPS
                 tool.sections[j].rightPoint = tool.leftPoint + tt * (tool.sections[j].positionRight - tool.toolFarLeftPosition);
             }
 
-            double oneFrameLeft = tool.toolFarLeftSpeed * fixUpdateTime * 10;
-            double oneFrameRight = tool.toolFarRightSpeed * fixUpdateTime * 10;
+            double oneFrameLeft = tool.toolFarLeftSpeed / HzTime * 10;
+            double oneFrameRight = tool.toolFarRightSpeed / HzTime * 10;
 
             if (!tool.isFastSections)
             {

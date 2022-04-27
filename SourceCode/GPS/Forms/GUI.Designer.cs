@@ -91,7 +91,7 @@ namespace AgOpenGPS
                 if (panelNavigation.Visible)
                 {
                     if (navPanelCounter-- < 1) panelNavigation.Visible = false;
-                    lblHz.Text = fixUpdateHz + " ~ " + (frameTime.ToString("0.0")) + " " + FixQuality;
+                    lblHz.Text = HzTime.ToString("0.0") + " ~ " + (frameTime.ToString("0.0")) + " " + FixQuality;
                 }
 
                 if (bnd.bndList.Count > 0)
@@ -184,8 +184,6 @@ namespace AgOpenGPS
             //every fifth second update  ///////////////////////////   FIFTH Fifth ////////////////////////////
 
             btnAutoSteerConfig.Text = SetSteerAngle + "\r\n" + ActualSteerAngle;
-
-            secondsSinceStart = (DateTime.Now - Process.GetCurrentProcess().StartTime).TotalSeconds;
         }//wait till timer fires again.  
 
         private void IsBetweenSunriseSunset(double lat, double lon)
@@ -265,8 +263,6 @@ namespace AgOpenGPS
                 panelSim.Visible = false;
                 timerSim.Enabled = false;
             }
-
-            fixUpdateTime = 1 / (double)fixUpdateHz;
 
             //set the flag mark button to red dot
             btnFlag.Image = Properties.Resources.FlagRed;
