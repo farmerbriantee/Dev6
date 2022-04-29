@@ -21,7 +21,7 @@ namespace AgOpenGPS
         //data buffer for pixels read from off screen buffer
         private byte[] grnPixels = new byte[150001];
         private int bbCounter = 0, deadCam = 0;
-        private double maxFieldX, maxFieldY, minFieldX, minFieldY;
+        public double maxFieldX, maxFieldY, minFieldX, minFieldY;
 
         public double fieldCenterX, fieldCenterY, maxFieldDistance, maxCrossFieldLength, avgPivDistance, avgPivDistanceTool;
 
@@ -172,7 +172,7 @@ namespace AgOpenGPS
                         isDraw = true;
                         break;
                     }
-                    
+
                     if (isDraw && triList.points.Count > 4)
                     {
                         GL.Color4((byte)triList.points[0].easting, (byte)triList.points[0].northing, (byte)triList.points[1].easting, (byte)(isDay ? 152 : 76));

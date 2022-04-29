@@ -88,8 +88,6 @@ namespace AgOpenGPS
             
             if (!isValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh || refList == creatingContour)))
             {
-                double minDistA = double.MaxValue, minDistB;
-
                 int refCount = refList.curvePts.Count - (refList == creatingContour ? backSpacing : 0);
                 if (refList.curvePts.Count < 2)
                 {
@@ -106,43 +104,13 @@ namespace AgOpenGPS
                                                     pivot.northing + (Math.Cos(heading) * guidanceLookDist));
                 }
 
-                //close call hit
-                int cc = 0, dd;
-
-                for (int j = 0; j < refCount; j += 10)
+                pivot.GetCurrentSegment(refList.curvePts, 0, refList.mode.HasFlag(Mode.Boundary), out rA, out rB, refCount);
+                if (rA < 0 || rB < 0)
                 {
-                    double dist = glm.Distance(pivot, refList.curvePts[j]);
-                    if (dist < minDistA)
-                    {
-                        minDistA = dist;
-                        cc = j;
-                    }
+                    curList.Clear();
+                    isLocked = false;
+                    return;
                 }
-
-                minDistA = minDistB = double.MaxValue;
-
-                dd = cc + 7; if (dd > refCount - 1) dd = refCount;
-                cc -= 7; if (cc < 0) cc = 0;
-
-                //find the closest 2 points to current close call
-                for (int j = cc; j < dd; j++)
-                {
-                    double dist = glm.Distance(pivot, refList.curvePts[j]);
-                    if (dist < minDistA)
-                    {
-                        minDistB = minDistA;
-                        rB = rA;
-                        minDistA = dist;
-                        rA = j;
-                    }
-                    else if (dist < minDistB)
-                    {
-                        minDistB = dist;
-                        rB = j;
-                    }
-                }
-
-                if (rA > rB) { int C = rA; rA = rB; rB = C; }
 
                 //same way as line creation or not
                 isHeadingSameWay = Math.PI - Math.Abs(Math.Abs(heading - refList.curvePts[rA].heading) - Math.PI) < glm.PIBy2;
@@ -187,7 +155,7 @@ namespace AgOpenGPS
                 curList = BuildOffsetList(refList, distAway);
                 isValid = true;
 
-                if (mf.isSideGuideLines && refList.mode.HasFlag(Mode.AB))
+                if (mf.isSideGuideLines && refList.mode.HasFlag(Mode.AB) && howManyPathsAway != oldHowManyPathsAway)
                 {
                     int Gcnt;
 

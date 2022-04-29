@@ -16,6 +16,8 @@ namespace AgOpenGPS
 
         private bool isDrawSections = false;
 
+        private double currentFieldCenterX, currentFieldCenterY, currentDist;
+
         private CGuidanceLine selectedCurveLine, selectedABLine;
 
         public FormABDraw(Form callingForm)
@@ -34,6 +36,12 @@ namespace AgOpenGPS
                 nudDistance.Maximum = (int)(nudDistance.Maximum / 2.54M);
                 nudDistance.Minimum = (int)(nudDistance.Minimum / 2.54M);
             }
+
+            currentFieldCenterX = mf.fieldCenterX;
+            currentFieldCenterY = mf.fieldCenterY;
+            currentDist = mf.maxFieldDistance;
+
+            MouseWheel += ZoomByMouseWheel;
         }
 
         private void FormABDraw_Load(object sender, EventArgs e)
@@ -73,6 +81,101 @@ namespace AgOpenGPS
                     mf.SetGuidanceMode(Mode.None);
             }
             mf.FileSaveCurveLines();
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            //capture up arrow key
+            if (keyData == Keys.Up)
+            {
+                currentFieldCenterY += 10;
+                if (currentFieldCenterY > mf.maxFieldY)
+                    currentFieldCenterY = mf.maxFieldY;
+
+                oglSelf.Refresh();
+                return true;
+            }
+            else if (keyData == Keys.Down)
+            {
+                currentFieldCenterY -= 10;
+                if (currentFieldCenterY < mf.minFieldY)
+                    currentFieldCenterY = mf.minFieldY;
+
+                oglSelf.Refresh();
+                return true;
+            }
+            else if (keyData == Keys.Left)
+            {
+                currentFieldCenterX -= 10;
+                if (currentFieldCenterX < mf.minFieldX)
+                    currentFieldCenterX = mf.minFieldX;
+
+                oglSelf.Refresh();
+                return true;
+            }
+            else if (keyData == Keys.Right)
+            {
+                currentFieldCenterX += 10;
+                if (currentFieldCenterX > mf.maxFieldX)
+                    currentFieldCenterX = mf.maxFieldX;
+
+                oglSelf.Refresh();
+                return true;
+            }
+
+            //handle your keys here
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void ZoomByMouseWheel(object sender, MouseEventArgs e)
+        {
+            if (currentDist == mf.maxFieldDistance && e.Delta < 0)
+            {
+                //currentFieldCenterX = mf.fieldCenterX;
+                //currentFieldCenterY = mf.fieldCenterY;
+
+                return;
+            }
+
+            vec2 plotPt = new vec2(
+                currentFieldCenterY + (e.X - 350) / 700.0 * currentDist,
+                currentFieldCenterX + (350 - e.Y) / 700.0 * currentDist
+            );
+
+            currentDist -= e.Delta;
+
+            if (currentDist < 100) currentDist = 100;
+            if (currentDist > mf.maxFieldDistance)
+                currentDist = mf.maxFieldDistance;
+
+            vec2 plotPt2 = new vec2(
+                currentFieldCenterY + (e.X - 350) / 700.0 * currentDist,
+                currentFieldCenterX + (350 - e.Y) / 700.0 * currentDist
+            );
+
+            double easting = plotPt2.easting - plotPt.easting;
+            double northing = plotPt2.northing - plotPt.northing;
+
+            currentFieldCenterX -= easting;
+            currentFieldCenterY -= northing;
+
+            if (currentFieldCenterY > mf.maxFieldY)
+                currentFieldCenterY = mf.maxFieldY;
+            else if (currentFieldCenterY < mf.minFieldY)
+                currentFieldCenterY = mf.minFieldY;
+
+            if (currentFieldCenterX > mf.maxFieldX)
+                currentFieldCenterX = mf.maxFieldX;
+            else if (currentFieldCenterX < mf.minFieldX)
+                currentFieldCenterX = mf.minFieldX;
+
+            oglSelf.MakeCurrent();
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            Matrix4 mat = Matrix4.CreateOrthographic((float)currentDist, (float)currentDist, -1.0f, 1.0f);
+            GL.LoadMatrix(ref mat);
+            GL.MatrixMode(MatrixMode.Modelview);
+            oglSelf.Refresh();
         }
 
         private void FixLabelsCurve()
@@ -143,6 +246,7 @@ namespace AgOpenGPS
                 {
                     loop = false;
                     i = -1;
+                    found = false;
                     if (!found) break;
                     else continue;
                 }
@@ -170,6 +274,7 @@ namespace AgOpenGPS
                 {
                     loop = false;
                     i = -1;
+                    found = false;
                     if (!found) break;
                     else continue;
                 }
@@ -296,16 +401,20 @@ namespace AgOpenGPS
 
         private void oglSelf_MouseDown(object sender, MouseEventArgs e)
         {
+            if (end > -1)
+            {
+                btnCancelTouch.Enabled = false;
+                btnMakeABLine.Enabled = false;
+                btnMakeCurve.Enabled = false;
+                start = end = -1;
+                return;
+            }
             btnCancelTouch.Enabled = true;
-            btnMakeABLine.Enabled = false;
-            btnMakeCurve.Enabled = false;
-
-            Point pt = oglSelf.PointToClient(Cursor.Position);
 
             //convert screen coordinates to field coordinates
             vec2 plotPt = new vec2(
-                mf.fieldCenterX + (pt.X - 350) / 700.0 * mf.maxFieldDistance,
-                mf.fieldCenterY + (350 - pt.Y) / 700.0 * mf.maxFieldDistance
+                currentFieldCenterX + (e.Location.X - 350) / 700.0 * currentDist,
+                currentFieldCenterY + (350 - e.Location.Y) / 700.0 * currentDist
             );
 
             double minDistA = double.MaxValue;
@@ -354,6 +463,7 @@ namespace AgOpenGPS
                 {
                     New.curvePts.Add(new vec3(poly.points[i].easting, poly.points[i].northing, 0));
                 }
+                /*
                 //make sure distance isn't too big between points on Turn
                 for (int i = 1; i < New.curvePts.Count; i++)
                 {
@@ -370,6 +480,7 @@ namespace AgOpenGPS
                         i--;
                     }
                 }
+                */
 
                 //who knows which way it actually goes
                 New.curvePts.CalculateHeadings(true);
@@ -514,7 +625,7 @@ namespace AgOpenGPS
             GL.LoadIdentity();                  // Reset The View
 
             //translate to that spot in the world
-            GL.Translate(-mf.fieldCenterX, -mf.fieldCenterY, 0);
+            GL.Translate(-currentFieldCenterX, -currentFieldCenterY, 0);
 
             GL.Color3(1, 1, 1);
 
@@ -630,7 +741,7 @@ namespace AgOpenGPS
 
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            Matrix4 mat = Matrix4.CreateOrthographic((float)mf.maxFieldDistance, (float)mf.maxFieldDistance, -1.0f, 1.0f);
+            Matrix4 mat = Matrix4.CreateOrthographic((float)currentDist, (float)currentDist, -1.0f, 1.0f);
             GL.LoadMatrix(ref mat);
             GL.MatrixMode(MatrixMode.Modelview);
         }

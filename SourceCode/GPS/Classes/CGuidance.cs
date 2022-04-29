@@ -78,6 +78,7 @@ namespace AgOpenGPS
             {
                 pivot.GetCurrentSegment(curList, 0, looped, out pA, out pB);
 
+                if (pA < 0 || pB < 0) return;
                 //return and reset if too far away or end of the line
                 if (pB > curList.Count - 2)
                     completeYouTurn = true;

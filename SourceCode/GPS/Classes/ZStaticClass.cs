@@ -234,14 +234,19 @@ namespace AgOpenGPS
             return false;
         }
 
-        public static Polyline OffsetAndDissolvePolyline(this Polyline Poly, double width, bool loop, int start = -1, int end = -1, bool add = true)
+        public static Polyline OffsetAndDissolvePolyline(this Polyline Poly, double width, bool loop, int start = -1, int end = -1, bool add = true, double radius = 0)
         {
-            List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, loop, 0, start, end, add);
+            List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, loop, 0, start, end, add, radius != 0);
 
             List<Polyline> Output = OffsetPoints.DissolvePolyLine(loop);
 
             if (Output.Count > 0)
+            {
+                if (radius != 0)
+                    Output[0].points = Output[0].points.OffsetPolyline(width < 0 ? radius : -radius, Output[0].loop, 0, start, end, add, radius > 0);
+
                 return Output[0];
+            }
             else
                 return new Polyline();
         }
@@ -255,7 +260,7 @@ namespace AgOpenGPS
             return Output;
         }
 
-        public static List<vec2> OffsetPolyline(this List<vec2> Points, double Distance, bool Loop, double AddHeader = 0, int Start = -1, int End = -1, bool Add = true)
+        public static List<vec2> OffsetPolyline(this List<vec2> Points, double Distance, bool Loop, double AddHeader = 0, int Start = -1, int End = -1, bool Add = true, bool round = false)
         {
             List<vec2> OffsetPoints = new List<vec2>();
             if (Points.Count > 1)
@@ -307,7 +312,40 @@ namespace AgOpenGPS
                             double sinA = norm1.Cross(norm2);
                             if (GetLineIntersection(start1, end1, start2, end2, out vec2 Crossing, out double Time, out double Time2, true))
                             {
-                                if (Time > 0.0 && Time < 1.0 && Time2 > 0.0 && Time2 < 1.0)
+                                if (round && sinA > 0.0 == Distance > 0)
+                                {
+                                    double startAngle = Math.Atan2(end1.easting - Points[B].easting, end1.northing - Points[B].northing);
+                                    double endAngle = Math.Atan2(end2.easting - Points[B].easting, end2.northing - Points[B].northing);
+
+                                    if (startAngle < 0) startAngle += glm.twoPI;
+                                    if (endAngle < 0) endAngle += glm.twoPI;
+
+                                    double sweepAngle;
+
+                                    if (((glm.twoPI - endAngle + startAngle) % glm.twoPI) < ((glm.twoPI - startAngle + endAngle) % glm.twoPI))
+                                        sweepAngle = (glm.twoPI - endAngle + startAngle) % glm.twoPI;
+                                    else
+                                        sweepAngle = (glm.twoPI - startAngle + endAngle) % glm.twoPI;
+                                    double Distance2 = Distance;
+
+                                    int sign = Math.Sign(-sweepAngle);
+                                    if (Distance < 0)
+                                    {
+                                        sign = -sign;
+                                        Distance2 = -Distance2;
+                                    }
+                                    int pointsCount = (int)Math.Round(Math.Abs(sweepAngle / 0.0436332));
+
+                                    double degreeFactor = sweepAngle / pointsCount;
+
+                                    for (int j = 0; j < pointsCount; ++j)
+                                    {
+                                        var pointX = Points[B].northing + Math.Cos(startAngle + sign * (j + 1) * degreeFactor) * Distance2;
+                                        var pointY = Points[B].easting + Math.Sin(startAngle + sign * (j + 1) * degreeFactor) * Distance2;
+                                        OffsetPoints.Add(new vec2(pointY, pointX));
+                                    }
+                                }
+                                else if (Time > 0.0 && Time < 1.0 && Time2 > 0.0 && Time2 < 1.0)
                                     OffsetPoints.Add(Crossing);
                                 else if ((Distance > 0) == (sinA > 0.0))
                                     OffsetPoints.Add(Crossing);
@@ -519,7 +557,7 @@ namespace AgOpenGPS
                 B += points.Length;
             }
         }
-
+        
         public static void CalculateRoundedCorner(this List<vec2> Points, double Radius, double Radius2, bool Loop, double MaxAngle, int Count1 = 0, int Count2 = int.MaxValue)
         {
             double tt = Math.Min(Math.Asin(0.5 / Radius), Math.Asin(0.5 / Radius2));
@@ -560,18 +598,23 @@ namespace AgOpenGPS
 
                     angle = Math.Abs(angle);
 
-                    if ((angle > glm.PIBy2 - MaxAngle && angle < glm.PIBy2 + MaxAngle) || (angle > Math.PI - MaxAngle && angle < Math.PI + MaxAngle))
+                    if ((angle > glm.PIBy2 - MaxAngle && angle < glm.PIBy2 + MaxAngle) || (angle > Math.PI - MaxAngle && angle < Math.PI + MaxAngle) || (angle < MaxAngle))
                     {
-                        if (C - A > 2)//Check why this is somethimes wrong!
-                        {
-                            while (C - 1 > A)
-                            {
-                                C = C == 0 ? Points.Count - 1 : C - 1;
-                                Points.RemoveAt(C);
-                            }
-                        }
+                        //if (C - A > 2)//Check why this is somethimes wrong!
+                        //{
+                        //    while (C - 1 > A)
+                        //    {
+                        //        C = C == 0 ? Points.Count - 1 : C - 1;
+                        //        Points.RemoveAt(C);
+                        //    }
+                        //}
                         stop = true;
+
+                        //if (Loop || A > 0) A = (A == 0) ? Points.Count - 1 : A - 1;
+                        //if (Loop || C < Points.Count - 1) C = (C + 1 == Points.Count) ? 0 : C + 1;
+
                         break;
+                        //continue;
                     }
 
                     reverse = angle > glm.PIBy2;
@@ -584,7 +627,7 @@ namespace AgOpenGPS
                     OldC = C;
                     if (segment > length1)
                     {
-                        if (Loop || (!Loop && A > 0)) A = (A == 0) ? Points.Count - 1 : A - 1;
+                        if (Loop || A > 0) A = (A == 0) ? Points.Count - 1 : A - 1;
 
                         if (A == C)
                         {
@@ -594,7 +637,7 @@ namespace AgOpenGPS
                     }
                     if (segment > length2)
                     {
-                        if (Loop || (!Loop && C < Points.Count - 1)) C = (C + 1 == Points.Count) ? 0 : C + 1;
+                        if (Loop || C < Points.Count - 1) C = (C + 1 == Points.Count) ? 0 : C + 1;
                         if (C == A)
                         {
                             stop = true;
@@ -632,7 +675,6 @@ namespace AgOpenGPS
                     if (Count2 != int.MaxValue)
                         Count2--;
                 }
-
 
                 B = A > B ? -1 : A;
 
