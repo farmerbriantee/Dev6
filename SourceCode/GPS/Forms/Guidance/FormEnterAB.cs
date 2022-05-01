@@ -132,20 +132,20 @@ namespace AgOpenGPS
                     east2 = east + Math.Sin(heading);
                 }
 
-                if (mf.gyd.EditGuidanceLine.curvePts.Count > 1)
+                if (mf.gyd.EditGuidanceLine.points.Count > 1)
                 {
-                    mf.gyd.EditGuidanceLine.curvePts[0] = new vec3(east, nort, heading);
-                    mf.gyd.EditGuidanceLine.curvePts[1] = new vec3(east2, nort2, heading);
+                    mf.gyd.EditGuidanceLine.points[0] = new vec3(east, nort, heading);
+                    mf.gyd.EditGuidanceLine.points[1] = new vec3(east2, nort2, heading);
                 }
-                else if (mf.gyd.EditGuidanceLine.curvePts.Count > 0)
+                else if (mf.gyd.EditGuidanceLine.points.Count > 0)
                 {
-                    mf.gyd.EditGuidanceLine.curvePts[0] = new vec3(east, nort, heading);
-                    mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(east2, nort2, heading));
+                    mf.gyd.EditGuidanceLine.points[0] = new vec3(east, nort, heading);
+                    mf.gyd.EditGuidanceLine.points.Add(new vec3(east2, nort2, heading));
                 }
                 else
                 {
-                    mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(east, nort, heading));
-                    mf.gyd.EditGuidanceLine.curvePts.Add(new vec3(east2, nort2, heading));
+                    mf.gyd.EditGuidanceLine.points.Add(new vec3(east, nort, heading));
+                    mf.gyd.EditGuidanceLine.points.Add(new vec3(east2, nort2, heading));
                 }
 
                 headingText = textBox1.Text = "Manual AB " +

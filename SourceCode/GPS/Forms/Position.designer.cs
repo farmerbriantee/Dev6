@@ -911,7 +911,7 @@ namespace AgOpenGPS
 
             if (gyd.isOkToAddDesPoints && gyd.EditGuidanceLine != null)
             {
-                gyd.EditGuidanceLine.curvePts.Add(new vec3(pivotAxlePos.easting, pivotAxlePos.northing, fixHeading));
+                gyd.EditGuidanceLine.points.Add(new vec3(pivotAxlePos.easting, pivotAxlePos.northing, fixHeading));
             }
 
             //save the north & east as previous

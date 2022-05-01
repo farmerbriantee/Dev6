@@ -135,9 +135,9 @@ namespace AgOpenGPS
                 for (double i = 0.0; i < passes; i++)
                 {
                     List<vec2> OffsetList2 = new List<vec2>();
-                    for (int s = 0; s < mf.gyd.currentGuidanceLine.curvePts.Count; s++)
+                    for (int s = 0; s < mf.gyd.currentGuidanceLine.points.Count; s++)
                     {
-                        OffsetList2.Add(new vec2(mf.gyd.currentGuidanceLine.curvePts[s].easting, mf.gyd.currentGuidanceLine.curvePts[s].northing));
+                        OffsetList2.Add(new vec2(mf.gyd.currentGuidanceLine.points[s].easting, mf.gyd.currentGuidanceLine.points[s].northing));
                     }
 
                     List<vec2> OffsetPoints = OffsetList2.OffsetPolyline(tramWidth * i, mf.gyd.currentGuidanceLine.mode.HasFlag(Mode.Boundary), mf.gyd.abLength);

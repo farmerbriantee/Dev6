@@ -461,7 +461,7 @@ namespace AgOpenGPS
 
                 for (int i = 0; i < poly.points.Count; i++)
                 {
-                    New.curvePts.Add(new vec3(poly.points[i].easting, poly.points[i].northing, 0));
+                    New.points.Add(new vec3(poly.points[i].easting, poly.points[i].northing, 0));
                 }
                 /*
                 //make sure distance isn't too big between points on Turn
@@ -483,7 +483,7 @@ namespace AgOpenGPS
                 */
 
                 //who knows which way it actually goes
-                New.curvePts.CalculateHeadings(true);
+                New.points.CalculateHeadings(true);
                 //create a name
                 New.Name = "Boundary Curve";
 
@@ -516,39 +516,39 @@ namespace AgOpenGPS
 
                 for (int i = 0; i < poly.points.Count; i++)
                 {
-                    New.curvePts.Add(new vec3(poly.points[i].easting, poly.points[i].northing, 0));
+                    New.points.Add(new vec3(poly.points[i].easting, poly.points[i].northing, 0));
                 }
 
                 //make sure distance isn't too big between points on Turn
-                for (int i = 1; i < New.curvePts.Count; i++)
+                for (int i = 1; i < New.points.Count; i++)
                 {
                     int j = i - 1;
                     //if (j == cnt) j = 0;
-                    double distance = glm.Distance(New.curvePts[i], New.curvePts[j]);
+                    double distance = glm.Distance(New.points[i], New.points[j]);
                     if (distance > 1.6)
                     {
-                        vec3 pointB = new vec3((New.curvePts[i].easting + New.curvePts[j].easting) / 2.0,
-                            (New.curvePts[i].northing + New.curvePts[j].northing) / 2.0,
-                            New.curvePts[i].heading);
+                        vec3 pointB = new vec3((New.points[i].easting + New.points[j].easting) / 2.0,
+                            (New.points[i].northing + New.points[j].northing) / 2.0,
+                            New.points[i].heading);
 
-                        New.curvePts.Insert(i, pointB);
+                        New.points.Insert(i, pointB);
                         i--;
                     }
                 }
 
                 //who knows which way it actually goes
-                New.curvePts.CalculateHeadings(false);
+                New.points.CalculateHeadings(false);
 
                 //calculate average heading of line
                 double x = 0, y = 0;
 
-                foreach (vec3 pt in New.curvePts)
+                foreach (vec3 pt in New.points)
                 {
                     x += Math.Cos(pt.heading);
                     y += Math.Sin(pt.heading);
                 }
-                x /= New.curvePts.Count;
-                y /= New.curvePts.Count;
+                x /= New.points.Count;
+                y /= New.points.Count;
                 double aveLineHeading = Math.Atan2(y, x);
                 if (aveLineHeading < 0) aveLineHeading += glm.twoPI;
 
@@ -562,7 +562,7 @@ namespace AgOpenGPS
 
                 //build the tail extensions
                 AddFirstLastPoints(New);
-                New.curvePts.CalculateHeadings(false);
+                New.points.CalculateHeadings(false);
 
                 mf.gyd.curveArr.Add(New);
                 selectedCurveLine = New;
@@ -595,8 +595,8 @@ namespace AgOpenGPS
             double headingCalc = abHead + glm.PIBy2;
 
             //calculate the new points for the reference line and points
-            New.curvePts.Add(new vec3((Math.Sin(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].easting, (Math.Cos(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].northing, abHead));
-            New.curvePts.Add(new vec3(New.curvePts[0].easting + Math.Sin(abHead), New.curvePts[0].northing + Math.Cos(abHead), abHead));
+            New.points.Add(new vec3((Math.Sin(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].easting, (Math.Cos(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].northing, abHead));
+            New.points.Add(new vec3(New.points[0].easting + Math.Sin(abHead), New.points[0].northing + Math.Cos(abHead), abHead));
 
             //create a name
             string text = (Math.Round(glm.toDegrees(abHead), 1)).ToString(CultureInfo.InvariantCulture)
@@ -695,15 +695,15 @@ namespace AgOpenGPS
                 else
                     GL.Begin(PrimitiveType.LineStrip);
 
-                for (int j = 0; j < mf.gyd.curveArr[i].curvePts.Count; j++)
+                for (int j = 0; j < mf.gyd.curveArr[i].points.Count; j++)
                 {
-                    vec3 item = mf.gyd.curveArr[i].curvePts[j];
+                    vec3 item = mf.gyd.curveArr[i].points[j];
                     if (j == 0 && !mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
                         GL.Vertex3(item.easting - (Math.Sin(item.heading) * mf.gyd.abLength), item.northing - (Math.Cos(item.heading) * mf.gyd.abLength), 0);
 
                     GL.Vertex3(item.easting, item.northing, 0);
 
-                    if (j == mf.gyd.curveArr[i].curvePts.Count - 1 && !mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
+                    if (j == mf.gyd.curveArr[i].points.Count - 1 && !mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
                         GL.Vertex3(item.easting + (Math.Sin(item.heading) * mf.gyd.abLength), item.northing + (Math.Cos(item.heading) * mf.gyd.abLength), 0);
                 }
 
@@ -749,23 +749,23 @@ namespace AgOpenGPS
         //add extensons
         public void AddFirstLastPoints(CGuidanceLine refList)
         {
-            int ptCnt = refList.curvePts.Count - 1;
+            int ptCnt = refList.points.Count - 1;
             for (int i = 1; i < 200; i++)
             {
-                vec3 pt = new vec3(refList.curvePts[ptCnt]);
+                vec3 pt = new vec3(refList.points[ptCnt]);
                 pt.easting += (Math.Sin(pt.heading) * i);
                 pt.northing += (Math.Cos(pt.heading) * i);
-                refList.curvePts.Add(pt);
+                refList.points.Add(pt);
             }
 
             //and the beginning
-            vec3 start = new vec3(refList.curvePts[0]);
+            vec3 start = new vec3(refList.points[0]);
             for (int i = 1; i < 200; i++)
             {
                 vec3 pt = new vec3(start);
                 pt.easting -= (Math.Sin(pt.heading) * i);
                 pt.northing -= (Math.Cos(pt.heading) * i);
-                refList.curvePts.Insert(0, pt);
+                refList.points.Insert(0, pt);
             }
         }
 

@@ -12,40 +12,40 @@ namespace AgOpenGPS
                 curveArr.Add(creatingContour);
             }
 
-            creatingContour.curvePts.Add(new vec3(pivot.easting + Math.Cos(pivot.heading) * mf.tool.toolOffset, pivot.northing - Math.Sin(pivot.heading) * mf.tool.toolOffset, pivot.heading));
+            creatingContour.points.Add(new vec3(pivot.easting + Math.Cos(pivot.heading) * mf.tool.toolOffset, pivot.northing - Math.Sin(pivot.heading) * mf.tool.toolOffset, pivot.heading));
         }
 
         //End the strip
         public void StopContourLine()
         {
             //make sure its long enough to bother
-            if (creatingContour?.curvePts.Count > 5)
+            if (creatingContour?.points.Count > 5)
             {
                 //build tale
-                double head = creatingContour.curvePts[0].heading;
+                double head = creatingContour.points[0].heading;
                 int length = (int)mf.tool.toolWidth + 3;
                 vec3 pnt;
                 for (int a = 0; a < length; a++)
                 {
-                    pnt.easting = creatingContour.curvePts[0].easting - (Math.Sin(head));
-                    pnt.northing = creatingContour.curvePts[0].northing - (Math.Cos(head));
-                    pnt.heading = creatingContour.curvePts[0].heading;
-                    creatingContour.curvePts.Insert(0, pnt);
+                    pnt.easting = creatingContour.points[0].easting - (Math.Sin(head));
+                    pnt.northing = creatingContour.points[0].northing - (Math.Cos(head));
+                    pnt.heading = creatingContour.points[0].heading;
+                    creatingContour.points.Insert(0, pnt);
                 }
 
-                int ptc = creatingContour.curvePts.Count - 1;
-                head = creatingContour.curvePts[ptc].heading;
+                int ptc = creatingContour.points.Count - 1;
+                head = creatingContour.points[ptc].heading;
 
                 for (double i = 1; i < length; i += 1)
                 {
-                    pnt.easting = creatingContour.curvePts[ptc].easting + (Math.Sin(head) * i);
-                    pnt.northing = creatingContour.curvePts[ptc].northing + (Math.Cos(head) * i);
+                    pnt.easting = creatingContour.points[ptc].easting + (Math.Sin(head) * i);
+                    pnt.northing = creatingContour.points[ptc].northing + (Math.Cos(head) * i);
                     pnt.heading = head;
-                    creatingContour.curvePts.Add(pnt);
+                    creatingContour.points.Add(pnt);
                 }
 
                 //add the point list to the save list for appending to contour file
-                mf.contourSaveList.Add(creatingContour.curvePts);
+                mf.contourSaveList.Add(creatingContour.points);
             }
             else
                 curveArr.Remove(creatingContour);
@@ -82,9 +82,9 @@ namespace AgOpenGPS
 
                 for (int i = New.points.Count - 1; i >= 0; i--)
                 {
-                    New2.curvePts.Add(new vec3(New.points[i].easting, New.points[i].northing, 0));
+                    New2.points.Add(new vec3(New.points[i].easting, New.points[i].northing, 0));
                 }
-                New2.curvePts.CalculateHeadings(true);
+                New2.points.CalculateHeadings(true);
 
                 curveArr.Add(New2);
             }

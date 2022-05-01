@@ -50,15 +50,15 @@ namespace AgOpenGPS
                             writer.WriteLine(0.ToString(CultureInfo.InvariantCulture));
 
                             //write out the points of ref line
-                            int cnt2 = gyd.curveArr[i].curvePts.Count;
+                            int cnt2 = gyd.curveArr[i].points.Count;
 
                             writer.WriteLine(cnt2.ToString(CultureInfo.InvariantCulture));
-                            if (gyd.curveArr[i].curvePts.Count > 0)
+                            if (gyd.curveArr[i].points.Count > 0)
                             {
                                 for (int j = 0; j < cnt2; j++)
-                                    writer.WriteLine(Math.Round(gyd.curveArr[i].curvePts[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                                        Math.Round(gyd.curveArr[i].curvePts[j].northing, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                                            Math.Round(gyd.curveArr[i].curvePts[j].heading, 5).ToString(CultureInfo.InvariantCulture));
+                                    writer.WriteLine(Math.Round(gyd.curveArr[i].points[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
+                                                        Math.Round(gyd.curveArr[i].points[j].northing, 3).ToString(CultureInfo.InvariantCulture) + "," +
+                                                            Math.Round(gyd.curveArr[i].points[j].heading, 5).ToString(CultureInfo.InvariantCulture));
                             }
                         }
                     }
@@ -136,7 +136,7 @@ namespace AgOpenGPS
                                 {
                                     line = reader.ReadLine();
                                     string[] words = line.Split(',');
-                                    New.curvePts.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
+                                    New.points.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
                                         double.Parse(words[1], CultureInfo.InvariantCulture),
                                         double.Parse(words[2], CultureInfo.InvariantCulture)));
                                 }
@@ -172,15 +172,15 @@ namespace AgOpenGPS
             {
                 foreach (var item in gyd.curveArr)
                 {
-                    if (item.mode.HasFlag(Mode.AB) && item.curvePts.Count > 1)
+                    if (item.mode.HasFlag(Mode.AB) && item.points.Count > 1)
                     {
-                        double heading = Math.Atan2(item.curvePts[1].easting - item.curvePts[0].easting, item.curvePts[1].northing - item.curvePts[0].northing);
+                        double heading = Math.Atan2(item.points[1].easting - item.points[0].easting, item.points[1].northing - item.points[0].northing);
 
                         //make it culture invariant
                         string line = item.Name.Trim()
                             + ',' + (Math.Round(glm.toDegrees(heading), 8)).ToString(CultureInfo.InvariantCulture)
-                            + ',' + (Math.Round(item.curvePts[0].easting, 3)).ToString(CultureInfo.InvariantCulture)
-                            + ',' + (Math.Round(item.curvePts[0].northing, 3)).ToString(CultureInfo.InvariantCulture);
+                            + ',' + (Math.Round(item.points[0].easting, 3)).ToString(CultureInfo.InvariantCulture)
+                            + ',' + (Math.Round(item.points[0].northing, 3)).ToString(CultureInfo.InvariantCulture);
 
                         //write out to file
                         writer.WriteLine(line);
@@ -236,8 +236,8 @@ namespace AgOpenGPS
 
                             double heading = glm.toRadians(double.Parse(words[1], CultureInfo.InvariantCulture));
 
-                            New.curvePts.Add(new vec3(double.Parse(words[2], CultureInfo.InvariantCulture), double.Parse(words[3], CultureInfo.InvariantCulture), heading));
-                            New.curvePts.Add(new vec3(New.curvePts[0].easting + Math.Sin(heading), New.curvePts[0].northing + Math.Cos(heading), heading));
+                            New.points.Add(new vec3(double.Parse(words[2], CultureInfo.InvariantCulture), double.Parse(words[3], CultureInfo.InvariantCulture), heading));
+                            New.points.Add(new vec3(New.points[0].easting + Math.Sin(heading), New.points[0].northing + Math.Cos(heading), heading));
 
                             gyd.curveArr.Add(New);
                         }
@@ -445,7 +445,7 @@ namespace AgOpenGPS
                             {
                                 line = reader.ReadLine();
                                 string[] words = line.Split(',');
-                                New.curvePts.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
+                                New.points.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
                                     double.Parse(words[1], CultureInfo.InvariantCulture),
                                     double.Parse(words[2], CultureInfo.InvariantCulture)));
                             }
@@ -1534,16 +1534,16 @@ namespace AgOpenGPS
                     kml.WriteStartElement("coordinates");
 
                     string linePts = "";
-                    for (int j = 0; j < gyd.curveArr[i].curvePts.Count; j++)
+                    for (int j = 0; j < gyd.curveArr[i].points.Count; j++)
                     {
                         if (j == 0)
-                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting - (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
-                                gyd.curveArr[i].curvePts[j].northing - (Math.Cos(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength));
-                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
+                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting - (Math.Sin(gyd.curveArr[i].points[j].heading) * gyd.abLength),
+                                gyd.curveArr[i].points[j].northing - (Math.Cos(gyd.curveArr[i].points[j].heading) * gyd.abLength));
+                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting, gyd.curveArr[i].points[j].northing);
 
-                        if (j == gyd.curveArr[i].curvePts.Count -1)
-                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting + (Math.Sin(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength),
-                                gyd.curveArr[i].curvePts[j].northing + (Math.Cos(gyd.curveArr[i].curvePts[j].heading) * gyd.abLength));
+                        if (j == gyd.curveArr[i].points.Count -1)
+                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting + (Math.Sin(gyd.curveArr[i].points[j].heading) * gyd.abLength),
+                                gyd.curveArr[i].points[j].northing + (Math.Cos(gyd.curveArr[i].points[j].heading) * gyd.abLength));
                     }
 
                     kml.WriteRaw(linePts);
@@ -1582,9 +1582,9 @@ namespace AgOpenGPS
                     kml.WriteStartElement("coordinates");
 
                     string linePts = "";
-                    for (int j = 0; j < gyd.curveArr[i].curvePts.Count; j++)
+                    for (int j = 0; j < gyd.curveArr[i].points.Count; j++)
                     {
-                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].curvePts[j].easting, gyd.curveArr[i].curvePts[j].northing);
+                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting, gyd.curveArr[i].points[j].northing);
                     }
                     kml.WriteRaw(linePts);
 

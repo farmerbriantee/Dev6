@@ -548,7 +548,7 @@ namespace AgOpenGPS
     public class CGuidanceLine
     {
         public Mode mode;
-        public List<vec3> curvePts = new List<vec3>();
+        public List<vec3> points = new List<vec3>();
         public string Name = "aa";
 
         public CGuidanceLine(Mode _mode)
@@ -560,7 +560,7 @@ namespace AgOpenGPS
         {
             mode = old.mode;
             Name = old.Name;
-            curvePts.AddRange(old.curvePts.ToArray());
+            points.AddRange(old.points.ToArray());
         }
     }
 }
