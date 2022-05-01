@@ -6,9 +6,9 @@ namespace AgOpenGPS
     public class CBoundaryList
     {
         //list of coordinates of boundary line
-        public Polyline fenceLine = new Polyline();
-        public List<Polyline> hdLine = new List<Polyline>();
-        public Polyline turnLine = new Polyline();
+        public Polyline2 fenceLine = new Polyline2();
+        public List<Polyline2> hdLine = new List<Polyline2>();
+        public Polyline2 turnLine = new Polyline2();
 
         //area variable
         public double area = 0;

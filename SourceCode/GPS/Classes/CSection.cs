@@ -177,7 +177,7 @@ namespace AgOpenGPS
             {
                 //save the triangle list in a patch list to add to saving file
                 mf.patchSaveList.Add(triangleList);
-                mf.patchList.Add(new Polyline { points = triangleList });
+                mf.patchList.Add(new Polyline2 { points = triangleList });
             }
             else
                 triangleList.Clear();
@@ -232,7 +232,7 @@ namespace AgOpenGPS
 
                 //save the cutoff patch to be saved later
                 mf.patchSaveList.Add(triangleList);
-                mf.patchList.Add(new Polyline { points = triangleList });
+                mf.patchList.Add(new Polyline2 { points = triangleList });
 
                 triangleList = new List<vec2>();
 

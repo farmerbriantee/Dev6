@@ -148,7 +148,7 @@ namespace AgOpenGPS
                 GL.Enable(EnableCap.Blend);
 
                 //draw patches of sections
-                foreach (Polyline triList in patchList)
+                foreach (Polyline2 triList in patchList)
                 {
                     bool isDraw = false;
                     int count2 = triList.points.Count;
@@ -916,7 +916,7 @@ namespace AgOpenGPS
                     GL.Color3(sectionColor.R, sectionColor.G, sectionColor.B);
 
                     //for every new chunk of patch
-                    foreach (Polyline triList in patchList)
+                    foreach (Polyline2 triList in patchList)
                     {
                         triList.DrawPolyLine(DrawType.TriangleStrip);
                     }

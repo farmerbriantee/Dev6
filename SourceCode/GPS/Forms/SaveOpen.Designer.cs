@@ -11,7 +11,7 @@ namespace AgOpenGPS
     public partial class FormGPS
     {
         //list of the list of patch data individual triangles for that entire section activity
-        public List<Polyline> patchList = new List<Polyline>();
+        public List<Polyline2> patchList = new List<Polyline2>();
 
         //list of the list of patch data individual triangles for field sections
         public List<List<vec2>> patchSaveList = new List<List<vec2>>();
@@ -361,7 +361,7 @@ namespace AgOpenGPS
                             line = reader.ReadLine();
                             int verts = int.Parse(line);
 
-                            Polyline New = new Polyline();
+                            Polyline2 New = new Polyline2();
 
                             for (int v = 0; v < verts; v++)
                             {
@@ -653,7 +653,7 @@ namespace AgOpenGPS
 
                                 if (numPoints > 0)
                                 {
-                                    Polyline New = new Polyline();
+                                    Polyline2 New = new Polyline2();
                                     //load the line
                                     for (int k = 0; k < numPoints; k++)
                                     {
@@ -720,7 +720,7 @@ namespace AgOpenGPS
                                 int numPolyLines = int.Parse(line);
                                 if (numPolyLines > 0)
                                 {
-                                    List<Polyline> BoundaryArr = new List<Polyline>();
+                                    List<Polyline2> BoundaryArr = new List<Polyline2>();
                                     for (int j = 0; j < numPolyLines; j++)
                                     {
                                         line = reader.ReadLine();
@@ -728,7 +728,7 @@ namespace AgOpenGPS
 
                                         if (numPoints > 0)
                                         {
-                                            Polyline tramArr = new Polyline();
+                                            Polyline2 tramArr = new Polyline2();
 
                                             line = reader.ReadLine();
                                             tramArr.loop = bool.Parse(line);
@@ -782,7 +782,7 @@ namespace AgOpenGPS
                                 int numPoints = int.Parse(line);
                                 if (numPoints > 0)
                                 {
-                                    Polyline tramArr = new Polyline();
+                                    Polyline2 tramArr = new Polyline2();
 
                                     line = reader.ReadLine();
                                     tramArr.loop = bool.Parse(line);

@@ -384,7 +384,7 @@ namespace AgOpenGPS
 
                                     if (type == 0)
                                     {
-                                        mf.patchList.Add(new Polyline { points = points2 });
+                                        mf.patchList.Add(new Polyline2 { points = points2 });
                                     }
                                     else if (type > 1)
                                     {

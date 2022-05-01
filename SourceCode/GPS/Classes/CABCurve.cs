@@ -144,8 +144,6 @@ namespace AgOpenGPS
 
             if (!isValid || howManyPathsAway != oldHowManyPathsAway || (oldIsHeadingSameWay != isHeadingSameWay && mf.tool.toolOffset != 0))
             {
-                oldHowManyPathsAway = howManyPathsAway;
-                oldIsHeadingSameWay = isHeadingSameWay;
                 curList.Clear();
 
                 if (refList == creatingContour && howManyPathsAway == 0) return;
@@ -155,7 +153,7 @@ namespace AgOpenGPS
                 curList = BuildOffsetList(refList, distAway);
                 isValid = true;
 
-                if (mf.isSideGuideLines && refList.mode.HasFlag(Mode.AB) && howManyPathsAway != oldHowManyPathsAway)
+                if (mf.isSideGuideLines && (refList.mode.HasFlag(Mode.AB) || refList.mode.HasFlag(Mode.Boundary)) && howManyPathsAway != oldHowManyPathsAway)
                 {
                     int Gcnt;
 
@@ -180,7 +178,7 @@ namespace AgOpenGPS
                             sideGuideLines.RemoveAt(5);
                             sideGuideLines.Insert(0, new List<vec3>());
                             Gcnt = 0;
-                            sideGuideLines[Gcnt] = BuildOffsetList(refList, widthMinusOverlap * (howManyPathsAway + i));
+                            sideGuideLines[Gcnt] = BuildOffsetList(refList, widthMinusOverlap * (oldHowManyPathsAway - 2.5 + i));
                         }
                     }
                     else
@@ -188,13 +186,16 @@ namespace AgOpenGPS
                         for (int i = 1; i <= Move; i++)
                         {
                             sideGuideLines.RemoveAt(0);
-                            sideGuideLines.Insert(5, new List<vec3>());
+                            sideGuideLines.Add(new List<vec3>());
                             Gcnt = 5;
-                            sideGuideLines[Gcnt] = BuildOffsetList(refList, widthMinusOverlap * (howManyPathsAway + i));
+                            sideGuideLines[Gcnt] = BuildOffsetList(refList, widthMinusOverlap * (oldHowManyPathsAway + 2.5 + i));
                         }
                     }
                 }
-                else sideGuideLines.Clear();
+                else if (!mf.isSideGuideLines) sideGuideLines.Clear();
+                
+                oldHowManyPathsAway = howManyPathsAway;
+                oldIsHeadingSameWay = isHeadingSameWay;
             }
         }
 
@@ -213,6 +214,26 @@ namespace AgOpenGPS
 
                 buildList.Add(new vec3(refList.curvePts[0].easting - east + east2, refList.curvePts[0].northing - north + north2, refList.curvePts[0].heading));
                 buildList.Add(new vec3(refList.curvePts[0].easting + east + east2, refList.curvePts[0].northing + north + north2, refList.curvePts[0].heading));
+            }
+            else if (refList.mode.HasFlag(Mode.Boundary))
+            {
+                Polyline Poly = new Polyline();
+
+                for (int i = 0; i < refList.curvePts.Count; i++)
+                {
+                    Poly.points.Add(new vec2(refList.curvePts[i].easting, refList.curvePts[i].northing));
+                }
+
+                Polyline BB = Poly.OffsetAndDissolvePolyline(distAway, true, -1, -1, true, mf.vehicle.minTurningRadius);
+
+                //BB.points.CalculateRoundedCorner(mf.vehicle.minTurningRadius, mf.vehicle.minTurningRadius, BB.loop, 0.4);
+
+                for (int i = 0; i < BB.points.Count; i++)
+                {
+                    buildList.Add(new vec3(BB.points[i].easting, BB.points[i].northing, 0));
+                }
+
+                buildList.CalculateHeadings(true);
             }
             else
             {
@@ -448,7 +469,7 @@ namespace AgOpenGPS
 
                         for (int i = 0; i < sideGuideLines.Count; i++)
                         {
-                            GL.Begin(PrimitiveType.LineStrip);
+                            GL.Begin(currentGuidanceLine.mode.HasFlag(Mode.AB) ? PrimitiveType.LineStrip : PrimitiveType.LineLoop);
                             for (int j = 0; j < sideGuideLines[i].Count; j++)
                             {
                                 GL.Vertex3(sideGuideLines[i][j].easting, sideGuideLines[i][j].northing, 0);

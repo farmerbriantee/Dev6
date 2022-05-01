@@ -643,7 +643,7 @@ namespace AgOpenGPS
             {
                 GL.Color3(0.0, 0.0, 0.352);
 
-                foreach (Polyline triList in mf.patchList)
+                foreach (Polyline2 triList in mf.patchList)
                 {
                     triList.DrawPolyLine(DrawType.TriangleStrip);
                 }

@@ -8,8 +8,13 @@ namespace AgOpenGPS
 
     public class Polyline
     {
-        public List<vec2> points = new List<vec2>(128);
-        public bool ResetPoints, ResetIndexer, loop;
+        public List<vec2> points = new List<vec2>();
+        public bool loop;
+    }
+
+    public class Polyline2 : Polyline
+    {
+        public bool ResetPoints, ResetIndexer;
         public int BufferPoints = int.MinValue, BufferIndex = int.MinValue, BufferPointsCnt = 0, BufferIndexCnt = 0;
 
         public void DrawPolyLine(DrawType type)
@@ -234,11 +239,11 @@ namespace AgOpenGPS
             return false;
         }
 
-        public static Polyline OffsetAndDissolvePolyline(this Polyline Poly, double width, bool loop, int start = -1, int end = -1, bool add = true, double radius = 0)
+        public static T OffsetAndDissolvePolyline<T>(this T Poly, double width, bool loop, int start = -1, int end = -1, bool add = true, double radius = 0) where T : Polyline, new()
         {
             List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, loop, 0, start, end, add, radius != 0);
 
-            List<Polyline> Output = OffsetPoints.DissolvePolyLine(loop);
+            List<T> Output = OffsetPoints.DissolvePolyLine<T>(loop);
 
             if (Output.Count > 0)
             {
@@ -248,14 +253,14 @@ namespace AgOpenGPS
                 return Output[0];
             }
             else
-                return new Polyline();
+                return new T();
         }
 
-        public static List<Polyline> OffsetAndDissolvePolyline(this Polyline Poly, bool _, double width, bool loop, int start = -1, int end = -1, bool add = true)
+        public static List<T> OffsetAndDissolvePolyline<T>(this T Poly, bool _, double width, bool loop, int start = -1, int end = -1, bool add = true) where T : Polyline, new()
         {
             List<vec2> OffsetPoints = Poly.points.OffsetPolyline(width, loop, 0, start, end, add);
 
-            List<Polyline> Output = OffsetPoints.DissolvePolyLine(loop);
+            List<T> Output = OffsetPoints.DissolvePolyLine<T>(loop);
 
             return Output;
         }
@@ -764,9 +769,9 @@ namespace AgOpenGPS
             }
         }
 
-        public static List<Polyline> DissolvePolyLine(this List<vec2> Points, bool loop = true)
+        public static List<T> DissolvePolyLine<T>(this List<vec2> Points, bool loop = true) where T : Polyline, new()
         {
-            if (Points.Count < 2) return new List<Polyline>();
+            if (Points.Count < 2) return new List<T>();
 
             VertexPoint First = new VertexPoint(Points[0]);
             VertexPoint CurrentVertex = First;
@@ -926,11 +931,11 @@ namespace AgOpenGPS
                 }
             }
 
-            List<Polyline> FinalPolyLine = new List<Polyline>();
+            List<T> FinalPolyLine = new List<T>();
 
             for (int I = 0; I < Polygons.Count; I++)
             {
-                FinalPolyLine.Add(new Polyline());
+                FinalPolyLine.Add(new T());
                 FinalPolyLine[FinalPolyLine.Count - 1].loop = loop;
                 start = true;
                 StopVertex = CurrentVertex = Polygons[I].Point;
@@ -1069,9 +1074,9 @@ namespace AgOpenGPS
             return area;
         }
 
-        public static List<Polyline> ClipPolyLine(this Polyline polyline, List<Polyline> clipPolylines, bool isClipOuter)
+        public static List<T> ClipPolyLine<T>(this T polyline, List<T> clipPolylines, bool isClipOuter) where T : Polyline, new()
         {
-            List<Polyline> FinalPolyLine = new List<Polyline>();
+            List<T> FinalPolyLine = new List<T>();
 
             int m = polyline.points.Count - 1;
             int isInside = -1;
@@ -1091,7 +1096,7 @@ namespace AgOpenGPS
 
                 if (test == isClipOuter)
                 {
-                    FinalPolyLine.Add(new Polyline());
+                    FinalPolyLine.Add(new T());
                     isInside = 1;
                 }
                 else
@@ -1153,7 +1158,7 @@ namespace AgOpenGPS
                             if (isInside == -1)
                             {
                                 isInside = 1;
-                                FinalPolyLine.Add(new Polyline());
+                                FinalPolyLine.Add(new T());
                                 FinalPolyLine[FinalPolyLine.Count - 1].points.Add(new vec2(Crossings2[k].easting, Crossings2[k].northing));
 
                                 FinalPolyLine[FinalPolyLine.Count - 1].loop = false;

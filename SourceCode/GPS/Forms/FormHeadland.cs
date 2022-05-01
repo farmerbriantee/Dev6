@@ -18,7 +18,7 @@ namespace AgOpenGPS
 
         private double currentFieldCenterX, currentFieldCenterY, currentDist;
 
-        public List<Polyline> headLineTemplate = new List<Polyline>();
+        public List<Polyline2> headLineTemplate = new List<Polyline2>();
 
         public FormHeadland(Form callingForm)
         {
@@ -179,7 +179,7 @@ namespace AgOpenGPS
             {
                 for (int i = 0; i < mf.bnd.bndList[0].hdLine.Count; i++)
                 {
-                    Polyline New = new Polyline();
+                    Polyline2 New = new Polyline2();
                     for (int j = 0; j < mf.bnd.bndList[0].hdLine[i].points.Count; j++)
                     {
                         New.points.Add(new vec2(mf.bnd.bndList[0].hdLine[i].points[j].easting, mf.bnd.bndList[0].hdLine[i].points[j].northing));
@@ -189,7 +189,7 @@ namespace AgOpenGPS
             }
             else
             {
-                Polyline New = new Polyline();
+                Polyline2 New = new Polyline2();
                 for (int i = 0; i < mf.bnd.bndList[0].fenceLine.points.Count; i++)
                 {
                     New.points.Add(new vec2(mf.bnd.bndList[0].fenceLine.points[i].easting, mf.bnd.bndList[0].fenceLine.points[i].northing));
@@ -222,7 +222,7 @@ namespace AgOpenGPS
             double width = (double)nudDistance.Value * mf.userBigToM;
             if (index < 0)
             {
-                List<Polyline> New = new List<Polyline>();
+                List<Polyline2> New = new List<Polyline2>();
                 for (int i = 0; i < headLineTemplate.Count; i++)
                 {
                     New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));
@@ -250,7 +250,7 @@ namespace AgOpenGPS
 
             double width = mf.tool.toolWidth * cboxToolWidths.SelectedIndex;
 
-            List<Polyline> New = new List<Polyline>();
+            List<Polyline2> New = new List<Polyline2>();
             for (int i = 0; i < headLineTemplate.Count; i++)
             {
                 New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));

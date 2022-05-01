@@ -15,8 +15,8 @@ namespace AgOpenGPS
         public bool isOuter, isTramOnBackBuffer;
 
         //tramlines
-        public List<Polyline> tramList = new List<Polyline>();
-        public List<List<Polyline>> tramBoundary = new List<List<Polyline>>();
+        public List<Polyline2> tramList = new List<Polyline2>();
+        public List<List<Polyline2>> tramBoundary = new List<List<Polyline2>>();
 
 
         // 0 off, 1 All, 2, Lines, 3 Outer
@@ -89,7 +89,7 @@ namespace AgOpenGPS
                         {
                             double Offset = tramWidth * (j + 0.5) * (i == 0 ? 1 : -1);
 
-                            List<Polyline> Build = mf.bnd.bndList[i].fenceLine.OffsetAndDissolvePolyline(true, Offset, true);
+                            List<Polyline2> Build = mf.bnd.bndList[i].fenceLine.OffsetAndDissolvePolyline(true, Offset, true);
                             if (Build.Count == 0) break;
 
                             for (int k = Build.Count - 1; k >= 0; k--)
@@ -141,7 +141,7 @@ namespace AgOpenGPS
                     }
 
                     List<vec2> OffsetPoints = OffsetList2.OffsetPolyline(tramWidth * i, mf.gyd.currentGuidanceLine.mode.HasFlag(Mode.Boundary), mf.gyd.abLength);
-                    List<Polyline> OffsetList = OffsetPoints.DissolvePolyLine(mf.gyd.currentGuidanceLine.mode.HasFlag(Mode.Boundary));
+                    List<Polyline2> OffsetList = OffsetPoints.DissolvePolyLine<Polyline2>(mf.gyd.currentGuidanceLine.mode.HasFlag(Mode.Boundary));
 
                     for (int s = 0; s < OffsetList.Count; s++)
                     {
@@ -160,7 +160,7 @@ namespace AgOpenGPS
                         {
                             if (tramBoundary[l].Count > 0 && tramBoundary[l][0].ResetIndexer)
                             {
-                                List<Polyline> Points2 = new List<Polyline>();
+                                List<Polyline2> Points2 = new List<Polyline2>();
                                 for (int n = 0; n < OffsetList.Count; n++)
                                 {
                                     Points2.AddRange(OffsetList[n].ClipPolyLine(tramBoundary[l], tramBoundary[l][0].ResetPoints));
