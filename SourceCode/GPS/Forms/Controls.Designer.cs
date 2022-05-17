@@ -95,7 +95,7 @@ namespace AgOpenGPS
             gyd.isValid = false;
             gyd.moveDistance = 0;
             gyd.currentGuidanceLine = null;
-            gyd.curList = new System.Collections.Generic.List<vec3>();
+            gyd.curList = new Polyline();
 
             panelDrag.Visible = newmode == Mode.RecPath;
             if (gyd.CurrentGMode == Mode.RecPath)
@@ -147,7 +147,7 @@ namespace AgOpenGPS
             }
             else if (gyd.CurrentGMode == Mode.Contour)
             {
-                if (gyd.curList.Count > 5) gyd.isLocked = !gyd.isLocked;
+                if (gyd.curList.points.Count > 5) gyd.isLocked = !gyd.isLocked;
             }
             else if (gyd.currentGuidanceLine != null)
             {
@@ -1016,9 +1016,9 @@ namespace AgOpenGPS
             tankPos.easting = hitchPos.easting + (Math.Sin(tankPos.heading) * (tool.toolTankTrailingHitchLength));
             tankPos.northing = hitchPos.northing + (Math.Cos(tankPos.heading) * (tool.toolTankTrailingHitchLength));
 
-            toolPos.heading = tankPos.heading;
-            toolPos.easting = tankPos.easting + (Math.Sin(toolPos.heading) * (tool.toolTrailingHitchLength));
-            toolPos.northing = tankPos.northing + (Math.Cos(toolPos.heading) * (tool.toolTrailingHitchLength));
+            tool.Pos.heading = tankPos.heading;
+            tool.Pos.easting = tankPos.easting + (Math.Sin(tool.Pos.heading) * (tool.toolTrailingHitchLength));
+            tool.Pos.northing = tankPos.northing + (Math.Cos(tool.Pos.heading) * (tool.toolTrailingHitchLength));
         }
 
         private void btnHeadlandOnOff_Click(object sender, EventArgs e)

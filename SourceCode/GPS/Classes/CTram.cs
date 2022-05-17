@@ -89,7 +89,7 @@ namespace AgOpenGPS
                         {
                             double Offset = tramWidth * (j + 0.5) * (i == 0 ? 1 : -1);
 
-                            List<Polyline2> Build = mf.bnd.bndList[i].fenceLine.OffsetAndDissolvePolyline(true, Offset, true);
+                            List<Polyline2> Build = mf.bnd.bndList[i].fenceLine.OffsetAndDissolvePolyline(true, Offset, 0);
                             if (Build.Count == 0) break;
 
                             for (int k = Build.Count - 1; k >= 0; k--)
@@ -99,8 +99,8 @@ namespace AgOpenGPS
 
                                 if (Build[k].points.Count > 1)
                                 {
-                                    List<vec2> Left = Build[k].points.OffsetPolyline(halfWheelTrack, true, 0);
-                                    List<vec2> Right = Build[k].points.OffsetPolyline(-halfWheelTrack, true, 0);
+                                    List<vec2> Left = Build[k].OffsetPolyline(halfWheelTrack);
+                                    List<vec2> Right = Build[k].OffsetPolyline(-halfWheelTrack);
 
                                     if (Left.Count > 1)
                                     {
@@ -134,14 +134,8 @@ namespace AgOpenGPS
             {
                 for (double i = 0.0; i < passes; i++)
                 {
-                    List<vec2> OffsetList2 = new List<vec2>();
-                    for (int s = 0; s < mf.gyd.currentGuidanceLine.points.Count; s++)
-                    {
-                        OffsetList2.Add(new vec2(mf.gyd.currentGuidanceLine.points[s].easting, mf.gyd.currentGuidanceLine.points[s].northing));
-                    }
-
-                    List<vec2> OffsetPoints = OffsetList2.OffsetPolyline(tramWidth * i, mf.gyd.currentGuidanceLine.mode.HasFlag(Mode.Boundary), mf.gyd.abLength);
-                    List<Polyline2> OffsetList = OffsetPoints.DissolvePolyLine<Polyline2>(mf.gyd.currentGuidanceLine.mode.HasFlag(Mode.Boundary));
+                    List<vec2> OffsetPoints = mf.gyd.currentGuidanceLine.OffsetPolyline<Polyline>(tramWidth * i, mf.gyd.abLength);
+                    List<Polyline2> OffsetList = OffsetPoints.DissolvePolyLine<Polyline2>(mf.gyd.currentGuidanceLine.loop);
 
                     for (int s = 0; s < OffsetList.Count; s++)
                     {
@@ -175,8 +169,8 @@ namespace AgOpenGPS
                     {
                         if (OffsetList[s].points.Count > 1)
                         {
-                            List<vec2> Left = OffsetList[s].points.OffsetPolyline(halfWheelTrack, OffsetList[s].loop);
-                            List<vec2> Right = OffsetList[s].points.OffsetPolyline(-halfWheelTrack, OffsetList[s].loop);
+                            List<vec2> Left = OffsetList[s].OffsetPolyline(halfWheelTrack);
+                            List<vec2> Right = OffsetList[s].OffsetPolyline(-halfWheelTrack);
 
                             if (OffsetList[s].loop && Left.Count > 2)
                                 Left.Add(Left[0]);

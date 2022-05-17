@@ -25,6 +25,7 @@ namespace AgOpenGPS
 
         //points in world space that start and end of section are in
         public vec2 leftPoint, rightPoint;
+        public vec3 Pos;
 
         public double toolOverlap, toolOffset;
         public double toolTrailingHitchLength, toolTankTrailingHitchLength;
@@ -246,7 +247,7 @@ namespace AgOpenGPS
                 GL.Translate(Math.Sin(mf.fixHeading) * hitchLength,
                             Math.Cos(mf.fixHeading) * hitchLength, 0);
 
-            if (mf.tool.isSteering && !isToolTrailing)
+            if (isSteering && !isToolTrailing)
                 GL.Translate(Math.Cos(mf.fixHeading) * toolSteerShift,
                                 Math.Sin(mf.fixHeading) * -toolSteerShift, 0);
 
@@ -283,14 +284,14 @@ namespace AgOpenGPS
                     GL.Rotate(glm.toDegrees(mf.tankPos.heading), 0.0, 0.0, 1.0);
                 }
 
-                GL.Rotate(glm.toDegrees(-mf.toolPos.heading), 0.0, 0.0, 1.0);
+                GL.Rotate(glm.toDegrees(-Pos.heading), 0.0, 0.0, 1.0);
 
                 GL.LineWidth(6);
                 GL.Color3(0, 0, 0);
                 GL.Begin(PrimitiveType.LineStrip);
-                GL.Vertex3(-0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
+                GL.Vertex3(-0.4 + toolOffset, toolTrailingHitchLength, 0);
                 GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
+                GL.Vertex3(0.4 + toolOffset, toolTrailingHitchLength, 0);
 
                 GL.End();
 
@@ -298,16 +299,16 @@ namespace AgOpenGPS
                 //draw the rigid hitch
                 GL.Color3(0.7f, 0.4f, 0.2f);
                 GL.Begin(PrimitiveType.LineStrip);
-                GL.Vertex3(-0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
+                GL.Vertex3(-0.4 + toolOffset, toolTrailingHitchLength, 0);
                 GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.4 + mf.tool.toolOffset, toolTrailingHitchLength, 0);
+                GL.Vertex3(0.4 + toolOffset, toolTrailingHitchLength, 0);
 
                 GL.End();
                 GL.Translate(toolOffset, toolTrailingHitchLength, 0.0);
             }
             else//no tow between hitch
             {
-                GL.Rotate(glm.toDegrees(-mf.toolPos.heading), 0.0, 0.0, 1.0);
+                GL.Rotate(glm.toDegrees(-Pos.heading), 0.0, 0.0, 1.0);
                 GL.Translate(toolOffset, 0.0, 0.0);
             }
 

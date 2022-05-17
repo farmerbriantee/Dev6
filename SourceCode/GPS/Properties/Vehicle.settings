@@ -153,7 +153,7 @@
       <Value Profile="(Default)">2,3,2</Value>
     </Setting>
     <Setting Name="Tool_Width" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">4</Value>
+      <Value Profile="(Default)">7</Value>
     </Setting>
     <Setting Name="Tool_Overlap" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
@@ -213,7 +213,7 @@
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="Tool_isTrailing" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Tool_Offset" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0</Value>
@@ -231,7 +231,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="Tool_Section_isFast" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="Tool_slowSpeedCutoff" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0.5</Value>

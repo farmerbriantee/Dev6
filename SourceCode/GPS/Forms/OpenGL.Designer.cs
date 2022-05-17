@@ -193,14 +193,14 @@ namespace AgOpenGPS
                         for (int i = 2; i < tool.sections[j].triangleList.Count; i++) GL.Vertex3(tool.sections[j].triangleList[i].easting, tool.sections[j].triangleList[i].northing, 0);
 
                         //left side of triangle
-                        vec2 pt = new vec2((cosSectionHeading * (tool.sections[j].positionLeft + tool.toolOffset)) + toolPos.easting,
-                                (sinSectionHeading * (tool.sections[j].positionLeft + tool.toolOffset)) + toolPos.northing);
+                        vec2 pt = new vec2((cosSectionHeading * (tool.sections[j].positionLeft + tool.toolOffset)) + tool.Pos.easting,
+                                (sinSectionHeading * (tool.sections[j].positionLeft + tool.toolOffset)) + tool.Pos.northing);
 
                         GL.Vertex3(pt.easting, pt.northing, 0);
 
                         //Right side of triangle
-                        pt = new vec2((cosSectionHeading * (tool.sections[j].positionRight + tool.toolOffset)) + toolPos.easting,
-                           (sinSectionHeading * (tool.sections[j].positionRight + tool.toolOffset)) + toolPos.northing);
+                        pt = new vec2((cosSectionHeading * (tool.sections[j].positionRight + tool.toolOffset)) + tool.Pos.easting,
+                           (sinSectionHeading * (tool.sections[j].positionRight + tool.toolOffset)) + tool.Pos.northing);
 
                         GL.Vertex3(pt.easting, pt.northing, 0);
                         GL.End();
@@ -642,18 +642,18 @@ namespace AgOpenGPS
             if (!Test)
             {
                 //rotate camera so heading matched fix heading in the world
-                GL.Rotate(glm.toDegrees(toolPos.heading), 0, 0, 1);
+                GL.Rotate(glm.toDegrees(tool.Pos.heading), 0, 0, 1);
 
                 //translate to that spot in the world
-                GL.Translate(-toolPos.easting - Math.Cos(toolPos.heading) * tool.toolOffset, -toolPos.northing + Math.Sin(toolPos.heading) * tool.toolOffset, 0);
+                GL.Translate(-tool.Pos.easting - Math.Cos(tool.Pos.heading) * tool.toolOffset, -tool.Pos.northing + Math.Sin(tool.Pos.heading) * tool.toolOffset, 0);
                 
                 GL.Color3((byte)0, (byte)(bnd.bndList.Count == 0 ? 250 : 252), (byte)0);
                 GL.Begin(PrimitiveType.TriangleStrip);
 
-                GL.Vertex3(toolPos.easting - 200, toolPos.northing - 200, 0);
-                GL.Vertex3(toolPos.easting + 200, toolPos.northing - 200, 0);
-                GL.Vertex3(toolPos.easting - 200, toolPos.northing + 200, 0);
-                GL.Vertex3(toolPos.easting + 200, toolPos.northing + 200, 0);
+                GL.Vertex3(tool.Pos.easting - 200, tool.Pos.northing - 200, 0);
+                GL.Vertex3(tool.Pos.easting + 200, tool.Pos.northing - 200, 0);
+                GL.Vertex3(tool.Pos.easting - 200, tool.Pos.northing + 200, 0);
+                GL.Vertex3(tool.Pos.easting + 200, tool.Pos.northing + 200, 0);
 
                 GL.End();
             }
@@ -745,8 +745,8 @@ namespace AgOpenGPS
                         {
                             GL.Vertex3(tool.sections[j].triangleList[k].easting, tool.sections[j].triangleList[k].northing, 0);
                         }
-                        GL.Vertex3(tool.sections[j].leftPoint.easting - Math.Sin(toolPos.heading) * 0.1, tool.sections[j].leftPoint.northing - Math.Cos(toolPos.heading) * 0.1, 0);
-                        GL.Vertex3(tool.sections[j].rightPoint.easting - Math.Sin(toolPos.heading) * 0.1, tool.sections[j].rightPoint.northing - Math.Cos(toolPos.heading) * 0.1, 0);
+                        GL.Vertex3(tool.sections[j].leftPoint.easting - Math.Sin(tool.Pos.heading) * 0.1, tool.sections[j].leftPoint.northing - Math.Cos(tool.Pos.heading) * 0.1, 0);
+                        GL.Vertex3(tool.sections[j].rightPoint.easting - Math.Sin(tool.Pos.heading) * 0.1, tool.sections[j].rightPoint.northing - Math.Cos(tool.Pos.heading) * 0.1, 0);
 
                         GL.End();
                     }
@@ -922,12 +922,12 @@ namespace AgOpenGPS
                     }
 
                     //draw curve if there is one
-                    if (gyd.currentGuidanceLine != null && gyd.curList.Count > 1)
+                    if (gyd.currentGuidanceLine != null && gyd.curList.points.Count > 1)
                     {
                         GL.LineWidth(2);
                         GL.Color3(0.925f, 0.2f, 0.90f);
-                        GL.Begin(PrimitiveType.LineStrip);
-                        for (int h = 0; h < gyd.curList.Count; h++) GL.Vertex3(gyd.curList[h].easting, gyd.curList[h].northing, 0);
+                        GL.Begin(gyd.curList.loop ? PrimitiveType.LineLoop : PrimitiveType.LineStrip);
+                        for (int h = 0; h < gyd.curList.points.Count; h++) GL.Vertex3(gyd.curList.points[h].easting, gyd.curList.points[h].northing, 0);
                         GL.End();
                     }
 

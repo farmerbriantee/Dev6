@@ -11,6 +11,7 @@ namespace AgOpenGPS
         CGuidanceLine currentLine;
         private bool isClosing;
         private int smoothCount = 20;
+        double heading = 0;
 
         public FormEditAB(Form callingForm, CGuidanceLine _currentLine)
         {
@@ -45,8 +46,15 @@ namespace AgOpenGPS
             lblHalfSnapFtM.Text = mf.unitsFtM;
             lblHalfWidth.Text = (mf.tool.toolWidth * 0.5 * mf.mToUserBig).ToString("0.00");
 
-            if (currentLine != null && currentLine.points.Count > 0)
-                tboxHeading.Text = glm.toDegrees(currentLine.points[0].heading).ToString("0.00000");
+            if (currentLine != null && currentLine.points.Count > 1)
+            {
+                double dx = currentLine.points[1].easting - currentLine.points[0].easting;
+                double dy = currentLine.points[1].northing - currentLine.points[0].northing;
+
+                heading = Math.Atan2(dx, dy);
+                if (heading < 0) heading += glm.twoPI;
+                tboxHeading.Text = glm.toDegrees(heading).ToString("0.00000");
+            }
 
             mf.panelRight.Enabled = false;
         }
@@ -55,17 +63,17 @@ namespace AgOpenGPS
         {
             mf.gyd.isValid = false;
 
-            if (currentLine != null && currentLine.points.Count > 0)
+            using (FormNumeric form = new FormNumeric(0, 360, Math.Round(glm.toDegrees(heading), 5), 5))
             {
-                using (FormNumeric form = new FormNumeric(0, 360, Math.Round(glm.toDegrees(currentLine.points[0].heading), 5), 5))
+                if (form.ShowDialog(this) == DialogResult.OK)
                 {
-                    if (form.ShowDialog(this) == DialogResult.OK)
-                    {
-                        tboxHeading.Text = ((double)form.ReturnValue).ToString();
-                        double heading = glm.toRadians((double)form.ReturnValue);
+                    tboxHeading.Text = ((double)form.ReturnValue).ToString();
+                    heading = glm.toRadians((double)form.ReturnValue);
 
-                        currentLine.points[0] = new vec3(currentLine.points[0].easting, currentLine.points[0].northing, heading);
-                        currentLine.points[1] = new vec3(currentLine.points[0].easting + Math.Sin(heading), currentLine.points[0].northing + Math.Cos(heading), heading);
+                    if (currentLine != null && currentLine.points.Count > 1)
+                    {
+                        currentLine.points[0] = new vec2(currentLine.points[0].easting, currentLine.points[0].northing);
+                        currentLine.points[1] = new vec2(currentLine.points[0].easting + Math.Sin(heading), currentLine.points[0].northing + Math.Cos(heading));
                     }
                 }
             }
@@ -139,8 +147,16 @@ namespace AgOpenGPS
                 mf.gyd.isValid = false;
                 mf.gyd.ReverseGuidanceLine(currentLine);
 
-                if (currentLine.points.Count > 0)
-                    tboxHeading.Text = glm.toDegrees(currentLine.points[0].heading).ToString("0.00000");
+                if (currentLine.points.Count > 1)
+                {
+                    double dx = currentLine.points[1].easting - currentLine.points[0].easting;
+                    double dy = currentLine.points[1].northing - currentLine.points[0].northing;
+
+                    heading = Math.Atan2(dx, dy);
+                    if (heading < 0) heading += glm.twoPI;
+
+                    tboxHeading.Text = glm.toDegrees(heading).ToString("0.00000");
+                }
             }
         }
 
@@ -184,12 +200,12 @@ namespace AgOpenGPS
 
         private void cboxDegrees_SelectedIndexChanged(object sender, EventArgs e)
         {
-            double heading = glm.toRadians(double.Parse(cboxDegrees.SelectedItem.ToString()));
+            heading = glm.toRadians(double.Parse(cboxDegrees.SelectedItem.ToString()));
 
             if (currentLine != null && currentLine.points.Count > 0)
             {
-                currentLine.points[0] = new vec3(currentLine.points[0].easting, currentLine.points[0].northing, heading);
-                currentLine.points[1] = new vec3(currentLine.points[0].easting + Math.Sin(heading), currentLine.points[0].northing + Math.Cos(heading), heading);
+                currentLine.points[0] = new vec2(currentLine.points[0].easting, currentLine.points[0].northing);
+                currentLine.points[1] = new vec2(currentLine.points[0].easting + Math.Sin(heading), currentLine.points[0].northing + Math.Cos(heading));
             }
 
             tboxHeading.Text = glm.toDegrees(heading).ToString("0.00000");
@@ -221,48 +237,10 @@ namespace AgOpenGPS
                     mf.gyd.MoveGuidanceLine(currentLine2, old);
                 }
 
-                //count the reference list of original curve
-                int cnt = currentLine2.points.Count;
 
-                //just go back if not very long
-                if (cnt < 200) return;
-
-                //the temp array
-                vec3[] arr = new vec3[cnt];
-
-                //read the points before and after the setpoint
-                for (int s = 0; s < smPts / 2; s++)
-                {
-                    arr[s].easting = currentLine2.points[s].easting;
-                    arr[s].northing = currentLine2.points[s].northing;
-                    arr[s].heading = currentLine2.points[s].heading;
-                }
-
-                for (int s = cnt - (smPts / 2); s < cnt; s++)
-                {
-                    arr[s].easting = currentLine2.points[s].easting;
-                    arr[s].northing = currentLine2.points[s].northing;
-                    arr[s].heading = currentLine2.points[s].heading;
-                }
-
-                //average them - center weighted average
-                for (int i = smPts / 2; i < cnt - (smPts / 2); i++)
-                {
-                    for (int j = -smPts / 2; j < smPts / 2; j++)
-                    {
-                        arr[i].easting += currentLine2.points[j + i].easting;
-                        arr[i].northing += currentLine2.points[j + i].northing;
-                    }
-                    arr[i].easting /= smPts;
-                    arr[i].northing /= smPts;
-                    arr[i].heading = currentLine2.points[i].heading;
-                }
-
-                if (arr == null || cnt < 1) return;
-
+                vec2[] arr = currentLine2.points.SmoothAB(smPts);
                 currentLine2.points.Clear();
                 currentLine2.points.AddRange(arr);
-                currentLine2.points.CalculateHeadings(currentLine2.mode.HasFlag(Mode.Boundary));
 
                 mf.gyd.isValid = false;
                 mf.gyd.currentGuidanceLine = mf.gyd.currentCurveLine = currentLine = currentLine2;

@@ -55,13 +55,11 @@ namespace AgOpenGPS
             if (currentPositonIndex < recList.Count)
             {
                 //the goal is the first point of path, the start is the current position
-                vec3 goal = new vec3(recList[currentPositonIndex].easting, recList[currentPositonIndex].northing, recList[currentPositonIndex].heading);
-
                 //get the dubins for approach to recorded path
-                GetDubinsPath(goal);
+                GetDubinsPath(recList[currentPositonIndex]);
 
                 //has a valid dubins path been created?
-                if (curList.Count == 0) return false;
+                if (curList.points.Count < 2) return false;
 
                 //technically all good if we get here so set all the flags
                 isFollowingDubinsHome = false;
@@ -85,17 +83,17 @@ namespace AgOpenGPS
                 //set a speed of 10 kmh
                 mf.sim.stepDistance = 2.77778;
 
-                CalculateSteerAngle(pivot, steer, heading, curList, false);
+                CalculateSteerAngle(pivot, steer, heading, curList);
 
                 //check if close to recorded path
-                if (curList.Count - pB < 8)
+                if (curList.points.Count - pB < 8)
                 {
                     double distSqr = glm.Distance(pivot, recList[currentPositonIndex]);
                     if (distSqr < 4)
                     {
                         isFollowingRecPath = true;
                         isFollowingDubinsToPath = false;
-                        curList.Clear();
+                        curList = new Polyline();
                     }
                 }
             }
@@ -138,7 +136,7 @@ namespace AgOpenGPS
 
             if (isFollowingDubinsHome)
             {
-                if (curList.Count - pB < 3)
+                if (curList.points.Count - pB < 3)
                 {
                     StopDrivingRecordedPath();
                     return;
@@ -147,7 +145,7 @@ namespace AgOpenGPS
                 mf.sim.stepDistance = 2.77778;
 
                 //StanleyDubinsPath(shuttleListCount);
-                CalculateSteerAngle(pivot, steer, heading, curList, false);
+                CalculateSteerAngle(pivot, steer, heading, curList);
             }
         }
 
@@ -156,7 +154,7 @@ namespace AgOpenGPS
             isFollowingDubinsHome = false;
             isFollowingRecPath = false;
             isFollowingDubinsToPath = false;
-            curList.Clear();
+            curList = new Polyline();
             mf.sim.stepDistance = 0;
             isDrivingRecordedPath = false;
             mf.btnPathGoStop.Image = Properties.Resources.boundaryPlay;
@@ -165,7 +163,7 @@ namespace AgOpenGPS
             mf.btnResumePath.Enabled = true;
         }
 
-        private void GetDubinsPath(vec3 goal)
+        private void GetDubinsPath(CRecPathPt goal)
         {
             CDubins dubPath = new CDubins(mf.vehicle.minTurningRadius * 1.2);
 
@@ -173,16 +171,13 @@ namespace AgOpenGPS
             vec2 pivotAxlePosRP = mf.pivotAxlePos;
 
             //bump it forward
-            vec3 pt2 = new vec3
-            {
-                easting = pivotAxlePosRP.easting + (Math.Sin(mf.fixHeading) * 3),
-                northing = pivotAxlePosRP.northing + (Math.Cos(mf.fixHeading) * 3),
-                heading = mf.fixHeading
-            };
+            vec2 pt2 = new vec2(pivotAxlePosRP.easting + (Math.Sin(mf.fixHeading) * 3),
+                pivotAxlePosRP.northing + (Math.Cos(mf.fixHeading) * 3));
 
-            //get the dubins path vec3 point coordinates of turn
-            curList = dubPath.GenerateDubins(pt2, goal);
-            curList.Insert(0, new vec3(pivotAxlePosRP.easting, pivotAxlePosRP.northing, mf.fixHeading));
+            //get the dubins path vec2 point coordinates of turn
+            curList.points = dubPath.GenerateDubins(pt2, mf.fixHeading, new vec2(goal.easting, goal.northing), goal.heading);
+            curList.loop = false;
+            curList.points.Insert(0, new vec2(pivotAxlePosRP.easting, pivotAxlePosRP.northing));
         }
     }
 }

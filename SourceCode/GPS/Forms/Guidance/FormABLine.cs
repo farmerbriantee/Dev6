@@ -93,7 +93,7 @@ namespace AgOpenGPS
             {
                 vec2 fix = mf.pivotAxlePos;
 
-                mf.gyd.EditGuidanceLine.points.Add(new vec3(fix.easting + Math.Cos(mf.fixHeading) * mf.tool.toolOffset, fix.northing - Math.Sin(mf.fixHeading) * mf.tool.toolOffset, mf.fixHeading));
+                mf.gyd.EditGuidanceLine.points.Add(new vec2(fix.easting + Math.Cos(mf.fixHeading) * mf.tool.toolOffset, fix.northing - Math.Sin(mf.fixHeading) * mf.tool.toolOffset));
 
                 nudHeading.Enabled = true;
                 nudHeading.Value = (decimal)glm.toDegrees(mf.fixHeading);
@@ -118,15 +118,12 @@ namespace AgOpenGPS
 
                 btnBPoint.BackColor = System.Drawing.Color.Teal;
 
-                vec3 tt = new vec3(fix.easting + Math.Cos(mf.fixHeading) * mf.tool.toolOffset, fix.northing - Math.Sin(mf.fixHeading) * mf.tool.toolOffset, mf.fixHeading);
+                vec2 tt = new vec2(fix.easting + Math.Cos(mf.fixHeading) * mf.tool.toolOffset, fix.northing - Math.Sin(mf.fixHeading) * mf.tool.toolOffset);
 
                 // heading based on AB points
                 double heading = Math.Atan2(tt.easting - mf.gyd.EditGuidanceLine.points[0].easting,
                     tt.northing - mf.gyd.EditGuidanceLine.points[0].northing);
                 if (heading < 0) heading += glm.twoPI;
-                tt.heading = heading;
-                if (mf.gyd.EditGuidanceLine.points.Count > 0)
-                    mf.gyd.EditGuidanceLine.points[0] = new vec3(mf.gyd.EditGuidanceLine.points[0].easting, mf.gyd.EditGuidanceLine.points[0].northing, heading);
 
                 if (mf.gyd.EditGuidanceLine.points.Count > 1)
                     mf.gyd.EditGuidanceLine.points[1] = tt;
@@ -156,9 +153,8 @@ namespace AgOpenGPS
                         double distance = glm.Distance(mf.gyd.EditGuidanceLine.points[i], mf.gyd.EditGuidanceLine.points[j]);
                         if (distance > 1.2)
                         {
-                            vec3 pointB = new vec3((mf.gyd.EditGuidanceLine.points[i].easting + mf.gyd.EditGuidanceLine.points[j].easting) / 2.0,
-                                (mf.gyd.EditGuidanceLine.points[i].northing + mf.gyd.EditGuidanceLine.points[j].northing) / 2.0,
-                                mf.gyd.EditGuidanceLine.points[i].heading);
+                            vec2 pointB = new vec2((mf.gyd.EditGuidanceLine.points[i].easting + mf.gyd.EditGuidanceLine.points[j].easting) / 2.0,
+                                (mf.gyd.EditGuidanceLine.points[i].northing + mf.gyd.EditGuidanceLine.points[j].northing) / 2.0);
 
                             mf.gyd.EditGuidanceLine.points.Insert(j, pointB);
                             cnt = mf.gyd.EditGuidanceLine.points.Count;
@@ -167,21 +163,11 @@ namespace AgOpenGPS
                     }
 
                     //calculate average heading of line
-                    double x = 0, y = 0;
-                    foreach (vec3 pt in mf.gyd.EditGuidanceLine.points)
-                    {
-                        x += Math.Cos(pt.heading);
-                        y += Math.Sin(pt.heading);
-                    }
-                    x /= mf.gyd.EditGuidanceLine.points.Count;
-                    y /= mf.gyd.EditGuidanceLine.points.Count;
-                    double aveLineHeading = Math.Atan2(y, x);
+                    double aveLineHeading = mf.gyd.EditGuidanceLine.points.CalculateAverageHeadings();
                     if (aveLineHeading < 0) aveLineHeading += glm.twoPI;
 
                     //build the tail extensions
-                    AddFirstLastPoints();
-                    SmoothAB(4);
-                    mf.gyd.EditGuidanceLine.points.CalculateHeadings(false);
+                    mf.gyd.EditGuidanceLine.points.AddFirstLastPoints(200);
 
                     panelAPlus.Visible = false;
                     panelName.Visible = true;
@@ -213,18 +199,18 @@ namespace AgOpenGPS
 
                 if (mf.gyd.EditGuidanceLine.points.Count > 1)
                 {
-                    mf.gyd.EditGuidanceLine.points[0] = new vec3(mf.gyd.EditGuidanceLine.points[0].easting, mf.gyd.EditGuidanceLine.points[0].northing, heading);
-                    mf.gyd.EditGuidanceLine.points[1] = new vec3(mf.gyd.EditGuidanceLine.points[0].easting + Math.Sin(heading), mf.gyd.EditGuidanceLine.points[0].northing + Math.Cos(heading), heading);
+                    mf.gyd.EditGuidanceLine.points[0] = new vec2(mf.gyd.EditGuidanceLine.points[0].easting, mf.gyd.EditGuidanceLine.points[0].northing);
+                    mf.gyd.EditGuidanceLine.points[1] = new vec2(mf.gyd.EditGuidanceLine.points[0].easting + Math.Sin(heading), mf.gyd.EditGuidanceLine.points[0].northing + Math.Cos(heading));
                 }
                 else if (mf.gyd.EditGuidanceLine.points.Count > 0)
                 {
-                    mf.gyd.EditGuidanceLine.points[0] = new vec3(mf.gyd.EditGuidanceLine.points[0].easting, mf.gyd.EditGuidanceLine.points[0].northing, heading);
-                    mf.gyd.EditGuidanceLine.points.Add(new vec3(mf.gyd.EditGuidanceLine.points[0].easting + Math.Sin(heading), mf.gyd.EditGuidanceLine.points[0].northing + Math.Cos(heading), heading));
+                    mf.gyd.EditGuidanceLine.points[0] = new vec2(mf.gyd.EditGuidanceLine.points[0].easting, mf.gyd.EditGuidanceLine.points[0].northing);
+                    mf.gyd.EditGuidanceLine.points.Add(new vec2(mf.gyd.EditGuidanceLine.points[0].easting + Math.Sin(heading), mf.gyd.EditGuidanceLine.points[0].northing + Math.Cos(heading)));
                 }
                 else
                 {
-                    mf.gyd.EditGuidanceLine.points.Add(new vec3(mf.gyd.EditGuidanceLine.points[0].easting, mf.gyd.EditGuidanceLine.points[0].northing, heading));
-                    mf.gyd.EditGuidanceLine.points.Add(new vec3(mf.gyd.EditGuidanceLine.points[0].easting + Math.Sin(heading), mf.gyd.EditGuidanceLine.points[0].northing + Math.Cos(heading), heading));
+                    mf.gyd.EditGuidanceLine.points.Add(new vec2(mf.gyd.EditGuidanceLine.points[0].easting, mf.gyd.EditGuidanceLine.points[0].northing));
+                    mf.gyd.EditGuidanceLine.points.Add(new vec2(mf.gyd.EditGuidanceLine.points[0].easting + Math.Sin(heading), mf.gyd.EditGuidanceLine.points[0].northing + Math.Cos(heading)));
                 }
 
                 textBox1.Text = "AB " +
@@ -346,8 +332,7 @@ namespace AgOpenGPS
 
                     textBox1.Text = mf.gyd.curveArr[idx].Name.Trim() + " Copy";
 
-                    mf.gyd.EditGuidanceLine = new CGuidanceLine(mf.gyd.curveArr[idx].mode);
-                    mf.gyd.EditGuidanceLine.points.AddRange(mf.gyd.curveArr[idx].points.ToArray());
+                    mf.gyd.EditGuidanceLine = new CGuidanceLine(mf.gyd.curveArr[idx]);
                 }
             }
         }
@@ -471,72 +456,6 @@ namespace AgOpenGPS
         {
             mf.gyd.isOkToAddDesPoints = !mf.gyd.isOkToAddDesPoints;
             btnPausePlay.Image = mf.gyd.isOkToAddDesPoints ? Properties.Resources.boundaryPause : Properties.Resources.BoundaryRecord;
-        }
-
-        public void SmoothAB(int smPts)
-        {
-            //count the reference list of original curve
-            int cnt = mf.gyd.EditGuidanceLine.points.Count;
-
-            //the temp array
-            vec3[] arr = new vec3[cnt];
-
-            //read the points before and after the setpoint
-            for (int s = 0; s < smPts / 2; s++)
-            {
-                arr[s].easting = mf.gyd.EditGuidanceLine.points[s].easting;
-                arr[s].northing = mf.gyd.EditGuidanceLine.points[s].northing;
-                arr[s].heading = mf.gyd.EditGuidanceLine.points[s].heading;
-            }
-
-            for (int s = cnt - (smPts / 2); s < cnt; s++)
-            {
-                arr[s].easting = mf.gyd.EditGuidanceLine.points[s].easting;
-                arr[s].northing = mf.gyd.EditGuidanceLine.points[s].northing;
-                arr[s].heading = mf.gyd.EditGuidanceLine.points[s].heading;
-            }
-
-            //average them - center weighted average
-            for (int i = smPts / 2; i < cnt - (smPts / 2); i++)
-            {
-                for (int j = -smPts / 2; j < smPts / 2; j++)
-                {
-                    arr[i].easting += mf.gyd.EditGuidanceLine.points[j + i].easting;
-                    arr[i].northing += mf.gyd.EditGuidanceLine.points[j + i].northing;
-                }
-                arr[i].easting /= smPts;
-                arr[i].northing /= smPts;
-                arr[i].heading = mf.gyd.EditGuidanceLine.points[i].heading;
-            }
-
-            //make a list to draw
-            mf.gyd.EditGuidanceLine.points.Clear();
-            for (int i = 0; i < cnt; i++)
-            {
-                mf.gyd.EditGuidanceLine.points.Add(arr[i]);
-            }
-        }
-
-        public void AddFirstLastPoints()
-        {
-            int ptCnt = mf.gyd.EditGuidanceLine.points.Count - 1;
-            for (int i = 1; i < 200; i++)
-            {
-                vec3 pt = new vec3(mf.gyd.EditGuidanceLine.points[ptCnt]);
-                pt.easting += (Math.Sin(pt.heading) * i);
-                pt.northing += (Math.Cos(pt.heading) * i);
-                mf.gyd.EditGuidanceLine.points.Add(pt);
-            }
-
-            //and the beginning
-            vec3 start = new vec3(mf.gyd.EditGuidanceLine.points[0]);
-            for (int i = 1; i < 200; i++)
-            {
-                vec3 pt = new vec3(start);
-                pt.easting -= (Math.Sin(pt.heading) * i);
-                pt.northing -= (Math.Cos(pt.heading) * i);
-                mf.gyd.EditGuidanceLine.points.Insert(0, pt);
-            }
         }
 
         #region Help

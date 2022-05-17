@@ -29,7 +29,7 @@ namespace AgOpenGPS
         }
 
         // Catmull Rom interpoint spline calculation
-        public static vec3 Catmull(double t, vec3 p0, vec3 p1, vec3 p2, vec3 p3)
+        public static vec2 Catmull(double t, vec2 p0, vec2 p1, vec2 p2, vec2 p3)
         {
             double tt = t * t;
             double ttt = tt * t;
@@ -39,62 +39,17 @@ namespace AgOpenGPS
             double q3 = -3.0f * ttt + 4.0f * tt + t;
             double q4 = ttt - tt;
 
+            //Catmull Rom gradient calculation
+            //double q1 = -3.0f * tt + 4.0f * t - 1;
+            //double q2 = 9.0f * tt - 10.0f * t;
+            //double q3 = -9.0f * tt + 8.0f * t + 1.0f;
+            //double q4 = 3.0f * tt - 2.0f * t;
+
             double tx = 0.5f * (p0.easting * q1 + p1.easting * q2 + p2.easting * q3 + p3.easting * q4);
             double ty = 0.5f * (p0.northing * q1 + p1.northing * q2 + p2.northing * q3 + p3.northing * q4);
 
-            vec3 ret = new vec3(tx, ty, 0);
+            vec2 ret = new vec2(tx, ty);
             return ret;
-
-            //f(t) = a_3 * t^3 + a_2 * t^2 + a_1 * t + a_0  cubic polynomial
-            //vec3 a = 2.0 * p1;
-            //vec3 b = p2 - p0;
-            //vec3 c = 2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3;
-            //vec3 d = -1.0 * p0 + 3.0 * p1 - 3.0 * p2 + p3;
-
-            //return (0.5 * (a + (t * b) + (t * t * c) + (t * t * t * d)));
-            //
-
-            //vec2 p0 = new vec2(1, 0);
-            //vec2 p1 = new vec2(3, 2);
-            //vec2 p2 = new vec2(5, 3);
-            //vec2 p3 = new vec2(6, 1);
-
-            //vec2 a = 2.0 * p1;
-            //vec2 b = p2 - p0;
-            //vec2 c = 2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3;
-            //vec2 d = -1.0 * p0 + 3.0 * p1 - 3.0 * p2 + p3;
-
-            //double tt = 0.25;
-
-            //vec2 pos = 0.5 * (a + (tt*b) + (tt * tt * c) + (tt * tt * tt * d));
-
-
-        }
-
-
-        // Catmull Rom gradient calculation
-        public static double CatmullGradient(double t, vec3 p0, vec3 p1, vec3 p2, vec3 p3)
-        {
-            double tt = t * t;
-
-            double q1 = -3.0f * tt + 4.0f * t - 1;
-            double q2 = 9.0f * tt - 10.0f * t;
-            double q3 = -9.0f * tt + 8.0f * t + 1.0f;
-            double q4 = 3.0f * tt - 2.0f * t;
-
-            double tx = 0.5f * (p0.easting * q1 + p1.easting * q2 + p2.easting * q3 + p3.easting * q4);
-            double ty = 0.5f * (p0.northing * q1 + p1.northing * q2 + p2.northing * q3 + p3.northing * q4);
-
-            return Math.Atan2(tx, ty);
-
-            //f(t) = a_3 * t^3 + a_2 * t^2 + a_1 * t + a_0  cubic polynomial
-            //vec3 a = 2.0 * p1;
-            //vec3 b = p2 - p0;
-            //vec3 c = 2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3;
-            //vec3 d = -1.0 * p0 + 3.0 * p1 - 3.0 * p2 + p3;
-
-            //return (0.5 * (a + (t * b) + (t * t * c) + (t * t * t * d)));
-            //
         }
 
         //Regex file expression
@@ -116,14 +71,6 @@ namespace AgOpenGPS
             return degrees * 0.01745329251994329576923690768489;
         }
 
-        //Distance calcs of all kinds
-        public static double Distance(double east1, double north1, double east2, double north2)
-        {
-            return Math.Sqrt(
-                Math.Pow(east1 - east2, 2)
-                + Math.Pow(north1 - north2, 2));
-        }
-
         public static double Distance(vec2 first, vec2 second)
         {
             return Math.Sqrt(
@@ -131,21 +78,7 @@ namespace AgOpenGPS
                 + Math.Pow(first.northing - second.northing, 2));
         }
 
-        public static double Distance(vec2 first, vec3 second)
-        {
-            return Math.Sqrt(
-                Math.Pow(first.easting - second.easting, 2)
-                + Math.Pow(first.northing - second.northing, 2));
-        }
-
         public static double Distance(vec3 first, vec2 second)
-        {
-            return Math.Sqrt(
-                Math.Pow(first.easting - second.easting, 2)
-                + Math.Pow(first.northing - second.northing, 2));
-        }
-
-        public static double Distance(vec3 first, vec3 second)
         {
             return Math.Sqrt(
                 Math.Pow(first.easting - second.easting, 2)
@@ -166,13 +99,6 @@ namespace AgOpenGPS
                 + Math.Pow(first.northing - north, 2));
         }
 
-        public static double Distance(vec3 first, double east, double north)
-        {
-            return Math.Sqrt(
-                Math.Pow(first.easting - east, 2)
-                + Math.Pow(first.northing - north, 2));
-        }
-
         public static double Distance(vecFix2Fix first, vec2 second)
         {
             return Math.Sqrt(
@@ -187,34 +113,6 @@ namespace AgOpenGPS
                 + Math.Pow(first.northing - second.northing, 2));
         }
 
-
-
-        //not normalized distance, no square root
-        public static double DistanceSquared(double northing1, double easting1, double northing2, double easting2)
-        {
-            return Math.Pow(easting1 - easting2, 2) + Math.Pow(northing1 - northing2, 2);
-        }
-
-        public static double DistanceSquared(vec3 first, vec2 second)
-        {
-            return (
-            Math.Pow(first.easting - second.easting, 2)
-            + Math.Pow(first.northing - second.northing, 2));
-        }
-
-        public static double DistanceSquared(vec2 first, vec3 second)
-        {
-            return (
-            Math.Pow(first.easting - second.easting, 2)
-            + Math.Pow(first.northing - second.northing, 2));
-        }
-
-        public static double DistanceSquared(vec3 first, vec3 second)
-        {
-            return (
-            Math.Pow(first.easting - second.easting, 2)
-            + Math.Pow(first.northing - second.northing, 2));
-        }
         public static double DistanceSquared(vec2 first, vec2 second)
         {
             return (

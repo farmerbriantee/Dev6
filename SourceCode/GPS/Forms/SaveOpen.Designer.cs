@@ -17,7 +17,7 @@ namespace AgOpenGPS
         public List<List<vec2>> patchSaveList = new List<List<vec2>>();
 
         //list of the list of patch data individual triangles for contour tracking
-        public List<List<vec3>> contourSaveList = new List<List<vec3>>();
+        public List<List<vec2>> contourSaveList = new List<List<vec2>>();
 
         public void FileSaveCurveLines()
         {
@@ -57,8 +57,7 @@ namespace AgOpenGPS
                             {
                                 for (int j = 0; j < cnt2; j++)
                                     writer.WriteLine(Math.Round(gyd.curveArr[i].points[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                                        Math.Round(gyd.curveArr[i].points[j].northing, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                                            Math.Round(gyd.curveArr[i].points[j].heading, 5).ToString(CultureInfo.InvariantCulture));
+                                                        Math.Round(gyd.curveArr[i].points[j].northing, 3).ToString(CultureInfo.InvariantCulture) + ",0");
                             }
                         }
                     }
@@ -121,7 +120,7 @@ namespace AgOpenGPS
                             New.Name = text;
 
                             if (New.Name == "Boundary Curve")
-                                New.mode |= Mode.Boundary;
+                                New.loop = true;
 
                             // get the average heading
                             line = reader.ReadLine();
@@ -136,9 +135,8 @@ namespace AgOpenGPS
                                 {
                                     line = reader.ReadLine();
                                     string[] words = line.Split(',');
-                                    New.points.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
-                                        double.Parse(words[1], CultureInfo.InvariantCulture),
-                                        double.Parse(words[2], CultureInfo.InvariantCulture)));
+                                    New.points.Add(new vec2(double.Parse(words[0], CultureInfo.InvariantCulture),
+                                        double.Parse(words[1], CultureInfo.InvariantCulture)));
                                 }
                                 gyd.curveArr.Add(New);
                             }
@@ -236,8 +234,8 @@ namespace AgOpenGPS
 
                             double heading = glm.toRadians(double.Parse(words[1], CultureInfo.InvariantCulture));
 
-                            New.points.Add(new vec3(double.Parse(words[2], CultureInfo.InvariantCulture), double.Parse(words[3], CultureInfo.InvariantCulture), heading));
-                            New.points.Add(new vec3(New.points[0].easting + Math.Sin(heading), New.points[0].northing + Math.Cos(heading), heading));
+                            New.points.Add(new vec2(double.Parse(words[2], CultureInfo.InvariantCulture), double.Parse(words[3], CultureInfo.InvariantCulture)));
+                            New.points.Add(new vec2(New.points[0].easting + Math.Sin(heading), New.points[0].northing + Math.Cos(heading)));
 
                             gyd.curveArr.Add(New);
                         }
@@ -445,9 +443,8 @@ namespace AgOpenGPS
                             {
                                 line = reader.ReadLine();
                                 string[] words = line.Split(',');
-                                New.points.Add(new vec3(double.Parse(words[0], CultureInfo.InvariantCulture),
-                                    double.Parse(words[1], CultureInfo.InvariantCulture),
-                                    double.Parse(words[2], CultureInfo.InvariantCulture)));
+                                New.points.Add(new vec2(double.Parse(words[0], CultureInfo.InvariantCulture),
+                                    double.Parse(words[1], CultureInfo.InvariantCulture)));
                             }
 
                             gyd.curveArr.Add(New);
@@ -591,7 +588,6 @@ namespace AgOpenGPS
                                     double.Parse(words[0], CultureInfo.InvariantCulture),
                                     double.Parse(words[1], CultureInfo.InvariantCulture)));
                                 }
-
                                 New.CalculateFenceArea();
 
                                 bnd.bndList.Add(New);
@@ -744,8 +740,8 @@ namespace AgOpenGPS
                                                 tramArr.points.Add(vecPt);
                                             }
 
-                                            List<vec2> Left = tramArr.points.OffsetPolyline(tram.halfWheelTrack, true);
-                                            List<vec2> Right = tramArr.points.OffsetPolyline(-tram.halfWheelTrack, true);
+                                            List<vec2> Left = tramArr.OffsetPolyline(tram.halfWheelTrack);
+                                            List<vec2> Right = tramArr.OffsetPolyline(-tram.halfWheelTrack);
 
                                             if (Left.Count > 1)
                                             {
@@ -797,8 +793,8 @@ namespace AgOpenGPS
                                         tramArr.points.Add(vecPt);
                                     }
 
-                                    List<vec2> Left = tramArr.points.OffsetPolyline(tram.halfWheelTrack, false);
-                                    List<vec2> Right = tramArr.points.OffsetPolyline(-tram.halfWheelTrack, false);
+                                    List<vec2> Left = tramArr.OffsetPolyline(tram.halfWheelTrack);
+                                    List<vec2> Right = tramArr.OffsetPolyline(-tram.halfWheelTrack);
 
                                     if (Left.Count > 1)
                                     {
@@ -1069,8 +1065,7 @@ namespace AgOpenGPS
                         for (int i = 0; i < count2; i++)
                         {
                             writer.WriteLine(Math.Round((triList[i].easting), 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                Math.Round(triList[i].northing, 3).ToString(CultureInfo.InvariantCulture)+ "," +
-                                Math.Round(triList[i].heading, 3).ToString(CultureInfo.InvariantCulture));
+                                Math.Round(triList[i].northing, 3).ToString(CultureInfo.InvariantCulture)+ ",0");
                         }
                     }
                 }
@@ -1534,16 +1529,28 @@ namespace AgOpenGPS
                     kml.WriteStartElement("coordinates");
 
                     string linePts = "";
-                    for (int j = 0; j < gyd.curveArr[i].points.Count; j++)
+                    if (gyd.curveArr[i].points.Count > 1)
                     {
-                        if (j == 0)
-                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting - (Math.Sin(gyd.curveArr[i].points[j].heading) * gyd.abLength),
-                                gyd.curveArr[i].points[j].northing - (Math.Cos(gyd.curveArr[i].points[j].heading) * gyd.abLength));
-                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting, gyd.curveArr[i].points[j].northing);
+                        for (int j = 0; j < gyd.curveArr[i].points.Count; j++)
+                        {
+                            if (j == 0)
+                            {
+                                double lineHeading = Math.Atan2(gyd.curveArr[i].points[j + 1].easting - gyd.curveArr[i].points[j].easting, gyd.curveArr[i].points[j + 1].northing - gyd.curveArr[i].points[j].northing);
 
-                        if (j == gyd.curveArr[i].points.Count -1)
-                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting + (Math.Sin(gyd.curveArr[i].points[j].heading) * gyd.abLength),
-                                gyd.curveArr[i].points[j].northing + (Math.Cos(gyd.curveArr[i].points[j].heading) * gyd.abLength));
+                                linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting - (Math.Sin(lineHeading) * gyd.abLength),
+                                    gyd.curveArr[i].points[j].northing - (Math.Cos(lineHeading) * gyd.abLength));
+                            }
+
+                            linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting, gyd.curveArr[i].points[j].northing);
+
+                            if (j == gyd.curveArr[i].points.Count - 1)
+                            {
+                                double lineHeading = Math.Atan2(gyd.curveArr[i].points[j].easting - gyd.curveArr[i].points[j - 1].easting, gyd.curveArr[i].points[j].northing - gyd.curveArr[i].points[j - 1].northing);
+
+                                linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting + (Math.Sin(lineHeading) * gyd.abLength),
+                                        gyd.curveArr[i].points[j].northing + (Math.Cos(lineHeading) * gyd.abLength));
+                            }
+                        }
                     }
 
                     kml.WriteRaw(linePts);

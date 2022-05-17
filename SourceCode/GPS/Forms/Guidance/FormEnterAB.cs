@@ -134,18 +134,18 @@ namespace AgOpenGPS
 
                 if (mf.gyd.EditGuidanceLine.points.Count > 1)
                 {
-                    mf.gyd.EditGuidanceLine.points[0] = new vec3(east, nort, heading);
-                    mf.gyd.EditGuidanceLine.points[1] = new vec3(east2, nort2, heading);
+                    mf.gyd.EditGuidanceLine.points[0] = new vec2(east, nort);
+                    mf.gyd.EditGuidanceLine.points[1] = new vec2(east2, nort2);
                 }
                 else if (mf.gyd.EditGuidanceLine.points.Count > 0)
                 {
-                    mf.gyd.EditGuidanceLine.points[0] = new vec3(east, nort, heading);
-                    mf.gyd.EditGuidanceLine.points.Add(new vec3(east2, nort2, heading));
+                    mf.gyd.EditGuidanceLine.points[0] = new vec2(east, nort);
+                    mf.gyd.EditGuidanceLine.points.Add(new vec2(east2, nort2));
                 }
                 else
                 {
-                    mf.gyd.EditGuidanceLine.points.Add(new vec3(east, nort, heading));
-                    mf.gyd.EditGuidanceLine.points.Add(new vec3(east2, nort2, heading));
+                    mf.gyd.EditGuidanceLine.points.Add(new vec2(east, nort));
+                    mf.gyd.EditGuidanceLine.points.Add(new vec2(east2, nort2));
                 }
 
                 headingText = textBox1.Text = "Manual AB " +

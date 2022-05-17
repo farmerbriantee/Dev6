@@ -129,10 +129,9 @@ namespace AgOpenGPS
         {
             Color field = mf.isDay ? mf.fieldColorDay : mf.fieldColorNight;
 
-            GL.Enable(EnableCap.Texture2D);
-
             if (mf.isTextureOn)
             {
+                GL.Enable(EnableCap.Texture2D);
                 //adjust bitmap zoom based on cam zoom
                 if (zoomValue > 100) Count = 4;
                 else if (zoomValue > 80) Count = 8;
@@ -155,6 +154,7 @@ namespace AgOpenGPS
                 GL.Vertex3(eastingMax, northingMin, 0.0);
 
                 GL.End();
+                GL.Disable(EnableCap.Texture2D);
             }
             else
             {
@@ -169,6 +169,7 @@ namespace AgOpenGPS
 
             if (isGeoMap && zoomValue > 15)
             {
+                GL.Enable(EnableCap.Texture2D);
                 GL.BindTexture(TextureTarget.Texture2D, mf.texture[20]);
                 GL.Begin(PrimitiveType.TriangleStrip);
                 GL.Color3(0.6f, 0.6f, 0.6f);
@@ -181,9 +182,9 @@ namespace AgOpenGPS
                 GL.TexCoord2(1, 1);
                 GL.Vertex3(eastingMaxGeo, northingMinGeo, 0.0);
                 GL.End();
+                GL.Disable(EnableCap.Texture2D);
             }
 
-            GL.Disable(EnableCap.Texture2D);
             ////if grid is on draw it
             if (isGridOn) DrawWorldGrid(gridZoom);
         }
@@ -206,15 +207,15 @@ namespace AgOpenGPS
             {
                 if (num < eastingMin) continue;
 
-                GL.Vertex3(num, northingMax, 0.1);
-                GL.Vertex3(num, northingMin, 0.1);
+                GL.Vertex3(num, northingMax, 0.0);
+                GL.Vertex3(num, northingMin, 0.0);
             }
             for (double num2 = Math.Round(northingMin / _gridZoom, MidpointRounding.AwayFromZero) * _gridZoom; num2 < northingMax; num2 += _gridZoom)
             {
                 if (num2 < northingMin) continue;
 
-                GL.Vertex3(eastingMax, num2, 0.1);
-                GL.Vertex3(eastingMin, num2, 0.1);
+                GL.Vertex3(eastingMax, num2, 0.0);
+                GL.Vertex3(eastingMin, num2, 0.0);
             }
             GL.End();
         }

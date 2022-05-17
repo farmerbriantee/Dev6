@@ -100,7 +100,7 @@ namespace AgOpenGPS
             for (int j = 0; j < bndList.Count; j++)
             {
                 bndList[j].turnLine.RemoveHandle();
-                bndList[j].turnLine = bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? mf.gyd.uturnDistanceFromBoundary : -mf.gyd.uturnDistanceFromBoundary, true, -1, -1, true);
+                bndList[j].turnLine = bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? mf.gyd.uturnDistanceFromBoundary : -mf.gyd.uturnDistanceFromBoundary, 0, -1, -1, true);
             }
         }
     }

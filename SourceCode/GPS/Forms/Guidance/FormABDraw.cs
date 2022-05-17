@@ -451,44 +451,19 @@ namespace AgOpenGPS
             //outside point
             double moveDist = (double)nudDistance.Value * mf.userToM;
 
-            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, true, -1, -1, true);
+            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, 0, -1, -1, true);
 
             btnCancelTouch.Enabled = false;
 
             if (poly.points.Count > 3)
             {
-                CGuidanceLine New = new CGuidanceLine(Mode.Curve | Mode.Boundary);
-
-                for (int i = 0; i < poly.points.Count; i++)
-                {
-                    New.points.Add(new vec3(poly.points[i].easting, poly.points[i].northing, 0));
-                }
-                /*
-                //make sure distance isn't too big between points on Turn
-                for (int i = 1; i < New.curvePts.Count; i++)
-                {
-                    int j = i - 1;
-                    //if (j == cnt) j = 0;
-                    double distance = glm.Distance(New.curvePts[i], New.curvePts[j]);
-                    if (distance > 1.6)
-                    {
-                        vec3 pointB = new vec3((New.curvePts[i].easting + New.curvePts[j].easting) / 2.0,
-                            (New.curvePts[i].northing + New.curvePts[j].northing) / 2.0,
-                            New.curvePts[i].heading);
-
-                        New.curvePts.Insert(i, pointB);
-                        i--;
-                    }
-                }
-                */
-
-                //who knows which way it actually goes
-                New.points.CalculateHeadings(true);
+                CGuidanceLine New = new CGuidanceLine(Mode.Curve, poly);
+                selectedCurveLine = New;
+                New.loop = true;
                 //create a name
                 New.Name = "Boundary Curve";
 
                 mf.gyd.curveArr.Add(New);
-                selectedCurveLine = New;
 
                 mf.FileSaveCurveLines();
 
@@ -508,48 +483,13 @@ namespace AgOpenGPS
 
             double moveDist = (double)nudDistance.Value * mf.userToM;
 
-            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, false, start, end, false);
+            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, 0, start, end, false);
 
             if (poly.points.Count > 3)
             {
-                CGuidanceLine New = new CGuidanceLine(Mode.Curve);
+                CGuidanceLine New = new CGuidanceLine(Mode.Curve, poly);
 
-                for (int i = 0; i < poly.points.Count; i++)
-                {
-                    New.points.Add(new vec3(poly.points[i].easting, poly.points[i].northing, 0));
-                }
-
-                //make sure distance isn't too big between points on Turn
-                for (int i = 1; i < New.points.Count; i++)
-                {
-                    int j = i - 1;
-                    //if (j == cnt) j = 0;
-                    double distance = glm.Distance(New.points[i], New.points[j]);
-                    if (distance > 1.6)
-                    {
-                        vec3 pointB = new vec3((New.points[i].easting + New.points[j].easting) / 2.0,
-                            (New.points[i].northing + New.points[j].northing) / 2.0,
-                            New.points[i].heading);
-
-                        New.points.Insert(i, pointB);
-                        i--;
-                    }
-                }
-
-                //who knows which way it actually goes
-                New.points.CalculateHeadings(false);
-
-                //calculate average heading of line
-                double x = 0, y = 0;
-
-                foreach (vec3 pt in New.points)
-                {
-                    x += Math.Cos(pt.heading);
-                    y += Math.Sin(pt.heading);
-                }
-                x /= New.points.Count;
-                y /= New.points.Count;
-                double aveLineHeading = Math.Atan2(y, x);
+                double aveLineHeading = New.points.CalculateAverageHeadings();
                 if (aveLineHeading < 0) aveLineHeading += glm.twoPI;
 
                 //create a name
@@ -559,11 +499,25 @@ namespace AgOpenGPS
                 while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
                     text += " ";
                 New.Name = text;
+                New.loop = false;
 
                 //build the tail extensions
-                AddFirstLastPoints(New);
-                New.points.CalculateHeadings(false);
+                New.points.AddFirstLastPoints(200);
 
+                //make sure distance isn't too big between points on Turn
+                for (int i = 1; i < New.points.Count; i++)
+                {
+                    int j = i - 1;
+                    //if (j == cnt) j = 0;
+                    double distance = glm.Distance(New.points[i], New.points[j]);
+                    if (distance > 1.6)
+                    {
+                        New.points.Insert(i, new vec2((New.points[i].easting + New.points[j].easting) / 2.0,
+                            (New.points[i].northing + New.points[j].northing) / 2.0));
+                        i--;
+                    }
+                }
+                
                 mf.gyd.curveArr.Add(New);
                 selectedCurveLine = New;
 
@@ -595,8 +549,8 @@ namespace AgOpenGPS
             double headingCalc = abHead + glm.PIBy2;
 
             //calculate the new points for the reference line and points
-            New.points.Add(new vec3((Math.Sin(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].easting, (Math.Cos(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].northing, abHead));
-            New.points.Add(new vec3(New.points[0].easting + Math.Sin(abHead), New.points[0].northing + Math.Cos(abHead), abHead));
+            New.points.Add(new vec2((Math.Sin(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].easting, (Math.Cos(headingCalc) * offset) + mf.bnd.bndList[0].fenceLine.points[start].northing));
+            New.points.Add(new vec2(New.points[0].easting + Math.Sin(abHead), New.points[0].northing + Math.Cos(abHead)));
 
             //create a name
             string text = (Math.Round(glm.toDegrees(abHead), 1)).ToString(CultureInfo.InvariantCulture)
@@ -690,21 +644,32 @@ namespace AgOpenGPS
                 else
                     continue;
 
-                if (mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
+                if (mf.gyd.curveArr[i].loop)
                     GL.Begin(PrimitiveType.LineLoop);
                 else
                     GL.Begin(PrimitiveType.LineStrip);
-
-                for (int j = 0; j < mf.gyd.curveArr[i].points.Count; j++)
+                if (mf.gyd.curveArr[i].points.Count > 1)
                 {
-                    vec3 item = mf.gyd.curveArr[i].points[j];
-                    if (j == 0 && !mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
-                        GL.Vertex3(item.easting - (Math.Sin(item.heading) * mf.gyd.abLength), item.northing - (Math.Cos(item.heading) * mf.gyd.abLength), 0);
+                    for (int j = 0; j < mf.gyd.curveArr[i].points.Count; j++)
+                    {
+                        vec2 item = mf.gyd.curveArr[i].points[j];
+                        if (j == 0 && !mf.gyd.curveArr[i].loop)
+                        {
+                            vec2 item2 = mf.gyd.curveArr[i].points[j + 1];
+                            double lineHeading = Math.Atan2(item2.easting - item.easting, item2.northing - item.northing);
 
-                    GL.Vertex3(item.easting, item.northing, 0);
+                            GL.Vertex3(item.easting - (Math.Sin(lineHeading) * mf.gyd.abLength), item.northing - (Math.Cos(lineHeading) * mf.gyd.abLength), 0);
+                        }
 
-                    if (j == mf.gyd.curveArr[i].points.Count - 1 && !mf.gyd.curveArr[i].mode.HasFlag(Mode.Boundary))
-                        GL.Vertex3(item.easting + (Math.Sin(item.heading) * mf.gyd.abLength), item.northing + (Math.Cos(item.heading) * mf.gyd.abLength), 0);
+                        GL.Vertex3(item.easting, item.northing, 0);
+
+                        if (j == mf.gyd.curveArr[i].points.Count - 1 && !mf.gyd.curveArr[i].loop)
+                        {
+                            vec2 item2 = mf.gyd.curveArr[i].points[j - 1];
+                            double lineHeading = Math.Atan2(item.easting - item2.easting, item.northing - item2.northing);
+                            GL.Vertex3(item.easting + (Math.Sin(lineHeading) * mf.gyd.abLength), item.northing + (Math.Cos(lineHeading) * mf.gyd.abLength), 0);
+                        }
+                    }
                 }
 
                 GL.End();
@@ -744,29 +709,6 @@ namespace AgOpenGPS
             Matrix4 mat = Matrix4.CreateOrthographic((float)currentDist, (float)currentDist, -1.0f, 1.0f);
             GL.LoadMatrix(ref mat);
             GL.MatrixMode(MatrixMode.Modelview);
-        }
-
-        //add extensons
-        public void AddFirstLastPoints(CGuidanceLine refList)
-        {
-            int ptCnt = refList.points.Count - 1;
-            for (int i = 1; i < 200; i++)
-            {
-                vec3 pt = new vec3(refList.points[ptCnt]);
-                pt.easting += (Math.Sin(pt.heading) * i);
-                pt.northing += (Math.Cos(pt.heading) * i);
-                refList.points.Add(pt);
-            }
-
-            //and the beginning
-            vec3 start = new vec3(refList.points[0]);
-            for (int i = 1; i < 200; i++)
-            {
-                vec3 pt = new vec3(start);
-                pt.easting -= (Math.Sin(pt.heading) * i);
-                pt.northing -= (Math.Cos(pt.heading) * i);
-                refList.points.Insert(0, pt);
-            }
         }
 
         #region Help

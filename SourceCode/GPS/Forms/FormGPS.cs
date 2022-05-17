@@ -246,9 +246,6 @@ namespace AgOpenGPS
             // load all the gui elements in gui.designer.cs
             LoadSettings();
 
-            //nmea limiter
-            udpWatch.Start();
-
             Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
             FixPanelsAndMenus();
 
@@ -653,7 +650,7 @@ namespace AgOpenGPS
             gyd.howManyPathsAway = 0;
 
             gyd.creatingContour = null;
-            gyd.curList.Clear();
+            gyd.curList = new Polyline();
             gyd.curveArr.Clear();
 
             gyd.resumeState = 0;

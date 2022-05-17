@@ -14,28 +14,6 @@ namespace AgOpenGPS
             this.northing = northing;
             this.heading = heading;
         }
-
-        public vec3(vec3 v)
-        {
-            easting = v.easting;
-            northing = v.northing;
-            heading = v.heading;
-        }
-
-        public static vec3 operator -(vec3 lhs, vec3 rhs)
-        {
-            return new vec3(lhs.easting - rhs.easting, lhs.northing - rhs.northing, 0);
-        }
-
-        public static vec3 operator +(vec3 lhs, vec3 rhs)
-        {
-            return new vec3(lhs.easting + rhs.easting, lhs.northing + rhs.northing, 0);
-        }
-
-        public static vec3 operator *(vec3 self, double s)
-        {
-            return new vec3(self.easting * s, self.northing * s, 0);
-        }
     }
 
     public struct vecCrossing
@@ -94,28 +72,6 @@ namespace AgOpenGPS
         }
     }
 
-
-    //
-
-    /// <summary>
-    /// easting, northing, heading, boundary#
-    /// </summary>
-    public struct vec4
-    {
-        public double easting; //easting
-        public double heading; //heading etc
-        public double northing; //northing
-        public int index;    //altitude
-
-        public vec4(double _easting, double _northing, double _heading, int _index)
-        {
-            this.easting = _easting;
-            this.heading = _heading;
-            this.northing = _northing;
-            this.index = _index;
-        }
-    }
-
     public struct vec2
     {
         public double easting; //easting
@@ -163,6 +119,11 @@ namespace AgOpenGPS
             return northing * v2.easting - easting * v2.northing;
         }
 
+        public double Dot(vec2 v2)
+        {
+            return northing * v2.northing + easting * v2.easting;
+        }
+
         //Returns the length of the vector
         public double GetLength()
         {
@@ -184,6 +145,10 @@ namespace AgOpenGPS
         public static vec2 operator /(vec2 self, double s)
         {
             return new vec2(self.easting / s, self.northing / s);
+        }
+        public static vec2 operator /(vec2 self, vec2 other)
+        {
+            return new vec2(self.easting / other.easting, self.northing / other.northing);
         }
 
         //add 2 vectors

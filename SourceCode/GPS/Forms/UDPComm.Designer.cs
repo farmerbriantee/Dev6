@@ -27,8 +27,6 @@ namespace AgOpenGPS
         private int udpWatchCounts = 0;
         public int udpWatchLimit = 70, toolGPSWatchdog = 20, vehicleGPSWatchdog = 20;
 
-        private readonly Stopwatch udpWatch = new Stopwatch();
-
         private bool EnableHeadRoll;
 
         private void ReceiveFromAgIO(byte[] data)
@@ -170,16 +168,14 @@ namespace AgOpenGPS
                     {
                         case 0xD6:// 214
                             {
-                                if (udpWatch.ElapsedMilliseconds < udpWatchLimit)
+                                if (startCounter > 0 && swHz.ElapsedMilliseconds < udpWatchLimit)
                                 {
                                     udpWatchCounts++;
                                     if (isLogNMEA) mc.logNMEASentence.Append("*** "
                                         + DateTime.UtcNow.ToString("ss.ff -> ", CultureInfo.InvariantCulture)
-                                        + udpWatch.ElapsedMilliseconds + "\r\n");
+                                        + swHz.ElapsedMilliseconds + "\r\n");
                                     return;
                                 }
-                                udpWatch.Reset();
-                                udpWatch.Start();
 
                                 double Lon = BitConverter.ToDouble(data, 5);
                                 double Lat = BitConverter.ToDouble(data, 13);

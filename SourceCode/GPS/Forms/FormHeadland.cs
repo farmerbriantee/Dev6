@@ -208,7 +208,7 @@ namespace AgOpenGPS
         {
             double width = (double)nudSetDistance.Value * mf.userBigToM;
 
-            headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, true, start, end, true));
+            headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, 0, start, end, true));
             headLineTemplate.Remove(headLineTemplate[index]);
 
             isSet = false;
@@ -225,7 +225,7 @@ namespace AgOpenGPS
                 List<Polyline2> New = new List<Polyline2>();
                 for (int i = 0; i < headLineTemplate.Count; i++)
                 {
-                    New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));
+                    New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, 0, -1, -1, true));
                 }
                 headLineTemplate = New;
 
@@ -234,7 +234,7 @@ namespace AgOpenGPS
             }
             else
             {
-                headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));
+                headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, 0, -1, -1, true));
                 headLineTemplate.Remove(headLineTemplate[index]);
             }
 
@@ -253,7 +253,7 @@ namespace AgOpenGPS
             List<Polyline2> New = new List<Polyline2>();
             for (int i = 0; i < headLineTemplate.Count; i++)
             {
-                New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, true, -1, -1, true));
+                New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, 0, -1, -1, true));
             }
             headLineTemplate = New;
 

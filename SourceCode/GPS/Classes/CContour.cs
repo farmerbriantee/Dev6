@@ -4,7 +4,7 @@ namespace AgOpenGPS
 {
     public partial class CGuidance
     {
-        public void AddPoint(vec3 pivot)
+        public void AddPoint(vec2 pivot, double heading)
         {
             if (creatingContour == null)
             {
@@ -12,7 +12,7 @@ namespace AgOpenGPS
                 curveArr.Add(creatingContour);
             }
 
-            creatingContour.points.Add(new vec3(pivot.easting + Math.Cos(pivot.heading) * mf.tool.toolOffset, pivot.northing - Math.Sin(pivot.heading) * mf.tool.toolOffset, pivot.heading));
+            creatingContour.points.Add(new vec2(pivot.easting + Math.Cos(heading) * mf.tool.toolOffset, pivot.northing - Math.Sin(heading) * mf.tool.toolOffset));
         }
 
         //End the strip
@@ -21,28 +21,7 @@ namespace AgOpenGPS
             //make sure its long enough to bother
             if (creatingContour?.points.Count > 5)
             {
-                //build tale
-                double head = creatingContour.points[0].heading;
-                int length = (int)mf.tool.toolWidth + 3;
-                vec3 pnt;
-                for (int a = 0; a < length; a++)
-                {
-                    pnt.easting = creatingContour.points[0].easting - (Math.Sin(head));
-                    pnt.northing = creatingContour.points[0].northing - (Math.Cos(head));
-                    pnt.heading = creatingContour.points[0].heading;
-                    creatingContour.points.Insert(0, pnt);
-                }
-
-                int ptc = creatingContour.points.Count - 1;
-                head = creatingContour.points[ptc].heading;
-
-                for (double i = 1; i < length; i += 1)
-                {
-                    pnt.easting = creatingContour.points[ptc].easting + (Math.Sin(head) * i);
-                    pnt.northing = creatingContour.points[ptc].northing + (Math.Cos(head) * i);
-                    pnt.heading = head;
-                    creatingContour.points.Add(pnt);
-                }
+                creatingContour.points.AddFirstLastPoints(mf.tool.toolWidth + 3);
 
                 //add the point list to the save list for appending to contour file
                 mf.contourSaveList.Add(creatingContour.points);
@@ -54,7 +33,7 @@ namespace AgOpenGPS
         }
 
         //build contours for boundaries
-        public void BuildFenceContours(int pass, int spacingInt)
+        public void BuildFenceContours(double pass, double spacing)
         {
             if (mf.bnd.bndList.Count == 0)
             {
@@ -62,31 +41,13 @@ namespace AgOpenGPS
                 return;
             }
 
-            double totalWidth;
-
-            if (pass == 1)
-            {
-                //determine how wide a headland space
-                totalWidth = (((mf.tool.toolWidth - mf.tool.toolOverlap) * 0.5) - spacingInt) * -1;
-            }
-            else
-            {
-                totalWidth = ((mf.tool.toolWidth - mf.tool.toolOverlap) * pass) + spacingInt + ((mf.tool.toolWidth - mf.tool.toolOverlap) * 0.5);
-            }
-
+            double totalWidth = ((mf.tool.toolWidth - mf.tool.toolOverlap) * pass) + spacing;
+            
             for (int j = 0; j < mf.bnd.bndList.Count; j++)
             {
-                Polyline New = mf.bnd.bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? totalWidth : -totalWidth, true, -1,-1, true);
-
-                var New2 = new CGuidanceLine(Mode.Contour | Mode.Boundary);
-
-                for (int i = New.points.Count - 1; i >= 0; i--)
-                {
-                    New2.points.Add(new vec3(New.points[i].easting, New.points[i].northing, 0));
-                }
-                New2.points.CalculateHeadings(true);
-
-                curveArr.Add(New2);
+                Polyline New = mf.bnd.bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? totalWidth : -totalWidth, 0, -1, -1, true);
+                New.loop = true;
+                curveArr.Add(new CGuidanceLine(Mode.Contour, New));
             }
 
             mf.TimedMessageBox(1500, "Boundary Contour", "Contour Path Created");
