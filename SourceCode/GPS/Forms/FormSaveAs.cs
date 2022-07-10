@@ -121,8 +121,7 @@ namespace AgOpenGPS
                 {
                     mf.WriteErrorLog("While Opening Field" + ex);
 
-                    FormTimedMessage form = new FormTimedMessage(2000, gStr.gsFieldFileIsCorrupt, gStr.gsChooseADifferentField);
-                    form.Show(this);
+                    this.TimedMessageBox(2000, gStr.gsFieldFileIsCorrupt, gStr.gsChooseADifferentField);
                     mf.JobClose();
                     return;
                 }
@@ -230,7 +229,7 @@ namespace AgOpenGPS
                 //    File.Copy(fileToCopy, destinationDirectory);
 
                 //now open the newly cloned field
-                mf.FileOpenField(dirNewField + myFileName);
+                mf.FileOpenField();
                 mf.displayFieldName = mf.currentFieldDirectory;
             }
 
@@ -240,29 +239,7 @@ namespace AgOpenGPS
 
         private void tboxFieldName_Click(object sender, EventArgs e)
         {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-                btnSerialCancel.Focus();
-            }
-        }
-
-        private void tboxTask_Click(object sender, EventArgs e)
-        {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-                btnSerialCancel.Focus();
-            }
-        }
-
-        private void tboxVehicle_Click(object sender, EventArgs e)
-        {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-                btnSerialCancel.Focus();
-            }
+            tboxFieldName.KeyboardToText();
         }
     }
 }

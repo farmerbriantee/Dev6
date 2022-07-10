@@ -81,10 +81,6 @@ namespace AgOpenGPS
         private int oneSecondCounter = 0;
         private int oneHalfSecondCounter = 0;
 
-        public double mToUser, userToM, mToUserBig, userBigToM, m2ToUser, KMHToUser, userToKMH;
-
-        public string unitsFtM, unitsInCm, unitsHaAc;
-
         /// <summary>
         /// create the world manager
         /// </summary>
@@ -120,25 +116,10 @@ namespace AgOpenGPS
         /// </summary>
         public CSim sim;
 
-        /// <summary>
-        /// Most of the displayed field data for GUI
-        /// </summary>
-        public CFieldData fd;
-
         ///// <summary>
         ///// Sound
         ///// </summary>
         public CSound sounds;
-
-        /// <summary>
-        /// Sound for approaching boundary
-        /// </summary>
-        public SoundPlayer sndHydraulicLift;
-
-        /// <summary>
-        /// Sound for approaching boundary
-        /// </summary>
-        public SoundPlayer sndHydraulicLower;
 
         /// <summary>
         /// The font class
@@ -172,7 +153,6 @@ namespace AgOpenGPS
             Portable.PortableSettingsProvider.ApplyProvider(Properties.Settings.Default, Properties.Vehicle.Default);
 
             ControlExtension.Draggable(oglZoom, true);
-            ControlExtension.Draggable(panelDrag, true);
 
             //time keeper
             secondsSinceStart = (DateTime.Now - Process.GetCurrentProcess().StartTime).TotalSeconds;
@@ -193,9 +173,6 @@ namespace AgOpenGPS
 
             //nmea simulator built in.
             sim = new CSim(this);
-
-            //fieldData all in one place
-            fd = new CFieldData(this);
 
             //instance of tram
             tram = new CTram(this);
@@ -246,8 +223,9 @@ namespace AgOpenGPS
             // load all the gui elements in gui.designer.cs
             LoadSettings();
 
-            Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            FixPanelsAndMenus();
+            LineUpManualBtns();
+
+            SetGuidanceMode(Mode.None);
 
             this.Resize += new System.EventHandler(this.FormGPS_Resize);
         }
@@ -310,7 +288,7 @@ namespace AgOpenGPS
         //called everytime window is resized, clean up button positions
         private void FormGPS_Resize(object sender, EventArgs e)
         {
-            FixPanelsAndMenus();
+            LineUpManualBtns();
         }
 
         // Load Bitmaps And Convert To Textures
@@ -475,79 +453,7 @@ namespace AgOpenGPS
 
             //out serial to autosteer module  //indivdual classes load the distance and heading deltas 
         }
-
-        public bool KeypadToNUD(NumericUpDown sender, Form owner)
-        {
-            sender.BackColor = Color.Red;
-            sender.Value = Math.Round(sender.Value, sender.DecimalPlaces);
-
-            using (FormNumeric form = new FormNumeric((double)sender.Minimum, (double)sender.Maximum, (double)sender.Value, 2))
-            {
-                DialogResult result = form.ShowDialog(owner);
-                if (result == DialogResult.OK)
-                {
-                    sender.Value = (decimal)form.ReturnValue;
-                    sender.BackColor = Color.AliceBlue;
-                    return true;
-                }
-                else if (result == DialogResult.Cancel)
-                {
-                    sender.BackColor = Color.AliceBlue;
-                }
-                return false;
-            }
-        }
-
-        public bool KeypadToButton(ref Button sender, ref double value, double minimum, double maximum, int decimals, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
-        {
-            using (FormNumeric form = new FormNumeric(minimum, maximum, value, decimals, true, unit2meter, Mtr2Unit, divisible))
-            {
-                if (form.ShowDialog(sender) == DialogResult.OK)
-                {
-                    value = form.ReturnValue;
-
-                    string guifix = "0";
-                    if (decimals > 0)
-                    {
-                        guifix = "0.0";
-                        while (--decimals > 0)
-                            guifix += "#";
-                    }
-
-                    sender.Text = (value * Mtr2Unit).ToString(guifix);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool KeypadToButton(ref Button sender, ref int value, int minimum, int maximum, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
-        {
-            using (FormNumeric form = new FormNumeric(minimum, maximum, value, 0, true, unit2meter, Mtr2Unit, divisible))
-            {
-                if (form.ShowDialog(sender) == DialogResult.OK)
-                {
-                    value = (int)form.ReturnValue;
-                    sender.Text = (value * Mtr2Unit).ToString("0");
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void KeyboardToText(TextBox sender, IWin32Window owner)
-        {
-            sender.BackColor = Color.Red;
-            using (FormKeyboard form = new FormKeyboard(sender.Text))
-            {
-                if (form.ShowDialog(owner) == DialogResult.OK)
-                {
-                    sender.Text = form.ReturnString;
-                }
-            }
-            sender.BackColor = Color.AliceBlue;
-        }
-
+        
         //request a new job
         public void JobNew()
         {
@@ -598,7 +504,12 @@ namespace AgOpenGPS
             LineUpManualBtns();
 
             toolStripBtnField.Image = (isOn && Properties.Settings.Default.setDisplayFeature_SimpleCloseField) ? Properties.Resources.JobClose : Properties.Resources.JobActive;
-        } 
+        }
+
+        public void PanelRightEnabled(bool status)
+        {
+            panelRight.Enabled = status;
+        }
 
         //close the current job
         public void JobClose()
@@ -654,7 +565,6 @@ namespace AgOpenGPS
             gyd.curveArr.Clear();
 
             gyd.resumeState = 0;
-            btnResumePath.Image = Properties.Resources.pathResumeStart;
             gyd.currentPositonIndex = 0;
 
 
@@ -675,7 +585,7 @@ namespace AgOpenGPS
             contourSaveList.Clear();
 
             //reset acre and distance counters
-            fd.workedAreaTotal = 0;
+            bnd.workedAreaTotal = 0;
 
             //reset GUI areas
             CalculateMinMax();
@@ -729,13 +639,6 @@ namespace AgOpenGPS
             {
                 MessageBox.Show("Error in WriteErrorLog: " + ex.Message, "Error Logging", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
-        }
-
-        //message box pops up with info then goes away
-        public void TimedMessageBox(int timeout, string s1, string s2)
-        {
-            FormTimedMessage form = new FormTimedMessage(timeout, s1, s2);
-            form.Show(this);
         }
     }//class FormGPS
 }//namespace AgOpenGPS

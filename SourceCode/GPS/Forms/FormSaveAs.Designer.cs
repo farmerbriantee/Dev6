@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormSaveAs));
             this.label1 = new System.Windows.Forms.Label();
             this.tboxFieldName = new System.Windows.Forms.TextBox();
             this.btnSerialCancel = new System.Windows.Forms.Button();
@@ -167,7 +166,7 @@
             this.chkHeadland.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.chkHeadland.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.chkHeadland.ForeColor = System.Drawing.Color.White;
-            this.chkHeadland.Image = ((System.Drawing.Image)(resources.GetObject("chkHeadland.Image")));
+            this.chkHeadland.Image = global::AgOpenGPS.Properties.Resources.HeadlandOn;
             this.chkHeadland.Location = new System.Drawing.Point(548, 136);
             this.chkHeadland.Name = "chkHeadland";
             this.chkHeadland.RightToLeft = System.Windows.Forms.RightToLeft.Yes;

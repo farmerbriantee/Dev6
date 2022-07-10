@@ -380,7 +380,7 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnSwapAB;
-        public System.Windows.Forms.Button btnContourPriority;
+        private System.Windows.Forms.Button btnContourPriority;
         private System.Windows.Forms.Button btnLeftHalfWidth;
         private System.Windows.Forms.Button btnRightHalfWidth;
         private System.Windows.Forms.Button btnNoSave;

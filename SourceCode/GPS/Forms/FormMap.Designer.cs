@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.cmbTileServers = new System.Windows.Forms.ComboBox();
             this.mapControl = new System.Windows.Forms.MapControl();
             this.label2 = new System.Windows.Forms.Label();
@@ -49,11 +47,6 @@
             this.btnZoomIn = new System.Windows.Forms.Button();
             this.btnZoomOut = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 500;
             // 
             // cmbTileServers
             // 
@@ -368,7 +361,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.ComboBox cmbTileServers;
         private System.Windows.Forms.MapControl mapControl;

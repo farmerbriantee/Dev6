@@ -32,7 +32,7 @@
             this.btnJobNew = new System.Windows.Forms.Button();
             this.btnDeleteAB = new System.Windows.Forms.Button();
             this.btnJobResume = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.lblFieldName = new System.Windows.Forms.Label();
             this.btnInField = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnFromKML = new System.Windows.Forms.Button();
@@ -115,18 +115,15 @@
             this.btnJobResume.UseVisualStyleBackColor = false;
             this.btnJobResume.Click += new System.EventHandler(this.btnJobResume_Click);
             // 
-            // textBox1
+            // lblFieldName
             // 
-            this.textBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(80)))));
-            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox1.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.textBox1.Location = new System.Drawing.Point(454, 27);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(268, 50);
-            this.textBox1.TabIndex = 88;
-            this.textBox1.Text = "File name goes here\r\nSecond line";
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.lblFieldName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(80)))));
+            this.lblFieldName.ForeColor = System.Drawing.SystemColors.ButtonFace;
+            this.lblFieldName.Location = new System.Drawing.Point(454, 27);
+            this.lblFieldName.Name = "lblFieldName";
+            this.lblFieldName.Size = new System.Drawing.Size(268, 48);
+            this.lblFieldName.TabIndex = 88;
+            this.lblFieldName.Text = "File name goes here\r\nSecond line";
             // 
             // btnInField
             // 
@@ -157,7 +154,7 @@
             this.panel1.Controls.Add(this.btnJobOpen);
             this.panel1.Controls.Add(this.btnFromKML);
             this.panel1.Controls.Add(this.btnDeleteAB);
-            this.panel1.Controls.Add(this.textBox1);
+            this.panel1.Controls.Add(this.lblFieldName);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(5, 5);
             this.panel1.Name = "panel1";
@@ -200,7 +197,6 @@
             this.Text = "Start a field";
             this.Load += new System.EventHandler(this.FormJob_Load);
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -211,9 +207,9 @@
         private System.Windows.Forms.Button btnJobNew;
         private System.Windows.Forms.Button btnJobResume;
         private System.Windows.Forms.Button btnDeleteAB;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button btnInField;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnFromKML;
+        private System.Windows.Forms.Label lblFieldName;
     }
 }

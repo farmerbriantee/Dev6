@@ -29,8 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormTram));
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.lblSmallSnapRight = new System.Windows.Forms.Label();
             this.nudPasses = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
@@ -133,8 +131,7 @@
             // btnLeft
             // 
             this.btnLeft.BackColor = System.Drawing.Color.Transparent;
-            this.btnLeft.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnLeft.BackgroundImage")));
-            this.btnLeft.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnLeft.BackgroundImage = global::AgOpenGPS.Properties.Resources.ArrowLeft;
             this.btnLeft.FlatAppearance.BorderColor = System.Drawing.SystemColors.ControlText;
             this.btnLeft.FlatAppearance.BorderSize = 0;
             this.btnLeft.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -143,7 +140,7 @@
             this.btnLeft.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.btnLeft.Location = new System.Drawing.Point(37, 86);
             this.btnLeft.Name = "btnLeft";
-            this.btnLeft.Size = new System.Drawing.Size(76, 55);
+            this.btnLeft.Size = new System.Drawing.Size(64, 64);
             this.btnLeft.TabIndex = 456;
             this.btnLeft.UseVisualStyleBackColor = false;
             this.btnLeft.Click += new System.EventHandler(this.btnLeft_Click);
@@ -152,8 +149,7 @@
             // btnRight
             // 
             this.btnRight.BackColor = System.Drawing.Color.Transparent;
-            this.btnRight.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnRight.BackgroundImage")));
-            this.btnRight.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnRight.BackgroundImage = global::AgOpenGPS.Properties.Resources.ArrowRight;
             this.btnRight.FlatAppearance.BorderColor = System.Drawing.SystemColors.ControlText;
             this.btnRight.FlatAppearance.BorderSize = 0;
             this.btnRight.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -162,7 +158,7 @@
             this.btnRight.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.btnRight.Location = new System.Drawing.Point(217, 87);
             this.btnRight.Name = "btnRight";
-            this.btnRight.Size = new System.Drawing.Size(76, 55);
+            this.btnRight.Size = new System.Drawing.Size(64, 64);
             this.btnRight.TabIndex = 457;
             this.btnRight.UseVisualStyleBackColor = false;
             this.btnRight.Click += new System.EventHandler(this.btnRight_Click);
@@ -384,7 +380,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.Button btnAdjLeft;
         private System.Windows.Forms.Button btnAdjRight;

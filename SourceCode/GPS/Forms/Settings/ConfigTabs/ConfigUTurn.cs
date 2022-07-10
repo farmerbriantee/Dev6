@@ -19,15 +19,15 @@ namespace AgOpenGPS
         private void ConfigUTurn_Load(object sender, EventArgs e)
         {
             youTurnStartOffset = mf.gyd.youTurnStartOffset;
-            lblDistance.Text = Math.Abs(youTurnStartOffset * mf.mToUserBig).ToString("0") + mf.unitsFtM;
+            lblDistance.Text = Math.Abs(youTurnStartOffset * glm.mToUserBig).ToString("0") + glm.unitsFtM;;
 
             uTurnSmoothing = mf.gyd.uTurnSmoothing;
             lblSmoothing.Text = uTurnSmoothing.ToString();
 
             DistanceFromBoundary = Properties.Vehicle.Default.set_youTurnDistanceFromBoundary;
-            nudTurnDistanceFromBoundary.Text = (DistanceFromBoundary * mf.mToUserBig).ToString("0.00");
+            nudTurnDistanceFromBoundary.Text = (DistanceFromBoundary * glm.mToUserBig).ToString("0.00");
 
-            lblFtMUTurn.Text = mf.unitsFtM;
+            lblFtMUTurn.Text = glm.unitsFtM;
         }
 
         public override void Close()
@@ -70,7 +70,7 @@ namespace AgOpenGPS
             else
                 youTurnStartOffset = 50;
 
-            lblDistance.Text = (youTurnStartOffset * mf.mToUserBig).ToString("0") + mf.unitsFtM;
+            lblDistance.Text = (youTurnStartOffset * glm.mToUserBig).ToString("0") + glm.unitsFtM;;
         }
 
         private void btnDistanceDn_Click(object sender, EventArgs e)
@@ -80,12 +80,12 @@ namespace AgOpenGPS
             else
                 youTurnStartOffset = 3;
 
-            lblDistance.Text = (youTurnStartOffset * mf.mToUserBig).ToString("0") + mf.unitsFtM;
+            lblDistance.Text = (youTurnStartOffset * glm.mToUserBig).ToString("0") + glm.unitsFtM;;
         }
 
         private void nudTurnDistanceFromBoundary_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTurnDistanceFromBoundary, ref DistanceFromBoundary, 0, 100, 2, mf.mToUserBig, mf.userBigToM);
+            nudTurnDistanceFromBoundary.KeypadToButton(ref DistanceFromBoundary, 0, 100, 2, glm.mToUserBig, glm.userBigToM);
         }
 
         private void nudTurnDistanceFromBoundary_HelpRequested(object sender, HelpEventArgs hlpevent)

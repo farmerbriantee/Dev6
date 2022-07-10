@@ -24,7 +24,10 @@ namespace AgOpenGPS
         private void BtnOk_Click(object sender, System.EventArgs e)
         {
             //convert to meters
-            mf.gyd.BuildFenceContours((double)nudPass.Value - 0.5, (double)(nudSpacing.Value * 0.01m));
+            if (mf.gyd.BuildFenceContours((double)nudPass.Value - 0.5, (double)nudSpacing.Value * 0.01))
+                mf.TimedMessageBox(1500, "Boundary Contour", "Contour Path Created");
+            else
+                mf.TimedMessageBox(1500, "Boundary Contour Error", "No Boundaries Made");
             Close();
         }
 
@@ -33,16 +36,15 @@ namespace AgOpenGPS
             Close();
         }
 
-        private void NudPass_Click(object sender, System.EventArgs e)
+        private void nudPass_Click(object sender, System.EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudPass.KeypadToNUD();
             btnCancel.Focus();
-
         }
 
-        private void NudSpacing_Click(object sender, System.EventArgs e)
+        private void nudSpacing_Click(object sender, System.EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudSpacing.KeypadToNUD();
             btnCancel.Focus();
         }
 

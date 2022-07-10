@@ -97,7 +97,7 @@ namespace AgOpenGPS
             //MakeDubinsLineFromPivotToFlag();
             vec2 steerAxlePosRP = mf.pivotAxlePos;
             lblDistanceToFlag.Text = (glm.Distance(steerAxlePosRP,
-                mf.flagPts[mf.flagNumberPicked - 1].easting, mf.flagPts[mf.flagNumberPicked - 1].northing) * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+                mf.flagPts[mf.flagNumberPicked - 1].easting, mf.flagPts[mf.flagNumberPicked - 1].northing) * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;;
         }
         /*
         private void MakeDubinsLineFromPivotToFlag()
@@ -127,12 +127,7 @@ namespace AgOpenGPS
         */
         private void tboxFlagNotes_Click(object sender, EventArgs e)
         {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-                btnExit.Focus();
-            }
-
+            tboxFlagNotes.KeyboardToText();
         }
     }
 }

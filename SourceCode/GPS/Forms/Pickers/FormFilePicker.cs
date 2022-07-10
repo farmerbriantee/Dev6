@@ -13,14 +13,11 @@ namespace AgOpenGPS
 
         private readonly List<string> fileList = new List<string>();
         private ListViewColumnSorter lvwColumnSorter;
-        private byte mode = 0;
 
         public FormFilePicker(Form callingForm, byte Idx, string _fileList)
         {
             //get copy of the calling main form
             mf = callingForm as FormGPS;
-
-            mode = Idx;
 
             InitializeComponent();
             btnOpenExistingLv.Text = gStr.gsUseSelected;
@@ -58,39 +55,6 @@ namespace AgOpenGPS
                 {
                     lvLines.Items.Add(new ListViewItem(fileList[i]));
                 }
-            }
-            else if (Idx == 2)
-            {
-                btnDeleteField.Image = Properties.Resources.Trash;
-                btnReturn.Image = Properties.Resources.SwitchOff;
-
-                lvLines.Columns.AddRange(new ColumnHeader[] { chName });
-
-                chName.Text = "Record Name";
-                chName.Width = 960;
-
-                string fieldDir = mf.fieldsDirectory + mf.currentFieldDirectory;
-
-                string[] files = Directory.GetFiles(fieldDir);
-
-                // Here we use the filename of all .rec files in the current field dir.
-                // The path and postfix is stripped off.
-
-                foreach (string file in files)
-                {
-                    if (file.EndsWith(".rec"))
-                    {
-                        string recordName = file.Replace(".rec", "").Replace(fieldDir, "").Replace("\\", "");
-                        lvLines.Items.Add(new ListViewItem(recordName));
-                    }
-                }
-
-                if (lvLines.Items.Count == 0)
-                {
-                    MessageBox.Show("No Recorded Paths", "Create A Path First",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
             }
 
             lvwColumnSorter = new ListViewColumnSorter();
@@ -220,7 +184,7 @@ namespace AgOpenGPS
                                             {
                                                 area += (pointList[j].easting + pointList[i].easting) * (pointList[j].northing - pointList[i].northing);
                                             }
-                                            area = Math.Abs(area / 2) * mf.m2ToUser;
+                                            area = Math.Abs(area / 2) * glm.m2ToUser;
                                         }
                                     }
                                 }
@@ -265,84 +229,17 @@ namespace AgOpenGPS
         {
             if (lvLines.SelectedItems.Count > 0)
             {
-                if (mode == 2)
+                if (lvLines.SelectedItems[0].SubItems[1].Text == "Error" || lvLines.SelectedItems[0].SubItems[2].Text == "Error")
                 {
-                    int count = lvLines.SelectedItems.Count;
-                    if (count > 0)
-                    {
-                        string selectedRecordPath = mf.fieldsDirectory + mf.currentFieldDirectory + "\\" + lvLines.SelectedItems[0].SubItems[0].Text + ".rec";
-
-                        // Copy the selected record file to the original record name inside the field dir:
-                        // ( this will load the last selected path automatically when this field is opened again)
-                        File.Copy(selectedRecordPath, mf.fieldsDirectory + mf.currentFieldDirectory + "\\RecPath.txt", true);
-                        // and load the selected path into the recPath object:
-                        string line;
-                        if (File.Exists(selectedRecordPath))
-                        {
-                            using (StreamReader reader = new StreamReader(selectedRecordPath))
-                            {
-                                try
-                                {
-                                    //read header
-                                    line = reader.ReadLine();
-                                    line = reader.ReadLine();
-                                    int numPoints = int.Parse(line);
-                                    mf.gyd.recList.Clear();
-
-                                    while (!reader.EndOfStream)
-                                    {
-                                        for (int v = 0; v < numPoints; v++)
-                                        {
-                                            line = reader.ReadLine();
-                                            string[] words = line.Split(',');
-                                            CRecPathPt point = new CRecPathPt(
-                                                double.Parse(words[0], CultureInfo.InvariantCulture),
-                                                double.Parse(words[1], CultureInfo.InvariantCulture),
-                                                double.Parse(words[2], CultureInfo.InvariantCulture),
-                                                double.Parse(words[3], CultureInfo.InvariantCulture),
-                                                bool.Parse(words[4]));
-
-                                            //add the point
-                                            mf.gyd.recList.Add(point);
-                                        }
-                                    }
-                                }
-
-                                catch (Exception ex)
-                                {
-                                    var form = new FormTimedMessage(2000, gStr.gsRecordedPathFileIsCorrupt, gStr.gsButFieldIsLoaded);
-                                    form.Show(this);
-                                    mf.WriteErrorLog("Load Recorded Path" + ex.ToString());
-                                }
-                            }
-                        }
-                    }
+                    MessageBox.Show("This Field is Damaged, Please Delete \r\n ALREADY TOLD YOU THAT :)", gStr.gsFileError,
+                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
-                    if (lvLines.SelectedItems[0].SubItems[1].Text == "Error" || lvLines.SelectedItems[0].SubItems[2].Text == "Error")
-                    {
-                        MessageBox.Show("This Field is Damaged, Please Delete \r\n ALREADY TOLD YOU THAT :)", gStr.gsFileError,
-                                            MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        mf.currentFieldDirectory = lvLines.SelectedItems[0].SubItems[0].Text;
-                        mf.FileOpenField(mf.fieldsDirectory + mf.currentFieldDirectory + "\\Field.txt");
-                        Close();
-                    }
+                    mf.currentFieldDirectory = lvLines.SelectedItems[0].SubItems[0].Text;
+                    mf.FileOpenField();
+                    Close();
                 }
-            }
-        }
-
-        private void btnReturn_Click(object sender, EventArgs e)
-        {
-            if (mode == 2)
-            {
-                mf.gyd.StopDrivingRecordedPath();
-                mf.FileSaveRecPath();
-                mf.panelDrag.Visible = false;
-                Close();
             }
         }
 
@@ -352,119 +249,14 @@ namespace AgOpenGPS
             {
                 string selectedRecord = lvLines.SelectedItems[0].SubItems[0].Text;
                 string dir2Delete = mf.fieldsDirectory + lvLines.SelectedItems[0].SubItems[0].Text;
-                if (mode == 2)
-                    dir2Delete = mf.fieldsDirectory + mf.currentFieldDirectory + "\\" + selectedRecord + ".rec";
 
                 if (new FormHelp(dir2Delete, gStr.gsDeleteForSure, true).ShowDialog(this) == DialogResult.Yes)
                 {
-                    if (mode == 2)
-                        File.Delete(dir2Delete);
-                    else
-                        Directory.Delete(dir2Delete, true);
+                    Directory.Delete(dir2Delete, true);
 
                     lvLines.Items.Remove(lvLines.SelectedItems[0]);
                 }
             }
-        }
-
-        public class ListViewColumnSorter : IComparer
-        {
-            /// <summary>
-            /// Specifies the column to be sorted
-            /// </summary>
-            private int ColumnToSort;
-
-            /// <summary>
-            /// Specifies the order in which to sort (i.e. 'Ascending').
-            /// </summary>
-            private SortOrder OrderOfSort;
-
-            /// <summary>
-            /// Case insensitive comparer object
-            /// </summary>
-            private CaseInsensitiveComparer ObjectCompare;
-
-            /// <summary>
-            /// Class constructor. Initializes various elements
-            /// </summary>
-            public ListViewColumnSorter()
-            {
-                // Initialize the column to '0'
-                ColumnToSort = 0;
-
-                // Initialize the sort order to 'none'
-                OrderOfSort = SortOrder.None;
-
-                // Initialize the CaseInsensitiveComparer object
-                ObjectCompare = new CaseInsensitiveComparer();
-            }
-
-            /// <summary>
-            /// This method is inherited from the IComparer interface. It compares the two objects passed using a case insensitive comparison.
-            /// </summary>
-            /// <param name="x">First object to be compared</param>
-            /// <param name="y">Second object to be compared</param>
-            /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
-            public int Compare(object x, object y)
-            {
-                int compareResult;
-                ListViewItem listviewX, listviewY;
-
-                // Cast the objects to be compared to ListViewItem objects
-                listviewX = (ListViewItem)x;
-                listviewY = (ListViewItem)y;
-
-                // Compare the two items
-                compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
-
-                // Calculate correct return value based on object comparison
-                if (OrderOfSort == SortOrder.Ascending)
-                {
-                    // Ascending sort is selected, return normal result of compare operation
-                    return compareResult;
-                }
-                else if (OrderOfSort == SortOrder.Descending)
-                {
-                    // Descending sort is selected, return negative result of compare operation
-                    return (-compareResult);
-                }
-                else
-                {
-                    // Return '0' to indicate they are equal
-                    return 0;
-                }
-            }
-
-            /// <summary>
-            /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
-            /// </summary>
-            public int SortColumn
-            {
-                set
-                {
-                    ColumnToSort = value;
-                }
-                get
-                {
-                    return ColumnToSort;
-                }
-            }
-
-            /// <summary>
-            /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
-            /// </summary>
-            public SortOrder Order
-            {
-                set
-                {
-                    OrderOfSort = value;
-                }
-                get
-                {
-                    return OrderOfSort;
-                }
-            }
-
         }
 
         private void lvLines_ColumnClick(object sender, ColumnClickEventArgs e)

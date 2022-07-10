@@ -27,11 +27,11 @@ namespace AgOpenGPS
 
             InitializeComponent();
 
-            lblCmInch.Text = mf.unitsInCm;
+            lblCmInch.Text = glm.unitsInCm;
 
             nudDistance.Controls[0].Enabled = false;
 
-            if (!mf.isMetric)
+            if (!glm.isMetric)
             {
                 nudDistance.Maximum = (int)(nudDistance.Maximum / 2.54M);
                 nudDistance.Minimum = (int)(nudDistance.Minimum / 2.54M);
@@ -46,13 +46,22 @@ namespace AgOpenGPS
 
         private void FormABDraw_Load(object sender, EventArgs e)
         {
-            nudDistance.Value = (decimal)Math.Round(mf.tool.toolWidth * mf.mToUser * 0.5, 0);
-            label6.Text = Math.Round(mf.tool.toolWidth * mf.mToUser, 0).ToString();
+            nudDistance.Value = (decimal)Math.Round(mf.tool.toolWidth * glm.mToUser * 0.5, 0);
+            label6.Text = Math.Round(mf.tool.toolWidth * glm.mToUser, 0).ToString();
 
             FixLabelsCurve();
 
             if (isDrawSections) btnDrawSections.Image = Properties.Resources.MappingOn;
             else btnDrawSections.Image = Properties.Resources.MappingOff;
+
+            bool isBounCurve = false;
+            for (int i = 0; i < mf.gyd.curveArr.Count; i++)
+            {
+                if (mf.gyd.curveArr[i].Name == "Boundary Curve") isBounCurve = true;
+            }
+
+            if (isBounCurve) btnMakeBoundaryCurve.Enabled = false;
+            else btnMakeBoundaryCurve.Enabled = true;
         }
 
         private void FormABDraw_FormClosing(object sender, FormClosingEventArgs e)
@@ -144,7 +153,7 @@ namespace AgOpenGPS
 
             currentDist -= e.Delta;
 
-            if (currentDist < 100) currentDist = 100;
+            if (currentDist < 50) currentDist = 50;
             if (currentDist > mf.maxFieldDistance)
                 currentDist = mf.maxFieldDistance;
 
@@ -234,6 +243,8 @@ namespace AgOpenGPS
             }
 
             lblNumAB.Text = totalAB.ToString();
+
+            oglSelf.Refresh();
         }
 
         private void btnSelectCurve_Click(object sender, EventArgs e)
@@ -305,7 +316,7 @@ namespace AgOpenGPS
 
         private void nudDistance_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudDistance.KeypadToNUD();
             btnSelectABLine.Focus();
         }
 
@@ -313,6 +324,8 @@ namespace AgOpenGPS
         {
             if (selectedCurveLine != null)
             {
+                if (selectedCurveLine.Name == "Boundary Curve") btnMakeBoundaryCurve.Enabled = true;
+
                 if (mf.gyd.currentCurveLine?.Name == selectedCurveLine.Name)
                     mf.gyd.currentCurveLine = null;
                 if (mf.gyd.currentGuidanceLine?.Name == selectedCurveLine.Name)
@@ -379,9 +392,8 @@ namespace AgOpenGPS
                     return;
                 }
 
-                if (mf.isKeyboardOn)
+                if (tboxNameCurve.KeyboardToText())
                 {
-                    mf.KeyboardToText((TextBox)sender, this);
                     selectedCurveLine.Name = tboxNameCurve.Text.Trim();
                     btnExit.Focus();
                 }
@@ -390,9 +402,8 @@ namespace AgOpenGPS
 
         private void tboxNameLine_Click(object sender, EventArgs e)
         {
-            if (mf.isKeyboardOn)
+            if (tboxNameLine.KeyboardToText())
             {
-                mf.KeyboardToText((TextBox)sender, this);
                 if (selectedABLine != null)
                     selectedABLine.Name = tboxNameLine.Text.Trim();
                 btnExit.Focus();
@@ -407,6 +418,7 @@ namespace AgOpenGPS
                 btnMakeABLine.Enabled = false;
                 btnMakeCurve.Enabled = false;
                 start = end = -1;
+                oglSelf.Refresh();
                 return;
             }
             btnCancelTouch.Enabled = true;
@@ -444,16 +456,17 @@ namespace AgOpenGPS
                 btnMakeABLine.Enabled = true;
                 btnMakeCurve.Enabled = true;
             }
+            oglSelf.Refresh();
         }
 
         private void btnMakeBoundaryCurve_Click(object sender, EventArgs e)
         {
-            //outside point
-            double moveDist = (double)nudDistance.Value * mf.userToM;
-
-            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, 0, -1, -1, true);
+            double moveDist = (double)nudDistance.Value * glm.userToM;
 
             btnCancelTouch.Enabled = false;
+            btnMakeBoundaryCurve.Enabled = false;
+
+            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, 0, -1, -1, true);
 
             if (poly.points.Count > 3)
             {
@@ -481,11 +494,11 @@ namespace AgOpenGPS
         {
             btnCancelTouch.Enabled = false;
 
-            double moveDist = (double)nudDistance.Value * mf.userToM;
+            double moveDist = (double)nudDistance.Value * glm.userToM;
 
             Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, 0, start, end, false);
 
-            if (poly.points.Count > 3)
+            if (poly.points.Count > 1)
             {
                 CGuidanceLine New = new CGuidanceLine(Mode.Curve, poly);
 
@@ -502,22 +515,8 @@ namespace AgOpenGPS
                 New.loop = false;
 
                 //build the tail extensions
-                New.points.AddFirstLastPoints(200);
+                New.points.AddFirstLastPoints(200, aveLineHeading);
 
-                //make sure distance isn't too big between points on Turn
-                for (int i = 1; i < New.points.Count; i++)
-                {
-                    int j = i - 1;
-                    //if (j == cnt) j = 0;
-                    double distance = glm.Distance(New.points[i], New.points[j]);
-                    if (distance > 1.6)
-                    {
-                        New.points.Insert(i, new vec2((New.points[i].easting + New.points[j].easting) / 2.0,
-                            (New.points[i].northing + New.points[j].northing) / 2.0));
-                        i--;
-                    }
-                }
-                
                 mf.gyd.curveArr.Add(New);
                 selectedCurveLine = New;
 
@@ -544,7 +543,7 @@ namespace AgOpenGPS
                 mf.bnd.bndList[0].fenceLine.points[end].northing - mf.bnd.bndList[0].fenceLine.points[start].northing);
             if (abHead < 0) abHead += glm.twoPI;
 
-            double offset = (double)nudDistance.Value * mf.userToM;
+            double offset = (double)nudDistance.Value * glm.userToM;
 
             double headingCalc = abHead + glm.PIBy2;
 

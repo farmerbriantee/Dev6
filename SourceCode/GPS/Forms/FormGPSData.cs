@@ -46,9 +46,9 @@ namespace AgOpenGPS
             lblRoll.Text = mf.RollInDegrees;
             lblYawHeading.Text = mf.GyroInDegrees;
             lblGPSHeading.Text = mf.GPSHeading;
-            lblFixHeading.Text = (mf.fixHeading * 57.2957795).ToString("0.0");
+            lblFixHeading.Text = glm.toDegrees(mf.fixHeading).ToString("0.0");
 
-            lblAltitude.Text = (mf.mc.altitude * mf.mToUserBig).ToString("0.0");
+            lblAltitude.Text = (mf.mc.altitude * glm.mToUserBig).ToString("0.0");
         }
     }
 }

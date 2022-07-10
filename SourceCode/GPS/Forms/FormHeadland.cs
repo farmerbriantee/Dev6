@@ -18,7 +18,7 @@ namespace AgOpenGPS
 
         private double currentFieldCenterX, currentFieldCenterY, currentDist;
 
-        public List<Polyline2> headLineTemplate = new List<Polyline2>();
+        private List<Polyline2> headLineTemplate = new List<Polyline2>();
 
         public FormHeadland(Form callingForm)
         {
@@ -45,7 +45,7 @@ namespace AgOpenGPS
             cboxIsSectionControlled.Checked = mf.bnd.isSectionControlledByHeadland;
 
             lblHeadlandWidth.Text = "0";
-            lblWidthUnits.Text = mf.unitsFtM;
+            lblWidthUnits.Text = glm.unitsFtM;;
 
             //Builds line
             nudDistance.Value = 0;
@@ -184,6 +184,7 @@ namespace AgOpenGPS
                     {
                         New.points.Add(new vec2(mf.bnd.bndList[0].hdLine[i].points[j].easting, mf.bnd.bndList[0].hdLine[i].points[j].northing));
                     }
+                    New.loop = true;
                     headLineTemplate.Add(New);
                 }
             }
@@ -194,6 +195,7 @@ namespace AgOpenGPS
                 {
                     New.points.Add(new vec2(mf.bnd.bndList[0].fenceLine.points[i].easting, mf.bnd.bndList[0].fenceLine.points[i].northing));
                 }
+                New.loop = true;
                 headLineTemplate.Add(New);
             }
 
@@ -206,20 +208,85 @@ namespace AgOpenGPS
 
         private void btnSetDistance_Click(object sender, EventArgs e)
         {
-            double width = (double)nudSetDistance.Value * mf.userBigToM;
+            double width = (double)nudSetDistance.Value * glm.userBigToM;
 
-            headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, 0, start, end, true));
-            headLineTemplate.Remove(headLineTemplate[index]);
+            Polyline2 New = headLineTemplate[index].OffsetAndDissolvePolyline(width, 10, start, end, false);
+
+            if (New.points.Count < 3) return;
+
+            vecCrossing Crossing = new vecCrossing(0, 0, double.MaxValue, -1, -1, -1);
+            if (StaticClass.GetLineIntersection(New.points[2], New.points[0], headLineTemplate[index].points[(start - 1).Clamp(headLineTemplate[index].points.Count)], headLineTemplate[index].points[start], out vec2 _Crossing, out double Time, out double Time2, true))
+            {
+                double dist = glm.Distance(headLineTemplate[index].points[start], _Crossing);
+                //    Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time2, 0, 0, 1);
+                //else
+                //if (dist < Math.Sqrt(width * width + width * width))
+                if (Time2 < 2.0 && Time2 > -2.0 && dist < width * 2)
+                    Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time2, 0, 0, 1);
+            }
+
+            vecCrossing Crossing2 = new vecCrossing(0, 0, double.MaxValue, -1, -1, -1);
+            if (StaticClass.GetLineIntersection(New.points[New.points.Count - 3], New.points[New.points.Count - 1], headLineTemplate[index].points[end], headLineTemplate[index].points[(end + 1).Clamp(headLineTemplate[index].points.Count)], out vec2 _Crossing2, out double Time3, out double Time4, true))
+            {
+                //double dist = glm.Distance(headLineTemplate[index].points[(end + 1).Clamp(headLineTemplate[index].points.Count)], _Crossing2);
+                //if (Time2 < 2.0 && Time2 > -2.0)
+                //    Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time2, 0, 0, 1);
+                //else
+                //if (dist < Math.Sqrt(width * width + width * width))
+                if (Time4 < 2.0 && Time4 > -2.0)
+                    Crossing2 = new vecCrossing(_Crossing2.easting, _Crossing2.northing, Time3, 0, 0, 1);
+            }
+
+            if (start <= end)
+            {
+                if (Crossing.time == double.MaxValue)
+                    start++;
+                if (Crossing2.time == double.MaxValue)
+                    end--;
+                headLineTemplate[index].points.RemoveRange(start, end - start + 1);
+            }
+            else
+            {
+                if (Crossing.time == double.MaxValue)
+                    start++;
+                if (Crossing2.time == double.MaxValue)
+                    end--;
+                headLineTemplate[index].points.RemoveRange(start, headLineTemplate[index].points.Count - start);
+                headLineTemplate[index].points.RemoveRange(0, end + 1);
+                start -= (end + 1);
+            }
+
+            if (Crossing.time < double.MaxValue)
+                headLineTemplate[index].points.Insert(start++, new vec2(Crossing.easting, Crossing.northing));
+            else
+                headLineTemplate[index].points.Insert(start++, New.points[0]);
+
+            if (New.points.Count > 2)
+            {
+                for (int l = 1; l < New.points.Count - 1; l++)
+                {
+                    headLineTemplate[index].points.Insert(start++, new vec2(New.points[l].easting, New.points[l].northing));
+                }
+            }
+
+            if (Crossing2.time < double.MaxValue)
+                headLineTemplate[index].points.Insert(start, new vec2(Crossing2.easting, Crossing2.northing));
+            else
+                headLineTemplate[index].points.Insert(start++, New.points[New.points.Count - 1]);
+
+            headLineTemplate[index] = headLineTemplate[index].OffsetAndDissolvePolyline(0, 0);
 
             isSet = false;
             index = start = end = -1;
+            nudSetDistance.Enabled = btnSetDistance.Enabled = btnDeletePoints.Enabled = isSet;
+            btnMakeFixedHeadland.Enabled = nudDistance.Enabled = !isSet;
 
             oglSelf.Refresh();
         }
 
         private void btnMakeFixedHeadland_Click(object sender, EventArgs e)
         {
-            double width = (double)nudDistance.Value * mf.userBigToM;
+            double width = (double)nudDistance.Value * glm.userBigToM;
             if (index < 0)
             {
                 List<Polyline2> New = new List<Polyline2>();
@@ -230,7 +297,7 @@ namespace AgOpenGPS
                 headLineTemplate = New;
 
                 totalHeadlandWidth += width;
-                lblHeadlandWidth.Text = (totalHeadlandWidth * mf.mToUserBig).ToString("0.00");
+                lblHeadlandWidth.Text = (totalHeadlandWidth * glm.mToUserBig).ToString("0.00");
             }
             else
             {
@@ -257,7 +324,7 @@ namespace AgOpenGPS
             }
             headLineTemplate = New;
 
-            lblHeadlandWidth.Text = (width * mf.mToUserBig).ToString("0.00");
+            lblHeadlandWidth.Text = (width * glm.mToUserBig).ToString("0.00");
             totalHeadlandWidth = width;
 
             oglSelf.Refresh();
@@ -413,7 +480,7 @@ namespace AgOpenGPS
 
         private void nudDistance_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudDistance.KeypadToNUD();
             btnExit.Focus();
 
             oglSelf.Refresh();
@@ -421,7 +488,7 @@ namespace AgOpenGPS
 
         private void nudSetDistance_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudSetDistance.KeypadToNUD();
             btnExit.Focus();
 
             oglSelf.Refresh();
@@ -442,11 +509,23 @@ namespace AgOpenGPS
         {
             if (start > end)
             {
-                headLineTemplate[index].points.RemoveRange(start, headLineTemplate[index].points.Count - start);
+                headLineTemplate[index].points.RemoveRange(start + 1, headLineTemplate[index].points.Count - (start + 1));
                 headLineTemplate[index].points.RemoveRange(0, end);
             }
+            else if (start < end)
+                headLineTemplate[index].points.RemoveRange(start + 1, end - (start + 1));
             else
-                headLineTemplate[index].points.RemoveRange(start, end - start);
+            {
+                if (StaticClass.GetLineIntersection(headLineTemplate[index].points[(start - 2).Clamp(headLineTemplate[index].points.Count)], headLineTemplate[index].points[(start - 1).Clamp(headLineTemplate[index].points.Count)], headLineTemplate[index].points[(end + 1).Clamp(headLineTemplate[index].points.Count)], headLineTemplate[index].points[(end + 2).Clamp(headLineTemplate[index].points.Count)], out vec2 _Crossing, out double Time, out double Time2, true))
+                {
+                    headLineTemplate[index].points.RemoveAt(start);
+                    headLineTemplate[index].points.Insert(start, new vec2(_Crossing.easting, _Crossing.northing));
+                }
+            }
+            isSet = false;
+            index = start = end = -1;
+            nudSetDistance.Enabled = btnSetDistance.Enabled = btnDeletePoints.Enabled = isSet;
+            btnMakeFixedHeadland.Enabled = nudDistance.Enabled = !isSet;
 
             oglSelf.Refresh();
         }

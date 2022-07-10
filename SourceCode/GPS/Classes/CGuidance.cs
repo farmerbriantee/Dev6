@@ -9,7 +9,7 @@ namespace AgOpenGPS
 
         public List<CGuidanceLine> curveArr = new List<CGuidanceLine>();
 
-        public CGuidanceLine currentGuidanceLine, currentABLine, currentCurveLine, EditGuidanceLine, creatingContour;
+        public CGuidanceLine currentGuidanceLine, currentABLine, currentCurveLine, currentRecPath, EditGuidanceLine, creatingContour;
 
         //the list of points to drive on
         public Polyline curList = new Polyline();
@@ -18,6 +18,8 @@ namespace AgOpenGPS
         public Mode CurrentGMode = Mode.None;
 
         private int currentLocationIndexA, currentLocationIndexB, backSpacing = 30;
+
+        public int currentPositonIndex, resumeState;
 
         public bool isValid, isOkToAddDesPoints, isLocked = false;
         public double lastSecond = 0, lastSecondSearch = 0, moveDistance;
@@ -70,21 +72,30 @@ namespace AgOpenGPS
         {
             bool completeYouTurn = !isYouTurnTriggered;
 
-            if (curList.points.Count > 1)
+            if (curList?.points.Count > 1)
             {
-                pivot.GetCurrentSegment(curList.points, 0, curList.loop, out pA, out pB);
+                pivot.GetCurrentSegment(curList, out pA, out pB, !isYouTurnTriggered && CurrentGMode == Mode.RecPath ? currentPositonIndex - 1 : 0, !isYouTurnTriggered && CurrentGMode == Mode.RecPath ? currentPositonIndex + 5 : int.MaxValue);
 
                 if (pA < 0 || pB < 0) return;
+
                 //return and reset if too far away or end of the line
                 if (pB > curList.points.Count - 2)
                     completeYouTurn = true;
 
-                if (CurrentGMode == Mode.Contour)
+                if (CurrentGMode == Mode.RecPath && mf.isAutoSteerBtnOn && !isYouTurnTriggered)
                 {
-                    if (isLocked && (pA < 1 || pB > curList.points.Count - 2))
+                    currentPositonIndex = pA;
+                    if (pB > curList.points.Count - 2)
                     {
-                        isLocked = false;
+                        //EndOfRecPath
+                        mf.sim.stepDistance = 0;
                         return;
+                    }
+                    if (curList is CGuidanceRecPath RecPath)
+                    {
+                        mf.sim.stepDistance = RecPath.Status[currentPositonIndex].speed / 3.6;
+
+                        mf.setSectionBtnState(RecPath.Status[currentPositonIndex].autoBtnState);
                     }
                 }
 
@@ -95,11 +106,6 @@ namespace AgOpenGPS
                 if (Math.Abs(dx2) < double.Epsilon && Math.Abs(dy2) < double.Epsilon) return;
 
                 distanceFromCurrentLinePivot = pivot.FindDistanceToSegment(curList.points[pA], curList.points[pB], out _, true, false, false);
-
-                //how far from current AB Line is fix
-                distanceFromCurrentLinePivot = ((dy2 * pivot.easting) - (dx2 * pivot.northing) + (curList.points[pB].easting
-                            * curList.points[pA].northing) - (curList.points[pB].northing * curList.points[pA].easting))
-                                / Math.Sqrt((dy2 * dy2) + (dx2 * dx2));
 
                 //should get its own closest segment
                 distanceFromCurrentLineTool = ((dy2 * mf.tool.Pos.easting) - (dx2 * mf.tool.Pos.northing) + (curList.points[pB].easting
@@ -128,11 +134,11 @@ namespace AgOpenGPS
                 currentLocationIndexB = pB;
                 double pivotHeading = Math.Atan2(dx2, dy2);
 
-                if (mf.isStanleyUsed)
+                if (mf.isStanleyUsed && CurrentGMode != Mode.RecPath)
                 {
                     #region Stanley
 
-                    steer.GetCurrentSegment(curList.points, pA, curList.loop, out sA, out sB);
+                    steer.GetCurrentSegment(curList, out sA, out sB);
 
                     if (isYouTurnTriggered)
                     {
@@ -394,180 +400,18 @@ namespace AgOpenGPS
                     distanceFromCurrentLineTool *= -1.0;
                 }
 
-                //Convert to millimeters from meters
-                mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
-                mf.guidanceLineDistanceOffTool = (short)Math.Round(distanceFromCurrentLineTool * 1000.0, MidpointRounding.AwayFromZero);
+                mf.guidanceLineDistanceOff = distanceFromCurrentLinePivot;
+                mf.guidanceLineDistanceOffTool = distanceFromCurrentLineTool;
                 mf.guidanceLineSteerAngle = (short)(steerAngle * 100);
             }
             else
             {
                 completeYouTurn = true;
                 //invalid distance so tell AS module
-                mf.guidanceLineDistanceOff = 32000;
+                mf.guidanceLineDistanceOff = double.NaN;
             }
             if (completeYouTurn && isYouTurnTriggered)
                 CompleteYouTurn();
-        }
-
-        private void PurePursuitRecPath(vec2 pivot, double heading, List<CRecPathPt> recList)
-        {
-            double dist, dx, dz;
-            double minDistA = double.MaxValue, minDistB = double.MaxValue;
-
-            if (isFollowingRecPath)
-            {
-                //set the search range close to current position
-                int top = currentPositonIndex + 5;
-                if (top > recList.Count) top = recList.Count;
-
-                for (int t = currentPositonIndex; t < top; t++)
-                {
-                    dist = glm.Distance(pivot, recList[t]);
-                    if (dist < minDistA)
-                    {
-                        minDistA = dist;
-                        pA = t;
-                    }
-                }
-
-                //next point is the next in list
-                pB = pA + 1;
-                if (pB == recList.Count)
-                {
-                    //don't go past the end of the list - "end of the line" trigger
-                    pA--;
-                    pB--;
-                    isEndOfTheRecLine = true;
-                }
-            }
-            else
-            {
-                //find the closest 2 points to current fix
-                for (int t = 0; t < recList.Count; t++)
-                {
-                    dist = glm.Distance(pivot, recList[t]);
-                    if (dist < minDistA)
-                    {
-                        minDistB = minDistA;
-                        pB = pA;
-                        minDistA = dist;
-                        pA = t;
-                    }
-                    else if (dist < minDistB)
-                    {
-                        minDistB = dist;
-                        pB = t;
-                    }
-                }
-
-                //just need to make sure the points continue ascending or heading switches all over the place
-                if (pA > pB) { int C = pA; pA = pB; pB = C; }
-            }
-
-            //save current position
-            currentPositonIndex = pA;
-
-            //get the distance from currently active AB line
-            dx = recList[pB].easting - recList[pA].easting;
-            dz = recList[pB].northing - recList[pA].northing;
-
-            if (Math.Abs(dx) < double.Epsilon && Math.Abs(dz) < double.Epsilon) return;
-
-            //how far from current AB Line is fix
-            distanceFromCurrentLinePivot = ((dz * pivot.easting) - (dx * pivot.northing) + (recList[pB].easting
-                        * recList[pA].northing) - (recList[pB].northing * recList[pA].easting))
-                            / Math.Sqrt((dz * dz) + (dx * dx));
-
-            //should get its own closest segment
-            distanceFromCurrentLineTool = ((dz * mf.tool.Pos.easting) - (dx * mf.tool.Pos.northing) + (recList[pB].easting
-                        * recList[pA].northing) - (recList[pB].northing * recList[pA].easting))
-                            / Math.Sqrt((dz * dz) + (dx * dx));
-
-            //integral slider is set to 0
-            if (mf.vehicle.purePursuitIntegralGain != 0 && !mf.isReverse)
-            {
-                pivotDistError = distanceFromCurrentLinePivot * 0.2 + pivotDistError * 0.8;
-
-                if (counter2++ > 4)
-                {
-                    pivotDerivativeDistError = pivotDistError - lastPivotDistError;
-                    lastPivotDistError = pivotDistError;
-                    counter2 = 0;
-                    pivotDerivativeDistError *= 2;
-
-                }
-
-                if (isFollowingRecPath && Math.Abs(pivotDerivativeDistError) < 0.1 && mf.mc.avgSpeed > 2.5)
-                {
-                    //if over the line heading wrong way, rapidly decrease integral
-                    if ((inty < 0 && distanceFromCurrentLinePivot < 0) || (inty > 0 && distanceFromCurrentLinePivot > 0))
-                    {
-                        inty += pivotDistError * mf.vehicle.purePursuitIntegralGain * -0.04;
-                    }
-                    else
-                    {
-                        if (Math.Abs(distanceFromCurrentLinePivot) > 0.02)
-                        {
-                            inty += pivotDistError * mf.vehicle.purePursuitIntegralGain * -0.02;
-                            if (inty > 0.2) inty = 0.2;
-                            else if (inty < -0.2) inty = -0.2;
-                        }
-                    }
-                }
-                else inty *= 0.95;
-            }
-            else inty = 0;
-
-            // ** Pure pursuit ** - calc point on ABLine closest to current position
-            double U = (((pivot.easting - recList[pA].easting) * dx)
-                        + ((pivot.northing - recList[pA].northing) * dz))
-                        / ((dx * dx) + (dz * dz));
-
-            rEast = recList[pA].easting + (U * dx);
-            rNorth = recList[pA].northing + (U * dz);
-
-            //update base on autosteer settings and distance from line
-            double goalPointDistance = mf.vehicle.UpdateGoalPointDistance();
-
-            bool ReverseHeading = !mf.isReverse;
-
-            int count = ReverseHeading ? 1 : -1;
-            CRecPathPt start = new CRecPathPt(rEast, rNorth, 0, 0, false);
-            double distSoFar = 0;
-
-            for (int i = ReverseHeading ? pB : pA; i < recList.Count && i >= 0; i += count)
-            {
-                // used for calculating the length squared of next segment.
-                double tempDist = glm.DistanceSquared(start, recList[i]);
-
-                //will we go too far?
-                if ((tempDist + distSoFar) > goalPointDistance)
-                {
-                    double j = (goalPointDistance - distSoFar) / tempDist; // the remainder to yet travel
-
-                    goalPoint.easting = (((1 - j) * start.easting) + (j * recList[i].easting));
-                    goalPoint.northing = (((1 - j) * start.northing) + (j * recList[i].northing));
-                    break;
-                }
-                else distSoFar += tempDist;
-                start = recList[i];
-            }
-
-            //calc "D" the distance from pivotAxlePosRP axle to lookahead point
-            double goalPointDistanceSquared = glm.DistanceSquared(goalPoint, pivot);
-
-            double localHeading = glm.twoPI - heading + inty;
-
-            steerAngle = glm.toDegrees(Math.Atan(2 * (((goalPoint.easting - pivot.easting) * Math.Cos(localHeading))
-                + ((goalPoint.northing - pivot.northing) * Math.Sin(localHeading))) * mf.vehicle.wheelbase / goalPointDistanceSquared));
-
-            if (steerAngle < -mf.vehicle.maxSteerAngle) steerAngle = -mf.vehicle.maxSteerAngle;
-            if (steerAngle > mf.vehicle.maxSteerAngle) steerAngle = mf.vehicle.maxSteerAngle;
-
-            //Convert to centimeters
-            mf.guidanceLineDistanceOff = (short)Math.Round(distanceFromCurrentLinePivot * 1000.0, MidpointRounding.AwayFromZero);
-            mf.guidanceLineDistanceOffTool = (short)Math.Round(distanceFromCurrentLineTool * 1000.0, MidpointRounding.AwayFromZero);
-            mf.guidanceLineSteerAngle = (short)(steerAngle * 100);
         }
     }
 
@@ -596,6 +440,23 @@ namespace AgOpenGPS
             loop = old.loop;
             Name = old.Name;
             points.AddRange(old.points.ToArray());
+        }
+    }
+
+    public class CGuidanceRecPath : CGuidanceLine
+    {
+        public List<CRecPathPt> Status = new List<CRecPathPt>();
+
+        public CGuidanceRecPath(Mode _mode) : base(_mode)
+        {
+        }
+
+        public CGuidanceRecPath(CGuidanceLine old) : base(old)
+        {
+            if (old is CGuidanceRecPath _old)
+            {
+                Status = _old.Status;
+            }
         }
     }
 }

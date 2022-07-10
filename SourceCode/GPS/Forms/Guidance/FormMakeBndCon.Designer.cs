@@ -63,7 +63,7 @@
             0,
             0,
             0});
-            this.nudPass.Click += new System.EventHandler(this.NudPass_Click);
+            this.nudPass.Click += new System.EventHandler(this.nudPass_Click);
             // 
             // lblHz
             // 
@@ -119,7 +119,7 @@
             0,
             0,
             0});
-            this.nudSpacing.Click += new System.EventHandler(this.NudSpacing_Click);
+            this.nudSpacing.Click += new System.EventHandler(this.nudSpacing_Click);
             // 
             // label1
             // 

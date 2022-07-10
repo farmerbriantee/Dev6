@@ -726,7 +726,25 @@ namespace AgOpenGPS
                 //for every new chunk of patch
                 foreach (var triList in patchList)
                 {
-                    if (triList.points.Count > 4)
+                    bool isDraw = false;
+                    int count2 = triList.points.Count;
+                    for (int i = 2; i < count2; i += 3)
+                    {
+                        //determine if point is in frustum or not
+                        if (triList.points[i].easting > pivotAxlePos.easting + 50)
+                            continue;
+                        if (triList.points[i].easting < pivotAxlePos.easting - 50)
+                            continue;
+                        if (triList.points[i].northing > pivotAxlePos.northing + 50)
+                            continue;
+                        if (triList.points[i].northing < pivotAxlePos.northing - 50)
+                            continue;
+
+                        //point is in frustum so draw the entire patch
+                        isDraw = true;
+                        break;
+                    }
+                    if (isDraw && triList.points.Count > 4)
                     {
                         triList.DrawPolyLine(DrawType.TriangleStrip);
                     }
@@ -897,8 +915,8 @@ namespace AgOpenGPS
                     double total3 = section2x + section3x * 2 + section4x * 3 + section5x * 4 + section6x * 5 + section7x * 6 + section8x * 7 + section9x * 8 + section10x * 9 + section11x * 10;
                     double totalinfield = infield + inhead1 + inhead0;
 
-                    fd.actualAreaCovered = (total2 / totalinfield);
-                    fd.overlapPercent = Math.Round(((total3 / total2) * 100), 2);
+                    bnd.actualAreaCovered = (total2 / totalinfield);
+                    bnd.overlapPercent = Math.Round(((total3 / total2) * 100), 2);
                 }
 
                 if (oglZoom.Width != 400)
@@ -1028,13 +1046,13 @@ namespace AgOpenGPS
             if (!gyd.isYouTurnTriggered)
             {
                 if (distancePivotToTurnLine > 0)
-                    font.DrawText(-30 + two3, 80, (distancePivotToTurnLine * mToUserBig).ToString("0") + unitsFtM);
+                    font.DrawText(-30 + two3, 80, (distancePivotToTurnLine * glm.mToUserBig).ToString("0") + glm.unitsFtM);
                 else
                     font.DrawText(-30 + two3, 80, "--");
             }
             else
             {
-                font.DrawText(-30 + two3, 80, ((gyd.totalUTurnLength - gyd.onA) * mToUserBig).ToString("0") + unitsFtM);
+                font.DrawText(-30 + two3, 80, ((gyd.totalUTurnLength - gyd.onA) * glm.mToUserBig).ToString("0") + glm.unitsFtM);
             }
         }
 
@@ -1292,12 +1310,12 @@ namespace AgOpenGPS
 
         private void DrawLightBarText()
         {
-            if (guidanceLineDistanceOff != 32000)
+            if (!double.IsNaN(guidanceLineDistanceOff))
             {
                 //save distance for display in millimeters
                 avgPivDistance = avgPivDistance * 0.5 + guidanceLineDistanceOff * 0.5;
 
-                double avgPivotDistance = avgPivDistance * (isMetric ? 0.1 : 0.03937);
+                double avgPivotDistance = avgPivDistance * glm.mToUser;
                 string hede;
 
                 DrawLightBar(oglMain.Width, oglMain.Height, avgPivotDistance);
@@ -1322,12 +1340,12 @@ namespace AgOpenGPS
         {
             GL.Disable(EnableCap.DepthTest);
 
-            if (guidanceLineDistanceOff != 32000)
+            if (!double.IsNaN(guidanceLineDistanceOffTool))
             {
                 // in millimeters
                 avgPivDistanceTool = avgPivDistanceTool * 0.5 + guidanceLineDistanceOffTool * 0.5;
 
-                double avgPivotDistance2 = avgPivDistanceTool * (isMetric ? 0.1 : 0.03937);
+                double avgPivotDistance2 = avgPivDistanceTool * glm.mToUser;
                 string hede;
 
                 //DrawLightBar(oglMain.Width, oglMain.Height, avgPivotDistance2);
@@ -1550,7 +1568,7 @@ namespace AgOpenGPS
             //font.DrawText(center, 150, "BETA 5.0.0.5", 1);
 
             GL.Color3(0.9752f, 0.62f, 0.325f);
-            if (timerSim.Enabled) font.DrawText(-110, oglMain.Height - 130, "Simulator On", 1);
+            if (glm.isSimEnabled) font.DrawText(-110, oglMain.Height - 130, "Simulator On", 1);
 
             if (gyd.CurrentGMode == Mode.Contour && gyd.isLocked && isFlashOnOff)
             {
@@ -1674,7 +1692,7 @@ namespace AgOpenGPS
             GL.BindTexture(TextureTarget.Texture2D, texture[8]);        // Select Our Texture
 
             double angle = 0;
-            double aveSpd = Math.Abs(mc.avgSpeed * KMHToUser);
+            double aveSpd = Math.Abs(mc.avgSpeed * glm.KMHToUser);
             if (aveSpd > 20) aveSpd = 20;
             angle = (aveSpd - 10) * 15;
 
@@ -1895,7 +1913,7 @@ namespace AgOpenGPS
                 fieldCenterY = (maxFieldY + minFieldY) / 2.0;
             }
 
-            fd.UpdateFieldBoundaryGUIAreas();
+            bnd.UpdateFieldBoundaryGUIAreas();
         }
 
         public Vector4 NDCToWorld(Vector4 ndc_corner, Matrix4 inv_view, Matrix4 inv_proj)
@@ -1911,17 +1929,17 @@ namespace AgOpenGPS
             if (bnd.bndList.Count > 0)
             {
                 sb.Clear();
-                sb.Append(((fd.workedAreaTotal - fd.actualAreaCovered) * m2ToUser).ToString("0.000"));
-                sb.Append(unitsHaAc + " ");
-                sb.Append(fd.overlapPercent.ToString("0.00"));
+                sb.Append(((bnd.workedAreaTotal - bnd.actualAreaCovered) * glm.m2ToUser).ToString("0.000"));
+                sb.Append(glm.unitsHaAc + " ");
+                sb.Append(bnd.overlapPercent.ToString("0.00"));
                 sb.Append("%  ");
-                sb.Append((fd.areaBoundaryOuterLessInner * m2ToUser).ToString("0.00"));
+                sb.Append((bnd.areaBoundaryOuterLessInner * glm.m2ToUser).ToString("0.00"));
                 sb.Append("-");
-                sb.Append((fd.actualAreaCovered * m2ToUser).ToString("0.00"));
+                sb.Append((bnd.actualAreaCovered * glm.m2ToUser).ToString("0.00"));
                 sb.Append(" = ");
-                sb.Append(((fd.areaBoundaryOuterLessInner - fd.actualAreaCovered) * m2ToUser).ToString("0.00"));
-                sb.Append(unitsHaAc + "  ");
-                sb.Append(fd.TimeTillFinished);
+                sb.Append(((bnd.areaBoundaryOuterLessInner - bnd.actualAreaCovered) * glm.m2ToUser).ToString("0.00"));
+                sb.Append(glm.unitsHaAc + "  ");
+                sb.Append(bnd.TimeTillFinished);
                 GL.Color3(0.95, 0.95, 0.95);
                 font.DrawText(-sb.Length * 7, oglMain.Height - 32, sb.ToString());
             }
@@ -1929,10 +1947,10 @@ namespace AgOpenGPS
             {
                 sb.Clear();
                 //sb.Append("Overlap ");
-                sb.Append(fd.overlapPercent.ToString("0.000"));
+                sb.Append(bnd.overlapPercent.ToString("0.000"));
                 sb.Append("%   ");
-                sb.Append((fd.actualAreaCovered * m2ToUser).ToString("0.000"));
-                sb.Append(unitsHaAc);
+                sb.Append((bnd.actualAreaCovered * glm.m2ToUser).ToString("0.000"));
+                sb.Append(glm.unitsHaAc);
                 GL.Color3(0.95, 0.95, 0.95);
                 font.DrawText(0, oglMain.Height - 32, sb.ToString());
             }

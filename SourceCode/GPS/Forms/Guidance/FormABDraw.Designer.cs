@@ -28,10 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormABDraw));
             this.oglSelf = new OpenTK.GLControl();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.lblNumCu = new System.Windows.Forms.Label();
             this.lblNumAB = new System.Windows.Forms.Label();
             this.lblABSelected = new System.Windows.Forms.Label();
@@ -76,12 +73,6 @@
             this.oglSelf.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.oglSelf_HelpRequested);
             this.oglSelf.Paint += new System.Windows.Forms.PaintEventHandler(this.oglSelf_Paint);
             this.oglSelf.MouseDown += new System.Windows.Forms.MouseEventHandler(this.oglSelf_MouseDown);
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 500;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // lblNumCu
             // 
@@ -216,8 +207,8 @@
             this.tboxNameCurve.Size = new System.Drawing.Size(283, 27);
             this.tboxNameCurve.TabIndex = 10;
             this.tboxNameCurve.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tboxNameCurve.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.tboxNameCurve_HelpRequested);
             this.tboxNameCurve.Click += new System.EventHandler(this.tboxNameCurve_Click);
+            this.tboxNameCurve.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.tboxNameCurve_HelpRequested);
             this.tboxNameCurve.Leave += new System.EventHandler(this.tboxNameCurve_Leave);
             // 
             // tboxNameLine
@@ -232,8 +223,8 @@
             this.tboxNameLine.Size = new System.Drawing.Size(283, 27);
             this.tboxNameLine.TabIndex = 9;
             this.tboxNameLine.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tboxNameLine.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.tboxNameLine_HelpRequested);
             this.tboxNameLine.Click += new System.EventHandler(this.tboxNameLine_Click);
+            this.tboxNameLine.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.tboxNameLine_HelpRequested);
             this.tboxNameLine.Leave += new System.EventHandler(this.tboxNameLine_Leave);
             // 
             // label4
@@ -408,7 +399,7 @@
             this.btnSelectABLine.FlatAppearance.BorderSize = 0;
             this.btnSelectABLine.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSelectABLine.Font = new System.Drawing.Font("Tahoma", 14.25F);
-            this.btnSelectABLine.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectABLine.Image")));
+            this.btnSelectABLine.Image = global::AgOpenGPS.Properties.Resources.ABLineCycle;
             this.btnSelectABLine.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.btnSelectABLine.Location = new System.Drawing.Point(826, 496);
             this.btnSelectABLine.Name = "btnSelectABLine";
@@ -427,7 +418,7 @@
             this.btnSelectCurve.FlatAppearance.BorderSize = 0;
             this.btnSelectCurve.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSelectCurve.Font = new System.Drawing.Font("Tahoma", 14.25F);
-            this.btnSelectCurve.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectCurve.Image")));
+            this.btnSelectCurve.Image = global::AgOpenGPS.Properties.Resources.ABLineCycle;
             this.btnSelectCurve.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.btnSelectCurve.Location = new System.Drawing.Point(826, 327);
             this.btnSelectCurve.Name = "btnSelectCurve";
@@ -561,7 +552,6 @@
         #endregion
 
         private OpenTK.GLControl oglSelf;
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.Button btnMakeABLine;
         private System.Windows.Forms.Button btnMakeCurve;

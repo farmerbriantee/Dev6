@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.bntOK = new System.Windows.Forms.Button();
             this.cboxIsMulti = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -69,11 +67,6 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 500;
             // 
             // bntOK
             // 
@@ -358,7 +351,6 @@
             this.cb01.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb01.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb01.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb01.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb01.Location = new System.Drawing.Point(12, 54);
             this.cb01.Name = "cb01";
             this.cb01.Size = new System.Drawing.Size(101, 73);
@@ -377,7 +369,6 @@
             this.cb03.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb03.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb03.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb03.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb03.Location = new System.Drawing.Point(226, 54);
             this.cb03.Name = "cb03";
             this.cb03.Size = new System.Drawing.Size(101, 73);
@@ -396,7 +387,6 @@
             this.cb02.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb02.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb02.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb02.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb02.Location = new System.Drawing.Point(119, 54);
             this.cb02.Name = "cb02";
             this.cb02.Size = new System.Drawing.Size(101, 73);
@@ -415,7 +405,6 @@
             this.cb04.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb04.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb04.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb04.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb04.Location = new System.Drawing.Point(333, 54);
             this.cb04.Name = "cb04";
             this.cb04.Size = new System.Drawing.Size(101, 73);
@@ -434,7 +423,6 @@
             this.cb05.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb05.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb05.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb05.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb05.Location = new System.Drawing.Point(451, 54);
             this.cb05.Name = "cb05";
             this.cb05.Size = new System.Drawing.Size(101, 73);
@@ -453,7 +441,6 @@
             this.cb06.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb06.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb06.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb06.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb06.Location = new System.Drawing.Point(558, 54);
             this.cb06.Name = "cb06";
             this.cb06.Size = new System.Drawing.Size(101, 73);
@@ -472,7 +459,6 @@
             this.cb07.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb07.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb07.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb07.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb07.Location = new System.Drawing.Point(665, 54);
             this.cb07.Name = "cb07";
             this.cb07.Size = new System.Drawing.Size(101, 73);
@@ -491,7 +477,6 @@
             this.cb08.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb08.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb08.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb08.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb08.Location = new System.Drawing.Point(773, 54);
             this.cb08.Name = "cb08";
             this.cb08.Size = new System.Drawing.Size(101, 73);
@@ -510,7 +495,6 @@
             this.cb16.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb16.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb16.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb16.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb16.Location = new System.Drawing.Point(773, 157);
             this.cb16.Name = "cb16";
             this.cb16.Size = new System.Drawing.Size(101, 73);
@@ -529,7 +513,6 @@
             this.cb15.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb15.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb15.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb15.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb15.Location = new System.Drawing.Point(665, 157);
             this.cb15.Name = "cb15";
             this.cb15.Size = new System.Drawing.Size(101, 73);
@@ -548,7 +531,6 @@
             this.cb14.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb14.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb14.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb14.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb14.Location = new System.Drawing.Point(558, 157);
             this.cb14.Name = "cb14";
             this.cb14.Size = new System.Drawing.Size(101, 73);
@@ -567,7 +549,6 @@
             this.cb13.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb13.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb13.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb13.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb13.Location = new System.Drawing.Point(451, 157);
             this.cb13.Name = "cb13";
             this.cb13.Size = new System.Drawing.Size(101, 73);
@@ -586,7 +567,6 @@
             this.cb12.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb12.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb12.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb12.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb12.Location = new System.Drawing.Point(333, 157);
             this.cb12.Name = "cb12";
             this.cb12.Size = new System.Drawing.Size(101, 73);
@@ -605,7 +585,6 @@
             this.cb10.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb10.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb10.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb10.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb10.Location = new System.Drawing.Point(119, 157);
             this.cb10.Name = "cb10";
             this.cb10.Size = new System.Drawing.Size(101, 73);
@@ -624,7 +603,6 @@
             this.cb11.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb11.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb11.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb11.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb11.Location = new System.Drawing.Point(226, 157);
             this.cb11.Name = "cb11";
             this.cb11.Size = new System.Drawing.Size(101, 73);
@@ -643,7 +621,6 @@
             this.cb09.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(12)))));
             this.cb09.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cb09.Font = new System.Drawing.Font("Tahoma", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cb09.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.cb09.Location = new System.Drawing.Point(12, 157);
             this.cb09.Name = "cb09";
             this.cb09.Size = new System.Drawing.Size(101, 73);
@@ -727,7 +704,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button bntOK;
         private System.Windows.Forms.CheckBox cboxIsMulti;
         private System.Windows.Forms.Label label1;

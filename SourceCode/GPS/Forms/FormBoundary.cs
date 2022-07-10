@@ -136,10 +136,10 @@ namespace AgOpenGPS
                     //d.BackColor = Color.Transparent;
                 }
 
-                int length = (mf.bnd.bndList[i].area * mf.m2ToUser).ToString("0").Length;
+                int length = (mf.bnd.bndList[i].area * glm.m2ToUser).ToString("0").Length;
                 if (length > 10) length = 10;
                 if (length < 3) length = 3;
-                b.Text = (mf.bnd.bndList[i].area * mf.m2ToUser).ToString("0.########".Substring(0, 11 - length)) + mf.unitsHaAc;
+                b.Text = (mf.bnd.bndList[i].area * glm.m2ToUser).ToString("0.########".Substring(0, 11 - length)) + glm.unitsHaAc;
 
                 if (i == fenceSelected)
                 {
@@ -471,7 +471,7 @@ namespace AgOpenGPS
 
         private void nudOffset_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudOffset.KeypadToNUD();
             btnPausePlay.Focus();
             mf.bnd.createBndOffset = (double)nudOffset.Value;
         }
@@ -512,7 +512,7 @@ namespace AgOpenGPS
                 area = Math.Abs(area / 2);
             }
 
-            lblArea.Text = Math.Round(area * mf.m2ToUser, 2) + mf.unitsHaAc;
+            lblArea.Text = Math.Round(area * glm.m2ToUser, 2) + glm.unitsHaAc;
             lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
         }
 

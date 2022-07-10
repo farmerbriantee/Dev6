@@ -807,7 +807,7 @@
             this.cboxFeatureRecPath.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cboxFeatureRecPath.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboxFeatureRecPath.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cboxFeatureRecPath.Image = global::AgOpenGPS.Properties.Resources.RecPath;
+            this.cboxFeatureRecPath.Image = global::AgOpenGPS.Properties.Resources.RecPathOn;
             this.cboxFeatureRecPath.Location = new System.Drawing.Point(57, 496);
             this.cboxFeatureRecPath.Name = "cboxFeatureRecPath";
             this.cboxFeatureRecPath.RightToLeft = System.Windows.Forms.RightToLeft.Yes;

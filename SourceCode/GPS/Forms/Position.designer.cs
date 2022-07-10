@@ -17,7 +17,9 @@ namespace AgOpenGPS
         public StringBuilder sbFix = new StringBuilder();
 
         // autosteer variables for sending serial
-        public short guidanceLineDistanceOff = 32000, guidanceLineDistanceOffTool, guidanceLineSteerAngle;
+        public double guidanceLineDistanceOff = double.NaN, guidanceLineDistanceOffTool = double.NaN;
+
+        public short guidanceLineSteerAngle;
 
         //guidance line look ahead
         public double guidanceLookAheadTime = 2;
@@ -83,7 +85,7 @@ namespace AgOpenGPS
             //simple comp filter
             HzTime = 0.97 * HzTime + 0.03 * rawHz;
 
-            if (timerSim.Enabled && Debugger.IsAttached)
+            if (glm.isSimEnabled && Debugger.IsAttached)
                 HzTime = 10;
 
             startCounter++;
@@ -171,7 +173,7 @@ namespace AgOpenGPS
                                 mc.fix.northing = stepFixPts[0].northing;
 
                                 isFirstHeadingSet = true;
-                                TimedMessageBox(2000, "Direction Reset", "Forward is Set");
+                                this.TimedMessageBox(2000, "Direction Reset", "Forward is Set");
                             }
                         }
                         else return;
@@ -424,6 +426,9 @@ namespace AgOpenGPS
 
                 worldManager.SmoothCam(fixHeading);
 
+                if (fixHeading < 0) fixHeading += glm.twoPI;
+                else if (fixHeading > glm.twoPI) fixHeading -= glm.twoPI;
+
                 //positions and headings 
                 CalculatePositionHeading();
             }
@@ -488,7 +493,7 @@ namespace AgOpenGPS
             //calc distance travelled since last GPS fix
             if (mc.avgSpeed > 1)
             {
-                if ((fd.distanceUser += distanceCurrentStepFix) > 3000) fd.distanceUser = 0; ;//userDistance can be reset
+                if ((bnd.distanceUser += distanceCurrentStepFix) > 3000) bnd.distanceUser = 0; ;//userDistance can be reset
             }
 
             if (mc.panicStopSpeed > 0 && (previousSpeed - mc.avgSpeed) > mc.panicStopSpeed)
@@ -500,12 +505,12 @@ namespace AgOpenGPS
             #region AutoSteer
 
             //reset the values
-            guidanceLineDistanceOffTool = guidanceLineDistanceOff = 32000;
+            guidanceLineDistanceOffTool = guidanceLineDistanceOff = double.NaN;
 
             gyd.GetCurrentGuidanceLine(pivotAxlePos, steerAxlePos, fixHeading);
 
             byte value = 0x00;
-            if ((isAutoSteerBtnOn || gyd.isDrivingRecordedPath) && guidanceLineDistanceOff != 32000) value |= 0x01;
+            if (isAutoSteerBtnOn && !double.IsNaN(guidanceLineDistanceOff)) value |= 0x01;
             if (gyd.isYouTurnTriggered) value |= 0x02;
             if (gyd.isYouTurnRight) value |= 0x04;
 
@@ -519,11 +524,11 @@ namespace AgOpenGPS
             //convert to cm from mm and divide by 2 - lightbar
             int distanceX2;
 
-            if (guidanceLineDistanceOff == 32000)
+            if (double.IsNaN(guidanceLineDistanceOff))
                 distanceX2 = 255;
             else
             {
-                distanceX2 = (int)(guidanceLineDistanceOff * 0.05);
+                distanceX2 = (int)(guidanceLineDistanceOff * 50);
 
                 if (distanceX2 < -127) distanceX2 = -127;
                 else if (distanceX2 > 127) distanceX2 = 127;
@@ -536,7 +541,7 @@ namespace AgOpenGPS
 
             if (vehicle.isInFreeDriveMode) //Drive button is on
             {
-                guidanceLineSteerAngle = (Int16)(vehicle.driveFreeSteerAngle * 100);
+                guidanceLineSteerAngle = (short)(vehicle.driveFreeSteerAngle * 100);
             }
             p_254.pgn[p_254.steerAngleHi] = unchecked((byte)(guidanceLineSteerAngle >> 8));
             p_254.pgn[p_254.steerAngleLo] = unchecked((byte)(guidanceLineSteerAngle));
@@ -544,19 +549,24 @@ namespace AgOpenGPS
             //speed for tool
             p_233.pgn[p_233.speed] = unchecked((byte)(Math.Abs(mc.avgSpeed) * 10.0));
 
+            short toolxte;
             if (vehicle.isInFreeToolDriveMode)
             {
-                guidanceLineDistanceOffTool = (Int16)(vehicle.driveFreeToolDistance * 100);
+                toolxte = (short)(vehicle.driveFreeToolDistance * 100);
+            }
+            else
+            {
+                toolxte = (short)Math.Round(guidanceLineDistanceOffTool * 1000.0, MidpointRounding.AwayFromZero);
             }
 
             //Tool XTE
-            p_233.pgn[p_233.highXTE] = unchecked((byte)(guidanceLineDistanceOffTool >> 8));
-            p_233.pgn[p_233.lowXTE] = unchecked((byte)(guidanceLineDistanceOffTool));
+            p_233.pgn[p_233.highXTE] = unchecked((byte)(toolxte >> 8));
+            p_233.pgn[p_233.lowXTE] = unchecked((byte)(toolxte));
 
-            //Vehicle XTE
-            p_233.pgn[p_233.highVehXTE] = unchecked((byte)(guidanceLineDistanceOff >> 8));
-            p_233.pgn[p_233.lowVehXTE] = unchecked((byte)(guidanceLineDistanceOff));
-
+            //Vehicle XTE       Convert from meters to millimeters
+            short vehiclexte = (short)Math.Round(guidanceLineDistanceOff * 1000.0, MidpointRounding.AwayFromZero);
+            p_233.pgn[p_233.highVehXTE] = unchecked((byte)(vehiclexte >> 8));
+            p_233.pgn[p_233.lowVehXTE] = unchecked((byte)(vehiclexte));
 
             //out serial to autosteer module  //indivdual classes load the distance and heading deltas 
             if (vehicleGPSWatchdog < 11)
@@ -566,7 +576,7 @@ namespace AgOpenGPS
                 SendPgnToLoop(p_233.pgn);
 
             //for average cross track error
-            if (guidanceLineDistanceOff != 32000)
+            if (!double.IsNaN(guidanceLineDistanceOff))
             {
                 crossTrackError = (int)((double)crossTrackError * 0.90 + Math.Abs((double)guidanceLineDistanceOff) * 0.1);
             }
@@ -595,7 +605,7 @@ namespace AgOpenGPS
                     if (gyd.isYouTurnBtnOn && isAutoSteerBtnOn && !gyd.isYouTurnTriggered && vehicleGPSWatchdog < 11)
                     {
                         //if we are too much off track > 1.3m, kill the diagnostic creation, start again
-                        if (crossTrackError > 1300)
+                        if (crossTrackError > 1.3)
                             gyd.ResetCreatedYouTurn();
                         else
                         {
@@ -899,15 +909,11 @@ namespace AgOpenGPS
         //add the points for section, contour line points, Area Calc feature
         private void AddSectionOrContourPathPoints()
         {
-            if (gyd.isRecordOn)
-            {
-                //keep minimum speed of 1.0
-                gyd.recList.Add(new CRecPathPt(pivotAxlePos.easting, pivotAxlePos.northing, fixHeading,
-                    mc.avgSpeed < 1.0? 1.0 : mc.avgSpeed, autoBtnState == btnStates.Auto));
-            }
-
             if (gyd.isOkToAddDesPoints && gyd.EditGuidanceLine != null)
             {
+                if (gyd.EditGuidanceLine is CGuidanceRecPath aa)
+                    aa.Status.Add(new CRecPathPt(mc.avgSpeed < 1.0 ? 1.0 : mc.avgSpeed, autoBtnState));
+
                 gyd.EditGuidanceLine.points.Add(new vec2(pivotAxlePos.easting, pivotAxlePos.northing));
             }
 
@@ -964,7 +970,7 @@ namespace AgOpenGPS
             {
                 if (leftSpeed > 0) leftSpeed *= -1;
             }
-            if (timerSim.Enabled && Debugger.IsAttached)
+            if (glm.isSimEnabled && Debugger.IsAttached)
                 tool.toolFarLeftSpeed = leftSpeed;
             else
                 tool.toolFarLeftSpeed = tool.toolFarLeftSpeed * 0.9 + leftSpeed * 0.1;
@@ -988,7 +994,7 @@ namespace AgOpenGPS
 
             //save the far left and right speed in m/sec averaged over 20%
 
-            if (timerSim.Enabled && Debugger.IsAttached)
+            if (glm.isSimEnabled && Debugger.IsAttached)
                 tool.toolFarRightSpeed = rightSpeed;
             else
                 tool.toolFarRightSpeed = tool.toolFarRightSpeed * 0.9 + rightSpeed * 0.1;
@@ -1137,7 +1143,7 @@ namespace AgOpenGPS
             {
                 if (!isJobStarted)
                 {
-                    if (timerSim.Enabled)
+                    if (glm.isSimEnabled)
                     {
                         worldManager.latStart = Properties.Settings.Default.setGPS_SimLatitude;
                         worldManager.lonStart = Properties.Settings.Default.setGPS_SimLongitude;

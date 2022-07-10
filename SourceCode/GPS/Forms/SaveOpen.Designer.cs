@@ -96,7 +96,7 @@ namespace AgOpenGPS
 
             if (!File.Exists(filename))
             {
-                TimedMessageBox(2000, gStr.gsFileError, "Missing Curve File");
+                this.TimedMessageBox(2000, gStr.gsFileError, "Missing Curve File");
             }
             else
             {
@@ -144,8 +144,7 @@ namespace AgOpenGPS
                     }
                     catch (Exception er)
                     {
-                        var form = new FormTimedMessage(2000, gStr.gsCurveLineFileIsCorrupt, gStr.gsButFieldIsLoaded);
-                        form.Show(this);
+                        this.TimedMessageBox(2000, gStr.gsCurveLineFileIsCorrupt, gStr.gsButFieldIsLoaded);
                         WriteErrorLog("Load Curve Line" + er.ToString());
                     }
                 }
@@ -207,7 +206,7 @@ namespace AgOpenGPS
 
             if (!File.Exists(filename))
             {
-                TimedMessageBox(2000, gStr.gsFileError, gStr.gsMissingABLinesFile);
+                this.TimedMessageBox(2000, gStr.gsFileError, gStr.gsMissingABLinesFile);
             }
             else
             {
@@ -242,8 +241,7 @@ namespace AgOpenGPS
                     }
                     catch (Exception er)
                     {
-                        var form = new FormTimedMessage(2000, "AB Line Corrupt", "Please delete it!!!");
-                        form.Show(this);
+                        this.TimedMessageBox(2000, "AB Line Corrupt", "Please delete it!!!");
                         WriteErrorLog("FieldOpen, Loading ABLine, Corrupt ABLine File" + er);
                     }
                 }
@@ -251,8 +249,10 @@ namespace AgOpenGPS
         }
 
         //function to open a previously saved field, resume, open exisiting, open named field
-        public void FileOpenField(string fileAndDirectory)
+        public void FileOpenField()
         {
+            string fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Field.txt";
+
             if (!File.Exists(fileAndDirectory)) return;
 
             //and open a new job
@@ -305,7 +305,7 @@ namespace AgOpenGPS
                         worldManager.latStart = double.Parse(offs[0], CultureInfo.InvariantCulture);
                         worldManager.lonStart = double.Parse(offs[1], CultureInfo.InvariantCulture);
 
-                        if (timerSim.Enabled)
+                        if (glm.isSimEnabled)
                         {
                             Properties.Settings.Default.setGPS_SimLatitude = worldManager.latStart;
                             Properties.Settings.Default.setGPS_SimLongitude = worldManager.lonStart;
@@ -322,9 +322,7 @@ namespace AgOpenGPS
                 {
                     WriteErrorLog("While Opening Field" + e.ToString());
 
-                    var form = new FormTimedMessage(2000, gStr.gsFieldFileIsCorrupt, gStr.gsChooseADifferentField);
-
-                    form.Show(this);
+                    this.TimedMessageBox(2000, gStr.gsFieldFileIsCorrupt, gStr.gsChooseADifferentField);
                     JobClose();
                     return;
                 }
@@ -340,8 +338,7 @@ namespace AgOpenGPS
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Sections.txt";
             if (!File.Exists(fileAndDirectory))
             {
-                var form = new FormTimedMessage(2000, gStr.gsMissingSectionFile, gStr.gsButFieldIsLoaded);
-                form.Show(this);
+                this.TimedMessageBox(2000, gStr.gsMissingSectionFile, gStr.gsButFieldIsLoaded);
                 //return;
             }
             else
@@ -350,8 +347,8 @@ namespace AgOpenGPS
                 {
                     try
                     {
-                        fd.workedAreaTotal = 0;
-                        fd.distanceUser = 0;
+                        bnd.workedAreaTotal = 0;
+                        bnd.distanceUser = 0;
 
                         //read header
                         while (!reader.EndOfStream)
@@ -384,7 +381,7 @@ namespace AgOpenGPS
                             }
 
                             //calculate area of this patch - AbsoluteValue of (Ax(By-Cy) + Bx(Cy-Ay) + Cx(Ay-By)/2)
-                            verts -= 3;
+                            verts = New.points.Count - 2;
                             if (verts >= 2)
                             {
                                 for (int j = 2; j < verts; j++)
@@ -394,7 +391,7 @@ namespace AgOpenGPS
                                               New.points[j + 1].easting * (New.points[j + 2].northing - New.points[j].northing) +
                                                   New.points[j + 2].easting * (New.points[j].northing - New.points[j + 1].northing);
 
-                                    fd.workedAreaTotal += Math.Abs((temp * 0.5));
+                                    bnd.workedAreaTotal += Math.Abs((temp * 0.5));
                                 }
                             }
                             patchList.Add(New);
@@ -404,8 +401,7 @@ namespace AgOpenGPS
                     {
                         WriteErrorLog("Section file" + e.ToString());
 
-                        var form = new FormTimedMessage(2000, "Section File is Corrupt", gStr.gsButFieldIsLoaded);
-                        form.Show(this);
+                        this.TimedMessageBox(2000, "Section File is Corrupt", gStr.gsButFieldIsLoaded);
                     }
 
                 }
@@ -416,8 +412,7 @@ namespace AgOpenGPS
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Contour.txt";
             if (!File.Exists(fileAndDirectory))
             {
-                var form = new FormTimedMessage(2000, gStr.gsMissingContourFile, gStr.gsButFieldIsLoaded);
-                form.Show(this);
+                this.TimedMessageBox(2000, gStr.gsMissingContourFile, gStr.gsButFieldIsLoaded);
                 //return;
             }
             
@@ -454,8 +449,7 @@ namespace AgOpenGPS
                     {
                         WriteErrorLog("Loading Contour file" + e.ToString());
 
-                        var form = new FormTimedMessage(2000, gStr.gsContourFileIsCorrupt, gStr.gsButFieldIsLoaded);
-                        form.Show(this);
+                        this.TimedMessageBox(2000, gStr.gsContourFileIsCorrupt, gStr.gsButFieldIsLoaded);
                     }
                 }
             }
@@ -467,8 +461,7 @@ namespace AgOpenGPS
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Flags.txt";
             if (!File.Exists(fileAndDirectory))
             {
-                var form = new FormTimedMessage(2000, gStr.gsMissingFlagsFile, gStr.gsButFieldIsLoaded);
-                form.Show(this);
+                this.TimedMessageBox(2000, gStr.gsMissingFlagsFile, gStr.gsButFieldIsLoaded);
             }
 
             else
@@ -528,8 +521,7 @@ namespace AgOpenGPS
 
                     catch (Exception e)
                     {
-                        var form = new FormTimedMessage(2000, gStr.gsFlagFileIsCorrupt, gStr.gsButFieldIsLoaded);
-                        form.Show(this);
+                        this.TimedMessageBox(2000, gStr.gsFlagFileIsCorrupt, gStr.gsButFieldIsLoaded);
                         WriteErrorLog("FieldOpen, Loading Flags, Corrupt Flag File" + e.ToString());
                     }
                 }
@@ -540,8 +532,7 @@ namespace AgOpenGPS
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\Boundary.txt";
             if (!File.Exists(fileAndDirectory))
             {
-                var form = new FormTimedMessage(2000, gStr.gsMissingBoundaryFile, gStr.gsButFieldIsLoaded);
-                form.Show(this);
+                this.TimedMessageBox(2000, gStr.gsMissingBoundaryFile, gStr.gsButFieldIsLoaded);
             }
             else
             {
@@ -596,8 +587,7 @@ namespace AgOpenGPS
                     }
                     catch (Exception e)
                     {
-                        var form = new FormTimedMessage(2000, gStr.gsBoundaryLineFilesAreCorrupt, gStr.gsButFieldIsLoaded);
-                        form.Show(this);
+                        this.TimedMessageBox(2000, gStr.gsBoundaryLineFilesAreCorrupt, gStr.gsButFieldIsLoaded);
                         WriteErrorLog("Load Boundary Line" + e.ToString());
                     }
                 }
@@ -667,8 +657,7 @@ namespace AgOpenGPS
                     }
                     catch (Exception e)
                     {
-                        var form = new FormTimedMessage(2000, "Headland File is Corrupt", "But Field is Loaded");
-                        form.Show(this);
+                        this.TimedMessageBox(2000, "Headland File is Corrupt", "But Field is Loaded");
                         WriteErrorLog("Load Headland Loop" + e.ToString());
                     }
                 }
@@ -823,8 +812,7 @@ namespace AgOpenGPS
 
                     catch (Exception e)
                     {
-                        var form = new FormTimedMessage(2000, "Tram is corrupt", gStr.gsButFieldIsLoaded);
-                        form.Show(this);
+                        this.TimedMessageBox(2000, "Tram is corrupt", gStr.gsButFieldIsLoaded);
                         WriteErrorLog("Load Boundary Line" + e.ToString());
                     }
                 }
@@ -840,32 +828,44 @@ namespace AgOpenGPS
                     {
                         //read header
                         line = reader.ReadLine();
-                        line = reader.ReadLine();
-                        int numPoints = int.Parse(line);
-                        gyd.recList.Clear();
 
                         while (!reader.EndOfStream)
                         {
-                            for (int v = 0; v < numPoints; v++)
-                            {
-                                line = reader.ReadLine();
-                                string[] words = line.Split(',');
-                                CRecPathPt point = new CRecPathPt(
-                                    double.Parse(words[0], CultureInfo.InvariantCulture),
-                                    double.Parse(words[1], CultureInfo.InvariantCulture),
-                                    double.Parse(words[2], CultureInfo.InvariantCulture),
-                                    double.Parse(words[3], CultureInfo.InvariantCulture),
-                                    bool.Parse(words[4]));
+                            CGuidanceRecPath New = new CGuidanceRecPath(Mode.RecPath);
 
-                                //add the point
-                                gyd.recList.Add(point);
+                            line = reader.ReadLine();
+                            while (gyd.curveArr.Exists(L => L.Name == line))//generate unique name!
+                                line += " ";
+                            New.Name = line;
+
+                            line = reader.ReadLine();
+                            if (line == "True" || line == "False")
+                            {
+                                New.loop = bool.Parse(line);
+                                line = reader.ReadLine(); //number of points
+                            }
+
+                            int numPoints = int.Parse(line);
+
+                            if (numPoints > 1)
+                            {
+                                for (int i = 0; i < numPoints; i++)
+                                {
+                                    line = reader.ReadLine();
+                                    string[] words = line.Split(',');
+                                    New.points.Add(new vec2(
+                                        double.Parse(words[0], CultureInfo.InvariantCulture),
+                                        double.Parse(words[1], CultureInfo.InvariantCulture)));
+                                    New.Status.Add(new CRecPathPt(double.Parse(words[2], CultureInfo.InvariantCulture),
+                                        (btnStates)Enum.Parse(typeof(btnStates), words[3], true)));
+                                }
+                                gyd.curveArr.Add(New);
                             }
                         }
                     }
                     catch (Exception e)
                     {
-                        var form = new FormTimedMessage(2000, gStr.gsRecordedPathFileIsCorrupt, gStr.gsButFieldIsLoaded);
-                        form.Show(this);
+                        this.TimedMessageBox(2000, gStr.gsRecordedPathFileIsCorrupt, gStr.gsButFieldIsLoaded);
                         WriteErrorLog("Load Recorded Path" + e.ToString());
                     }
                 }
@@ -883,8 +883,7 @@ namespace AgOpenGPS
 
             if (!isJobStarted)
             {
-                using (var form = new FormTimedMessage(3000, gStr.gsFieldNotOpen, gStr.gsCreateNewField))
-                { form.Show(this); }
+                this.TimedMessageBox(3000, gStr.gsFieldNotOpen, gStr.gsCreateNewField);
                 return;
             }
             string myFileName, dirField;
@@ -1185,8 +1184,7 @@ namespace AgOpenGPS
             }
         }
 
-        //Create contour file
-        public void FileCreateRecPath()
+        public void FileSaveRecPath()
         {
             //get the directory and make sure it exists, create if not
             string dirField = fieldsDirectory + currentFieldDirectory + "\\";
@@ -1195,44 +1193,40 @@ namespace AgOpenGPS
             if ((directoryName.Length > 0) && (!Directory.Exists(directoryName)))
             { Directory.CreateDirectory(directoryName); }
 
-            string myFileName = "RecPath.txt";
-
             //write out the file
-            using (StreamWriter writer = new StreamWriter(dirField + myFileName))
+            using (StreamWriter writer = new StreamWriter((dirField + "RecPath.txt")))
             {
-                //write paths # of sections
-                writer.WriteLine("$RecPath," + currentVersionStr);
-                writer.WriteLine("0");
-            }
-        }
-
-        //save the recorded path
-        public void FileSaveRecPath(string name = "RecPath.Txt")
-        {
-            //get the directory and make sure it exists, create if not
-            string dirField = fieldsDirectory + currentFieldDirectory + "\\";
-
-            string directoryName = Path.GetDirectoryName(dirField);
-            if ((directoryName.Length > 0) && (!Directory.Exists(directoryName)))
-            { Directory.CreateDirectory(directoryName); }
-
-            //string fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\RecPath.txt";
-            //if (!File.Exists(fileAndDirectory)) FileCreateRecPath();
-
-            //write out the file
-            using (StreamWriter writer = new StreamWriter((dirField + name)))
-            {
-                writer.WriteLine("$RecPath," + currentVersionStr);
-                writer.WriteLine(gyd.recList.Count.ToString(CultureInfo.InvariantCulture));
-                if (gyd.recList.Count > 0)
+                try
                 {
-                    for (int j = 0; j < gyd.recList.Count; j++)
-                        writer.WriteLine(
-                            Math.Round(gyd.recList[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                            Math.Round(gyd.recList[j].northing, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                            Math.Round(gyd.recList[j].heading, 3).ToString(CultureInfo.InvariantCulture) + "," +
-                            Math.Round(gyd.recList[j].speed, 1).ToString(CultureInfo.InvariantCulture) + "," +
-                            (gyd.recList[j].autoBtnState).ToString());
+                    writer.WriteLine("$RecPath," + currentVersionStr);
+
+                    for (int i = 0; i < gyd.curveArr.Count; i++)
+                    {
+                        if (gyd.curveArr[i].mode.HasFlag(Mode.RecPath))
+                        {
+                            if (gyd.curveArr[i] is CGuidanceRecPath RecPath)
+                            {
+                                //write out the points of ref line
+                                writer.WriteLine(RecPath.Name);
+                                writer.WriteLine(RecPath.loop);
+                                writer.WriteLine(RecPath.Status.Count.ToString(CultureInfo.InvariantCulture));
+
+                                for (int j = 0; j < RecPath.Status.Count; j++)
+                                {
+                                    writer.WriteLine(
+                                    Math.Round(RecPath.points[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
+                                    Math.Round(RecPath.points[j].northing, 3).ToString(CultureInfo.InvariantCulture) + "," +
+                                    Math.Round(RecPath.Status[j].speed, 1).ToString(CultureInfo.InvariantCulture) + "," +
+                                    (RecPath.Status[j].autoBtnState).ToString());
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception er)
+                {
+                    WriteErrorLog("Saving RecPath" + er.ToString());
+                    return;
                 }
             }
         }
@@ -1608,33 +1602,40 @@ namespace AgOpenGPS
             kml.WriteElementString("name", "Recorded Path");
             kml.WriteElementString("visibility", "1");
 
-            kml.WriteStartElement("Placemark");
-            kml.WriteElementString("visibility", "1");
-
-            kml.WriteElementString("name", "Path " + 1);
-            kml.WriteStartElement("Style");
-
-            kml.WriteStartElement("LineStyle");
-            kml.WriteElementString("color", "ff44ffff");
-            kml.WriteElementString("width", "2");
-            kml.WriteEndElement(); // <LineStyle>
-            kml.WriteEndElement(); //Style
-
-            kml.WriteStartElement("LineString");
-            kml.WriteElementString("tessellate", "1");
-            kml.WriteStartElement("coordinates");
-
-            string linePts2 = "";
-            for (int j = 0; j < gyd.recList.Count; j++)
+            for (int i = 0; i < gyd.curveArr.Count; i++)
             {
-                linePts2 += worldManager.GetLocalToWSG84_KML(gyd.recList[j].easting, gyd.recList[j].northing);
+                if (gyd.curveArr[i].mode.HasFlag(Mode.RecPath))
+                {
+                    kml.WriteStartElement("Placemark");
+                    kml.WriteElementString("visibility", "0");
+
+                    kml.WriteElementString("name", gyd.curveArr[i].Name.Trim());
+                    kml.WriteStartElement("Style");
+
+                    kml.WriteStartElement("LineStyle");
+                    kml.WriteElementString("color", "ff44ffff");
+                    kml.WriteElementString("width", "2");
+                    kml.WriteEndElement(); // <LineStyle>
+                    kml.WriteEndElement(); //Style
+
+                    kml.WriteStartElement("LineString");
+                    kml.WriteElementString("tessellate", "1");
+                    kml.WriteStartElement("coordinates");
+
+                    string linePts = "";
+                    for (int j = 0; j < gyd.curveArr[i].points.Count; j++)
+                    {
+                        linePts += worldManager.GetLocalToWSG84_KML(gyd.curveArr[i].points[j].easting, gyd.curveArr[i].points[j].northing);
+                    }
+                    kml.WriteRaw(linePts);
+
+                    kml.WriteEndElement(); // <coordinates>
+                    kml.WriteEndElement(); // <LineString>
+
+                    kml.WriteEndElement(); // <Placemark>
+                }
             }
-            kml.WriteRaw(linePts2);
 
-            kml.WriteEndElement(); // <coordinates>
-            kml.WriteEndElement(); // <LineString>
-
-            kml.WriteEndElement(); // <Placemark>
             kml.WriteEndElement(); // <Folder>
 
             //flags  *************************************************************************

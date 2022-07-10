@@ -18,8 +18,8 @@ namespace AgOpenGPS
 
             this.Text = gStr.gsTramLines;
             label3.Text = gStr.gsPasses;
-            label2.Text = ((int)(0.1 * mf.mToUser)).ToString() + mf.unitsInCm;
-            lblTramWidth.Text = (mf.tram.tramWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+            label2.Text = ((int)(0.1 * glm.mToUser)).ToString() + glm.unitsInCm;
+            lblTramWidth.Text = (mf.tram.tramWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;
 
             nudPasses.Controls[0].Enabled = false;
         }
@@ -32,11 +32,11 @@ namespace AgOpenGPS
             halfToolWidth = (mf.tool.toolWidth - mf.tool.toolOverlap) / 2.0;
 
 
-            lblTrack.Text = (mf.vehicle.trackWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+            lblTrack.Text = (mf.vehicle.trackWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;;
 
-            lblToolWidthHalf.Text = (halfToolWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+            lblToolWidthHalf.Text = (halfToolWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;;
 
-            mf.panelRight.Enabled = false;
+            mf.PanelRightEnabled(false);
 
             //if off, turn it on because they obviously want a tram.
             if (mf.tram.displayMode == 0) mf.tram.displayMode = 1;
@@ -104,7 +104,7 @@ namespace AgOpenGPS
                 mf.tram.displayMode = 0;
             }
 
-            mf.panelRight.Enabled = true;
+            mf.PanelRightEnabled(true);
 
             mf.FileSaveTram();
             mf.FixTramModeButton();
@@ -146,7 +146,7 @@ namespace AgOpenGPS
 
         private void nudPasses_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudPasses.KeypadToNUD();
         }
 
         private void btnSwapAB_Click(object sender, EventArgs e)

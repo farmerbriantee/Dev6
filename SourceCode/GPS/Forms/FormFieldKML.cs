@@ -108,7 +108,7 @@ namespace AgOpenGPS
                         mf.worldManager.lonStart = lonK;
                     }
 
-                    if (mf.timerSim.Enabled)
+                    if (glm.isSimEnabled)
                     {
                         Properties.Settings.Default.setGPS_SimLatitude = mf.worldManager.latStart;
                         Properties.Settings.Default.setGPS_SimLongitude = mf.worldManager.lonStart;
@@ -129,7 +129,7 @@ namespace AgOpenGPS
                     //create the field file header info
                     mf.FileCreateField();
                     mf.FileCreateSections();
-                    mf.FileCreateRecPath();
+                    mf.FileSaveRecPath();
                     mf.FileCreateContour();
                     mf.FileCreateElevation();
                     mf.FileSaveFlags();
@@ -162,11 +162,7 @@ namespace AgOpenGPS
 
         private void tboxFieldName_Click(object sender, EventArgs e)
         {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-                btnSerialCancel.Focus();
-            }
+            tboxFieldName.KeyboardToText();
         }
 
         private void btnLoadKML_Click(object sender, EventArgs e)

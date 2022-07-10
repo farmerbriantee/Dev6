@@ -101,43 +101,43 @@ namespace AgOpenGPS
 
         private void nudUser1_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudUser1, ref user1, 0, 255))
+            if (nudUser1.KeypadToButton(ref user1, 0, 255))
                 pboxSendMachine.Visible = true;
         }
 
         private void nudUser2_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudUser2, ref user2, 0, 255))
+            if (nudUser2.KeypadToButton(ref user2, 0, 255))
                 pboxSendMachine.Visible = true;
         }
 
         private void nudUser3_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudUser3, ref user3, 0, 255))
+            if (nudUser3.KeypadToButton(ref user3, 0, 255))
                 pboxSendMachine.Visible = true;
         }
 
         private void nudUser4_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudUser4, ref user4, 0, 255))
+            if (nudUser4.KeypadToButton(ref user4, 0, 255))
                 pboxSendMachine.Visible = true;
         }
 
         private void nudRaiseTime_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudRaiseTime, ref raiseTime, 1, 255))
+            if (nudRaiseTime.KeypadToButton(ref raiseTime, 1, 255))
                 pboxSendMachine.Visible = true;
         }
 
         private void nudLowerTime_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudLowerTime, ref lowerTime, 1, 255))
+            if (nudLowerTime.KeypadToButton(ref lowerTime, 1, 255))
                 pboxSendMachine.Visible = true;
         }
 
         private void nudHydLiftLookAhead_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudHydLiftLookAhead, ref lookAhead, 1, 20, 1))
+            if (nudHydLiftLookAhead.KeypadToButton(ref lookAhead, 1, 20, 1))
                 pboxSendMachine.Visible = true;
         }
 

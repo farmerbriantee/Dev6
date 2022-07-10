@@ -2,11 +2,130 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Windows.Forms;
 
 namespace AgOpenGPS
 {
     public static class glm
     {
+        public static bool isMetric = true, isKeyboardOn = true, isSimEnabled = false;
+        public static double mToUser = 100.0, userToM = 0.01, mToUserBig = 1.0, userBigToM = 1.0, m2ToUser = 0.0001, KMHToUser = 1.0, userToKMH = 1.0;
+
+        public static string unitsFtM, unitsInCm, unitsHaAc;
+
+        public static void SetUserScales(bool _metric)
+        {
+            isMetric = _metric;
+            if (isMetric)
+            {
+                userToM = 0.01;//cm to m
+                mToUser = 100.0;//m to cm
+
+                mToUserBig = 1.0;//m to m
+                userBigToM = 1.0;//m to m
+                KMHToUser = 1.0;//Km/H to Km/H
+                userToKMH = 1.0;//Km/H to Km/H
+
+                m2ToUser = 0.0001;//m2 to Ha
+
+                unitsFtM = " m";
+                unitsInCm = " cm";
+                unitsHaAc = " Ha";
+            }
+            else
+            {
+                userToM = 0.0254;//inches to meters
+                mToUser = 39.3701;//meters to inches
+
+                mToUserBig = 3.28084;//meters to feet
+                userBigToM = 0.3048;//feet to meters
+                KMHToUser = 0.62137;//Km/H to mph
+                userToKMH = 1.60934;//mph to Km/H
+
+                m2ToUser = 0.000247105;//m2 to Acres
+
+                unitsFtM = " ft";
+                unitsInCm = " in";
+                unitsHaAc = " Ac";
+            }
+        }
+
+        public static bool KeypadToNUD(this NumericUpDown sender)
+        {
+            sender.Value = Math.Round(sender.Value, sender.DecimalPlaces);
+
+            using (FormNumeric form = new FormNumeric((double)sender.Minimum, (double)sender.Maximum, (double)sender.Value, 2))
+            {
+                DialogResult result = form.ShowDialog(sender);
+                if (result == DialogResult.OK)
+                {
+                    sender.Value = (decimal)form.ReturnValue;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public static bool KeyboardToText(this TextBox sender)
+        {
+            if (isKeyboardOn)
+            {
+                using (FormKeyboard form = new FormKeyboard(sender.Text))
+                {
+                    if (form.ShowDialog(sender) == DialogResult.OK)
+                    {
+                        sender.Text = form.ReturnString;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        public static bool KeypadToButton(this Button sender, ref double value, double minimum, double maximum, int decimals, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
+        {
+            using (FormNumeric form = new FormNumeric(minimum, maximum, value, decimals, true, unit2meter, Mtr2Unit, divisible))
+            {
+                if (form.ShowDialog(sender) == DialogResult.OK)
+                {
+                    value = form.ReturnValue;
+
+                    string guifix = "0";
+                    if (decimals > 0)
+                    {
+                        guifix = "0.0";
+                        while (--decimals > 0)
+                            guifix += "#";
+                    }
+
+                    sender.Text = (value * Mtr2Unit).ToString(guifix);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool KeypadToButton(this Button sender, ref int value, int minimum, int maximum, double Mtr2Unit = 1.0, double unit2meter = 1.0, decimal divisible = -1)
+        {
+            using (FormNumeric form = new FormNumeric(minimum, maximum, value, 0, true, unit2meter, Mtr2Unit, divisible))
+            {
+                if (form.ShowDialog(sender) == DialogResult.OK)
+                {
+                    value = (int)form.ReturnValue;
+                    sender.Text = (value * Mtr2Unit).ToString("0");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        //message box pops up with info then goes away
+        public static void TimedMessageBox(this Control control, int timeout, string s1, string s2)
+        {
+            FormTimedMessage form = new FormTimedMessage(timeout, s1, s2);
+            form.Show(control);
+        }
+
         public static bool IsPointInPolygon(this List<vec2> polygon, vec2 testPoint)
         {
             bool result = false;
@@ -85,13 +204,6 @@ namespace AgOpenGPS
                 + Math.Pow(first.northing - second.northing, 2));
         }
 
-        public static double Distance(vec2 first, CRecPathPt second)
-        {
-            return Math.Sqrt(
-                Math.Pow(first.easting - second.easting, 2)
-                + Math.Pow(first.northing - second.northing, 2));
-        }
-
         public static double Distance(vec2 first, double east, double north)
         {
             return Math.Sqrt(
@@ -114,13 +226,6 @@ namespace AgOpenGPS
         }
 
         public static double DistanceSquared(vec2 first, vec2 second)
-        {
-            return (
-            Math.Pow(first.easting - second.easting, 2)
-            + Math.Pow(first.northing - second.northing, 2));
-        }
-
-        public static double DistanceSquared(CRecPathPt first, CRecPathPt second)
         {
             return (
             Math.Pow(first.easting - second.easting, 2)

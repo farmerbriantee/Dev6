@@ -519,7 +519,7 @@ namespace AgOpenGPS
 
         private void nudMaxCounts_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMaxCounts, ref MaxCounts, 0, 255);
+            nudMaxCounts.KeypadToButton(ref MaxCounts, 0, 255);
         }
 
         private void EnableAlert_Click(object sender, EventArgs e)

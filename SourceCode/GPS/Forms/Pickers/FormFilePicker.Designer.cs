@@ -82,7 +82,6 @@
             this.btnReturn.Size = new System.Drawing.Size(71, 63);
             this.btnReturn.TabIndex = 91;
             this.btnReturn.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.btnReturn.Click += new System.EventHandler(this.btnReturn_Click);
             // 
             // btnDeleteField
             // 

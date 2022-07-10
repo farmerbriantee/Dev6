@@ -39,7 +39,7 @@ namespace AgOpenGPS
 
         private void nudHeading_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudHeading.KeypadToNUD();
             btnEnterManual.Focus();
             CalcHeading();
         }
@@ -74,28 +74,28 @@ namespace AgOpenGPS
 
         private void nudLatitude_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudLatitude.KeypadToNUD();
             btnEnterManual.Focus();
             CalcHeading();
         }
 
         private void nudLongitude_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudLongitude.KeypadToNUD();
             btnEnterManual.Focus();
             CalcHeading();
         }
 
         private void nudLatitudeB_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudLatitudeB.KeypadToNUD();
             btnEnterManual.Focus();
             CalcHeading();
         }
 
         private void nudLongitudeB_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudLongitudeB.KeypadToNUD();
             btnEnterManual.Focus();
             CalcHeading();
         }
@@ -107,7 +107,7 @@ namespace AgOpenGPS
             Close();
         }
 
-        public void CalcHeading()
+        private void CalcHeading()
         {
             if (mf.gyd.EditGuidanceLine != null)
             {

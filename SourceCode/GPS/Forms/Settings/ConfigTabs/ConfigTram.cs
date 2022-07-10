@@ -18,10 +18,10 @@ namespace AgOpenGPS
 
         private void ConfigTram_Load(object sender, EventArgs e)
         {
-            lblTramWidthUnits.Text = mf.unitsFtM;
+            lblTramWidthUnits.Text = glm.unitsFtM;
             tramWidth = Properties.Settings.Default.setTram_tramWidth;
 
-            nudTramWidth.Text = (tramWidth * mf.mToUserBig).ToString("0.00");
+            nudTramWidth.Text = (tramWidth * glm.mToUserBig).ToString("0.00");
 
             cboxTramOnBackBuffer.Checked = Properties.Settings.Default.setTram_isTramOnBackBuffer;
         }
@@ -38,7 +38,7 @@ namespace AgOpenGPS
 
         private void nudTramWidth_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTramWidth, ref tramWidth, 0.5, 50, 2, mf.mToUserBig, mf.userBigToM);
+            nudTramWidth.KeypadToButton(ref tramWidth, 0.5, 50, 2, glm.mToUserBig, glm.userBigToM);
         }
 
         private void cboxTramOnBackBuffer_HelpRequested(object sender, HelpEventArgs hlpevent)

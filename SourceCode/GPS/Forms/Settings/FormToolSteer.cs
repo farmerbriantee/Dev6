@@ -25,10 +25,10 @@ namespace AgOpenGPS
         private void FormSteer_Load(object sender, EventArgs e)
         {
             AntennaHeight = mf.tool.AntennaHeight;
-            nudToolAntennaHeight.Text = (AntennaHeight * mf.mToUser).ToString("0");
+            nudToolAntennaHeight.Text = (AntennaHeight * glm.mToUser).ToString("0");
 
             AntennaOffset = mf.tool.AntennaOffset;
-            nudToolAntennaOffset.Text = (AntennaOffset * mf.mToUser).ToString("0");
+            nudToolAntennaOffset.Text = (AntennaOffset * glm.mToUser).ToString("0");
 
             cboxToolOnlyGPS.Checked = mf.tool.isSteering;
 
@@ -190,12 +190,12 @@ namespace AgOpenGPS
 
         private void nudToolAntennaHeight_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudToolAntennaHeight, ref AntennaHeight, 0.0, 10.0, 0, mf.mToUser, mf.userToM);
+            nudToolAntennaHeight.KeypadToButton(ref AntennaHeight, 0.0, 10.0, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudToolAntennaOffset_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudToolAntennaOffset, ref AntennaOffset, -5.0, 5.0, 0, mf.mToUser, mf.userToM);
+            nudToolAntennaOffset.KeypadToButton(ref AntennaOffset, -5.0, 5.0, 0, glm.mToUser, glm.userToM);
         }
 
         public void SetProgressNoAnimation(ProgressBar pb, int value)

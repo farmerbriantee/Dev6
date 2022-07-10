@@ -160,7 +160,7 @@ namespace AgOpenGPS
 
                     double leftAckermam, rightAckerman;
 
-                    if (mf.timerSim.Enabled)
+                    if (glm.isSimEnabled)
                     {
                         if (mf.sim.steerAngle < 0)
                         {
@@ -238,7 +238,7 @@ namespace AgOpenGPS
 
                     double leftAckermam, rightAckerman;
 
-                    if (mf.timerSim.Enabled)
+                    if (glm.isSimEnabled)
                     {
                         if (mf.sim.steerAngle < 0)
                         {
@@ -315,7 +315,7 @@ namespace AgOpenGPS
                 {
                     double modelSteerAngle;
 
-                    if (mf.timerSim.Enabled)
+                    if (glm.isSimEnabled)
                         modelSteerAngle = 0.5 * mf.sim.steerAngle;
                     else
                         modelSteerAngle = 0.5 * mf.mc.actualSteerAngleDegrees;

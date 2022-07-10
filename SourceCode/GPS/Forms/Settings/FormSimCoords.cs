@@ -34,7 +34,7 @@ namespace AgOpenGPS
                 Close();
             }
 
-            if (!mf.timerSim.Enabled)
+            if (!glm.isSimEnabled)
             {
                 mf.TimedMessageBox(2000, "Simulator is off", "Go Back To Work, No Time For Games");
                 Close();
@@ -58,9 +58,13 @@ namespace AgOpenGPS
             Close();
         }
 
-        private void nud_Click(object sender, EventArgs e)
+        private void nudLongitude_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudLongitude.KeypadToNUD();
+        }
+        private void nudLatitude_Click(object sender, EventArgs e)
+        {
+            nudLatitude.KeypadToNUD();
         }
     }
 }

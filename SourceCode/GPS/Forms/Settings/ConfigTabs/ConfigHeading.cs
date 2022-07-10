@@ -33,7 +33,7 @@ namespace AgOpenGPS
 
             lblFusion.Text = hsbarFusion.Value.ToString();
             lblFusionIMU.Text = (100 - hsbarFusion.Value).ToString();
-            label8.Text = "distance (" + mf.unitsInCm + " )";
+            label8.Text = "distance (" + glm.unitsInCm + " )";
 
             cboxIsRTK.Checked = Properties.Settings.Default.setGPS_isRTK;
             cboxIsRTK_KillAutoSteer.Checked = Properties.Settings.Default.setGPS_isRTK_KillAutoSteer;
@@ -41,10 +41,10 @@ namespace AgOpenGPS
             cboxIsDualAsIMU.Checked = Properties.Settings.Default.setIMU_isDualAsIMU;
 
             stepDistance = Properties.Settings.Default.setF_minFixStep;
-            nudMinFixStepDistance.Text = (stepDistance * mf.mToUser).ToString("0");
+            nudMinFixStepDistance.Text = (stepDistance * glm.mToUser).ToString("0");
 
             startSpeed = Properties.Vehicle.Default.setVehicle_startSpeed;
-            nudStartSpeed.Text = (startSpeed * mf.KMHToUser).ToString("0.0");
+            nudStartSpeed.Text = (startSpeed * glm.KMHToUser).ToString("0.0");
 
             frameTime = Properties.Settings.Default.SetGPS_udpWatchMsec;
             nudMinimumFrameTime.Text = frameTime.ToString();
@@ -82,22 +82,22 @@ namespace AgOpenGPS
 
         private void nudMinFixStepDistance_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMinFixStepDistance, ref stepDistance, 0.2, 10, 2, mf.mToUser, mf.userToM);
+            nudMinFixStepDistance.KeypadToButton(ref stepDistance, 0.2, 10, 2, glm.mToUser, glm.userToM);
         }
 
         private void nudStartSpeed_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudStartSpeed, ref startSpeed, 0.5, 5, 1, mf.KMHToUser, mf.userToKMH);
+            nudStartSpeed.KeypadToButton(ref startSpeed, 0.5, 5, 1, glm.KMHToUser, glm.userToKMH);
         }
 
         private void nudForwardComp_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudForwardComp, ref forwardComp, 0, 5, 2);
+            nudForwardComp.KeypadToButton(ref forwardComp, 0, 5, 2);
         }
 
         private void nudReverseComp_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudReverseComp, ref reverseComp, 0, 3, 2);
+            nudReverseComp.KeypadToButton(ref reverseComp, 0, 3, 2);
         }
 
         private void hsbarFusion_ValueChanged(object sender, EventArgs e)
@@ -108,17 +108,17 @@ namespace AgOpenGPS
 
         private void nudMinimumFrameTime_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMinimumFrameTime, ref frameTime, 40, 90);
+            nudMinimumFrameTime.KeypadToButton(ref frameTime, 40, 90);
         }
 
         private void nudAgeAlarm_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudAgeAlarm, ref ageAlarm, 2, 300);
+            nudAgeAlarm.KeypadToButton(ref ageAlarm, 2, 300);
         }
 
         private void nudDualHeadingOffset_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudDualHeadingOffset, ref dualHeadingOffset, -90, 90, 3);
+            nudDualHeadingOffset.KeypadToButton(ref dualHeadingOffset, -90, 90, 3);
         }
 
         private void nudReverseComp_HelpRequested(object sender, HelpEventArgs hlpevent)

@@ -24,9 +24,9 @@ namespace AgOpenGPS
             turnOffDelay = mf.tool.turnOffDelay;
             nudTurnOffDelay.Text = turnOffDelay.ToString("0.0");
             offset = mf.tool.toolOffset;
-            nudOffset.Text = (offset * mf.mToUser).ToString("0");
+            nudOffset.Text = (offset * glm.mToUser).ToString("0");
             overlap = mf.tool.toolOverlap;
-            nudOverlap.Text = (overlap * mf.mToUser).ToString("0");
+            nudOverlap.Text = (overlap * glm.mToUser).ToString("0");
         }
 
         public override void Close()
@@ -42,12 +42,12 @@ namespace AgOpenGPS
 
         private void nudLookAhead_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudLookAhead, ref lookAhead, 0.0, 10, 1);
+            nudLookAhead.KeypadToButton(ref lookAhead, 0.0, 10, 1);
         }
 
         private void nudLookAheadOff_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudLookAheadOff, ref lookAheadOff, 0, 10, 1))
+            if (nudLookAheadOff.KeypadToButton(ref lookAheadOff, 0, 10, 1))
             {
                 if (lookAheadOff > 0)
                 {
@@ -59,7 +59,7 @@ namespace AgOpenGPS
 
         private void nudTurnOffDelay_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref nudTurnOffDelay, ref turnOffDelay, 0, 10, 1))
+            if (nudTurnOffDelay.KeypadToButton(ref turnOffDelay, 0, 10, 1))
             {
                 if (turnOffDelay > 0)
                 {
@@ -71,12 +71,12 @@ namespace AgOpenGPS
 
         private void nudOffset_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudOffset, ref offset, -25, 25, 0, mf.mToUser, mf.userToM);
+            nudOffset.KeypadToButton(ref offset, -25, 25, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudOverlap_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudOverlap, ref overlap, -30, 30, 0, mf.mToUser, mf.userToM);
+            nudOverlap.KeypadToButton(ref overlap, -30, 30, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudLookAhead_HelpRequested(object sender, HelpEventArgs hlpevent)

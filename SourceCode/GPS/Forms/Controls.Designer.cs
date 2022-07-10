@@ -58,7 +58,7 @@ namespace AgOpenGPS
                     return;
             }
 
-            Form form = new FormABLine(this, false);
+            Form form = new FormABLine(this, gyd.CurrentGMode);
             form.Show(this);
         }
 
@@ -86,7 +86,35 @@ namespace AgOpenGPS
                     return;
             }
 
-            var form = new FormABLine(this, true);
+            var form = new FormABLine(this, gyd.CurrentGMode);
+            form.Show(this);
+        }
+
+        private void btnRecPath_Click(object sender, EventArgs e)
+        {
+            if (isTT)
+            {
+                //new FormHelp(gStr.recpath, gStr.gsHelp).ShowDialog(this);
+                ResetHelpBtn();
+                return;
+            }
+
+            Form f = Application.OpenForms["FormABLine"];
+            if (f != null)
+            {
+                f.Close();
+            }
+
+            if (gyd.CurrentGMode != Mode.RecPath)
+            {
+                SetGuidanceMode(Mode.RecPath);
+
+                gyd.currentGuidanceLine = gyd.currentRecPath;
+                if (gyd.currentGuidanceLine != null)
+                    return;
+            }
+
+            var form = new FormABLine(this, gyd.CurrentGMode);
             form.Show(this);
         }
 
@@ -97,19 +125,39 @@ namespace AgOpenGPS
             gyd.currentGuidanceLine = null;
             gyd.curList = new Polyline();
 
-            panelDrag.Visible = newmode == Mode.RecPath;
-            if (gyd.CurrentGMode == Mode.RecPath)
-                gyd.StopDrivingRecordedPath();
+            //gyd.resumeState = 0;
+            gyd.currentPositonIndex = 0;
 
             setBtnAutoSteer(false);
 
-            btnContour.Image = newmode == Mode.Contour ? Properties.Resources.ContourOn : Properties.Resources.ContourOff;
-            btnCycleLines.Image = newmode == Mode.Contour ? Properties.Resources.ColorLocked : Properties.Resources.ABLineCycle;
-            btnCycleLines.Enabled = (newmode == Mode.Curve || newmode == Mode.AB || newmode == Mode.Contour);
+            if (newmode == Mode.None)
+            {
+                btnCycleLines.Image = null;
+            }
+            else if (newmode == Mode.RecPath)
+            {
+                if (gyd.resumeState == 0)
+                    btnCycleLines.Image = Properties.Resources.pathResumeStart;
+                else if (gyd.resumeState == 1)
+                    btnCycleLines.Image = Properties.Resources.pathResumeLast;
+                else
+                    btnCycleLines.Image = Properties.Resources.pathResumeClose;
+            }
+            else if (newmode == Mode.Contour)
+            {
+                btnCycleLines.Image = null;//= Properties.Resources.ColorLocked;
+            }
+            else
+                btnCycleLines.Image = Properties.Resources.ABLineCycle;
 
+            btnCycleLines.Enabled = (newmode == Mode.Curve || newmode == Mode.AB);// || newmode == Mode.Contour);
+
+            btnContour.Image = newmode == Mode.Contour ? Properties.Resources.ContourOn : Properties.Resources.ContourOff;
             btnCurve.Image = newmode == Mode.Curve ? Properties.Resources.CurveOn : Properties.Resources.CurveOff;
             btnABLine.Image = newmode == Mode.AB ? Properties.Resources.ABLineOn : Properties.Resources.ABLineOff;
+            btnRecPath.Image = newmode == Mode.RecPath ? Properties.Resources.RecPathOn : Properties.Resources.RecPathOff;
 
+            btnCycleLines.Enabled = newmode != Mode.None;
             btnAutoSteer.Enabled = newmode != Mode.None;
             
             if (newmode == Mode.Curve || newmode == Mode.AB)
@@ -147,7 +195,29 @@ namespace AgOpenGPS
             }
             else if (gyd.CurrentGMode == Mode.Contour)
             {
-                if (gyd.curList.points.Count > 5) gyd.isLocked = !gyd.isLocked;
+                //if (gyd.curList.points.Count > 5) gyd.isLocked = !gyd.isLocked;
+            }
+            else if (gyd.CurrentGMode == Mode.RecPath)
+            {
+                if (gyd.resumeState == 0)
+                {
+                    gyd.resumeState++;
+                    btnCycleLines.Image = Properties.Resources.pathResumeLast;
+                    this.TimedMessageBox(1500, "Resume Style", "Last Stopped Position");
+                }
+
+                else if (gyd.resumeState == 1)
+                {
+                    gyd.resumeState++;
+                    btnCycleLines.Image = Properties.Resources.pathResumeClose;
+                    this.TimedMessageBox(1500, "Resume Style", "Closest Point");
+                }
+                else
+                {
+                    gyd.resumeState = 0;
+                    btnCycleLines.Image = Properties.Resources.pathResumeStart;
+                    this.TimedMessageBox(1500, "Resume Style", "Start At Beginning");
+                }
             }
             else if (gyd.currentGuidanceLine != null)
             {
@@ -177,7 +247,8 @@ namespace AgOpenGPS
                         else
                             gyd.currentCurveLine = gyd.currentGuidanceLine;
 
-                        lblCurveLineName.Text = (gyd.currentGuidanceLine.mode.HasFlag(Mode.AB) ? "AB-" : "Cur-") + gyd.currentGuidanceLine.Name.Trim();
+                        string text = gyd.currentGuidanceLine.mode.ToString();
+                        lblCurveLineName.Text = text.Substring(0, text.Length > 3 ? 3 : text.Length) + "-" + gyd.currentGuidanceLine.Name.Trim();
                         break;
                     }
                 }
@@ -255,14 +326,23 @@ namespace AgOpenGPS
             if (status != isAutoSteerBtnOn)
             {
                 isAutoSteerBtnOn = status;
-                btnAutoSteer.Image = status ? Properties.Resources.AutoSteerOn : Properties.Resources.AutoSteerOff;
 
                 if (!isAutoSteerBtnOn && gyd.isYouTurnBtnOn)
                     btnAutoYouTurn.PerformClick();
+                else
+                    gyd.ResetYouTurn();
+
+                if (isAutoSteerBtnOn && gyd.CurrentGMode == Mode.RecPath)
+                {
+                    isAutoSteerBtnOn = gyd.StartDrivingRecordedPath();
+                }
+
+                btnAutoSteer.Image = isAutoSteerBtnOn ? Properties.Resources.AutoSteerOn : Properties.Resources.AutoSteerOff;
+
 
                 if (sounds.isSteerSoundOn)
                 {
-                    if (status)
+                    if (isAutoSteerBtnOn)
                         sounds.sndAutoSteerOn.Play();
                     else
                         sounds.sndAutoSteerOff.Play();
@@ -312,22 +392,13 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-            fd.distanceUser = 0;
-            fd.workedAreaTotalUser = 0;
+            bnd.distanceUser = 0;
+            bnd.workedAreaTotalUser = 0;
         }        
         private void navPanelToolStrip_Click(object sender, EventArgs e)
         {
-            //buttonPanelCounter = 0;
-
-            if (panelNavigation.Visible)
-            {
-                panelNavigation.Visible = false;
-            }
-            else
-            {
-                panelNavigation.Visible = true;
-                navPanelCounter = 2;
-            }
+            panelNavigation.Visible = !panelNavigation.Visible;
+            navPanelCounter = 2;
         }
         private void toolStripMenuItemFlagRed_Click(object sender, EventArgs e)
         {
@@ -419,7 +490,7 @@ namespace AgOpenGPS
                 }
                 catch
                 {
-                    TimedMessageBox(2000, "No File Found", "Can't Find AgIO");
+                    this.TimedMessageBox(2000, "No File Found", "Can't Find AgIO");
                 }
             }
             else
@@ -486,6 +557,14 @@ namespace AgOpenGPS
         #endregion
 
         #region Top Panel
+        private void btnMenu_Click(object sender, EventArgs e)
+        {
+            Button btnSender = (Button)sender;
+            Point ptLowerLeft = new Point(0, btnSender.Height);
+            ptLowerLeft = btnSender.PointToScreen(ptLowerLeft);
+            fileToolStripMenuItem.Show(ptLowerLeft); 
+        }
+
         private void lblSpeed_Click(object sender, EventArgs e)
         {
             if (isTT)
@@ -520,12 +599,10 @@ namespace AgOpenGPS
         {
             if (this.WindowState == FormWindowState.Maximized)
             {
-                Padding = new System.Windows.Forms.Padding(5,5,5,5);
                 this.WindowState = FormWindowState.Normal;
             }
             else
             {
-                Padding = new System.Windows.Forms.Padding(8, 8, 8, 8);
                 this.WindowState = FormWindowState.Maximized;
             }
         }
@@ -539,8 +616,7 @@ namespace AgOpenGPS
         {
             if (isJobStarted)
             {
-                var form = new FormTimedMessage(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
-                form.Show(this);
+                this.TimedMessageBox(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
                 return;
             }
 
@@ -641,28 +717,17 @@ namespace AgOpenGPS
 
         private void simulatorOnToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!panelSim.Visible && isJobStarted)
+            if (!glm.isSimEnabled && isJobStarted)
             {
-                TimedMessageBox(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
-                simulatorOnToolStripMenuItem.Checked = panelSim.Visible;
+                this.TimedMessageBox(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
             }
-            else if (!panelSim.Visible && sentenceCounter < 299)
+            else if (!glm.isSimEnabled && sentenceCounter < 299)
             {
-                TimedMessageBox(2000, "Conected", "GPS");
-                simulatorOnToolStripMenuItem.Checked = panelSim.Visible;
+                this.TimedMessageBox(2000, "Conected", "GPS");
             }
             else
             {
-                simulatorOnToolStripMenuItem.Checked = panelSim.Visible = timerSim.Enabled = !panelSim.Visible;
-                isFirstFixPositionSet = false;
-                isGPSPositionInitialized = false;
-                isFirstHeadingSet = false;
-                startCounter = 0;
-            }
-            if (Properties.Settings.Default.setMenu_isSimulatorOn != simulatorOnToolStripMenuItem.Checked)
-            {
-                Properties.Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
-                Properties.Settings.Default.Save();
+                SetSimStatus(!glm.isSimEnabled);
             }
         }
 
@@ -856,8 +921,7 @@ namespace AgOpenGPS
             }
             else
             {
-                var form = new FormTimedMessage(1500, gStr.gsNoABLineActive, gStr.gsPleaseEnterABLine);
-                return;
+                this.TimedMessageBox(1500, gStr.gsNoABLineActive, gStr.gsPleaseEnterABLine);
             }
         }
 
@@ -887,14 +951,6 @@ namespace AgOpenGPS
                 fc.Close();
             }
 
-        }
-
-        private void btnOpenConfig_Click(object sender, EventArgs e)
-        {
-            using (var form = new FormConfig(this))
-            {
-                form.ShowDialog(this);
-            }
         }
 
         private void btnTramDisplayMode_Click(object sender, EventArgs e)
@@ -952,8 +1008,7 @@ namespace AgOpenGPS
             }
             else
             {
-                var form = new FormTimedMessage(2000, (gStr.gsNoGuidanceLines), (gStr.gsTurnOnContourOrMakeABLine));
-                form.Show(this);
+                this.TimedMessageBox(2000, gStr.gsNoGuidanceLines, gStr.gsTurnOnContourOrMakeABLine);
             }
         }
 
@@ -1117,7 +1172,7 @@ namespace AgOpenGPS
                     {
                         //clear out the contour Lists
                         gyd.ResetContour();
-                        fd.workedAreaTotal = 0;
+                        bnd.workedAreaTotal = 0;
 
                         for (int j = 0; j < patchList.Count; j++)
                         {
@@ -1132,7 +1187,7 @@ namespace AgOpenGPS
                 }
                 else
                 {
-                   TimedMessageBox(1500, "Sections are on", "Turn Auto or Manual Off First");
+                   this.TimedMessageBox(1500, "Sections are on", "Turn Auto or Manual Off First");
                 }
             }
         }
@@ -1316,7 +1371,7 @@ namespace AgOpenGPS
                 {
                     if (!isFirstFixPositionSet || sentenceCounter > 299 || mc.latitude == 0 || mc.longitude == 0)
                     {
-                        TimedMessageBox(2500, "No GPS", "You are lost with no GPS, Fix that First");
+                        this.TimedMessageBox(2500, "No GPS", "You are lost with no GPS, Fix that First");
                         return;
                     }
 
@@ -1354,28 +1409,30 @@ namespace AgOpenGPS
             CloseCurrentJob(false);
         }
 
-        private bool CloseCurrentJob(bool closing)
+        private bool CloseCurrentJob(bool closing, int choice = 0)
         {
             //close the current job and ask how to or if to save
             if (isJobStarted)
             {
-                if (!panelSim.Visible && autoBtnState != btnStates.Off)
+                if (!glm.isSimEnabled && autoBtnState != btnStates.Off)
                 {
-                    TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
+                    this.TimedMessageBox(2000, "Safe Shutdown", "Turn off Auto Section Control");
                     return true;
                 }
 
                 CloseTopMosts();
 
-                int choice = 0;
-                using (FormSaveOrNot form = new FormSaveOrNot(closing))
+                if (choice == 0)
                 {
-                    DialogResult result = form.ShowDialog(this);
+                    using (FormSaveOrNot form = new FormSaveOrNot(closing))
+                    {
+                        DialogResult result = form.ShowDialog(this);
 
-                    if (result == DialogResult.Ignore) choice = 0;   //Ignore
-                    else if (result == DialogResult.OK) choice = 1;      //Save and Exit
-                    else if (result == DialogResult.Yes) choice = 2;      //Save As
-                    else choice = 0;  // oops something is really busted
+                        if (result == DialogResult.Ignore) choice = 0;   //Ignore
+                        else if (result == DialogResult.OK) choice = 1;      //Save and Exit
+                        else if (result == DialogResult.Yes) choice = 2;      //Save As
+                        else choice = 0;  // oops something is really busted
+                    }
                 }
 
                 if (choice > 0)
@@ -1429,8 +1486,7 @@ namespace AgOpenGPS
             }
             else
             {
-                var form = new FormTimedMessage(1500, gStr.gsNoABLineActive, gStr.gsPleaseEnterABLine);
-                form.Show(this);
+                this.TimedMessageBox(1500, gStr.gsNoABLineActive, gStr.gsPleaseEnterABLine);
                 return;
             }
         }
@@ -1438,14 +1494,10 @@ namespace AgOpenGPS
         {
             if (bnd.bndList.Count == 0)
             {
-                TimedMessageBox(2000, gStr.gsNoBoundary, gStr.gsCreateABoundaryFirst);
+                this.TimedMessageBox(2000, gStr.gsNoBoundary, gStr.gsCreateABoundaryFirst);
                 return;
             }
 
-            GetHeadland();
-        }
-        public void GetHeadland()
-        {
             using (var form = new FormHeadland(this))
             {
                 form.ShowDialog(this);
@@ -1477,109 +1529,7 @@ namespace AgOpenGPS
                 var form = new FormBoundary(this);
                 form.Show(this);
             }
-            else { TimedMessageBox(3000, gStr.gsFieldNotOpen, gStr.gsStartNewField); }
-        }
-
-        //Recorded Path
-        private void btnPathGoStop_Click(object sender, EventArgs e)
-        {
-            //already running?
-            if (gyd.isDrivingRecordedPath)
-            {
-                gyd.StopDrivingRecordedPath();
-                btnPathGoStop.Image = Properties.Resources.boundaryPlay;
-                btnPathRecordStop.Enabled = true;
-                btnPickPath.Enabled = true;
-                btnResumePath.Enabled = true;
-                return;
-            }
-
-            //start the recorded path driving process
-            if (!gyd.StartDrivingRecordedPath())
-            {
-                //Cancel the recPath - something went seriously wrong
-                gyd.StopDrivingRecordedPath();
-                TimedMessageBox(1500, gStr.gsProblemMakingPath, gStr.gsCouldntGenerateValidPath);
-                btnPathGoStop.Image = Properties.Resources.boundaryPlay;
-                btnPathRecordStop.Enabled = true;
-                btnPickPath.Enabled = true;
-                btnResumePath.Enabled = true;
-                return;
-            }
-            else
-            {
-                btnPathGoStop.Image = Properties.Resources.boundaryStop;
-                btnPathRecordStop.Enabled = false;
-                btnPickPath.Enabled = false;
-                btnResumePath.Enabled = false;
-            }
-        }
-
-        private void btnPathRecordStop_Click(object sender, EventArgs e)
-        {
-            if (gyd.isRecordOn)
-            {
-                gyd.isRecordOn = false;
-                btnPathRecordStop.Image = Properties.Resources.BoundaryRecord;
-                btnPathGoStop.Enabled = true;
-                btnPickPath.Enabled = true;
-                btnResumePath.Enabled = true;
-
-                using (var form = new FormRecordName(this))
-                {
-                    form.ShowDialog(this);
-                    if(form.DialogResult == DialogResult.OK) 
-                    {
-                        String filename = form.filename + ".rec";
-                        FileSaveRecPath();
-                        FileSaveRecPath(filename);
-                    }
-                }                
-            }
-            else if (isJobStarted)
-            {
-                gyd.recList.Clear();
-                gyd.isRecordOn = true;
-                btnPathRecordStop.Image = Properties.Resources.boundaryStop;
-                btnPathGoStop.Enabled = false;
-                btnPickPath.Enabled = false;
-                btnResumePath.Enabled = false;
-            }
-        }
-
-        private void btnResumePath_Click(object sender, EventArgs e)
-        {
-            if (gyd.resumeState == 0)
-            {
-                gyd.resumeState++;
-                btnResumePath.Image = Properties.Resources.pathResumeLast;
-                TimedMessageBox(1500, "Resume Style", "Last Stopped Position");
-            }
-
-            else if (gyd.resumeState == 1)
-            {
-                gyd.resumeState++;
-                btnResumePath.Image = Properties.Resources.pathResumeClose;
-                TimedMessageBox(1500, "Resume Style", "Closest Point");
-            }
-            else
-            {
-                gyd.resumeState = 0;
-                btnResumePath.Image = Properties.Resources.pathResumeStart;
-                TimedMessageBox(1500, "Resume Style", "Start At Beginning");
-            }
-        }
-
-        private void btnPickPath_Click(object sender, EventArgs e)
-        {
-            gyd.resumeState = 0;
-            btnResumePath.Image = Properties.Resources.pathResumeStart;
-            gyd.currentPositonIndex = 0;
-
-            using (FormFilePicker form = new FormFilePicker(this, 2, ""))
-            {
-                form.ShowDialog(this);
-            }
+            else { this.TimedMessageBox(3000, gStr.gsFieldNotOpen, gStr.gsStartNewField); }
         }
 
         private void recordedPathStripMenu_Click(object sender, EventArgs e)
@@ -1592,7 +1542,7 @@ namespace AgOpenGPS
         #region Sim controls
         private void timerSim_Tick(object sender, EventArgs e)
         {
-            if ((gyd.isDrivingRecordedPath || isAutoSteerBtnOn) && guidanceLineDistanceOff != 32000)
+            if (isAutoSteerBtnOn && !double.IsNaN(guidanceLineDistanceOff))
                 sim.DoSimTick(guidanceLineSteerAngle * 0.01);
             else sim.DoSimTick(sim.steerAngleScrollBar);
         }

@@ -30,16 +30,16 @@ namespace AgOpenGPS
 
         private void ConfigSections_Load(object sender, EventArgs e)
         {
-            if (mf.isMetric)
+            if (glm.isMetric)
             {
-                lblSecTotalWidthFeet.Text = (mf.tool.toolWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+                lblSecTotalWidthFeet.Text = (mf.tool.toolWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;;
                 lblTurnOffBelowUnits.Text = gStr.gsKMH;
             }
             else
             {
                 lblSecTotalWidthInches.Visible = true;
                 lblTurnOffBelowUnits.Text = gStr.gsMPH;
-                double toFeet = mf.tool.toolWidth * mf.mToUserBig;
+                double toFeet = mf.tool.toolWidth * glm.mToUserBig;
                 lblSecTotalWidthFeet.Text = Convert.ToString((int)toFeet) + "'";
                 double temp = Math.Round((toFeet - Math.Truncate(toFeet)) * 12, 0);
                 lblSecTotalWidthInches.Text = Convert.ToString(temp) + '"';
@@ -48,7 +48,7 @@ namespace AgOpenGPS
             cboxSectionResponse.Checked = mf.tool.isFastSections;
 
             cutoffSpeed = mf.tool.slowSpeedCutoff;
-            nudCutoffSpeed.Text = (cutoffSpeed * mf.KMHToUser).ToString("0.0");
+            nudCutoffSpeed.Text = (cutoffSpeed * glm.KMHToUser).ToString("0.0");
 
             numberOfSections = mf.tool.numOfSections;
             btnNumSections.Text = numberOfSections.ToString();
@@ -60,7 +60,7 @@ namespace AgOpenGPS
             btnMaxBoundOverlap.Text = bndOverlap.ToString();
 
             defaultSectionWidth = Properties.Vehicle.Default.Tool_defaultSectionWidth;
-            nudDefaultSectionWidth.Text = (defaultSectionWidth * mf.mToUser).ToString("0");
+            nudDefaultSectionWidth.Text = (defaultSectionWidth * glm.mToUser).ToString("0");
 
             //based on number of sections and values update the page before displaying
             UpdateSpinners();
@@ -151,7 +151,7 @@ namespace AgOpenGPS
 
         private void btnMaxBoundOverlap_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref btnMaxBoundOverlap, ref bndOverlap, 0, 100, 0);
+            btnMaxBoundOverlap.KeypadToButton(ref bndOverlap, 0, 100, 0);
         }
 
         private void btnSection_Click(object sender, EventArgs e)
@@ -163,7 +163,7 @@ namespace AgOpenGPS
                 {
                     double val = sectionWidths[idx];
 
-                    if (mf.KeypadToButton(ref button, ref val, 0.01, 50, 0, mf.mToUser, mf.userToM))
+                    if (button.KeypadToButton(ref val, 0.01, 50, 0, glm.mToUser, glm.userToM))
                     {
                         sectionWidths[idx] = val;
                         SectionFeetInchesTotalWidthLabelUpdate(idx);
@@ -174,17 +174,17 @@ namespace AgOpenGPS
 
         private void nudCutoffSpeed_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudCutoffSpeed, ref cutoffSpeed, 0, 30, 1, mf.KMHToUser, mf.userToKMH);
+            nudCutoffSpeed.KeypadToButton(ref cutoffSpeed, 0, 30, 1, glm.KMHToUser, glm.userToKMH);
         }
 
         private void nudMinCoverage_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMinCoverage, ref maxOverlap, 0, 100);
+            nudMinCoverage.KeypadToButton(ref maxOverlap, 0, 100);
         }
 
         private void btnNumSections_Click(object sender, EventArgs e)
         {
-            if (mf.KeypadToButton(ref btnNumSections, ref numberOfSections, 0, CTool.MAXSECTIONS))
+            if (btnNumSections.KeypadToButton(ref numberOfSections, 0, CTool.MAXSECTIONS))
             {
                 double wide = defaultSectionWidth;
 
@@ -195,7 +195,7 @@ namespace AgOpenGPS
 
                 UpdateSpinners();
 
-                string tt = (wide * mf.mToUser).ToString("0");
+                string tt = (wide * glm.mToUser).ToString("0");
                 for (int j = 0; j < sectionWidths.Count; j++)
                 {
                     sectionWidths[j] = wide;
@@ -209,10 +209,10 @@ namespace AgOpenGPS
 
         private void nudDefaultSectionWidth_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudDefaultSectionWidth, ref defaultSectionWidth, 0.01, 50, 0, mf.mToUser, mf.userToM);
+            nudDefaultSectionWidth.KeypadToButton(ref defaultSectionWidth, 0.01, 50, 0, glm.mToUser, glm.userToM);
         }
 
-        public void UpdateSpinners()
+        private void UpdateSpinners()
         {
             for (int j = sectionWidths.Count - 1; j >= numberOfSections; j--)
             {
@@ -236,7 +236,7 @@ namespace AgOpenGPS
                     Size = new Size(125, 50),
                     Name = j.ToString(),
                     TextAlign = ContentAlignment.MiddleCenter,
-                    Text = (sectionWidths[j] * mf.mToUser).ToString("0"),
+                    Text = (sectionWidths[j] * glm.mToUser).ToString("0"),
                     Font = new Font("Tahoma", 24F, FontStyle.Bold, GraphicsUnit.Point, 0),
                     UseVisualStyleBackColor = false
                 };
@@ -282,24 +282,24 @@ namespace AgOpenGPS
 
             if (Math.Round(totalWidth, 3) > 50)
             {
-                if (mf.isMetric)
+                if (glm.isMetric)
                     mf.TimedMessageBox(3000, "Too Wide", "Max 50 Meters");
                 else
                     mf.TimedMessageBox(3000, "Too Wide", "Max 164 Feet");
 
                 totalWidth -= sectionWidths[idx];
                 sectionWidths[idx] = 50 - (totalWidth - sectionWidths[idx]);
-                sectionButtons[idx].Text = (sectionWidths[idx] * mf.mToUser).ToString("0");
+                sectionButtons[idx].Text = (sectionWidths[idx] * glm.mToUser).ToString("0");
                 totalWidth += sectionWidths[idx];
             }
 
-            if (mf.isMetric)
+            if (glm.isMetric)
             {
-                lblSecTotalWidthFeet.Text = (totalWidth * mf.mToUserBig).ToString("0.00") + mf.unitsFtM;
+                lblSecTotalWidthFeet.Text = (totalWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;;
             }
             else
             {
-                double toFeet = (totalWidth * mf.mToUserBig);
+                double toFeet = (totalWidth * glm.mToUserBig);
                 lblSecTotalWidthFeet.Text = Convert.ToString((int)toFeet) + "'";
                 double temp = Math.Round((toFeet - Math.Truncate(toFeet)) * 12, 0);
                 lblSecTotalWidthInches.Text = Convert.ToString(temp) + '"';

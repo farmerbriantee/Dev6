@@ -4,7 +4,6 @@ using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Globalization;
-using System.Diagnostics;
 
 namespace AgOpenGPS
 {
@@ -35,7 +34,34 @@ namespace AgOpenGPS
             //for testing purposes only will be deleted on release!
             if (data.Length > 7 && data[0] == 0xB5 && data[1] == 0x62 && data[2] == 0x01)//Daniel P
             {
-                if (data[3] == 0x07 && data.Length > 99)//UBX-NAV-PVT
+                if (data[3] == 0x06 && data.Length > 8)
+                {
+                    int CK_A = 0;
+                    int CK_B = 0;
+
+                    for (int j = 2; j < 7; j += 1)// start with Class and end by Checksum
+                    {
+                        CK_A = (CK_A + data[j]) & 0xFF;
+                        CK_B = (CK_B + CK_A) & 0xFF;
+                    }
+
+                    if (data[7] == CK_A && data[8] == CK_B)
+                    {
+                        if ((data[6] & 0x81) == 0x81)
+                        {
+                            mc.fixQualityTool = 4;
+                        }
+                        else if ((data[6] & 0x41) == 0x41)
+                        {
+                            mc.fixQualityTool = 5;
+                        }
+                        else
+                        {
+                            mc.fixQualityTool = 1;
+                        }
+                    }
+                }
+                else if (data[3] == 0x07 && data.Length > 99)//UBX-NAV-PVT
                 {
                     int CK_A = 0;
                     int CK_B = 0;
@@ -80,6 +106,9 @@ namespace AgOpenGPS
 
                         if (mc.longitude != 0)
                         {
+                            vehicleGPSWatchdog = 0;
+                            if (toolGPSWatchdog < 20) toolGPSWatchdog++;
+
                             mc.speed = (data[66] | (data[67] << 8) | (data[68] << 16) | (data[69] << 24)) * 0.0036;// mm/s to km/h
                             worldManager.ConvertWGS84ToLocal(mc.latitude, mc.longitude, out mc.fix.northing, out mc.fix.easting);
 
@@ -186,8 +215,8 @@ namespace AgOpenGPS
                                     vehicleGPSWatchdog = 0;
                                     if (toolGPSWatchdog < 20) toolGPSWatchdog++;
 
-                                    if (timerSim.Enabled)
-                                        DisableSim();
+                                    if (glm.isSimEnabled)
+                                        SetSimStatus(false);
 
                                     mc.longitude = Lon;
                                     mc.latitude = Lat;
@@ -509,7 +538,7 @@ namespace AgOpenGPS
                 // Initialise the socket
                 loopBackSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 loopBackSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
-                loopBackSocket.Bind(new IPEndPoint(IPAddress.Loopback, 15555));
+                loopBackSocket.Bind(new IPEndPoint(IPAddress.Any, 15555));
                 loopBackSocket.BeginReceiveFrom(loopBuffer, 0, loopBuffer.Length, SocketFlags.None, ref epSender, new AsyncCallback(ReceiveAppData), null);
             }
             catch (Exception ex)
@@ -518,18 +547,20 @@ namespace AgOpenGPS
             }
         }
 
-        private void DisableSim()
+        private void SetSimStatus(bool enabled)
         {
             isFirstFixPositionSet = false;
             isGPSPositionInitialized = false;
             isFirstHeadingSet = false;
             startCounter = 0;
-            panelSim.Visible = false;
-            timerSim.Enabled = false;
-            simulatorOnToolStripMenuItem.Checked = false;
-            Properties.Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
-            Properties.Settings.Default.Save();
-            return;
+            panelSim.Visible = timerSim.Enabled = enabled;
+            simulatorOnToolStripMenuItem.Checked = glm.isSimEnabled = enabled;
+
+            if (Properties.Settings.Default.setMenu_isSimulatorOn != simulatorOnToolStripMenuItem.Checked)
+            {
+                Properties.Settings.Default.setMenu_isSimulatorOn = simulatorOnToolStripMenuItem.Checked;
+                Properties.Settings.Default.Save();
+            }
         }
 
         private void ReceiveAppData(IAsyncResult asyncResult)
@@ -561,7 +592,7 @@ namespace AgOpenGPS
             }
             catch (Exception ex)
             { 
-                if (!panelSim.Visible)
+                if (!glm.isSimEnabled)
                     MessageBox.Show("SendData Error: " + ex.Message, "UDP Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -592,8 +623,6 @@ namespace AgOpenGPS
         //for moving and sizing borderless window
         protected override void WndProc(ref Message m)
         {
-            const int RESIZE_HANDLE_SIZE = 10;
-
             switch (m.Msg)
             {
                 case 0x0083:
@@ -608,29 +637,29 @@ namespace AgOpenGPS
                     {
                         Point screenPoint = new Point(m.LParam.ToInt32());
                         Point clientPoint = this.PointToClient(screenPoint);
-                        if (clientPoint.Y <= RESIZE_HANDLE_SIZE)
+                        if (clientPoint.Y <= NormalPadding.Top)
                         {
-                            if (clientPoint.X <= RESIZE_HANDLE_SIZE)
+                            if (clientPoint.X <= NormalPadding.Left)
                                 m.Result = (IntPtr)13/*HTTOPLEFT*/ ;
-                            else if (clientPoint.X < (Size.Width - RESIZE_HANDLE_SIZE))
+                            else if (clientPoint.X < (Size.Width - NormalPadding.Right))
                                 m.Result = (IntPtr)12/*HTTOP*/ ;
                             else
                                 m.Result = (IntPtr)14/*HTTOPRIGHT*/ ;
                         }
-                        else if (clientPoint.Y <= (Size.Height - RESIZE_HANDLE_SIZE))
+                        else if (clientPoint.Y <= (Size.Height - NormalPadding.Bottom))
                         {
-                            if (clientPoint.X <= RESIZE_HANDLE_SIZE)
+                            if (clientPoint.X <= NormalPadding.Left)
                                 m.Result = (IntPtr)10/*HTLEFT*/ ;
-                            else if (clientPoint.X < (Size.Width - RESIZE_HANDLE_SIZE))
+                            else if (clientPoint.X < (Size.Width - NormalPadding.Right))
                                 m.Result = (IntPtr)2/*HTCAPTION*/ ;
                             else
                                 m.Result = (IntPtr)11/*HTRIGHT*/ ;
                         }
                         else
                         {
-                            if (clientPoint.X <= RESIZE_HANDLE_SIZE)
+                            if (clientPoint.X <= NormalPadding.Left)
                                 m.Result = (IntPtr)16/*HTBOTTOMLEFT*/ ;
-                            else if (clientPoint.X < (Size.Width - RESIZE_HANDLE_SIZE))
+                            else if (clientPoint.X < (Size.Width - NormalPadding.Right))
                                 m.Result = (IntPtr)15/*HTBOTTOM*/ ;
                             else
                                 m.Result = (IntPtr)17/*HTBOTTOMRIGHT*/ ;
@@ -639,6 +668,23 @@ namespace AgOpenGPS
                     return;
             }
             base.WndProc(ref m);
+        }
+
+        private static Padding MaximizedPadding = new System.Windows.Forms.Padding(8, 8, 8, 8);
+        private static Padding NormalPadding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+
+        protected override void OnLayout(LayoutEventArgs levent)
+        {
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+               if (this.Padding != MaximizedPadding)
+                this.Padding = MaximizedPadding;
+            }
+            else if (this.Padding != NormalPadding)
+            {
+                this.Padding = NormalPadding;
+            }
+            base.OnLayout(levent);
         }
 
         #region keystrokes

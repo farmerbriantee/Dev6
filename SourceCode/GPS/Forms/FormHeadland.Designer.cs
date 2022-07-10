@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.oglSelf = new OpenTK.GLControl();
             this.nudDistance = new System.Windows.Forms.NumericUpDown();
             this.btnDeletePoints = new System.Windows.Forms.Button();

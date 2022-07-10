@@ -9,7 +9,6 @@ namespace AgOpenGPS
 
         private double snapAdj = 0;
         CGuidanceLine currentLine;
-        private bool isClosing;
         private int smoothCount = 20;
         double heading = 0;
 
@@ -31,20 +30,20 @@ namespace AgOpenGPS
 
         private void FormEditAB_Load(object sender, EventArgs e)
         {
-            if (mf.isMetric)
+            if (glm.isMetric)
             {
                 nudMinTurnRadius.DecimalPlaces = 0;
-                nudMinTurnRadius.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * mf.mToUser);
+                nudMinTurnRadius.Value = (int)((double)Properties.Settings.Default.setAS_snapDistance * glm.mToUser);
             }
             else
             {
                 nudMinTurnRadius.DecimalPlaces = 1;
-                nudMinTurnRadius.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * mf.mToUser), 1);
+                nudMinTurnRadius.Value = (decimal)Math.Round(((double)Properties.Settings.Default.setAS_snapDistance * glm.mToUser), 1);
             }
 
-            label1.Text = mf.unitsInCm;
-            lblHalfSnapFtM.Text = mf.unitsFtM;
-            lblHalfWidth.Text = (mf.tool.toolWidth * 0.5 * mf.mToUserBig).ToString("0.00");
+            label1.Text = glm.unitsInCm;
+            lblHalfSnapFtM.Text = glm.unitsFtM;;
+            lblHalfWidth.Text = (mf.tool.toolWidth * 0.5 * glm.mToUserBig).ToString("0.00");
 
             if (currentLine != null && currentLine.points.Count > 1)
             {
@@ -56,7 +55,7 @@ namespace AgOpenGPS
                 tboxHeading.Text = glm.toDegrees(heading).ToString("0.00000");
             }
 
-            mf.panelRight.Enabled = false;
+            mf.PanelRightEnabled(false);
         }
 
         private void tboxHeading_Click(object sender, EventArgs e)
@@ -81,12 +80,12 @@ namespace AgOpenGPS
 
         private void nudMinTurnRadius_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudMinTurnRadius.KeypadToNUD();
         }
 
         private void nudMinTurnRadius_ValueChanged(object sender, EventArgs e)
         {
-            snapAdj = (double)nudMinTurnRadius.Value * mf.userToM;
+            snapAdj = (double)nudMinTurnRadius.Value * glm.userToM;
         }
 
         private void btnAdjRight_Click(object sender, EventArgs e)
@@ -114,16 +113,12 @@ namespace AgOpenGPS
                     mf.FileSaveCurveLines();
             }
             mf.gyd.moveDistance = 0;
-            mf.gyd.isValid = false;
-
-            isClosing = true;
             Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             mf.gyd.moveDistance = 0;
-            mf.gyd.isValid = false;
 
             int idx = mf.gyd.curveArr.FindIndex(x => x.Name == currentLine?.Name);
             if (idx > -1)
@@ -135,8 +130,7 @@ namespace AgOpenGPS
             }
             else
                 mf.gyd.currentGuidanceLine = null;
-
-            isClosing = true;
+            
             Close();
         }
 
@@ -177,7 +171,6 @@ namespace AgOpenGPS
 
         private void btnNoSave_Click(object sender, EventArgs e)
         {
-            isClosing = true;
             mf.gyd.isValid = false;
             Close();
         }
@@ -213,18 +206,13 @@ namespace AgOpenGPS
 
         private void FormEditAB_FormClosing(object sender, FormClosingEventArgs e)
         {
+            mf.gyd.isValid = false;
             mf.gyd.isSmoothWindowOpen = false;
-
-            if (!isClosing)
-            {
-                e.Cancel = true;
-                return;
-            }
-            mf.panelRight.Enabled = true;
+            mf.PanelRightEnabled(true);
         }
 
         //for calculating for display the averaged new line
-        public void SmoothAB(int smPts)
+        private void SmoothAB(int smPts)
         {
             int idx = mf.gyd.curveArr.FindIndex(x => x.Name == currentLine?.Name);
             if (idx > -1)

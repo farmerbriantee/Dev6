@@ -8,76 +8,97 @@ namespace AgOpenGPS
     {
         public void GetCurrentGuidanceLine(vec2 pivot, vec2 steer, double heading)
         {
-            if (CurrentGMode == Mode.RecPath)
-                UpdatePosition(pivot, steer, heading);
+            if (CurrentGMode == Mode.Contour)
+                FindCurrentContourLine(pivot, heading);
+
+            if (currentGuidanceLine != null)
+            {
+                if (currentGuidanceLine.mode == Mode.RecPath)
+                {
+                    curList = currentGuidanceLine;
+                    isHeadingSameWay = true;
+                }
+                else
+                    BuildCurrentCurveLine(pivot, heading, currentGuidanceLine);
+            }
             else
             {
-                if (CurrentGMode == Mode.Contour)
-                    FindCurrentContourLine(pivot);
-
-                if (currentGuidanceLine != null)
-                    BuildCurrentCurveLine(pivot, heading, currentGuidanceLine);
-                else
-                {
-                    curList = new Polyline();
-                    isLocked = false;
-                    return;
-                }
-                
-                CalculateSteerAngle(pivot, steer, heading, isYouTurnTriggered ? ytList : curList);
+                curList = new Polyline();
+                return;
             }
+
+            CalculateSteerAngle(pivot, steer, heading, isYouTurnTriggered ? ytList : curList);
         }
 
-        public void FindCurrentContourLine(vec2 pivot)
+        public void FindCurrentContourLine(vec2 pivot, double heading)
         {
             if ((mf.secondsSinceStart - lastSecondSearch) < (curList.points.Count < 2 ? 0.3 : 2.0)) return;
 
             lastSecondSearch = mf.secondsSinceStart;
-            int ptCount;
             double minDistA = double.MaxValue;
 
-            if (!isLocked)
+            double sinH = Math.Sin(heading);
+            double cosH = Math.Cos(heading);
+
+            vec2 Start = new vec2(pivot.easting - cosH * (mf.tool.toolWidth * 2 - mf.tool.toolOffset) + sinH,
+                                pivot.northing + sinH * (mf.tool.toolWidth * 2 - mf.tool.toolOffset) + cosH);
+            vec2 End = new vec2(pivot.easting + cosH * (mf.tool.toolWidth * 2 + mf.tool.toolOffset) + sinH,
+                                pivot.northing - sinH * (mf.tool.toolWidth * 2 + mf.tool.toolOffset) + cosH);
+
+            int stripNum = -1;
+
+            for (int s = 0; s < curveArr.Count; s++)
             {
-                int stripNum = -1;
-                for (int s = 0; s < curveArr.Count; s++)
+
+                if ((!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh) || currentGuidanceLine == null || curveArr[s] == currentGuidanceLine)
                 {
                     if (curveArr[s].mode.HasFlag(Mode.Contour))
                     {
-                        ptCount = curveArr[s].points.Count - (curveArr[s] == creatingContour ? backSpacing : 1);
-                        if (ptCount < 1) continue;
-                        double dist;
-                        for (int p = 0; p < ptCount; p += 6)
+                        int start = 1;
+                        int end = curveArr[s].points.Count;
+
+                        if (mf.isAutoSteerBtnOn && !mf.mc.steerSwitchHigh && curveArr[s] == currentGuidanceLine)
                         {
-                            dist = glm.Distance(pivot, curveArr[s].points[p]);
-                            if (dist < minDistA)
-                            {
-                                minDistA = dist;
-                                stripNum = s;
-                            }
+                            start = rA - 50;
+                            if (start < 1) start = 1;
+                            end = rB + 50;
+                            if (end > curveArr[s].points.Count) end = curveArr[s].points.Count;
                         }
 
-                        //catch the last point
-                        dist = glm.Distance(pivot, curveArr[s].points[ptCount]);
-                        if (dist < minDistA)
+                        for (int p = start; p < end; p += 1)
                         {
-                            minDistA = dist;
-                            stripNum = s;
+                            if (StaticClass.GetLineIntersection(curveArr[s].points[p - 1], curveArr[s].points[p], Start, End, out vec2 _Crossing, out double Time, out _, false))
+                            {
+                                double dist = glm.DistanceSquared(pivot, curveArr[s].points[p]);
+                                if (dist < minDistA)
+                                {
+                                    minDistA = dist;
+                                    stripNum = s;
+                                    rA = p - 1;
+                                    rB = p;
+
+                                    oldHowManyPathsAway = 5;
+                                }
+                            }
                         }
                     }
                 }
+            }
 
-                if (stripNum < 0)
+            if (stripNum < 0)
+            {
+                if (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh)
                 {
                     isValid = false;
                     moveDistance = 0;
                     currentGuidanceLine = null;
                 }
-                else if (currentGuidanceLine != curveArr[stripNum])
-                {
-                    isValid = false;
-                    moveDistance = 0;
-                    currentGuidanceLine = curveArr[stripNum];
-                }
+            }
+            else if (currentGuidanceLine != curveArr[stripNum])
+            {
+                isValid = false;
+                moveDistance = 0;
+                currentGuidanceLine = curveArr[stripNum];
             }
         }
 
@@ -86,29 +107,22 @@ namespace AgOpenGPS
             //move the ABLine over based on the overlap amount set in vehicle
             double widthMinusOverlap = mf.tool.toolWidth - mf.tool.toolOverlap;
             
-            if (!isValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh || refList == creatingContour)))
+            if (!isValid || ((mf.secondsSinceStart - lastSecond) > 0.66 && (!mf.isAutoSteerBtnOn || mf.mc.steerSwitchHigh)))
             {
-                int refCount = refList.points.Count - (refList == creatingContour ? backSpacing : 0);
-                if (refList.points.Count < 2)
-                {
-                    curList = new Polyline();
-                    isLocked = false;
-                    return;
-                }
-
-                if (!refList.mode.HasFlag(Mode.Contour))
+                if (CurrentGMode != Mode.Contour)
                 {
                     //guidance look ahead distance based on time or tool width at least 
                     double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.mc.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
                     pivot = new vec2(pivot.easting + (Math.Sin(heading) * guidanceLookDist),
                                                     pivot.northing + (Math.Cos(heading) * guidanceLookDist));
-                }
+                    int refCount = refList.points.Count;
 
-                pivot.GetCurrentSegment(refList.points, 0, refList.loop, out rA, out rB, refCount);
+                    pivot.GetCurrentSegment(refList, out rA, out rB, 0, refCount);
+                } 
+
                 if (rA < 0 || rB < 0)
                 {
                     curList = new Polyline();
-                    isLocked = false;
                     return;
                 }
 
@@ -131,7 +145,7 @@ namespace AgOpenGPS
                 lastSecond = mf.secondsSinceStart;
             }
 
-            if (refList?.mode.HasFlag(Mode.Contour) == true)
+            if (refList.mode.HasFlag(Mode.Contour))
             {
                 if (howManyPathsAway > 1)
                     howManyPathsAway = 1;
@@ -198,17 +212,33 @@ namespace AgOpenGPS
 
             int ptCount = refList.points.Count - (refList == creatingContour ? backSpacing : 1);
 
-            int start = (refList == creatingContour) ? (rA - (isHeadingSameWay ? 10 : 50)) : 0;
-            if (start < 0) start = 0;
-
-            int end = (refList == creatingContour) ? (rA + (isHeadingSameWay ? 50 : 10)) : ptCount;
-            if (end > ptCount) end = ptCount;
-
-            buildList = refList.OffsetAndDissolvePolyline<Polyline>(distAway, abLength, start, end, true, mf.vehicle.minTurningRadius);
-
-
-            if (refList.mode.HasFlag(Mode.Curve) && !refList.loop)
+            int start = (refList.mode.HasFlag(Mode.Contour)) ? (rA - 50) : 0;
+            if (start < 0)
             {
+                if (refList.loop)
+                {
+                    start += ptCount;
+                    start %= ptCount;
+                }
+                else
+                    start = 0;
+            }
+
+            int end = (refList.mode.HasFlag(Mode.Contour)) ? (rB + 50) : ptCount;
+            if (end > ptCount)
+            {
+                if (refList.loop)
+                    end %= ptCount;
+                else
+                    end = ptCount;
+            }
+
+            buildList = refList.OffsetAndDissolvePolyline<Polyline>(distAway, refList.mode.HasFlag(Mode.Contour) ? 0 : abLength, start, end, !refList.mode.HasFlag(Mode.Contour), mf.vehicle.minTurningRadius);
+
+
+            if (false && refList.mode.HasFlag(Mode.Curve) && !refList.loop)
+            {
+                //should be making circles at turn points not Catmull splines
                 int cnt = buildList.points.Count;
                 if (cnt > 6)
                 {
@@ -288,28 +318,6 @@ namespace AgOpenGPS
 
         public void DrawGuidanceLines()
         {
-            GL.LineWidth(lineWidth);
-
-            if (CurrentGMode == Mode.RecPath && recList.Count > 0)
-            {
-                GL.Color3(0.98f, 0.92f, 0.460f);
-                GL.Begin(PrimitiveType.LineStrip);
-                for (int h = 0; h < recList.Count; h++) GL.Vertex3(recList[h].easting, recList[h].northing, 0);
-                GL.End();
-
-                if (!isRecordOn && currentPositonIndex < recList.Count)
-                {
-                    //Draw lookahead Point
-                    GL.PointSize(16.0f);
-                    GL.Begin(PrimitiveType.Points);
-
-                    GL.Color3(1.0f, 0.5f, 0.95f);
-                    GL.Vertex3(recList[currentPositonIndex].easting, recList[currentPositonIndex].northing, 0);
-                    GL.End();
-                    GL.PointSize(1.0f);
-                }
-            }
-
             if (EditGuidanceLine != null && EditGuidanceLine.points.Count > 1)
             {
                 GL.Color3(0.95f, 0.42f, 0.750f);
@@ -317,7 +325,7 @@ namespace AgOpenGPS
 
                 for (int h = 0; h < EditGuidanceLine.points.Count; h++)
                 {
-                    if (h == 0 && !EditGuidanceLine.loop)
+                    if (h == 0 && !EditGuidanceLine.loop && EditGuidanceLine.mode != Mode.RecPath)
                     {
                         double heading = Math.Atan2(EditGuidanceLine.points[1].easting - EditGuidanceLine.points[0].easting, EditGuidanceLine.points[1].northing - EditGuidanceLine.points[0].northing);
 
@@ -344,7 +352,7 @@ namespace AgOpenGPS
             }
             else
             {
-                if (currentGuidanceLine != null && currentGuidanceLine.points.Count > 1)
+                if (CurrentGMode != Mode.RecPath && currentGuidanceLine != null && currentGuidanceLine.points.Count > 1)
                 {
                     if (isSmoothWindowOpen)
                         GL.Color3(0.930f, 0.92f, 0.260f);
@@ -353,13 +361,20 @@ namespace AgOpenGPS
                     GL.Enable(EnableCap.LineStipple);
                     GL.LineStipple(1, 0x0F00);
                     bool Extend = false;
+                    int start = 0;
+                    int end = currentGuidanceLine.points.Count;
                     if (currentGuidanceLine.mode.HasFlag(Mode.Contour))
                     {
-                        if (isLocked)
+                        if (mf.isAutoSteerBtnOn && !mf.mc.steerSwitchHigh)
                             GL.Color3(0.983f, 0.2f, 0.20f);
                         else
                             GL.Color3(0.3f, 0.982f, 0.0f);
                         GL.Begin(PrimitiveType.Points);
+                        start = rA - (isHeadingSameWay ? 15 : 70);
+                        if (start < 0) start = 0;
+                        end = rB + (isHeadingSameWay ? 70 : 15);
+                        if (end > currentGuidanceLine.points.Count) end = currentGuidanceLine.points.Count;
+
                     }
                     else if (currentGuidanceLine.loop)
                         GL.Begin(PrimitiveType.LineLoop);
@@ -369,7 +384,7 @@ namespace AgOpenGPS
                         GL.Begin(PrimitiveType.LineStrip);
                     }
 
-                    for (int h = 0; h < currentGuidanceLine.points.Count; h++)
+                    for (int h = start; h < end; h++)
                     {
                         if (Extend && h == 0)
                         {
@@ -430,6 +445,20 @@ namespace AgOpenGPS
                             GL.Vertex3(curList.points[h].easting, curList.points[h].northing, 0);
                         GL.End();
                     }
+                    else if (!mf.isAutoSteerBtnOn && currentGuidanceLine?.mode.HasFlag(Mode.RecPath) == true)
+                    {
+                        if (currentPositonIndex > -1 && currentPositonIndex < curList.points.Count)
+                        {
+                            //Draw lookahead Point
+                            GL.PointSize(16.0f);
+                            GL.Begin(PrimitiveType.Points);
+
+                            GL.Color3(1.0f, 0.5f, 0.95f);
+                            GL.Vertex3(curList.points[currentPositonIndex].easting, curList.points[currentPositonIndex].northing, 0);
+                            GL.End();
+                            GL.PointSize(1.0f);
+                        }
+                    }
 
                     if (!mf.isStanleyUsed && mf.worldManager.camSetDistance > -200)
                     {
@@ -443,6 +472,7 @@ namespace AgOpenGPS
 
                     if (OffsetList.points.Count > 1)
                     {
+                        GL.LineWidth(5);
                         GL.Enable(EnableCap.LineStipple);
                         GL.LineStipple(1, 0xFC00);
                         GL.Color3(0.95f, 0.5f, 0.95f);

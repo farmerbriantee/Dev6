@@ -36,11 +36,9 @@ namespace AgOpenGPS
         public bool isVehicleImage;
 
         //Is it in 2D or 3D, metric or imperial, display lightbar, display grid etc
-        public bool isMetric = true, isLightbarOn = true;
-        public bool isUTurnAlwaysOn, isSpeedoOn, isAutoDayNight, isSideGuideLines = true;
-        public bool isSkyOn = true, isTextureOn = true;
+        public bool isSpeedoOn, isAutoDayNight, isSideGuideLines = true;
+        public bool isSkyOn = true, isTextureOn = true, isLightbarOn = true;
         public bool isDay = true, isDayTime = true;
-        public bool isKeyboardOn = true;
 
         public bool isUTurnOn = true, isLateralOn = true;
 
@@ -88,25 +86,25 @@ namespace AgOpenGPS
                 worldManager.checkZoomWorldGrid(pivotAxlePos.northing, pivotAxlePos.easting);
 
                 //hide the NAv panel in 6  secs
-                if (panelNavigation.Visible)
+                if (panelNavigation.Visible && navPanelCounter-- < 1)
                 {
-                    if (navPanelCounter-- < 1) panelNavigation.Visible = false;
-                    lblHz.Text = HzTime.ToString("0.0") + " ~ " + (frameTime.ToString("0.0")) + " " + FixQuality;
+                    panelNavigation.Visible = false;
                 }
 
                 if (bnd.bndList.Count > 0)
                 {
-                    lblFieldStatus.Text = fd.BoundaryArea + "   " +
-                                          fd.WorkedAreaRemain + "    " + fd.TimeTillFinished
-                                          + "  " + fd.WorkedAreaRemainPercentage + "      "
-                                          + fd.WorkedArea;
+                    lblFieldStatus.Text = bnd.BoundaryArea + "   " +
+                                          bnd.WorkedAreaRemain + "    " + bnd.TimeTillFinished
+                                          + "  " + bnd.WorkedAreaRemainPercentage + "      "
+                                          + bnd.WorkedArea;
                 }
                 else
-                    lblFieldStatus.Text = fd.WorkedArea;
+                    lblFieldStatus.Text = bnd.WorkedArea;
 
-                lblTopData.Text = (tool.toolWidth * mToUserBig).ToString("0.00") + unitsFtM + " - " + vehicleFileName;
+                lblTopData.Text = (tool.toolWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM + " - " + vehicleFileName;
                 lblFix.Text = FixQuality;
-                lblAge.Text = mc.age.ToString("0.0");
+                lblAge.Text = "Age: " + mc.age.ToString("0.0");
+                lblHz.Text = HzTime.ToString("0.0") + " ~ " + frameTime.ToString("0.0");
 
                 if (isJobStarted)
                 {
@@ -114,7 +112,8 @@ namespace AgOpenGPS
 
                     if (gyd.currentGuidanceLine != null)
                     {
-                        lblCurveLineName.Text = (gyd.currentGuidanceLine.mode.HasFlag(Mode.AB) ? "AB-" : "Cur-") + gyd.currentGuidanceLine.Name.Trim();
+                        string text = gyd.currentGuidanceLine.mode.ToString();
+                        lblCurveLineName.Text = text.Substring(0, text.Length > 3 ? 3 : text.Length) + "-" + gyd.currentGuidanceLine.Name.Trim();
                     }
                     else lblCurveLineName.Text = string.Empty;
                 }
@@ -155,7 +154,7 @@ namespace AgOpenGPS
                     btnEditAB.Text = "";
                 }
 
-                distanceToolBtn.Text = (fd.distanceUser * mToUserBig).ToString("0") + unitsFtM + "\r\n" + (fd.workedAreaTotalUser * m2ToUser).ToString("0.00");
+                distanceToolBtn.Text = (bnd.distanceUser * glm.mToUserBig).ToString("0") + glm.unitsFtM + "\r\n" + (bnd.workedAreaTotalUser * glm.m2ToUser).ToString("0.00");
 
                 //statusbar flash red undefined headland
                 if (mc.isOutOfBounds && BackColor != Color.Tomato)
@@ -178,7 +177,7 @@ namespace AgOpenGPS
 
                 isFlashOnOff = !isFlashOnOff;
 
-                lblSpeed.Text = (mc.avgSpeed * KMHToUser).ToString("0.0");
+                lblSpeed.Text = (mc.avgSpeed * glm.KMHToUser).ToString("0.0");
             }
 
             //every fifth second update  ///////////////////////////   FIFTH Fifth ////////////////////////////
@@ -210,8 +209,7 @@ namespace AgOpenGPS
             //make sure current field directory exists, null if not
             currentFieldDirectory = Properties.Settings.Default.setF_CurrentDir;
 
-            isMetric = Settings.Default.setMenu_isMetric;
-            SetUserScales();
+            glm.SetUserScales(Settings.Default.setMenu_isMetric);
 
             SetFeaturesOnOff();
 
@@ -238,10 +236,9 @@ namespace AgOpenGPS
             isAutoDayNight = Settings.Default.setDisplay_isAutoDayNight;
             isSideGuideLines = Settings.Default.setMenu_isSideGuideLines;
             isLightbarOn = Settings.Default.setMenu_isLightbarOn;
-            isKeyboardOn = Settings.Default.setDisplay_isKeyboardOn;
+            glm.isKeyboardOn = Settings.Default.setDisplay_isKeyboardOn;
 
             panelNavigation.Location = new System.Drawing.Point(90, 100);
-            panelDrag.Location = new System.Drawing.Point(87, 268);
 
             vehicleOpacity = ((double)(Properties.Settings.Default.setDisplay_vehicleOpacity) * 0.01);
             vehicleOpacityByte = (byte)(255 * ((double)(Properties.Settings.Default.setDisplay_vehicleOpacity) * 0.01));
@@ -252,17 +249,7 @@ namespace AgOpenGPS
             //grab the current vehicle filename - make sure it exists
             vehicleFileName = Vehicle.Default.setVehicle_vehicleName;
 
-            simulatorOnToolStripMenuItem.Checked = Settings.Default.setMenu_isSimulatorOn;
-            if (simulatorOnToolStripMenuItem.Checked)
-            {
-                panelSim.Visible = true;
-                timerSim.Enabled = true;
-            }
-            else
-            {
-                panelSim.Visible = false;
-                timerSim.Enabled = false;
-            }
+            SetSimStatus(Settings.Default.setMenu_isSimulatorOn);
 
             //set the flag mark button to red dot
             btnFlag.Image = Properties.Resources.FlagRed;
@@ -298,7 +285,7 @@ namespace AgOpenGPS
 
             minFixStepDist = Settings.Default.setF_minFixStep;
 
-            fd.workedAreaTotalUser = Settings.Default.setF_UserTotalArea;
+            bnd.workedAreaTotalUser = Settings.Default.setF_UserTotalArea;
 
 
             //load the lightbar resolution
@@ -320,7 +307,6 @@ namespace AgOpenGPS
             topFieldViewToolStripMenuItem.Checked = Properties.Settings.Default.setMenu_isOGLZoomOn == 1;
             boundariesToolStripMenuItem.Visible = Properties.Settings.Default.setDisplayFeature_Boundary;
             toolStripBtnMakeBndContour.Visible = Properties.Settings.Default.setDisplayFeature_BoundaryContour;
-            recordedPathStripMenu.Visible = Properties.Settings.Default.setDisplayFeature_RecPath;
 
             toolStripBtnField.Image = isJobStarted && Properties.Settings.Default.setDisplayFeature_SimpleCloseField ? Properties.Resources.JobClose : Properties.Resources.JobActive;
 
@@ -339,6 +325,7 @@ namespace AgOpenGPS
             btnCycleLines.Visible = Properties.Settings.Default.setDisplayFeature_CycleLines;
             btnABLine.Visible = Properties.Settings.Default.setDisplayFeature_ABLine;
             btnCurve.Visible = Properties.Settings.Default.setDisplayFeature_Curve;
+            btnRecPath.Visible = Properties.Settings.Default.setDisplayFeature_RecPath;
             btnAutoSteer.Visible = Properties.Settings.Default.setDisplayFeature_AutoSteer;
             isUTurnOn = Properties.Settings.Default.setDisplayFeature_UTurn;
             isLateralOn = Properties.Settings.Default.setDisplayFeature_Lateral;
@@ -348,43 +335,6 @@ namespace AgOpenGPS
         {
             if (Properties.Settings.Default.setAS_isAutoSteerAutoOn) btnAutoSteer.Text = "R";
             else btnAutoSteer.Text = "M";
-        }
-
-        public void SetUserScales()
-        {
-
-            if (isMetric)
-            {
-                userToM = 0.01;//cm to m
-                mToUser = 100.0;//m to cm
-
-                mToUserBig = 1.0;//m to m
-                userBigToM = 1.0;//m to m
-                KMHToUser = 1.0;//Km/H to Km/H
-                userToKMH = 1.0;//Km/H to Km/H
-
-                m2ToUser = 0.0001;//m2 to Ha
-
-                unitsFtM = " m";
-                unitsInCm = " cm";
-                unitsHaAc = " Ha";
-            }
-            else
-            {
-                userToM = 0.0254;//inches to meters
-                mToUser = 39.3701;//meters to inches
-
-                mToUserBig = 3.28084;//meters to feet
-                userBigToM = 0.3048;//feet to meters
-                KMHToUser = 0.62137;//Km/H to mph
-                userToKMH = 1.60934;//mph to Km/H
-
-                m2ToUser = 0.000247105;//m2 to Acres
-
-                unitsInCm = " in";
-                unitsFtM = " ft";
-                unitsHaAc = " Ac";
-            }
         }
 
         private void ZoomByMouseWheel(object sender, MouseEventArgs e)
@@ -422,37 +372,10 @@ namespace AgOpenGPS
             Properties.Settings.Default.Save();
         }
 
-        private void FixPanelsAndMenus()
-        {
-            if (this.WindowState != FormWindowState.Minimized)
-            {
-                menuStrip1.Left = this.Padding.Left;
-                menuStrip1.Top = this.Padding.Top;
-                lblAge.Top = this.Padding.Top;
-                label1.Top = this.Padding.Top;
-                lblFix.Top = 40 + this.Padding.Top;
-
-                lblTopData.Top = this.Padding.Top;
-                lblCurveLineName.Top = this.Padding.Top;
-                lblCurrentField.Top = 17 + this.Padding.Top;
-                lblFieldStatus.Top = 34 + this.Padding.Top;
-
-                panelCaptionBar.Top = this.Padding.Top;
-                panelCaptionBar.Left = Width - 360 - this.Padding.Right;
-
-                panelMain.Top = 60 + this.Padding.Top;
-                panelMain.Left = this.Padding.Left;
-                panelMain.Width = Width - this.Padding.Horizontal;
-                panelMain.Height = Height - 60 - this.Padding.Vertical;
-
-                LineUpManualBtns();
-            }
-        }
-
         //line up section On Off Auto buttons based on how many there are
         public void LineUpManualBtns()
         {
-            int top = oglMain.Height - 31;
+            int top = oglMain.Height + 30;
 
             int oglButtonWidth = oglMain.Width * 3 / 4;
             int buttonWidth = oglButtonWidth / tool.numOfSections;
@@ -461,11 +384,10 @@ namespace AgOpenGPS
             Size size = new System.Drawing.Size(buttonWidth, 25);
             int Left = (75 + oglMain.Width / 2) - (tool.numOfSections * size.Width) / 2;
             
-            if (panelSim.Visible == true)
+            if (glm.isSimEnabled)
             {
-                panelSim.Top = oglMain.Height - 53;
-                panelSim.Left = 70 + oglMain.Width / 2 - 300;
-                panelSim.Width = 600;
+                panelSim.Top = oglMain.Height - 40;
+                panelSim.Left = 60 + oglMain.Width / 2 - 300;
             }
 
             //turn section buttons all On
@@ -494,7 +416,7 @@ namespace AgOpenGPS
             Settings.Default.setDisplay_camPitch = worldManager.camPitch;
             Properties.Settings.Default.setDisplay_camZoom = worldManager.zoomValue;
 
-            Settings.Default.setF_UserTotalArea = fd.workedAreaTotalUser;
+            Settings.Default.setF_UserTotalArea = bnd.workedAreaTotalUser;
 
             Settings.Default.Save();
         }
@@ -666,7 +588,7 @@ namespace AgOpenGPS
                     Array.Clear(stepFixPts, 0, stepFixPts.Length);
                     isFirstHeadingSet = false;
                     isReverse = false;
-                    TimedMessageBox(2000, "Reset Direction", "Drive Forward > 1.5 kmh");
+                    this.TimedMessageBox(2000, "Reset Direction", "Drive Forward > 1.5 kmh");
                     return;
                 }
 
@@ -757,7 +679,7 @@ namespace AgOpenGPS
         {
             get
             {
-                if (timerSim.Enabled)
+                if (glm.isSimEnabled)
                     return "Sim: ";
                 else if (mc.fixQuality == 0) return "Invalid: ";
                 else if (mc.fixQuality == 1) return "GPS single: ";
@@ -793,7 +715,7 @@ namespace AgOpenGPS
         public string SetSteerAngle { get { return ((double)(guidanceLineSteerAngle) * 0.01).ToString("0.0"); } }
         public string ActualSteerAngle { get { return ((mc.actualSteerAngleDegrees) ).ToString("0.0") ; } }
 
-        public string FixOffset { get { return ((worldManager.fixOffset.easting * mToUser).ToString("0") + ", " + (worldManager.fixOffset.northing * mToUser).ToString("0")); } }
+        public string FixOffset { get { return ((worldManager.fixOffset.easting * glm.mToUser).ToString("0") + ", " + (worldManager.fixOffset.northing * glm.mToUser).ToString("0")); } }
 
         #endregion properties 
     }//end class

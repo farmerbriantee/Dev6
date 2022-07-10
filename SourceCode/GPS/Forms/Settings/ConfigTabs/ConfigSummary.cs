@@ -27,9 +27,9 @@ namespace AgOpenGPS
             chkDisplayLogNMEA.Checked = mf.isLogNMEA;
             chkDisplayPolygons.Checked = mf.isDrawPolygons;
             chkDisplayLightbar.Checked = mf.isLightbarOn;
-            chkDisplayKeyboard.Checked = mf.isKeyboardOn;
+            chkDisplayKeyboard.Checked = glm.isKeyboardOn;
 
-            if (mf.isMetric) rbtnDisplayMetric.Checked = true;
+            if (glm.isMetric) rbtnDisplayMetric.Checked = true;
             else rbtnDisplayImperial.Checked = true;
         }
 
@@ -44,11 +44,11 @@ namespace AgOpenGPS
             mf.isLogNMEA = chkDisplayLogNMEA.Checked;
             mf.isDrawPolygons = chkDisplayPolygons.Checked;
             Properties.Settings.Default.setMenu_isLightbarOn = mf.isLightbarOn = chkDisplayLightbar.Checked;
-            Properties.Settings.Default.setDisplay_isKeyboardOn = mf.isKeyboardOn = chkDisplayKeyboard.Checked;
+            Properties.Settings.Default.setDisplay_isKeyboardOn = glm.isKeyboardOn = chkDisplayKeyboard.Checked;
             Properties.Settings.Default.setDisplay_isStartFullScreen = chkDisplayStartFullScreen.Checked;
-            Properties.Settings.Default.setMenu_isMetric = mf.isMetric = rbtnDisplayMetric.Checked;
+            Properties.Settings.Default.setMenu_isMetric = glm.isMetric = rbtnDisplayMetric.Checked;
 
-            mf.SetUserScales();
+            glm.SetUserScales(glm.isMetric);
 
             Properties.Settings.Default.Save();
         }
@@ -65,10 +65,7 @@ namespace AgOpenGPS
 
         private void tboxVehicleNameSave_Click(object sender, EventArgs e)
         {
-            if (mf.isKeyboardOn)
-            {
-                mf.KeyboardToText((TextBox)sender, this);
-            }
+            tboxVehicleNameSave.KeyboardToText();
         }
 
         private void btnVehicleLoad_Click(object sender, EventArgs e)
@@ -97,10 +94,10 @@ namespace AgOpenGPS
                         chkDisplayLogNMEA.Checked = mf.isLogNMEA;
                         chkDisplayPolygons.Checked = mf.isDrawPolygons;
                         chkDisplayLightbar.Checked = mf.isLightbarOn;
-                        chkDisplayKeyboard.Checked = mf.isKeyboardOn;
+                        chkDisplayKeyboard.Checked = glm.isKeyboardOn;
                         chkDisplayStartFullScreen.Checked = Properties.Settings.Default.setDisplay_isStartFullScreen;
 
-                        if (mf.isMetric) rbtnDisplayMetric.Checked = true;
+                        if (glm.isMetric) rbtnDisplayMetric.Checked = true;
                         else rbtnDisplayImperial.Checked = true;
 
 
@@ -147,8 +144,7 @@ namespace AgOpenGPS
             }
             else
             {
-                var form = new FormTimedMessage(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
-                form.Show(this);
+                this.TimedMessageBox(2000, gStr.gsFieldIsOpen, gStr.gsCloseFieldFirst);
             }
             //Close();
         }

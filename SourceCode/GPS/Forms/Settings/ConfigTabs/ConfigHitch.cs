@@ -18,11 +18,11 @@ namespace AgOpenGPS
         private void ConfigHitch_Load(object sender, EventArgs e)
         {
             drawbarLength = Math.Abs(mf.tool.hitchLength);
-            nudDrawbarLength.Text = (drawbarLength * mf.mToUser).ToString("0");
+            nudDrawbarLength.Text = (drawbarLength * glm.mToUser).ToString("0");
             trailingHitchLength = Math.Abs(mf.tool.toolTrailingHitchLength);
-            nudTrailingHitchLength.Text = (trailingHitchLength * mf.mToUser).ToString("0");
+            nudTrailingHitchLength.Text = (trailingHitchLength * glm.mToUser).ToString("0");
             tankHitch = Math.Abs(mf.tool.toolTankTrailingHitchLength);
-            nudTankHitch.Text = (tankHitch * mf.mToUser).ToString("0");
+            nudTankHitch.Text = (tankHitch * glm.mToUser).ToString("0");
 
             if (mf.tool.isToolFrontFixed)
             {
@@ -92,17 +92,17 @@ namespace AgOpenGPS
 
         private void nudTrailingHitchLength_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTrailingHitchLength, ref trailingHitchLength, 0.01, 30, 0, mf.mToUser, mf.userToM);
+            nudTrailingHitchLength.KeypadToButton(ref trailingHitchLength, 0.01, 30, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudDrawbarLength_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudDrawbarLength, ref drawbarLength, 0.0, 30, 0, mf.mToUser, mf.userToM);
+            nudDrawbarLength.KeypadToButton(ref drawbarLength, 0.0, 30, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudTankHitch_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudTankHitch, ref tankHitch, 0.01, 30, 0, mf.mToUser, mf.userToM);
+            nudTankHitch.KeypadToButton(ref tankHitch, 0.01, 30, 0, glm.mToUser, glm.userToM);
         }
     }
 }

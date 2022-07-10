@@ -75,13 +75,13 @@ namespace AgOpenGPS
 
         private void nudNorth_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudNorth.KeypadToNUD();
             mf.worldManager.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
         }
 
         private void nudEast_Click(object sender, EventArgs e)
         {
-            mf.KeypadToNUD((NumericUpDown)sender, this);
+            nudEast.KeypadToNUD();
             mf.worldManager.fixOffset = new vec2((double)nudEast.Value / 100, (double)nudNorth.Value / 100);
         }
     }

@@ -33,7 +33,7 @@ namespace AgOpenGPS
 
         private void btnJobResume_Click(object sender, EventArgs e)
         {
-            mf.FileOpenField(mf.fieldsDirectory + mf.currentFieldDirectory + "\\Field.txt");
+            mf.FileOpenField();
 
             //back to FormGPS
             DialogResult = DialogResult.OK;
@@ -50,7 +50,7 @@ namespace AgOpenGPS
 
             if (!File.Exists(fileAndDirectory))
             {
-                textBox1.Text = "";
+                lblFieldName.Text = "";
                 btnJobResume.Enabled = false;
                 mf.currentFieldDirectory = "";
 
@@ -60,7 +60,7 @@ namespace AgOpenGPS
             }
             else
             {
-                textBox1.Text = mf.currentFieldDirectory;
+                lblFieldName.Text = mf.currentFieldDirectory;
             }
 
             mf.CloseTopMosts();
@@ -135,7 +135,7 @@ namespace AgOpenGPS
                         }
                         catch (Exception)
                         {
-                            FormTimedMessage form = new FormTimedMessage(2000, gStr.gsFieldFileIsCorrupt, gStr.gsChooseADifferentField);
+                            this.TimedMessageBox(2000, gStr.gsFieldFileIsCorrupt, gStr.gsChooseADifferentField);
                         }
                     }
                 }
@@ -157,18 +157,17 @@ namespace AgOpenGPS
                 else // 1 field found
                 {
                     mf.currentFieldDirectory = infieldList;
-                    mf.FileOpenField(mf.fieldsDirectory + infieldList + "\\Field.txt");
+                    mf.FileOpenField();
                     Close();
                 }
             }
             else //no fields found
             {
-                FormTimedMessage form2 = new FormTimedMessage(2000, gStr.gsNoFieldsFound, gStr.gsFieldNotOpen);
-                form2.Show(this);
+                this.TimedMessageBox(2000, gStr.gsNoFieldsFound, gStr.gsFieldNotOpen);
             }
         }
 
-        public double GetDistance(double longitude, double latitude, double otherLongitude, double otherLatitude)
+        private double GetDistance(double longitude, double latitude, double otherLongitude, double otherLatitude)
         {
             double d1 = latitude * (Math.PI / 180.0);
             double num1 = longitude * (Math.PI / 180.0);

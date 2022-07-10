@@ -18,13 +18,13 @@ namespace AgOpenGPS
         private void ConfigDimensions_Load(object sender, EventArgs e)
         {
             minTurnRadius = Properties.Vehicle.Default.setVehicle_minTurningRadius;
-            nudMinTurnRadius.Text = (minTurnRadius * mf.mToUser).ToString("0");
+            nudMinTurnRadius.Text = (minTurnRadius * glm.mToUser).ToString("0");
 
             wheelbase = Properties.Vehicle.Default.setVehicle_wheelbase;
-            nudWheelbase.Text = (wheelbase * mf.mToUser).ToString("0");
+            nudWheelbase.Text = (wheelbase * glm.mToUser).ToString("0");
 
             vehicleTrack = Properties.Vehicle.Default.setVehicle_trackWidth;
-            nudVehicleTrack.Text = (vehicleTrack * mf.mToUser).ToString("0");
+            nudVehicleTrack.Text = (vehicleTrack * glm.mToUser).ToString("0");
 
             if (mf.vehicle.vehicleType == 0) pictureBox1.Image = Properties.Resources.RadiusWheelBase;
             else if (mf.vehicle.vehicleType == 1) pictureBox1.Image = Properties.Resources.RadiusWheelBaseHarvester;
@@ -43,17 +43,17 @@ namespace AgOpenGPS
 
         private void nudVehicleTrack_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudVehicleTrack, ref vehicleTrack, 0.5, 20, 0, mf.mToUser, mf.userToM);
+            nudVehicleTrack.KeypadToButton(ref vehicleTrack, 0.5, 20, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudMinTurnRadius_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudMinTurnRadius, ref minTurnRadius, 0.5, 100, 0, mf.mToUser, mf.userToM);
+            nudMinTurnRadius.KeypadToButton(ref minTurnRadius, 0.5, 100, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudWheelbase_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudWheelbase, ref wheelbase, 0.5, 20, 0, mf.mToUser, mf.userToM);
+            nudWheelbase.KeypadToButton(ref wheelbase, 0.5, 20, 0, glm.mToUser, glm.userToM);
         }
     }
 }

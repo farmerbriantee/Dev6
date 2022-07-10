@@ -143,7 +143,7 @@ namespace AgOpenGPS
                     sections.Insert(sections.Count - 1, new CSection(mf, j));
                     mf.Controls.Add(sections[j].button);
                     sections[j].button.BringToFront();
-                    if (mf.timerSim.Enabled)
+                    if (glm.isSimEnabled)
                         sections[j].UpdateButton(mf.autoBtnState);
                 }
                 sections[j].positionLeft = leftOffset;

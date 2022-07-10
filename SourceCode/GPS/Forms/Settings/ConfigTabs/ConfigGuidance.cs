@@ -19,10 +19,10 @@ namespace AgOpenGPS
         private void ConfigGuidance_Load(object sender, EventArgs e)
         {
             snapDistance = Properties.Settings.Default.setAS_snapDistance;
-            nudSnapDistance.Text = (snapDistance * mf.mToUser).ToString(mf.isMetric ? "0" : "0.0");
+            nudSnapDistance.Text = (snapDistance * glm.mToUser).ToString(glm.isMetric ? "0" : "0.0");
 
             lineLength = Properties.Settings.Default.setAB_lineLength;
-            nudABLength.Text = (lineLength * mf.mToUserBig).ToString("0");
+            nudABLength.Text = (lineLength * glm.mToUserBig).ToString("0");
 
             lookAheadTime = Properties.Settings.Default.setAS_guidanceLookAheadTime;
             nudGuidanceLookAhead.Text = lookAheadTime.ToString("0.0");
@@ -34,11 +34,11 @@ namespace AgOpenGPS
             nudLineWidth.Text = lineWidth.ToString();
 
             PanicStopSpeed = Properties.Settings.Default.setVehicle_panicStopSpeed;
-            nudPanicStopSpeed.Text = (PanicStopSpeed * mf.KMHToUser).ToString("0.0");
+            nudPanicStopSpeed.Text = (PanicStopSpeed * glm.KMHToUser).ToString("0.0");
 
-            label20.Text = mf.unitsInCm;
-            label79.Text = mf.unitsFtM;
-            label102.Text = mf.unitsInCm;
+            label20.Text = glm.unitsInCm;
+            label79.Text = glm.unitsFtM;;
+            label102.Text = glm.unitsInCm;
         }
 
         public override void Close()
@@ -55,32 +55,32 @@ namespace AgOpenGPS
 
         private void nudLightbarCmPerPixel_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudLightbarCmPerPixel, ref lightbarCmPerPixel, 1, 100);
+            nudLightbarCmPerPixel.KeypadToButton(ref lightbarCmPerPixel, 1, 100);
         }
 
         private void nudABLength_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudABLength, ref lineLength, 200, 5000, 0, mf.mToUserBig, mf.userBigToM);
+            nudABLength.KeypadToButton(ref lineLength, 200, 5000, 0, glm.mToUserBig, glm.userBigToM);
         }
 
         private void nudSnapDistance_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudSnapDistance, ref snapDistance, 0, 10, mf.isMetric ? 0 : 1, mf.mToUser, mf.userToM);
+            nudSnapDistance.KeypadToButton(ref snapDistance, 0, 10, glm.isMetric ? 0 : 1, glm.mToUser, glm.userToM);
         }
 
         private void nudGuidanceLookAhead_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudGuidanceLookAhead, ref lookAheadTime, 0, 10, 1);
+            nudGuidanceLookAhead.KeypadToButton(ref lookAheadTime, 0, 10, 1);
         }
 
         private void nudLineWidth_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudLineWidth, ref lineWidth, 1, 8);
+            nudLineWidth.KeypadToButton(ref lineWidth, 1, 8);
         }
 
         private void nudPanicStopSpeed_Click(object sender, EventArgs e)
         {
-            mf.KeypadToButton(ref nudPanicStopSpeed, ref PanicStopSpeed, 0.0, 100.0, 1, mf.KMHToUser, mf.userToKMH);
+            nudPanicStopSpeed.KeypadToButton(ref PanicStopSpeed, 0.0, 100.0, 1, glm.KMHToUser, glm.userToKMH);
         }
 
         private void nudLightbarCmPerPixel_HelpRequested(object sender, HelpEventArgs hlpevent)

@@ -151,7 +151,7 @@ namespace AgOpenGPS
         {
             List<vec2> OffsetPoints = Poly.OffsetPolyline(width, header, start, end, add);//, radius != 0);
 
-            List<T> Output = OffsetPoints.DissolvePolyLine<T>(Poly.loop);
+            List<T> Output = OffsetPoints.DissolvePolyLine<T>(Poly.loop && add);
 
             if (Output.Count > 0)
             {
@@ -182,7 +182,7 @@ namespace AgOpenGPS
                 vec2 norm1, norm2;
                 bool dd = Start > End;
 
-                int stop = Add ? Poly.points.Count - 1 : End;
+                int stop = !Add || Start > End ? End : Poly.points.Count - 1;
 
                 for (int B = Add || Start < 0 ? 0 : Start; B <= stop || dd; B++)
                 {
@@ -203,15 +203,21 @@ namespace AgOpenGPS
 
                         if ((!Poly.loop && B == 0) || (!Add && B == Start))
                         {
-                            double Easting = Poly.points[B].easting + Distance * norm2.northing - AddHeader * norm2.easting;
-                            double Northing = Poly.points[B].northing - Distance * norm2.easting - AddHeader * norm2.northing;
+                            double Easting = Poly.points[B].easting + Distance * norm2.northing;
+                            double Northing = Poly.points[B].northing - Distance * norm2.easting;
+
+                            if (AddHeader != 0)
+                                OffsetPoints.Add(new vec2(Easting - AddHeader * norm2.easting, Northing - AddHeader * norm2.northing));
                             OffsetPoints.Add(new vec2(Easting, Northing));
                         }
                         else if ((!Poly.loop && B == Poly.points.Count - 1) || (!Add && B == End))
                         {
-                            double Easting = Poly.points[B].easting - Distance * norm1.northing - AddHeader * norm1.easting;
-                            double Northing = Poly.points[B].northing + Distance * norm1.easting - AddHeader * norm1.northing;
+                            double Easting = Poly.points[B].easting - Distance * norm1.northing;
+                            double Northing = Poly.points[B].northing + Distance * norm1.easting;
+
                             OffsetPoints.Add(new vec2(Easting, Northing));
+                            if (AddHeader != 0)
+                                OffsetPoints.Add(new vec2(Easting - AddHeader * norm1.easting, Northing - AddHeader * norm1.northing));
                         }
                         else if (Distance == 0)
                             OffsetPoints.Add(Poly.points[B]);
@@ -247,7 +253,9 @@ namespace AgOpenGPS
                                         sign = -sign;
                                         Distance2 = -Distance2;
                                     }
-                                    int pointsCount = (int)Math.Round(Math.Abs(sweepAngle / 0.0436332));
+                                    int pointsCount = (int)Math.Round(Math.Abs(sweepAngle / 0.0436332)) + 1;
+
+                                    //ss based on radius!
 
                                     double degreeFactor = sweepAngle / pointsCount;
 
@@ -327,7 +335,7 @@ namespace AgOpenGPS
 
                     angle = Math.Abs(angle);
 
-                    if ((angle > glm.PIBy2 - MaxAngle && angle < glm.PIBy2 + MaxAngle) || (angle > Math.PI - MaxAngle && angle < Math.PI + MaxAngle) || (angle < MaxAngle))
+                    //if ((angle > glm.PIBy2 - MaxAngle && angle < glm.PIBy2 + MaxAngle) || (angle > Math.PI - MaxAngle && angle < Math.PI + MaxAngle) || (angle < MaxAngle))
                     {
                         //if (C - A > 2)//Check why this is somethimes wrong!
                         //{
@@ -337,12 +345,12 @@ namespace AgOpenGPS
                         //        Points.RemoveAt(C);
                         //    }
                         //}
-                        stop = true;
+                        //stop = true;
 
                         //if (Loop || A > 0) A = (A == 0) ? Points.Count - 1 : A - 1;
                         //if (Loop || C < Points.Count - 1) C = (C + 1 == Points.Count) ? 0 : C + 1;
 
-                        break;
+                        //break;
                         //continue;
                     }
 
@@ -992,26 +1000,43 @@ namespace AgOpenGPS
                 return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        public static void GetCurrentSegment(this vec2 Point, List<vec2> curList, int Start, bool loop, out int AA, out int BB, int maxlimit = int.MaxValue)
+        public static void GetCurrentSegment(this vec2 Point, Polyline curList, out int AA, out int BB, int Start = 0, int End = int.MaxValue)
         {
             AA = -1;
             BB = -1;
 
             double minDistA = double.MaxValue;
-
-            for (int B = (Start + 1).Clamp(curList.Count); (B > Start || B < Start || loop) && B < curList.Count; B += 1)
+            int A = Start > 0 ? Start - 1 : curList.points.Count - 1;
+            for (int B = (Start > 0 ? Start : 0); B < curList.points.Count && B < End; A = B++)
             {
-                int AAA = (B - 1).Clamp(curList.Count);
+                if (B == 0 && !curList.loop)
+                    continue;
 
-                double dist2 = Point.FindDistanceToSegment(curList[AAA], curList[B], out _);
+                double dist2 = Point.FindDistanceToSegment(curList.points[A], curList.points[B], out _);
 
                 if (dist2 < minDistA)
                 {
                     minDistA = dist2;
-                    AA = AAA;
+                    AA = A;
                     BB = B;
                 }
+                else if (dist2 == minDistA && B > Start + 1)
+                {
+                    vec2 dd = (curList.points[A] - curList.points[A - 1]).Normalize();
+                    vec2 ee = (curList.points[A] - curList.points[B]).Normalize();
+                    vec2 tt = curList.points[A] + (dd + ee);
+
+                    double sign = Math.Sign((tt.northing - curList.points[A].northing) * (Point.easting - curList.points[A].easting) - (tt.easting - curList.points[A].easting) * (Point.northing - curList.points[A].northing));
+
+                    if (sign < 0)
+                    {
+                        minDistA = dist2;
+                        AA = A;
+                        BB = B;
+                    }
+                }
             }
+            
             return;
         }
 
@@ -1067,14 +1092,81 @@ namespace AgOpenGPS
             return arr;
         }
 
-        public static void AddFirstLastPoints(this List<vec2> points, double length)
+        public static void AddFirstLastPoints(this List<vec2> points, double length, double lineHeading, bool StraightLine = true)
         {
             if (points.Count > 1)
             {
-                double lineHeading = Math.Atan2(points[points.Count - 1].easting - points[0].easting, points[points.Count - 1].northing - points[0].northing);
+                if (StraightLine)
+                {
+                    points.Add(new vec2(points[points.Count - 1].easting + (Math.Sin(lineHeading) * length), points[points.Count - 1].northing + (Math.Cos(lineHeading) * length)));
+                    points.Insert(0, new vec2(points[0].easting - (Math.Sin(lineHeading) * length), points[0].northing - (Math.Cos(lineHeading) * length)));
+                }
+                else
+                {
+                    double x = 0, y = 0, TotalDistance = 0;
+                    int i = 0;
 
-                points.Add(new vec2(points[points.Count - 1].easting + (Math.Sin(lineHeading) * length), points[points.Count - 1].northing + (Math.Cos(lineHeading) * length)));
-                points.Insert(0, new vec2(points[0].easting - (Math.Sin(lineHeading) * length), points[0].northing - (Math.Cos(lineHeading) * length)));
+                    for (int j = 1; j < points.Count; i = j++)
+                    {
+                        double N = points[j].northing - points[i].northing;
+                        double E = points[j].easting - points[i].easting;
+                        double Distance = Math.Sqrt(Math.Pow(N, 2) + Math.Pow(E, 2));
+
+                        if (TotalDistance + Distance > lineHeading)
+                        {
+                            double U = (lineHeading - TotalDistance) / Distance; // the remainder to yet travel
+                            TotalDistance += U * Distance;
+                            x += U * N;
+                            y += U * E;
+                            break;
+                        }
+                        else
+                        {
+                            x += N;
+                            y += E;
+                            TotalDistance += Distance;
+                        }
+                    }
+                    x /= TotalDistance;
+                    y /= TotalDistance;
+
+                    double head1 = Math.Atan2(y, x);
+                    points.Insert(0, new vec2(points[0].easting - (Math.Sin(head1) * length), points[0].northing - (Math.Cos(head1) * length)));
+
+
+
+                    x = y = TotalDistance = 0;
+                    i = points.Count - 1;
+
+                    for (int j = points.Count - 2; j > 0; i = j--)
+                    {
+                        double N = points[j].northing - points[i].northing;
+                        double E = points[j].easting - points[i].easting;
+                        double Distance = Math.Sqrt(Math.Pow(N, 2) + Math.Pow(E, 2));
+
+                        if (TotalDistance + Distance > lineHeading)
+                        {
+                            double U = (lineHeading - TotalDistance) / Distance; // the remainder to yet travel
+                            TotalDistance += U * Distance;
+                            x += U * N;
+                            y += U * E;
+                            break;
+                        }
+                        else
+                        {
+                            x += N;
+                            y += E;
+                            TotalDistance += Distance;
+                        }
+                    }
+                    x /= TotalDistance;
+                    y /= TotalDistance;
+
+                    double head2 = Math.Atan2(y, x);
+
+
+                    points.Add(new vec2(points[points.Count - 1].easting - (Math.Sin(head2) * length), points[points.Count - 1].northing - (Math.Cos(head2) * length)));
+                }
             }
         }
 
