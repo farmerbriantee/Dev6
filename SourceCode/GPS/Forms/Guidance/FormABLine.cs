@@ -26,9 +26,7 @@ namespace AgOpenGPS
 
             Text = Mode == Mode.AB ? gStr.gsABline : Mode == Mode.Curve ? gStr.gsABCurve : gStr.gsRecord;
 
-            //SetStyle delete recpath image!
-
-            btnListDelete.Image = Mode == Mode.AB ? Properties.Resources.ABLineDelete : Properties.Resources.HideContour;
+            btnListDelete.Image = Mode == Mode.AB ? Properties.Resources.ABLineDelete : Mode == Mode.Curve ? Properties.Resources.CurveDelete : Properties.Resources.RecPathDelete;
         }
 
         private void FormABLine_Load(object sender, EventArgs e)

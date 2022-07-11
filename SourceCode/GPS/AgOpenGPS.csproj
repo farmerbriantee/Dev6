@@ -882,6 +882,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AOG.ico" />
+    <None Include="btnImages\RecPathDelete.png" />
+    <None Include="btnImages\CurveDelete.png" />
+    <None Include="btnImages\ContourDelete.png" />
     <None Include="btnImages\RecPathOn.png" />
     <None Include="btnImages\RecPathOff.png" />
     <None Include="btnImages\ResetTool.png" />
@@ -1088,7 +1091,6 @@
     <None Include="btnImages\JobActive.png" />
     <None Include="btnImages\FileSave.png" />
     <None Include="btnImages\Play.png" />
-    <None Include="btnImages\Stop.png" />
     <None Include="btnImages\back-button.png" />
     <None Include="btnImages\FileDontSave.png" />
     <None Include="btnImages\FileNew.png" />
@@ -1137,7 +1139,6 @@
     <None Include="btnImages\Camera2D64.png" />
     <None Include="btnImages\Camera3D64.png" />
     <None Include="btnImages\CameraNorth64.png" />
-    <None Include="btnImages\HideContour.png" />
     <None Include="btnImages\MakeBoundaryContour.jpg" />
   </ItemGroup>
   <ItemGroup>

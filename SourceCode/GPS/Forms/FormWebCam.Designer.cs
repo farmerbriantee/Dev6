@@ -40,7 +40,7 @@
             this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(13, 234);
+            this.comboBox1.Location = new System.Drawing.Point(13, 466);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(196, 27);
             this.comboBox1.TabIndex = 11;
@@ -48,17 +48,16 @@
             // 
             // stopButton
             // 
-            this.stopButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.stopButton.BackgroundImage = global::AgOpenGPS.Properties.Resources.Stop;
+            this.stopButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.stopButton.BackgroundImage = global::AgOpenGPS.Properties.Resources.boundaryStop;
             this.stopButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.stopButton.Enabled = false;
             this.stopButton.FlatAppearance.BorderSize = 0;
             this.stopButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.stopButton.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.stopButton.Location = new System.Drawing.Point(319, 229);
-            this.stopButton.Margin = new System.Windows.Forms.Padding(2);
+            this.stopButton.Location = new System.Drawing.Point(440, 440);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(75, 37);
+            this.stopButton.Size = new System.Drawing.Size(60, 60);
             this.stopButton.TabIndex = 13;
             this.stopButton.UseVisualStyleBackColor = true;
             this.stopButton.Click += new System.EventHandler(this.stopButton_Click_1);
@@ -71,22 +70,21 @@
             this.webCameraControl1.BackColor = System.Drawing.SystemColors.AppWorkspace;
             this.webCameraControl1.Location = new System.Drawing.Point(0, 0);
             this.webCameraControl1.Name = "webCameraControl1";
-            this.webCameraControl1.Size = new System.Drawing.Size(398, 229);
+            this.webCameraControl1.Size = new System.Drawing.Size(500, 440);
             this.webCameraControl1.TabIndex = 10;
             // 
             // startButton
             // 
-            this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.startButton.BackgroundImage = global::AgOpenGPS.Properties.Resources.Play;
             this.startButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.startButton.Enabled = false;
             this.startButton.FlatAppearance.BorderSize = 0;
             this.startButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.startButton.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.startButton.Location = new System.Drawing.Point(226, 229);
-            this.startButton.Margin = new System.Windows.Forms.Padding(2);
+            this.startButton.Location = new System.Drawing.Point(375, 440);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(75, 37);
+            this.startButton.Size = new System.Drawing.Size(60, 60);
             this.startButton.TabIndex = 12;
             this.startButton.UseVisualStyleBackColor = true;
             this.startButton.Click += new System.EventHandler(this.startButton_Click_1);
@@ -95,7 +93,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(398, 268);
+            this.ClientSize = new System.Drawing.Size(500, 500);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.startButton);

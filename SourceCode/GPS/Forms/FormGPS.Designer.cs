@@ -877,7 +877,7 @@
             // deleteContourPathsToolStripMenuItem
             // 
             this.deleteContourPathsToolStripMenuItem.Enabled = false;
-            this.deleteContourPathsToolStripMenuItem.Image = global::AgOpenGPS.Properties.Resources.HideContour;
+            this.deleteContourPathsToolStripMenuItem.Image = global::AgOpenGPS.Properties.Resources.ContourDelete;
             this.deleteContourPathsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.deleteContourPathsToolStripMenuItem.Name = "deleteContourPathsToolStripMenuItem";
             this.deleteContourPathsToolStripMenuItem.Size = new System.Drawing.Size(404, 70);

@@ -765,7 +765,7 @@
             this.cboxFeatureHideContour.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cboxFeatureHideContour.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboxFeatureHideContour.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.cboxFeatureHideContour.Image = global::AgOpenGPS.Properties.Resources.HideContour;
+            this.cboxFeatureHideContour.Image = global::AgOpenGPS.Properties.Resources.ContourDelete;
             this.cboxFeatureHideContour.Location = new System.Drawing.Point(200, 178);
             this.cboxFeatureHideContour.Name = "cboxFeatureHideContour";
             this.cboxFeatureHideContour.RightToLeft = System.Windows.Forms.RightToLeft.Yes;

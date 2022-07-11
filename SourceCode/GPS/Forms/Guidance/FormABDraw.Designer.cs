@@ -380,7 +380,7 @@
             this.btnDeleteCurve.FlatAppearance.BorderSize = 0;
             this.btnDeleteCurve.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDeleteCurve.Font = new System.Drawing.Font("Tahoma", 14.25F);
-            this.btnDeleteCurve.Image = global::AgOpenGPS.Properties.Resources.HideContour;
+            this.btnDeleteCurve.Image = global::AgOpenGPS.Properties.Resources.CurveDelete;
             this.btnDeleteCurve.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.btnDeleteCurve.Location = new System.Drawing.Point(934, 327);
             this.btnDeleteCurve.Name = "btnDeleteCurve";
