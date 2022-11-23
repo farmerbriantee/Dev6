@@ -94,7 +94,6 @@ namespace AgOpenGPS
         {
             if (isTT)
             {
-                //new FormHelp(gStr.recpath, gStr.gsHelp).ShowDialog(this);
                 ResetHelpBtn();
                 return;
             }
@@ -187,10 +186,7 @@ namespace AgOpenGPS
         {
             if (isTT)
             {
-                if (gyd.CurrentGMode == Mode.Contour)
-                    new FormHelp(gStr.h_btnLockToContour, gStr.gsHelp).ShowDialog(this);
-                else
-                    new FormHelp(gStr.h_btnCycleLines, gStr.gsHelp).ShowDialog(this);
+                new FormHelp(gyd.CurrentGMode == Mode.Contour ? gStr.h_btnLockToContour : gStr.h_btnCycleLines, gStr.gsHelp).ShowDialog(this);
                 ResetHelpBtn();
             }
             else if (gyd.CurrentGMode == Mode.Contour)
@@ -1067,13 +1063,7 @@ namespace AgOpenGPS
 
         private void btnResetToolHeading_Click(object sender, EventArgs e)
         {
-            tankPos.heading = fixHeading;
-            tankPos.easting = hitchPos.easting + (Math.Sin(tankPos.heading) * (tool.toolTankTrailingHitchLength));
-            tankPos.northing = hitchPos.northing + (Math.Cos(tankPos.heading) * (tool.toolTankTrailingHitchLength));
-
-            tool.Pos.heading = tankPos.heading;
-            tool.Pos.easting = tankPos.easting + (Math.Sin(tool.Pos.heading) * (tool.toolTrailingHitchLength));
-            tool.Pos.northing = tankPos.northing + (Math.Cos(tool.Pos.heading) * (tool.toolTrailingHitchLength));
+            tool.ResetTool();
         }
 
         private void btnHeadlandOnOff_Click(object sender, EventArgs e)

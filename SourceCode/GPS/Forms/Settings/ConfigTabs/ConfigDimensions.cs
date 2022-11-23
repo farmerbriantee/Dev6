@@ -17,13 +17,13 @@ namespace AgOpenGPS
 
         private void ConfigDimensions_Load(object sender, EventArgs e)
         {
-            minTurnRadius = Properties.Vehicle.Default.setVehicle_minTurningRadius;
+            minTurnRadius = mf.vehicle.minTurningRadius;
             nudMinTurnRadius.Text = (minTurnRadius * glm.mToUser).ToString("0");
 
-            wheelbase = Properties.Vehicle.Default.setVehicle_wheelbase;
+            wheelbase = mf.vehicle.wheelbase;
             nudWheelbase.Text = (wheelbase * glm.mToUser).ToString("0");
 
-            vehicleTrack = Properties.Vehicle.Default.setVehicle_trackWidth;
+            vehicleTrack = mf.vehicle.trackWidth;
             nudVehicleTrack.Text = (vehicleTrack * glm.mToUser).ToString("0");
 
             if (mf.vehicle.vehicleType == 0) pictureBox1.Image = Properties.Resources.RadiusWheelBase;
@@ -38,6 +38,8 @@ namespace AgOpenGPS
             Properties.Vehicle.Default.setVehicle_wheelbase = mf.vehicle.wheelbase = wheelbase;
 
             mf.tram.halfWheelTrack = mf.vehicle.trackWidth * 0.5;
+            mf.vehicle.updateVBO = true;
+            mf.tool.updateVBO = true;
             Properties.Vehicle.Default.Save();
         }
 

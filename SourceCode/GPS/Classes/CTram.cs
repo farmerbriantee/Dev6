@@ -11,7 +11,7 @@ namespace AgOpenGPS
         //tram settings
         //public double wheelTrack;
         public double tramWidth, halfWheelTrack;
-        public int passes;
+        public int firstPass, passes;
         public bool isOuter, isTramOnBackBuffer;
 
         //tramlines
@@ -23,6 +23,7 @@ namespace AgOpenGPS
         public int displayMode;
         internal int controlByte;
         private bool ResettramBoundary = false;
+        public int outerTramPasses = 1;
 
         public CTram(FormGPS _f)
         {
@@ -35,7 +36,10 @@ namespace AgOpenGPS
             halfWheelTrack = Properties.Vehicle.Default.setVehicle_trackWidth * 0.5;
             isTramOnBackBuffer = Properties.Settings.Default.setTram_isTramOnBackBuffer;
 
+            firstPass = Properties.Settings.Default.setTram_Firstpass;
             passes = Properties.Settings.Default.setTram_passes;
+            outerTramPasses = Properties.Settings.Default.setTram_OuterTramPasses;
+
             displayMode = 0;
 
             isOuter = ((int)(tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
@@ -66,7 +70,6 @@ namespace AgOpenGPS
         public void BuildTram()
         {
             ResettramBoundary = true;
-            int outerTramPasses = 5;
             for (int j = 0; j < tramList.Count; j++)
                 tramList[j].RemoveHandle();
             tramList.Clear();
@@ -87,9 +90,9 @@ namespace AgOpenGPS
                     {
                         for (int j = 0; j < outerTramPasses; j++)
                         {
-                            double Offset = tramWidth * (j + 0.5) * (i == 0 ? 1 : -1);
+                            double offsetDist = tramWidth * (j + 0.5) * (i == 0 ? 1 : -1);
 
-                            List<Polyline2> Build = mf.bnd.bndList[i].fenceLine.OffsetAndDissolvePolyline(true, Offset, 0);
+                            List<Polyline2> Build = mf.bnd.bndList[i].fenceLine.OffsetAndDissolvePolyline<Polyline2>(offsetDist);
                             if (Build.Count == 0) break;
 
                             for (int k = Build.Count - 1; k >= 0; k--)
@@ -99,28 +102,7 @@ namespace AgOpenGPS
 
                                 if (Build[k].points.Count > 1)
                                 {
-                                    List<vec2> Left = Build[k].OffsetPolyline(halfWheelTrack);
-                                    List<vec2> Right = Build[k].OffsetPolyline(-halfWheelTrack);
-
-                                    if (Left.Count > 1)
-                                    {
-                                        if (Build[k].BufferPoints == int.MinValue) GL.GenBuffers(1, out Build[k].BufferPoints);
-                                        GL.BindBuffer(BufferTarget.ArrayBuffer, Build[k].BufferPoints);
-                                        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Left.Count * 16), Left.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                        Build[k].BufferPointsCnt = Left.Count;
-                                    }
-                                    if (Right.Count > 1)
-                                    {
-                                        if (Build[k].BufferIndex == int.MinValue) GL.GenBuffers(1, out Build[k].BufferIndex);
-                                        GL.BindBuffer(BufferTarget.ArrayBuffer, Build[k].BufferIndex);
-                                        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Right.Count * 16), Right.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                        Build[k].BufferIndexCnt = Right.Count;
-                                    }
-
-                                    Build[k].ResetPoints = i == 0;
-                                    Build[k].ResetIndexer = j == outerTramPasses - 1;
+                                    BuildTramLeftRightOffset(Build[k], i == 0, j == outerTramPasses - 1);
                                 }
                                 else Build.RemoveAt(k);
                             }
@@ -132,10 +114,9 @@ namespace AgOpenGPS
 
             if (mf.gyd.currentGuidanceLine != null)
             {
-                for (double i = 0.0; i < passes; i++)
+                for (double i = 0; i < passes; i++)
                 {
-                    List<vec2> OffsetPoints = mf.gyd.currentGuidanceLine.OffsetPolyline<Polyline>(tramWidth * i, mf.gyd.abLength);
-                    List<Polyline2> OffsetList = OffsetPoints.DissolvePolyLine<Polyline2>(mf.gyd.currentGuidanceLine.loop);
+                    List<Polyline2> OffsetList = mf.gyd.currentGuidanceLine.OffsetAndDissolvePolyline<Polyline2>(tramWidth * (firstPass + i), mf.gyd.abLength);
 
                     for (int s = 0; s < OffsetList.Count; s++)
                     {
@@ -157,7 +138,8 @@ namespace AgOpenGPS
                                 List<Polyline2> Points2 = new List<Polyline2>();
                                 for (int n = 0; n < OffsetList.Count; n++)
                                 {
-                                    Points2.AddRange(OffsetList[n].ClipPolyLine(tramBoundary[l], tramBoundary[l][0].ResetPoints));
+                                    if (OffsetList[n].points.Count > 0)
+                                        Points2.AddRange(OffsetList[n].ClipPolyLine(tramBoundary[l], tramBoundary[l][0].ResetPoints));
                                 }
                                 OffsetList.Clear();
                                 OffsetList = Points2;
@@ -169,37 +151,61 @@ namespace AgOpenGPS
                     {
                         if (OffsetList[s].points.Count > 1)
                         {
-                            List<vec2> Left = OffsetList[s].OffsetPolyline(halfWheelTrack);
-                            List<vec2> Right = OffsetList[s].OffsetPolyline(-halfWheelTrack);
-
-                            if (OffsetList[s].loop && Left.Count > 2)
-                                Left.Add(Left[0]);
-
-                            if (OffsetList[s].loop && Right.Count > 2)
-                                Right.Add(Right[0]);
-
-                            if (Left.Count > 1)
-                            {
-                                if (OffsetList[s].BufferPoints == int.MinValue) GL.GenBuffers(1, out OffsetList[s].BufferPoints);
-                                GL.BindBuffer(BufferTarget.ArrayBuffer, OffsetList[s].BufferPoints);
-                                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Left.Count * 16), Left.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                OffsetList[s].BufferPointsCnt = Left.Count;
-                            }
-                            if (Right.Count > 1)
-                            {
-                                if (OffsetList[s].BufferIndex == int.MinValue) GL.GenBuffers(1, out OffsetList[s].BufferIndex);
-                                GL.BindBuffer(BufferTarget.ArrayBuffer, OffsetList[s].BufferIndex);
-                                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Right.Count * 16), Right.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                OffsetList[s].BufferIndexCnt = Right.Count;
-                            }
+                            BuildTramLeftRightOffset(OffsetList[s]);
 
                             tramList.Add(OffsetList[s]);
                         }
                     }
                 }
             }
+        }
+
+        public void BuildTramLeftRightOffset(Polyline2 Build, bool outerBound = false, bool lastPass = false)
+        {
+            List<vec2> Left = Build.OffsetPolyline(halfWheelTrack, true, out int dddd);
+            List<vec2> Right = Build.OffsetPolyline(-halfWheelTrack, true, out int eeee);
+
+            if (dddd > 0)
+            {
+                Left.RemoveRange(0, dddd);
+            }
+            else if (dddd < 0)
+            {
+                Left.RemoveRange(Left.Count + dddd, -dddd);
+            }
+            else if (Left.Count > 2)
+                Left.Add(Left[0]);
+
+            if (eeee > 0)
+            {
+                Right.RemoveRange(0, eeee);
+            }
+            else if (eeee < 0)
+            {
+                Right.RemoveRange(Right.Count + eeee, -eeee);
+            }
+            else if (Right.Count > 2)
+                Right.Add(Right[0]);
+
+            if (Left.Count > 1)
+            {
+                if (Build.VBO == 0) Build.VBO = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, Build.VBO);
+                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Left.Count * 16), Left.ToArray(), BufferUsageHint.StaticDraw);
+
+                Build.VBOCount = Left.Count;
+            }
+            if (Right.Count > 1)
+            {
+                if (Build.EBO == 0) Build.EBO = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, Build.EBO);
+                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Right.Count * 16), Right.ToArray(), BufferUsageHint.StaticDraw);
+
+                Build.EBOCount = Right.Count;
+            }
+
+            Build.ResetPoints = outerBound;
+            Build.ResetIndexer = lastPass;
         }
     }
 }

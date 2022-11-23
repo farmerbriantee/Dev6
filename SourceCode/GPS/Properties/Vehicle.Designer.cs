@@ -12,7 +12,7 @@ namespace AgOpenGPS.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
     internal sealed partial class Vehicle : global::System.Configuration.ApplicationSettingsBase {
         
         private static Vehicle defaultInstance = ((Vehicle)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Vehicle())));
@@ -649,7 +649,7 @@ namespace AgOpenGPS.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-2.5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-0.5")]
         public double Tool_TrailingHitchLength {
             get {
                 return ((double)(this["Tool_TrailingHitchLength"]));
@@ -901,7 +901,7 @@ namespace AgOpenGPS.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-3")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-0.5")]
         public double Tool_TankTrailingHitchLength {
             get {
                 return ((double)(this["Tool_TankTrailingHitchLength"]));
@@ -956,6 +956,30 @@ namespace AgOpenGPS.Properties {
             }
             set {
                 this["Tool_slowSpeedCutoff"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-2")]
+        public double Tool_TrailingAxleLength {
+            get {
+                return ((double)(this["Tool_TrailingAxleLength"]));
+            }
+            set {
+                this["Tool_TrailingAxleLength"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-2.5")]
+        public double Tool_TankTrailingAxleLength {
+            get {
+                return ((double)(this["Tool_TankTrailingAxleLength"]));
+            }
+            set {
+                this["Tool_TankTrailingAxleLength"] = value;
             }
         }
     }

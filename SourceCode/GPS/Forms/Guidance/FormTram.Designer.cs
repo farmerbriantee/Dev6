@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.lblSmallSnapRight = new System.Windows.Forms.Label();
             this.nudPasses = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
@@ -36,8 +35,6 @@
             this.btnMode = new System.Windows.Forms.Button();
             this.btnLeft = new System.Windows.Forms.Button();
             this.btnRight = new System.Windows.Forms.Button();
-            this.btnTriggerDistanceDn = new ProXoft.WinForms.RepeatButton();
-            this.btnTriggerDistanceUp = new ProXoft.WinForms.RepeatButton();
             this.btnSwapAB = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnAdjLeft = new System.Windows.Forms.Button();
@@ -47,7 +44,13 @@
             this.label6 = new System.Windows.Forms.Label();
             this.lblToolWidthHalf = new System.Windows.Forms.Label();
             this.lblTramWidth = new System.Windows.Forms.Label();
+            this.nudFirstPass = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
+            this.nudOuterTramPasses = new System.Windows.Forms.NumericUpDown();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nudPasses)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudFirstPass)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudOuterTramPasses)).BeginInit();
             this.SuspendLayout();
             // 
             // lblSmallSnapRight
@@ -68,16 +71,21 @@
             this.nudPasses.BackColor = System.Drawing.Color.AliceBlue;
             this.nudPasses.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.nudPasses.InterceptArrowKeys = false;
-            this.nudPasses.Location = new System.Drawing.Point(123, 293);
+            this.nudPasses.Location = new System.Drawing.Point(190, 293);
             this.nudPasses.Maximum = new decimal(new int[] {
             999,
             0,
             0,
             0});
+            this.nudPasses.Minimum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            -2147483648});
             this.nudPasses.Name = "nudPasses";
             this.nudPasses.ReadOnly = true;
             this.nudPasses.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.nudPasses.Size = new System.Drawing.Size(92, 46);
+            this.nudPasses.Size = new System.Drawing.Size(100, 46);
             this.nudPasses.TabIndex = 433;
             this.nudPasses.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.nudPasses.Value = new decimal(new int[] {
@@ -85,7 +93,7 @@
             0,
             0,
             0});
-            this.nudPasses.Click += new System.EventHandler(this.nudPasses_Click);
+            this.nudPasses.Click += new System.EventHandler(this.nudLastPass_Click);
             this.nudPasses.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudPasses_HelpRequested);
             // 
             // label3
@@ -93,9 +101,9 @@
             this.label3.BackColor = System.Drawing.Color.WhiteSmoke;
             this.label3.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.Black;
-            this.label3.Location = new System.Drawing.Point(103, 242);
+            this.label3.Location = new System.Drawing.Point(170, 242);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(124, 48);
+            this.label3.Size = new System.Drawing.Size(140, 48);
             this.label3.TabIndex = 435;
             this.label3.Text = "Passes";
             this.label3.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -164,38 +172,6 @@
             this.btnRight.Click += new System.EventHandler(this.btnRight_Click);
             this.btnRight.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.btnRight_HelpRequested);
             // 
-            // btnTriggerDistanceDn
-            // 
-            this.btnTriggerDistanceDn.BackColor = System.Drawing.Color.Transparent;
-            this.btnTriggerDistanceDn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnTriggerDistanceDn.FlatAppearance.BorderSize = 0;
-            this.btnTriggerDistanceDn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnTriggerDistanceDn.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnTriggerDistanceDn.Image = global::AgOpenGPS.Properties.Resources.DnArrow64;
-            this.btnTriggerDistanceDn.Location = new System.Drawing.Point(32, 277);
-            this.btnTriggerDistanceDn.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.btnTriggerDistanceDn.Name = "btnTriggerDistanceDn";
-            this.btnTriggerDistanceDn.Size = new System.Drawing.Size(64, 63);
-            this.btnTriggerDistanceDn.TabIndex = 439;
-            this.btnTriggerDistanceDn.UseVisualStyleBackColor = false;
-            this.btnTriggerDistanceDn.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnTriggerDistanceDn_MouseDown);
-            // 
-            // btnTriggerDistanceUp
-            // 
-            this.btnTriggerDistanceUp.BackColor = System.Drawing.Color.Transparent;
-            this.btnTriggerDistanceUp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnTriggerDistanceUp.FlatAppearance.BorderSize = 0;
-            this.btnTriggerDistanceUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnTriggerDistanceUp.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnTriggerDistanceUp.Image = global::AgOpenGPS.Properties.Resources.UpArrow64;
-            this.btnTriggerDistanceUp.Location = new System.Drawing.Point(235, 277);
-            this.btnTriggerDistanceUp.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.btnTriggerDistanceUp.Name = "btnTriggerDistanceUp";
-            this.btnTriggerDistanceUp.Size = new System.Drawing.Size(64, 63);
-            this.btnTriggerDistanceUp.TabIndex = 440;
-            this.btnTriggerDistanceUp.UseVisualStyleBackColor = false;
-            this.btnTriggerDistanceUp.MouseDown += new System.Windows.Forms.MouseEventHandler(this.btnTriggerDistanceUp_MouseDown);
-            // 
             // btnSwapAB
             // 
             this.btnSwapAB.BackColor = System.Drawing.Color.Transparent;
@@ -224,9 +200,9 @@
             this.btnCancel.Image = global::AgOpenGPS.Properties.Resources.SwitchOff;
             this.btnCancel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnCancel.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnCancel.Location = new System.Drawing.Point(7, 380);
+            this.btnCancel.Location = new System.Drawing.Point(9, 377);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(98, 67);
+            this.btnCancel.Size = new System.Drawing.Size(72, 62);
             this.btnCancel.TabIndex = 421;
             this.btnCancel.UseVisualStyleBackColor = false;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -261,9 +237,9 @@
             this.btnExit.ForeColor = System.Drawing.Color.White;
             this.btnExit.Image = global::AgOpenGPS.Properties.Resources.FileSave;
             this.btnExit.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnExit.Location = new System.Drawing.Point(224, 380);
+            this.btnExit.Location = new System.Drawing.Point(249, 377);
             this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(98, 67);
+            this.btnExit.Size = new System.Drawing.Size(72, 62);
             this.btnExit.TabIndex = 234;
             this.btnExit.UseVisualStyleBackColor = false;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
@@ -339,21 +315,95 @@
             this.lblTramWidth.Text = "10 cm";
             this.lblTramWidth.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // nudFirstPass
+            // 
+            this.nudFirstPass.BackColor = System.Drawing.Color.AliceBlue;
+            this.nudFirstPass.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudFirstPass.InterceptArrowKeys = false;
+            this.nudFirstPass.Location = new System.Drawing.Point(40, 293);
+            this.nudFirstPass.Maximum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            0});
+            this.nudFirstPass.Minimum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            -2147483648});
+            this.nudFirstPass.Name = "nudFirstPass";
+            this.nudFirstPass.ReadOnly = true;
+            this.nudFirstPass.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.nudFirstPass.Size = new System.Drawing.Size(100, 46);
+            this.nudFirstPass.TabIndex = 466;
+            this.nudFirstPass.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.nudFirstPass.Value = new decimal(new int[] {
+            777,
+            0,
+            0,
+            0});
+            this.nudFirstPass.Click += new System.EventHandler(this.nudFirstPass_Click);
+            this.nudFirstPass.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.nudPasses_HelpRequested);
+            // 
+            // label1
+            // 
+            this.label1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.label1.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Black;
+            this.label1.Location = new System.Drawing.Point(20, 242);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(140, 48);
+            this.label1.TabIndex = 467;
+            this.label1.Text = "First Pass";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            // 
+            // nudOuterTramPasses
+            // 
+            this.nudOuterTramPasses.BackColor = System.Drawing.Color.AliceBlue;
+            this.nudOuterTramPasses.Font = new System.Drawing.Font("Tahoma", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudOuterTramPasses.InterceptArrowKeys = false;
+            this.nudOuterTramPasses.Location = new System.Drawing.Point(121, 393);
+            this.nudOuterTramPasses.Name = "nudOuterTramPasses";
+            this.nudOuterTramPasses.ReadOnly = true;
+            this.nudOuterTramPasses.Size = new System.Drawing.Size(100, 46);
+            this.nudOuterTramPasses.TabIndex = 468;
+            this.nudOuterTramPasses.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.nudOuterTramPasses.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.nudOuterTramPasses.Click += new System.EventHandler(this.nudOuterTramPasses_Click);
+            // 
+            // label4
+            // 
+            this.label4.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.label4.Font = new System.Drawing.Font("Tahoma", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.ForeColor = System.Drawing.Color.Black;
+            this.label4.Location = new System.Drawing.Point(101, 342);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(140, 48);
+            this.label4.TabIndex = 469;
+            this.label4.Text = "Outer Tram Passes";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            // 
             // FormTram
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
             this.ClientSize = new System.Drawing.Size(330, 451);
+            this.Controls.Add(this.nudOuterTramPasses);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.nudFirstPass);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.nudPasses);
-            this.Controls.Add(this.btnTriggerDistanceDn);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.lblTrack);
             this.Controls.Add(this.btnLeft);
             this.Controls.Add(this.btnRight);
             this.Controls.Add(this.btnAdjLeft);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.btnTriggerDistanceUp);
             this.Controls.Add(this.btnSwapAB);
             this.Controls.Add(this.btnAdjRight);
             this.Controls.Add(this.btnExit);
@@ -363,7 +413,7 @@
             this.Controls.Add(this.lblToolWidthHalf);
             this.Controls.Add(this.lblTramWidth);
             this.Controls.Add(this.btnMode);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.HelpButton = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -374,6 +424,8 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormTram_FormClosing);
             this.Load += new System.EventHandler(this.FormTram_Load);
             ((System.ComponentModel.ISupportInitialize)(this.nudPasses)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudFirstPass)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudOuterTramPasses)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -388,8 +440,6 @@
         private System.Windows.Forms.NumericUpDown nudPasses;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btnSwapAB;
-        private ProXoft.WinForms.RepeatButton btnTriggerDistanceDn;
-        private ProXoft.WinForms.RepeatButton btnTriggerDistanceUp;
         private System.Windows.Forms.Button btnLeft;
         private System.Windows.Forms.Button btnRight;
         private System.Windows.Forms.Label label2;
@@ -398,5 +448,9 @@
         private System.Windows.Forms.Label lblToolWidthHalf;
         private System.Windows.Forms.Label lblTrack;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.NumericUpDown nudFirstPass;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.NumericUpDown nudOuterTramPasses;
+        private System.Windows.Forms.Label label4;
     }
 }

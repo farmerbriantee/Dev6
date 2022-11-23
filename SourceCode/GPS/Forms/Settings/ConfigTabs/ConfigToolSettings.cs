@@ -31,12 +31,13 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            Properties.Vehicle.Default.Tool_LookAheadOn = mf.tool.lookAheadOnSetting = lookAhead;
-            Properties.Vehicle.Default.Tool_LookAheadOff = mf.tool.lookAheadOffSetting = lookAheadOff;
+            Properties.Vehicle.Default.Tool_LookAheadOn = mf.tool.lookAheadOnSetting = mf.tool.mappingOnDelay = lookAhead;
+            Properties.Vehicle.Default.Tool_LookAheadOff = mf.tool.lookAheadOffSetting = mf.tool.mappingOffDelay = lookAheadOff;
             Properties.Vehicle.Default.Tool_OffDelay = mf.tool.turnOffDelay = turnOffDelay;
             Properties.Vehicle.Default.Tool_Overlap = mf.tool.toolOverlap = overlap;
             Properties.Vehicle.Default.Tool_Offset = mf.tool.toolOffset = offset;
 
+            mf.tool.updateVBO = true;
             Properties.Vehicle.Default.Save();
         }
 

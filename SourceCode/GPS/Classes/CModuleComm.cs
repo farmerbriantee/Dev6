@@ -17,7 +17,7 @@ namespace AgOpenGPS
         //other GIS Info
         public double altitude, speed = double.MaxValue, avgSpeed, panicStopSpeed;
 
-        public double headingTrueDual, headingTrueDualTool, headingTrue, hdop, age, hdopTool, ageTool, headingTrueDualOffset;
+        public double headingTrueDual = double.MaxValue, headingTrueDualTool, headingTrue, hdop, age, hdopTool, ageTool, headingTrueDualOffset;
 
         public int fixQuality, fixQualityTool, ageAlarm;
         public int satellitesTracked, satellitesTrackedTool;

@@ -31,6 +31,7 @@
             this.lvLines = new System.Windows.Forms.ListView();
             this.chField = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelAPlus = new System.Windows.Forms.Panel();
+            this.btnPausePlay = new System.Windows.Forms.Button();
             this.btnManual = new System.Windows.Forms.Button();
             this.btnCancel_APlus = new System.Windows.Forms.Button();
             this.btnEnter_APlus = new System.Windows.Forms.Button();
@@ -51,7 +52,6 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnListUse = new System.Windows.Forms.Button();
             this.btnListDelete = new System.Windows.Forms.Button();
-            this.btnPausePlay = new System.Windows.Forms.Button();
             this.panelAPlus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudHeading)).BeginInit();
             this.panelName.SuspendLayout();
@@ -97,6 +97,25 @@
             this.panelAPlus.Name = "panelAPlus";
             this.panelAPlus.Size = new System.Drawing.Size(233, 313);
             this.panelAPlus.TabIndex = 431;
+            // 
+            // btnPausePlay
+            // 
+            this.btnPausePlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnPausePlay.BackColor = System.Drawing.Color.Transparent;
+            this.btnPausePlay.Enabled = false;
+            this.btnPausePlay.FlatAppearance.BorderSize = 0;
+            this.btnPausePlay.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPausePlay.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnPausePlay.Image = global::AgOpenGPS.Properties.Resources.boundaryPause;
+            this.btnPausePlay.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnPausePlay.Location = new System.Drawing.Point(80, 232);
+            this.btnPausePlay.Name = "btnPausePlay";
+            this.btnPausePlay.Size = new System.Drawing.Size(82, 81);
+            this.btnPausePlay.TabIndex = 430;
+            this.btnPausePlay.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnPausePlay.UseVisualStyleBackColor = false;
+            this.btnPausePlay.Click += new System.EventHandler(this.btnPausePlay_Click);
+            this.btnPausePlay.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.btnPausePlay_HelpRequested);
             // 
             // btnManual
             // 
@@ -436,25 +455,6 @@
             this.btnListDelete.UseVisualStyleBackColor = false;
             this.btnListDelete.Click += new System.EventHandler(this.btnListDelete_Click);
             this.btnListDelete.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.btnListDelete_HelpRequested);
-            // 
-            // btnPausePlay
-            // 
-            this.btnPausePlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnPausePlay.BackColor = System.Drawing.Color.Transparent;
-            this.btnPausePlay.Enabled = false;
-            this.btnPausePlay.FlatAppearance.BorderSize = 0;
-            this.btnPausePlay.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPausePlay.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPausePlay.Image = global::AgOpenGPS.Properties.Resources.boundaryPause;
-            this.btnPausePlay.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnPausePlay.Location = new System.Drawing.Point(148, 229);
-            this.btnPausePlay.Name = "btnPausePlay";
-            this.btnPausePlay.Size = new System.Drawing.Size(82, 81);
-            this.btnPausePlay.TabIndex = 430;
-            this.btnPausePlay.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.btnPausePlay.UseVisualStyleBackColor = false;
-            this.btnPausePlay.Click += new System.EventHandler(this.btnPausePlay_Click);
-            this.btnPausePlay.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.btnPausePlay_HelpRequested);
             // 
             // FormABLine
             // 

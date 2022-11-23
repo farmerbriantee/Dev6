@@ -41,21 +41,21 @@ namespace AgOpenGPS
                 nudRaiseTime.Enabled = false;
             }
 
-            raiseTime = Properties.Vehicle.Default.setArdMac_hydRaiseTime;
+            raiseTime = mf.p_238.pgn[mf.p_238.raiseTime];
             nudRaiseTime.Text = raiseTime.ToString();
-            lowerTime = Properties.Vehicle.Default.setArdMac_hydLowerTime;
+            lowerTime = mf.p_238.pgn[mf.p_238.lowerTime];
             nudLowerTime.Text = lowerTime.ToString();
 
-            user1 = Properties.Vehicle.Default.setArdMac_user1;
+            user1 = mf.p_238.pgn[mf.p_238.user1];
             nudUser1.Text = user1.ToString();
-            user2 = Properties.Vehicle.Default.setArdMac_user2;
+            user2 = mf.p_238.pgn[mf.p_238.user2];
             nudUser2.Text = user2.ToString();
-            user3 = Properties.Vehicle.Default.setArdMac_user3;
+            user3 = mf.p_238.pgn[mf.p_238.user3];
             nudUser3.Text = user3.ToString();
-            user4 = Properties.Vehicle.Default.setArdMac_user4;
+            user4 = mf.p_238.pgn[mf.p_238.user4];
             nudUser4.Text = user4.ToString();
 
-            lookAhead = Properties.Vehicle.Default.setVehicle_hydraulicLiftLookAhead;
+            lookAhead = mf.vehicle.hydLiftLookAheadTime;
             nudHydLiftLookAhead.Text = lookAhead.ToString("0.0");
         }
 

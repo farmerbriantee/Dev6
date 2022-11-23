@@ -108,9 +108,7 @@ namespace AgOpenGPS
                 distanceFromCurrentLinePivot = pivot.FindDistanceToSegment(curList.points[pA], curList.points[pB], out _, true, false, false);
 
                 //should get its own closest segment
-                distanceFromCurrentLineTool = ((dy2 * mf.tool.Pos.easting) - (dx2 * mf.tool.Pos.northing) + (curList.points[pB].easting
-                            * curList.points[pA].northing) - (curList.points[pB].northing * curList.points[pA].easting))
-                                / Math.Sqrt((dy2 * dy2) + (dx2 * dx2));
+                distanceFromCurrentLineTool = mf.tool.WorkPos.FindDistanceToSegment(curList.points[pA], curList.points[pB], out _, true, false, false);
 
                 double U = (((pivot.easting - curList.points[pA].easting) * dx2)
                                 + ((pivot.northing - curList.points[pA].northing) * dy2))
@@ -164,10 +162,7 @@ namespace AgOpenGPS
                     if (Math.Abs(dx) < double.Epsilon && Math.Abs(dy) < double.Epsilon) return;
 
                     //how far from current AB Line is fix
-                    double distanceFromCurrentLineSteer = ((dy * steer.easting) - (dx * steer.northing) + (curList.points[sB].easting
-                                * curList.points[sA].northing) - (curList.points[sB].northing * curList.points[sA].easting))
-                                    / Math.Sqrt((dy * dy) + (dx * dx));
-
+                    double distanceFromCurrentLineSteer = steer.FindDistanceToSegment(curList.points[sA], curList.points[sB], out _, true, false, false);
 
                     if (!isYouTurnTriggered && CurrentGMode == Mode.Curve)
                     {
@@ -178,7 +173,7 @@ namespace AgOpenGPS
                             dx = curList.points[sB + 1].easting - curList.points[sB - 1].easting;
                             dy = curList.points[sB + 1].northing - curList.points[sB - 1].northing;
                         }
-                        else
+                        else if (sA > 0 && sA + 1 < curList.points.Count)
                         {
                             dx = curList.points[sA + 1].easting - curList.points[sA - 1].easting;
                             dy = curList.points[sA + 1].northing - curList.points[sA - 1].northing;
@@ -319,15 +314,18 @@ namespace AgOpenGPS
 
                     double dist = goalPointDistance - distSoFar;
 
+                    double sin = Math.Sin(pivotHeading);
+                    double cos = Math.Cos(pivotHeading);
+
                     if (pA == 0 && !curList.loop && !CountUp && U < 0)//extend end of line
                     {
-                        goalPoint.northing = rNorth + (Math.Cos(pivotHeading) * -goalPointDistance);
-                        goalPoint.easting = rEast + (Math.Sin(pivotHeading) * -goalPointDistance);
+                        goalPoint.northing = rNorth + (cos * -goalPointDistance);
+                        goalPoint.easting = rEast + (sin * -goalPointDistance);
                     }
                     else if (!curList.loop && pB == curList.points.Count - 1 && CountUp && U > 1)//extend end of line
                     {
-                        goalPoint.northing = start.northing + (Math.Cos(pivotHeading) * goalPointDistance);
-                        goalPoint.easting = start.easting + (Math.Sin(pivotHeading) * goalPointDistance);
+                        goalPoint.northing = start.northing + (cos * goalPointDistance);
+                        goalPoint.easting = start.easting + (sin * goalPointDistance);
                     }
                     else
                     {
@@ -364,15 +362,15 @@ namespace AgOpenGPS
 
                             if (i == 0 && !curList.loop && !CountUp)//extend end of line
                             {
-                                goalPoint.northing = start.northing + (Math.Cos(pivotHeading) * -(goalPointDistance - distSoFar));
-                                goalPoint.easting = start.easting + (Math.Sin(pivotHeading) * -(goalPointDistance - distSoFar));
+                                goalPoint.northing = start.northing + (cos * -(goalPointDistance - distSoFar));
+                                goalPoint.easting = start.easting + (sin * -(goalPointDistance - distSoFar));
                             }
                             else if (!curList.loop && i == curList.points.Count - 1 && CountUp)//extend end of line
                             {
                                 //goalPointDistance is longer than remaining u-turn
                                 completeYouTurn = true;
-                                goalPoint.northing = start.northing + (Math.Cos(pivotHeading) * (goalPointDistance - distSoFar));
-                                goalPoint.easting = start.easting + (Math.Sin(pivotHeading) * (goalPointDistance - distSoFar));
+                                goalPoint.northing = start.northing + (cos * (goalPointDistance - distSoFar));
+                                goalPoint.easting = start.easting + (sin * (goalPointDistance - distSoFar));
                             }
                         }
                     }

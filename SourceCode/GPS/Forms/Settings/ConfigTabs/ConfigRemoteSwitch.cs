@@ -15,22 +15,22 @@ namespace AgOpenGPS
 
         private void ConfigRemoteSwitch_Load(object sender, EventArgs e)
         {
-            chkSelectWorkSwitch.Checked = Properties.Settings.Default.setF_IsWorkSwitchEnabled;
+            chkSelectWorkSwitch.Checked = mf.mc.isWorkSwitchEnabled;
 
-            chkSetManualSections.Checked = Properties.Settings.Default.setF_IsWorkSwitchManual;
+            chkSetManualSections.Checked = mf.mc.isWorkSwitchManual;
             chkSetAutoSections.Checked = !chkSetManualSections.Checked;
 
-            chkWorkSwActiveLow.Checked = Properties.Settings.Default.setF_IsWorkSwitchActiveLow;
+            chkWorkSwActiveLow.Checked = mf.mc.isWorkSwitchActiveLow;
             chkWorkSwActiveLow.Image = chkWorkSwActiveLow.Checked ? Properties.Resources.SwitchActiveClosed : Properties.Resources.SwitchActiveOpen;
 
 
-            chkSelectSteerSwitch.Checked = Properties.Settings.Default.setF_IsSteerSwitchEnabled;
+            chkSelectSteerSwitch.Checked = mf.mc.isSteerSwitchEnabled;
 
-            chkSetManualSectionsSteer.Checked = Properties.Settings.Default.setF_steerControlsManual;
+            chkSetManualSectionsSteer.Checked = mf.mc.isSteerSwitchManual;
             chkSetAutoSectionsSteer.Enabled = !chkSetManualSectionsSteer.Checked;
 
-            cboxAutoSteerAuto.Checked = Properties.Settings.Default.setAS_isAutoSteerAutoOn;
-            if (Properties.Settings.Default.setAS_isAutoSteerAutoOn)
+            cboxAutoSteerAuto.Checked = mf.mc.isAutoSteerAuto;
+            if (cboxAutoSteerAuto.Checked)
             {
                 cboxAutoSteerAuto.Image = Properties.Resources.AutoSteerOn;
                 cboxAutoSteerAuto.Text = "        Remote";

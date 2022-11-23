@@ -98,8 +98,8 @@ namespace AgOpenGPS
             {
                 vec2 fix = mf.pivotAxlePos;
 
-                mf.gyd.EditGuidanceLine.points.Add(new vec2(fix.easting + Math.Cos(mf.fixHeading) * mf.tool.toolOffset, fix.northing - Math.Sin(mf.fixHeading) * mf.tool.toolOffset));
-                mf.gyd.EditGuidanceLine.points.Add(new vec2(mf.gyd.EditGuidanceLine.points[0].easting + Math.Sin(mf.fixHeading), mf.gyd.EditGuidanceLine.points[0].northing + Math.Cos(mf.fixHeading)));
+                mf.gyd.EditGuidanceLine.points.Add(new vec2(fix.easting + mf.cosH * mf.tool.toolOffset, fix.northing - mf.sinH * mf.tool.toolOffset));
+                mf.gyd.EditGuidanceLine.points.Add(new vec2(mf.gyd.EditGuidanceLine.points[0].easting + mf.sinH, mf.gyd.EditGuidanceLine.points[0].northing + mf.cosH));
 
                 nudHeading.Enabled = true;
                 nudHeading.Value = (decimal)glm.toDegrees(mf.fixHeading);
@@ -204,7 +204,7 @@ namespace AgOpenGPS
                     if (aveLineHeading < 0) aveLineHeading += glm.twoPI;
 
                     //build the tail extensions
-                    mf.gyd.EditGuidanceLine.points.AddFirstLastPoints(200, aveLineHeading);
+                    mf.gyd.EditGuidanceLine.points.AddFirstLastPoints(200, mf.tool.toolWidth, false);
 
                     panelAPlus.Visible = false;
                     panelName.Visible = true;
@@ -280,19 +280,16 @@ namespace AgOpenGPS
             if (Mode == Mode.AB)
             {
                 btnManual.Visible = true;
-                btnPausePlay.Visible = false;
                 nudHeading.Enabled = false;
+                btnPausePlay.Visible = false;
                 btnEnter_APlus.Enabled = false;
-
-                mf.gyd.EditGuidanceLine = new CGuidanceLine(Mode.AB);
             }
             else
             {
                 btnManual.Visible = false;
                 nudHeading.Visible = false;
-                btnEnter_APlus.Visible = false;
                 btnPausePlay.Enabled = false;
-                mf.gyd.EditGuidanceLine = new CGuidanceLine(Mode.Curve);
+                btnEnter_APlus.Visible = false;
             }
 
             if (Mode == Mode.RecPath)

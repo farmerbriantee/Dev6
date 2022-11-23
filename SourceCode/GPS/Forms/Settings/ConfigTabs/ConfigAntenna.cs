@@ -17,20 +17,20 @@ namespace AgOpenGPS
 
         private void ConfigAntenna_Load(object sender, EventArgs e)
         {
-            antennaHeight = Properties.Vehicle.Default.setVehicle_antennaHeight;
+            antennaHeight = mf.vehicle.antennaHeight;
             nudAntennaHeight.Text = (antennaHeight * glm.mToUser).ToString("0");
 
-            antennaPivot = Properties.Vehicle.Default.setVehicle_antennaPivot;
+            antennaPivot = mf.vehicle.antennaPivot;
             nudAntennaPivot.Text = (antennaPivot * glm.mToUser).ToString("0");
             
-            antennaOffset = Properties.Vehicle.Default.setVehicle_antennaOffset;
+            antennaOffset = mf.vehicle.antennaOffset;
             nudAntennaOffset.Text = (antennaOffset * glm.mToUser).ToString("0");
 
-            if (Properties.Vehicle.Default.setVehicle_vehicleType == 0)
+            if (mf.vehicle.vehicleType == 0)
                 pboxAntenna.BackgroundImage = Properties.Resources.AntennaTractor;
-            else if (Properties.Vehicle.Default.setVehicle_vehicleType == 1)
+            else if (mf.vehicle.vehicleType == 1)
                 pboxAntenna.BackgroundImage = Properties.Resources.AntennaHarvester;
-            else if (Properties.Vehicle.Default.setVehicle_vehicleType == 2)
+            else if (mf.vehicle.vehicleType == 2)
                 pboxAntenna.BackgroundImage = Properties.Resources.Antenna4WD;
         }
 
@@ -39,7 +39,7 @@ namespace AgOpenGPS
             Properties.Vehicle.Default.setVehicle_antennaPivot = mf.vehicle.antennaPivot = antennaPivot;
             Properties.Vehicle.Default.setVehicle_antennaHeight = mf.vehicle.antennaHeight = antennaHeight;
             Properties.Vehicle.Default.setVehicle_antennaOffset = mf.vehicle.antennaOffset = antennaOffset;
-
+            mf.vehicle.updateVBO = true;
             Properties.Vehicle.Default.Save();
         }
 

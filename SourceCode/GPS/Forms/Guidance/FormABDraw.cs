@@ -461,12 +461,12 @@ namespace AgOpenGPS
 
         private void btnMakeBoundaryCurve_Click(object sender, EventArgs e)
         {
-            double moveDist = (double)nudDistance.Value * glm.userToM;
+            double offsetDist = (double)nudDistance.Value * glm.userToM;
 
             btnCancelTouch.Enabled = false;
             btnMakeBoundaryCurve.Enabled = false;
 
-            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, 0, -1, -1, true);
+            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline<Polyline>(offsetDist)[0];
 
             if (poly.points.Count > 3)
             {
@@ -494,9 +494,9 @@ namespace AgOpenGPS
         {
             btnCancelTouch.Enabled = false;
 
-            double moveDist = (double)nudDistance.Value * glm.userToM;
+            double offsetDist = (double)nudDistance.Value * glm.userToM;
 
-            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline(moveDist, 0, start, end, false);
+            Polyline poly = mf.bnd.bndList[0].fenceLine.OffsetAndDissolvePolyline<Polyline>(offsetDist, 0, start, end, false)[0];
 
             if (poly.points.Count > 1)
             {
@@ -512,10 +512,9 @@ namespace AgOpenGPS
                 while (mf.gyd.curveArr.Exists(L => L.Name == text))//generate unique name!
                     text += " ";
                 New.Name = text;
-                New.loop = false;
-
-                //build the tail extensions
-                New.points.AddFirstLastPoints(200, aveLineHeading);
+                
+                if (!New.loop) //build the tail extensions
+                    New.points.AddFirstLastPoints(200, mf.tool.toolWidth, false);
 
                 mf.gyd.curveArr.Add(New);
                 selectedCurveLine = New;
@@ -708,6 +707,7 @@ namespace AgOpenGPS
             Matrix4 mat = Matrix4.CreateOrthographic((float)currentDist, (float)currentDist, -1.0f, 1.0f);
             GL.LoadMatrix(ref mat);
             GL.MatrixMode(MatrixMode.Modelview);
+            GL.EnableClientState(ArrayCap.VertexArray);
         }
 
         #region Help

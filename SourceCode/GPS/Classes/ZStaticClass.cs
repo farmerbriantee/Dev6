@@ -10,12 +10,18 @@ namespace AgOpenGPS
     {
         public List<vec2> points = new List<vec2>();
         public bool loop;
+
+        public override string ToString()
+        {
+            return "points = " + points.Count.ToString() + ", loop = " + loop.ToString();
+        }
     }
 
     public class Polyline2 : Polyline
     {
         public bool ResetPoints, ResetIndexer;
-        public int BufferPoints = int.MinValue, BufferIndex = int.MinValue, BufferPointsCnt = 0, BufferIndexCnt = 0;
+        public int VBO = 0, EBO = 0, VBOCount = 0, EBOCount = 0;
+        public double northMax = double.PositiveInfinity, northMin, eastMax, eastMin;
 
         public void DrawPolyLine(DrawType type)
         {
@@ -23,94 +29,97 @@ namespace AgOpenGPS
             {
                 if (type == DrawType.Tram)
                 {
-                    if (BufferPoints != int.MinValue)
+                    if (VBO != 0)
                     {
-                        GL.BindBuffer(BufferTarget.ArrayBuffer, BufferPoints);
-                        GL.VertexPointer(2, VertexPointerType.Double, 16, IntPtr.Zero);
-                        GL.EnableClientState(ArrayCap.VertexArray);
+                        GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+                        GL.VertexPointer(2, VertexPointerType.Double, 0, 0);
                         if (loop)
-                            GL.DrawArrays(PrimitiveType.LineLoop, 0, BufferPointsCnt);
+                            GL.DrawArrays(PrimitiveType.LineLoop, 0, VBOCount);
                         else
-                            GL.DrawArrays(PrimitiveType.LineStrip, 0, BufferPointsCnt);
+                            GL.DrawArrays(PrimitiveType.LineStrip, 0, VBOCount);
                     }
 
-                    if (BufferIndex != int.MinValue)
+                    if (EBO != 0)
                     {
-                        GL.BindBuffer(BufferTarget.ArrayBuffer, BufferIndex);
-                        GL.VertexPointer(2, VertexPointerType.Double, 16, IntPtr.Zero);
-                        GL.EnableClientState(ArrayCap.VertexArray);
+                        GL.BindBuffer(BufferTarget.ArrayBuffer, EBO);
+                        GL.VertexPointer(2, VertexPointerType.Double, 0, 0);
                         if (loop)
-                            GL.DrawArrays(PrimitiveType.LineLoop, 0, BufferIndexCnt);
+                            GL.DrawArrays(PrimitiveType.LineLoop, 0, EBOCount);
                         else
-                            GL.DrawArrays(PrimitiveType.LineStrip, 0, BufferIndexCnt);
+                            GL.DrawArrays(PrimitiveType.LineStrip, 0, EBOCount);
                     }
                 }
                 else
                 {
-                    if (type == DrawType.Triangles && (BufferIndex == int.MinValue || ResetIndexer))
+                    if (VBO == 0 || ResetPoints)
                     {
-                        List<int> Indexer = points.TriangulatePolygon();
-
-                        if (BufferIndex == int.MinValue) GL.GenBuffers(1, out BufferIndex);
-                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, BufferIndex);
-                        GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(Indexer.Count * 4), Indexer.ToArray(), BufferUsageHint.StaticDraw);
-
-                        BufferIndexCnt = Indexer.Count;
-                        ResetIndexer = false;
-                    }
-                    else if (BufferPoints == int.MinValue || ResetPoints)
-                    {
-                        if (BufferPoints == int.MinValue) GL.GenBuffers(1, out BufferPoints);
-                        GL.BindBuffer(BufferTarget.ArrayBuffer, BufferPoints);
+                        if (VBO == 0) VBO = GL.GenBuffer();
+                        points.Add(points[0]);
+                        GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
                         GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(points.Count * 16), points.ToArray(), BufferUsageHint.StaticDraw);
-                        BufferPointsCnt = points.Count;
+                        points.RemoveAt(points.Count - 1);
+
+                        VBOCount = points.Count;
                         ResetPoints = false;
+                        if (EBO != 0) ResetIndexer = true;
                     }
 
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, BufferPoints);
-                    GL.VertexPointer(2, VertexPointerType.Double, 0, IntPtr.Zero);
-                    GL.EnableClientState(ArrayCap.VertexArray);
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+                    GL.VertexPointer(2, VertexPointerType.Double, 0, 0);
 
                     if (type == DrawType.Triangles)
                     {
-                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, BufferIndex);
-                        GL.DrawElements(PrimitiveType.Triangles, BufferIndexCnt, DrawElementsType.UnsignedInt, IntPtr.Zero);
+                        if (EBO == 0 || ResetIndexer)
+                        {
+                            List<int> Indexer = points.TriangulatePolygon();
+
+                            if (EBO == 0) EBO = GL.GenBuffer();
+
+                            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
+                            GL.BufferData(BufferTarget.ElementArrayBuffer, Indexer.Count * sizeof(int), Indexer.ToArray(), BufferUsageHint.StaticDraw);
+
+                            EBOCount = Indexer.Count;
+                            ResetIndexer = false;
+                        }
+
+                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
+                        GL.DrawElements(PrimitiveType.Triangles, EBOCount, DrawElementsType.UnsignedInt, 0);//this draws in indexed order!
                     }
                     else if (type == DrawType.TriangleStrip)
                     {
-                        GL.DrawArrays(PrimitiveType.TriangleStrip, 2, BufferPointsCnt - 2);
+                        GL.DrawArrays(PrimitiveType.TriangleStrip, 2, VBOCount - 2);
                     }
                     else if (type == DrawType.Points)
-                        GL.DrawArrays(PrimitiveType.Points, 0, BufferPointsCnt);
+                        GL.DrawArrays(PrimitiveType.Points, 0, VBOCount);
                     else if (loop || type == DrawType.LineLoop)
-                        GL.DrawArrays(PrimitiveType.LineLoop, 0, BufferPointsCnt);
+                        GL.DrawArrays(PrimitiveType.LineLoop, 0, VBOCount);
                     else
-                        GL.DrawArrays(PrimitiveType.LineStrip, 0, BufferPointsCnt);
+                        GL.DrawArrays(PrimitiveType.LineStrip, 0, VBOCount);
                 }
             }
         }
 
         public void RemoveHandle()
         {
-            if (BufferPoints != int.MinValue)
+            if (VBO != 0)
             {
                 try
                 {
-                    if (GL.IsBuffer(BufferPoints))
-                        GL.DeleteBuffer(BufferPoints);
-                    BufferPoints = int.MinValue;
+                    if (GL.IsBuffer(VBO))
+                        GL.DeleteBuffer(VBO);
+                    VBO = 0;
                 }
                 catch
                 {
                 }
             }
-            if (BufferIndex != int.MinValue)
+            if (EBO != 0)
             {
                 try
                 {
-                    if (GL.IsBuffer(BufferIndex))
-                        GL.DeleteBuffer(BufferIndex);
-                    BufferIndex = int.MinValue;
+                    if (GL.IsBuffer(EBO))
+                        GL.DeleteBuffer(EBO);
+                    EBO = 0;
                 }
                 catch
                 {
@@ -147,146 +156,321 @@ namespace AgOpenGPS
             return false;
         }
 
-        public static T OffsetAndDissolvePolyline<T>(this T Poly, double width, double header, int start = -1, int end = -1, bool add = true, double radius = 0) where T : Polyline, new()
+        public static List<T> OffsetAndDissolvePolyline<T>(this Polyline Poly, double offset, double header = 0, int start = -1, int end = -1, bool add = true) where T : Polyline, new()
         {
-            List<vec2> OffsetPoints = Poly.OffsetPolyline(width, header, start, end, add);//, radius != 0);
+            List<vec2> OffsetPoints = Poly.OffsetPolyline(offset,false, out int dddd, header, start, end, add);
 
-            List<T> Output = OffsetPoints.DissolvePolyLine<T>(Poly.loop && add);
+            List<T> Output = OffsetPoints.DissolvePolyLine<T>(dddd);// Poly.loop && add);
 
             if (Output.Count > 0)
-            {
-                //if (radius != 0)
-                //    Output[0].points = Output[0].OffsetPolyline(width < 0 ? radius : -radius, 0, start, end, add, radius > 0);
-
-                return Output[0];
-            }
+                return Output;
             else
-                return new T();
+                return new List<T>() { new T() };
         }
 
-        public static List<T> OffsetAndDissolvePolyline<T>(this T Poly, bool _, double width, double header, int start = -1, int end = -1, bool add = true) where T : Polyline, new()
+        public static List<vec2> OffsetPolyline<T>(this T Poly, double offset, bool round, out int dddd, double AddHeader = 0, int Start = -1, int End = -1, bool Add = true) where T : Polyline, new()
         {
-            List<vec2> OffsetPoints = Poly.OffsetPolyline(width, header, start, end, add);
+            double area = 0;
 
-            List<T> Output = OffsetPoints.DissolvePolyLine<T>(Poly.loop);
-
-            return Output;
-        }
-
-        public static List<vec2> OffsetPolyline<T>(this T Poly, double Distance, double AddHeader = 0, int Start = -1, int End = -1, bool Add = true, bool round = true) where T : Polyline, new()
-        {
             List<vec2> OffsetPoints = new List<vec2>();
+
+            dddd = 0;
             if (Poly.points.Count > 1)
             {
-                int A, C;
-                vec2 norm1, norm2;
-                bool dd = Start > End;
+                List<vec2> StartPoints = new List<vec2>();
 
+                bool pointsAtEnd = false;
+                bool dd = Start > End;
                 int stop = !Add || Start > End ? End : Poly.points.Count - 1;
 
-                for (int B = Add || Start < 0 ? 0 : Start; B <= stop || dd; B++)
+                if (round && (!Poly.loop || !Add))
                 {
-                    if (B == Poly.points.Count && dd)
+                    for (int B = Add || Start < 0 ? 0 : Start; B <= stop || dd; B++)
                     {
-                        dd = false;
-                        B = -1;
-                        continue;
-                    }
-
-                    if (Start == -1 || (Start > End ? (B >= Start || B <= End) : (B >= Start && B <= End)))
-                    {
-                        A = (B - 1).Clamp(Poly.points.Count);
-                        C = (B + 1).Clamp(Poly.points.Count);
-
-                        norm1 = (Poly.points[A] - Poly.points[B]).Normalize();
-                        norm2 = (Poly.points[C] - Poly.points[B]).Normalize();
-
+                        if (B == Poly.points.Count && dd)
+                        {
+                            dd = false;
+                            B = -1;
+                            continue;
+                        }
+                        
                         if ((!Poly.loop && B == 0) || (!Add && B == Start))
                         {
-                            double Easting = Poly.points[B].easting + Distance * norm2.northing;
-                            double Northing = Poly.points[B].northing - Distance * norm2.easting;
+                            vec2 norm4 = (Poly.points[B + 1] - Poly.points[B]).Normalize();
 
-                            if (AddHeader != 0)
-                                OffsetPoints.Add(new vec2(Easting - AddHeader * norm2.easting, Northing - AddHeader * norm2.northing));
-                            OffsetPoints.Add(new vec2(Easting, Northing));
+                            double Easting = Poly.points[B].easting;
+                            double Northing = Poly.points[B].northing;
+
+                            StartPoints.Add(new vec2(Easting - AddHeader * norm4.easting, Northing - AddHeader * norm4.northing));
                         }
                         else if ((!Poly.loop && B == Poly.points.Count - 1) || (!Add && B == End))
                         {
-                            double Easting = Poly.points[B].easting - Distance * norm1.northing;
-                            double Northing = Poly.points[B].northing + Distance * norm1.easting;
+                            vec2 norm3 = (Poly.points[B - 1] - Poly.points[B]).Normalize();
+                            double Easting = Poly.points[B].easting;
+                            double Northing = Poly.points[B].northing;
 
-                            OffsetPoints.Add(new vec2(Easting, Northing));
-                            if (AddHeader != 0)
-                                OffsetPoints.Add(new vec2(Easting - AddHeader * norm1.easting, Northing - AddHeader * norm1.northing));
+                            StartPoints.Add(new vec2(Easting - AddHeader * norm3.easting, Northing - AddHeader * norm3.northing));
                         }
-                        else if (Distance == 0)
-                            OffsetPoints.Add(Poly.points[B]);
                         else
                         {
-                            vec2 start1 = new vec2(Poly.points[A].easting - Distance * norm1.northing, Poly.points[A].northing + Distance * norm1.easting);
-                            vec2 end1 = new vec2(Poly.points[B].easting - Distance * norm1.northing, Poly.points[B].northing + Distance * norm1.easting);
-                            vec2 start2 = new vec2(Poly.points[C].easting + Distance * norm2.northing, Poly.points[C].northing - Distance * norm2.easting);
-                            vec2 end2 = new vec2(Poly.points[B].easting + Distance * norm2.northing, Poly.points[B].northing - Distance * norm2.easting);
+                            StartPoints.Add(new vec2(Poly.points[B].easting, Poly.points[B].northing));
+                        }
+                    }
 
-                            double sinA = norm1.Cross(norm2);
-                            if (GetLineIntersection(start1, end1, start2, end2, out vec2 Crossing, out double Time, out double Time2, true))
+                    if (GetLineIntersection(StartPoints[1], StartPoints[0], StartPoints[StartPoints.Count - 2], StartPoints[StartPoints.Count - 1], out vec2 crossingA, out double TimeA, out double TimeB, true) && TimeA > 0.0 && TimeB > 0.0)
+                    {
+                        if (TimeA < 1.0)
+                            StartPoints.RemoveAt(0);
+                        if (TimeB < 1.0)
+                            StartPoints.RemoveAt(StartPoints.Count - 1);
+                        StartPoints.Insert(0, crossingA);
+                        //StartPoints.Add(crossingA);
+                        dddd = 0;
+                        //Poly.loop = true;
+                    }
+                    else if (StartPoints.Count > 0)
+                    {
+                        double mineast, maxeast, minnorth, maxnorth;
+
+                        mineast = maxeast = StartPoints[0].easting;
+                        minnorth = maxnorth = StartPoints[0].northing;
+
+                        for (int i = 0; i < StartPoints.Count; i++)
+                        {
+                            if (StartPoints[i].easting > maxeast) maxeast = StartPoints[i].easting;
+                            else if (StartPoints[i].easting < mineast) mineast = StartPoints[i].easting;
+
+                            if (StartPoints[i].northing > maxnorth) maxnorth = StartPoints[i].northing;
+                            else if (StartPoints[i].northing < minnorth) minnorth = StartPoints[i].northing;
+                        }
+
+                        maxeast += 10000;
+                        mineast -= 10000;
+                        maxnorth += 10000;
+                        minnorth -= 10000;
+
+                        vec2[] rr = new vec2[4];
+
+                        rr[0] = new vec2(mineast, maxnorth);
+                        rr[1] = new vec2(maxeast, maxnorth);
+                        rr[2] = new vec2(maxeast, minnorth);
+                        rr[3] = new vec2(mineast, minnorth);
+                        int j = 3;
+                        int k = 0;
+
+                        vec2 cross = StartPoints[0];
+
+                        for (; k < rr.Length; j = k++)
+                        {
+                            if (GetLineIntersection(StartPoints[1], StartPoints[0], rr[j], rr[k], out vec2 crossing, out double timeA, out double timeB, true))
                             {
-                                if (round && sinA > 0.0 == Distance > 0)
+                                if (timeA > 0 && timeB >= 0 && timeB <= 1)
                                 {
-                                    double startAngle = Math.Atan2(end1.easting - Poly.points[B].easting, end1.northing - Poly.points[B].northing);
-                                    double endAngle = Math.Atan2(end2.easting - Poly.points[B].easting, end2.northing - Poly.points[B].northing);
-
-                                    if (startAngle < 0) startAngle += glm.twoPI;
-                                    if (endAngle < 0) endAngle += glm.twoPI;
-
-                                    double sweepAngle;
-
-                                    if (((glm.twoPI - endAngle + startAngle) % glm.twoPI) < ((glm.twoPI - startAngle + endAngle) % glm.twoPI))
-                                        sweepAngle = (glm.twoPI - endAngle + startAngle) % glm.twoPI;
-                                    else
-                                        sweepAngle = (glm.twoPI - startAngle + endAngle) % glm.twoPI;
-                                    double Distance2 = Distance;
-
-                                    int sign = Math.Sign(-sweepAngle);
-                                    if (Distance < 0)
-                                    {
-                                        sign = -sign;
-                                        Distance2 = -Distance2;
-                                    }
-                                    int pointsCount = (int)Math.Round(Math.Abs(sweepAngle / 0.0436332)) + 1;
-
-                                    //ss based on radius!
-
-                                    double degreeFactor = sweepAngle / pointsCount;
-
-                                    for (int j = 0; j < pointsCount; ++j)
-                                    {
-                                        var pointX = Poly.points[B].northing + Math.Cos(startAngle + sign * (j + 1) * degreeFactor) * Distance2;
-                                        var pointY = Poly.points[B].easting + Math.Sin(startAngle + sign * (j + 1) * degreeFactor) * Distance2;
-                                        OffsetPoints.Add(new vec2(pointY, pointX));
-                                    }
+                                    if (timeA <= 1)
+                                        StartPoints.RemoveAt(0);
+                                    StartPoints.Insert(0, crossing);
+                                    cross = crossing;
+                                    dddd += 1;
+                                    break;
                                 }
-                                else if (Time > 0.0 && Time < 1.0 && Time2 > 0.0 && Time2 < 1.0)
-                                    OffsetPoints.Add(Crossing);
-                                else if ((Distance > 0) == (sinA > 0.0))
-                                    OffsetPoints.Add(Crossing);
-                                else
+                            }
+                        }
+                        bool looparound = true;
+                        int l = j;
+
+                        for (; looparound || j >= k; l = k++)
+                        {
+                            if (k >= 4)
+                            {
+                                if (looparound)
                                 {
-                                    OffsetPoints.Add(end1);
-                                    OffsetPoints.Add(end2);
+                                    looparound = false;
+                                    k = 0;
+                                    //continue;
+                                }
+                                else
+                                    break;
+                            }
+
+                            if (GetLineIntersection(StartPoints[StartPoints.Count - 2], StartPoints[StartPoints.Count - 1], rr[l], rr[k], out vec2 crossing, out double timeC, out double timeD, true))
+                            {
+                                if (timeC > 0 && timeD >= 0 && timeD <= 1)
+                                {
+                                    if (timeC <= 1)
+                                        StartPoints.RemoveAt(StartPoints.Count - 1);
+
+                                    StartPoints.Insert(0, crossing);
+                                    dddd += 1;
+                                    break;
+                                }
+                            }
+                            cross = rr[k];
+                            StartPoints.Insert(0, rr[k]);
+                            dddd += 1;
+                        }
+                    }
+
+                    int j2 = StartPoints.Count - 1;  // The last vertex is the 'previous' one to the first
+                    for (int i = 0; i < StartPoints.Count; j2 = i++)
+                    {
+                        area += (StartPoints[j2].easting + StartPoints[i].easting) * (StartPoints[j2].northing - StartPoints[i].northing);
+                    }
+
+                    //make sure boundary is clockwise
+                    if (area < 0)
+                    {
+                        pointsAtEnd = true;
+                        offset = -offset;
+                        StartPoints.Reverse();
+                        dddd = -dddd;
+                    }
+                    //Poly.loop = true;
+
+                }
+                else
+                    StartPoints = Poly.points;
+
+
+
+                int A, C;
+                vec2 norm1, norm2;
+
+                for (int B = 0; B < StartPoints.Count; B++)
+                {
+                    if (Start == -1 || (Start > End ? (B >= Start || B <= End) : (B >= Start && B <= End)))
+                    {
+                        A = (B - 1).Clamp(StartPoints.Count);
+                        C = (B + 1).Clamp(StartPoints.Count);
+
+                        norm1 = (StartPoints[A] - StartPoints[B]).Normalize();
+                        norm2 = (StartPoints[C] - StartPoints[B]).Normalize();
+
+
+                        vec2 tt = norm1 + norm2;
+                        if (offset == 0)
+                            OffsetPoints.Add(StartPoints[B]);
+                        else
+                        {
+                            bool force = false;
+                            double DistanceA = offset;
+                            double DistanceB = offset;
+                            if (!pointsAtEnd)
+                            {
+                                if ((B == 0 && dddd == 0) || B < dddd)
+                                {
+                                    if (dddd != 0)
+                                        DistanceA = 0;
+                                    if (B < dddd - 1)
+                                        DistanceB = 0;
+                                    force = true;
+                                }
+                            }
+                            if (pointsAtEnd)
+                            {
+                                if ((B == StartPoints.Count - 1 && dddd == 0) || (B >= StartPoints.Count + dddd))
+                                {
+                                    if (C > B)
+                                    {
+                                        DistanceB = 0;
+                                    }
+                                    if (B > StartPoints.Count + dddd)
+                                        DistanceA = 0;
+                                    force = true;
+                                }
+                            }
+
+
+
+                            vec2 start1 = new vec2(StartPoints[A].easting - DistanceA * norm1.northing, StartPoints[A].northing + DistanceA * norm1.easting);
+                            vec2 end1 = new vec2(StartPoints[B].easting - DistanceA * norm1.northing, StartPoints[B].northing + DistanceA * norm1.easting);
+
+                            vec2 start2 = new vec2(StartPoints[C].easting + DistanceB * norm2.northing, StartPoints[C].northing - DistanceB * norm2.easting);
+                            vec2 end2 = new vec2(StartPoints[B].easting + DistanceB * norm2.northing, StartPoints[B].northing - DistanceB * norm2.easting);
+
+                            if (Math.Abs(tt.easting) < 0.000000001 && Math.Abs(tt.northing) < 0.000000001)
+                            {
+                                OffsetPoints.Add(end1);
+                            }
+                            else
+                            {
+                                double sinA = norm1.Cross(norm2);
+                                if (GetLineIntersection(start1, end1, start2, end2, out vec2 Crossing, out double Time, out double Time2, true))
+                                {
+                                    if (force)
+                                        OffsetPoints.Add(Crossing);
+                                    else if (sinA > 0.0 == offset > 0)
+                                    {
+                                        double startAngle = Math.Atan2(end1.easting - StartPoints[B].easting, end1.northing - StartPoints[B].northing);
+                                        double endAngle = Math.Atan2(end2.easting - StartPoints[B].easting, end2.northing - StartPoints[B].northing);
+
+                                        if (startAngle < 0) startAngle += glm.twoPI;
+                                        if (endAngle < 0) endAngle += glm.twoPI;
+
+                                        double sweepAngle;
+
+                                        if (((glm.twoPI - endAngle + startAngle) % glm.twoPI) < ((glm.twoPI - startAngle + endAngle) % glm.twoPI))
+                                            sweepAngle = (glm.twoPI - endAngle + startAngle) % glm.twoPI;
+                                        else
+                                            sweepAngle = (glm.twoPI - startAngle + endAngle) % glm.twoPI;
+                                        double Distance2 = offset;
+
+                                        int sign = Math.Sign(-sweepAngle);
+                                        if (offset < 0)
+                                        {
+                                            sign = -sign;
+                                            Distance2 = -Distance2;
+                                        }
+                                        int pointsCount = (int)Math.Round(Math.Abs(sweepAngle / 0.0436332)) + 1;
+
+                                        //ss based on radius!
+                                        
+                                        double degreeFactor = sweepAngle / pointsCount;
+
+                                        for (int j = 0; j < pointsCount; ++j)
+                                        {
+                                            var pointX = StartPoints[B].northing + Math.Cos(startAngle + sign * (j + 1) * degreeFactor) * Distance2;
+                                            var pointY = StartPoints[B].easting + Math.Sin(startAngle + sign * (j + 1) * degreeFactor) * Distance2;
+                                            OffsetPoints.Add(new vec2(pointY, pointX));
+                                        }
+                                    }
+                                    else if (Time > 0.0 && Time < 1.0 && Time2 > 0.0 && Time2 < 1.0)
+                                        OffsetPoints.Add(Crossing);
+                                    else if ((offset > 0) == (sinA > 0.0))
+                                        OffsetPoints.Add(Crossing);
+                                    else
+                                    {
+                                        OffsetPoints.Add(end1);
+                                        OffsetPoints.Add(end2);
+                                    }
                                 }
                             }
                         }
                     }
                     else if (Add)
-                        OffsetPoints.Add(Poly.points[B]);
-                    else if (B == End)
-                        break;
+                        OffsetPoints.Add(StartPoints[B]);
                 }
             }
             return OffsetPoints;
         }
 
+        public static void CalculateBoundingBox(this Polyline2 Poly, int Index)
+        {
+            if (Poly.points.Count > Index)
+            {
+                Poly.northMax = Poly.northMin = Poly.points[Index].northing;
+                Poly.eastMax = Poly.eastMin = Poly.points[Index].easting;
+
+                for (; Index < Poly.points.Count; Index++)
+                {
+                    if (Poly.points[Index].easting > Poly.eastMax) Poly.eastMax = Poly.points[Index].easting;
+                    else if (Poly.points[Index].easting < Poly.eastMin) Poly.eastMin = Poly.points[Index].easting;
+
+                    if (Poly.points[Index].northing > Poly.northMax) Poly.northMax = Poly.points[Index].northing;
+                    else if (Poly.points[Index].northing < Poly.northMin) Poly.northMin = Poly.points[Index].northing;
+                }
+            }
+        }
+        
         public static vec2 GetProportionPoint(this vec2 point, double segment, double length, double dx, double dy)
         {
             double factor = segment / length;
@@ -501,7 +685,7 @@ namespace AgOpenGPS
             }
         }
 
-        public static List<T> DissolvePolyLine<T>(this List<vec2> Points, bool loop = true) where T : Polyline, new()
+        public static List<T> DissolvePolyLine<T>(this List<vec2> Points, int dddd, bool loop = true) where T : Polyline, new()
         {
             if (Points.Count < 2) return new List<T>();
 
@@ -539,9 +723,6 @@ namespace AgOpenGPS
 
                     if (GetLineIntersection(CurrentVertex.Coords, CurrentVertex.Next.Coords, SecondVertex.Coords, SecondVertex.Next.Coords, out vec2 intersectionPoint2D, out double Time, out _))
                     {
-                        if (!loop && SecondVertex.Next == StopVertex)
-                            break;
-
                         VertexPoint aa = new VertexPoint(intersectionPoint2D)
                         {
                             Crossing = CurrentVertex,
@@ -683,6 +864,20 @@ namespace AgOpenGPS
                     CurrentVertex = CurrentVertex.Next;
                     if (safety++ > TotalCount) break;
                 }
+                if (StopVertex == First)
+                {
+                    if (dddd > 0)
+                    {
+                        FinalPolyLine[FinalPolyLine.Count - 1].points.RemoveRange(0, dddd);
+                        FinalPolyLine[FinalPolyLine.Count - 1].loop = false;
+                    }
+                    else if (dddd < 0)
+                    {
+                        FinalPolyLine[FinalPolyLine.Count - 1].points.RemoveRange(FinalPolyLine[FinalPolyLine.Count - 1].points.Count + dddd, -dddd);
+                        FinalPolyLine[FinalPolyLine.Count - 1].loop = false;
+                        FinalPolyLine[FinalPolyLine.Count - 1].points.Reverse();
+                    }
+                }
             }
 
             return FinalPolyLine;
@@ -733,47 +928,52 @@ namespace AgOpenGPS
 
                 if (!IsTriangleOrientedClockwise(CurrentVertex.Coords, CurrentVertex.Next.Coords, CurrentVertex.Next.Next.Coords))
                 {
-                    inside = false;
+                    double denominator = (CurrentVertex.Next.Coords.northing - CurrentVertex.Coords.northing) * (CurrentVertex.Next.Next.Coords.easting - CurrentVertex.Next.Coords.easting) - (CurrentVertex.Next.Next.Coords.northing - CurrentVertex.Next.Coords.northing) * (CurrentVertex.Next.Coords.easting - CurrentVertex.Coords.easting);
 
-                    for (int l = 0; l < Points.Count; l++)
+                    if (denominator < -0.0001 || denominator > 0.0001)//straight line fix
                     {
-                        if (IsPointInTriangle(CurrentVertex.Coords, CurrentVertex.Next.Coords, CurrentVertex.Next.Next.Coords, Points[l]))
+                        inside = false;
+
+                        for (int l = 0; l < Points.Count; l++)
                         {
-                            inside = true;
+                            if (IsPointInTriangle(CurrentVertex.Coords, CurrentVertex.Next.Coords, CurrentVertex.Next.Next.Coords, Points[l]))
+                            {
+                                inside = true;
+                                break;
+                            }
+                        }
+
+                        if (!inside)
+                        {
+                            int winding_number = 0;
+
+                            double a = (CurrentVertex.Coords.northing + CurrentVertex.Next.Coords.northing + CurrentVertex.Next.Next.Coords.northing) / 3.0;
+                            double b = (CurrentVertex.Coords.easting + CurrentVertex.Next.Coords.easting + CurrentVertex.Next.Next.Coords.easting) / 3.0;
+
+                            vec2 test3 = new vec2(b, a);
+                            int l = Points.Count - 1;
+                            for (int m = 0; m < Points.Count; l = m++)
+                            {
+                                if (Points[l].easting <= test3.easting && Points[m].easting > test3.easting)
+                                {
+                                    if ((Points[m].northing - Points[l].northing) * (test3.easting - Points[l].easting) -
+                                    (test3.northing - Points[l].northing) * (Points[m].easting - Points[l].easting) > 0)
+                                    {
+                                        ++winding_number;
+                                    }
+                                }
+                                else if (Points[l].easting > test3.easting && Points[m].easting <= test3.easting)
+                                {
+                                    if ((Points[m].northing - Points[l].northing) * (test3.easting - Points[l].easting) -
+                                    (test3.northing - Points[l].northing) * (Points[m].easting - Points[l].easting) < 0)
+                                    {
+                                        --winding_number;
+                                    }
+                                }
+                            }
+                            winding = winding_number;
                             break;
                         }
-                    }
-
-                    if (!inside)
-                    {
-                        int winding_number = 0;
-
-                        double a = (CurrentVertex.Coords.northing + CurrentVertex.Next.Coords.northing + CurrentVertex.Next.Next.Coords.northing) / 3.0;
-                        double b = (CurrentVertex.Coords.easting + CurrentVertex.Next.Coords.easting + CurrentVertex.Next.Next.Coords.easting) / 3.0;
-
-                        vec2 test3 = new vec2(b, a);
-                        int l = Points.Count - 1;
-                        for (int m = 0; m < Points.Count; l = m++)
-                        {
-                            if (Points[l].easting <= test3.easting && Points[m].easting > test3.easting)
-                            {
-                                if ((Points[m].northing - Points[l].northing) * (test3.easting - Points[l].easting) -
-                                (test3.northing - Points[l].northing) * (Points[m].easting - Points[l].easting) > 0)
-                                {
-                                    ++winding_number;
-                                }
-                            }
-                            else if (Points[l].easting > test3.easting && Points[m].easting <= test3.easting)
-                            {
-                                if ((Points[m].northing - Points[l].northing) * (test3.easting - Points[l].easting) -
-                                (test3.northing - Points[l].northing) * (Points[m].easting - Points[l].easting) < 0)
-                                {
-                                    --winding_number;
-                                }
-                            }
-                        }
-                        winding = winding_number;
-                        break;
                     }
                 }
 
@@ -1242,7 +1442,12 @@ namespace AgOpenGPS
 
         public static bool IsTriangleOrientedClockwise(vec2 p1, vec2 p2, vec2 p3)
         {
-            return p1.northing * p2.easting + p3.northing * p1.easting + p2.northing * p3.easting - p1.northing * p3.easting - p3.northing * p2.easting - p2.northing * p1.easting <= 0;
+            double denominator = (p2.northing - p1.northing) * (p3.easting - p2.easting) - (p3.northing - p2.northing) * (p2.easting - p1.easting);
+
+            if (denominator > -0.0001 && denominator < 0.0001)//straight line fix
+                return true;
+            else
+                return p1.northing * p2.easting + p3.northing * p1.easting + p2.northing * p3.easting - p1.northing * p3.easting - p3.northing * p2.easting - p2.northing * p1.easting <= 0;
         }
 
         private static bool IsEar(vec2 PointA, vec2 PointB, vec2 PointC, List<vec2> vertices)

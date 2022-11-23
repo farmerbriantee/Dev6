@@ -4,7 +4,7 @@ namespace AgOpenGPS
 {
     public partial class CGuidance
     {
-        public void AddPoint(vec2 pivot, double heading)
+        public void AddPoint(vec2 pivot)
         {
             if (creatingContour == null)
             {
@@ -12,7 +12,7 @@ namespace AgOpenGPS
                 curveArr.Add(creatingContour);
             }
 
-            creatingContour.points.Add(new vec2(pivot.easting + Math.Cos(heading) * mf.tool.toolOffset, pivot.northing - Math.Sin(heading) * mf.tool.toolOffset));
+            creatingContour.points.Add(new vec2(pivot.easting + mf.cosH * mf.tool.toolOffset, pivot.northing - mf.sinH * mf.tool.toolOffset));
         }
 
         //End the strip
@@ -28,7 +28,7 @@ namespace AgOpenGPS
             }
             else
                 curveArr.Remove(creatingContour);
-
+            
             creatingContour = null;
         }
 
@@ -40,11 +40,11 @@ namespace AgOpenGPS
                 return false;
             }
 
-            double totalWidth = ((mf.tool.toolWidth - mf.tool.toolOverlap) * pass) + spacing;
-            
+            double offsetDist = ((mf.tool.toolWidth - mf.tool.toolOverlap) * pass) + spacing;
+
             for (int j = 0; j < mf.bnd.bndList.Count; j++)
             {
-                Polyline New = mf.bnd.bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? totalWidth : -totalWidth, 0, -1, -1, true);
+                Polyline New = mf.bnd.bndList[j].fenceLine.OffsetAndDissolvePolyline<Polyline>(j == 0 ? offsetDist : -offsetDist)[0];
                 New.loop = true;
                 curveArr.Add(new CGuidanceLine(Mode.Contour, New) { Name = "Boundary Contour" });
             }
@@ -103,8 +103,8 @@ namespace AgOpenGPS
                     vec2 pivotAxlePosRP = mf.pivotAxlePos;
 
                     //bump it forward
-                    vec2 pt2 = new vec2(pivotAxlePosRP.easting + (Math.Sin(mf.fixHeading) * 3),
-                        pivotAxlePosRP.northing + (Math.Cos(mf.fixHeading) * 3));
+                    vec2 pt2 = new vec2(pivotAxlePosRP.easting + (mf.sinH * 3),
+                        pivotAxlePosRP.northing + (mf.cosH * 3));
 
                     //get the dubins path vec2 point coordinates of turn
                     ytList.points = dubPath.GenerateDubins(pt2, mf.fixHeading, currentRecPath.points[currentPositonIndex], Heading);

@@ -28,8 +28,7 @@ namespace AgOpenGPS
         public double BndBoxRight;
         public double BndBoxTop;
         public double BndBoxBottom;
-        //public List<WGS84[]> Parts = new List<WGS84[]>();
-        public List<List<vec2>> Parts = new List<List<vec2>>();
+        public List<Polyline2> Parts = new List<Polyline2>();
         public bool InsideLargeView = false;
         public int[] BufferID, NumElements, BufferIndex;
         public Color color = Color.FromArgb(0x78000000);
@@ -49,7 +48,6 @@ namespace AgOpenGPS
             mf = _f;
         }
 
-
         public void Draw()
         {
             GL.LineWidth(2);
@@ -57,24 +55,12 @@ namespace AgOpenGPS
             {
                 for (int j = 0; j < Polygons[i].Parts.Count; j++)
                 {
-                    //GL.Color4(Polygons[i].color);
-                    //GL.Begin(PrimitiveType.Polygon);
-                    //for (int k = 0; k < Polygons[i].Parts[j].Count; k++)
-                    //{
-                    //    GL.Vertex3(Polygons[i].Parts[j][k].easting, Polygons[i].Parts[j][k].northing, 0);
-                    //}
-                    //GL.End();
-
                     GL.Color4(Color.FromArgb(0x78000000));
-                    GL.Begin(PrimitiveType.LineLoop);
-                    for (int k = 0; k < Polygons[i].Parts[j].Count; k++)
-                    {
-                        GL.Vertex3(Polygons[i].Parts[j][k].easting, Polygons[i].Parts[j][k].northing, 0);
-                    }
-                    GL.End();
+                    Polygons[i].Parts[j].DrawPolyLine(DrawType.LineLoop);
                 }
             }
         }
+
         public void Main(string FilePath)
         {
             FileStream MainStream = File.Open(FilePath + ".shp", FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -291,26 +277,25 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    List<vec2> points = new List<vec2>(numPointsInPart);
+                                    CBoundaryList New = new CBoundaryList();
+
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + 0 + (16 * point), true));
 
                                         mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        points.Add(new vec2(Easting, Northing));
+                                        New.fenceLine.points.Add(new vec2(Easting, Northing));
                                     }
 
-                                    //CBoundaryList New = new CBoundaryList();
-
-                                    if (points[0].easting == points[points.Count - 1].easting && points[0].northing == points[points.Count - 1].northing)
+                                    if (New.fenceLine.points[0].easting == New.fenceLine.points[New.fenceLine.points.Count - 1].easting && New.fenceLine.points[0].northing == New.fenceLine.points[New.fenceLine.points.Count - 1].northing)
                                     {
-                                        points.RemoveAt(0);
+                                        New.fenceLine.points.RemoveAt(0);
                                     }
 
-                                    //New.fenceLine.points = points;
-                                    //New.CalculateFenceArea();
-                                    //mf.bnd.bndList.Add(New);
+                                    New.CalculateFenceArea();
 
+                                    mf.bnd.bndList.Add(New);
+                                    /*
                                     ShapePolygon2 aa = new ShapePolygon2
                                     {
                                         BndBoxLeft = ParseDouble(ByteArray, 12, true),
@@ -324,10 +309,11 @@ namespace AgOpenGPS
                                         if (aa.BndBoxTop - 0.1 <= mf.mc.latitude && aa.BndBoxBottom + 0.1 >= mf.mc.latitude)
                                         {
                                             aa.InsideLargeView = true;
-                                            aa.Parts.Add(points);
+                                            aa.Parts.Add(Fence);
                                             Polygons.Add(aa);
                                         }
                                     }
+                                    */
                                 }
                             }
                         }
@@ -374,17 +360,17 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    List<vec2> points2 = new List<vec2>(numPointsInPart);
+                                    Polyline2 New = new Polyline2();
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + (16 * point), true));
                                         mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        points2.Add(new vec2(Easting, Northing));
+                                        New.points.Add(new vec2(Easting, Northing));
                                     }
 
                                     if (type == 0)
                                     {
-                                        mf.patchList.Add(new Polyline2 { points = points2 });
+                                        mf.patchList.Add(New);
                                     }
                                     else if (type > 1)
                                     {
@@ -403,7 +389,7 @@ namespace AgOpenGPS
                                                 aa.InsideLargeView = true;
                                                 if (table.Rows.Count > Polygons.Count && table.Columns.Count > 3)
                                                     aa.color = table.Rows[Polygons.Count][4].ToString() == "100" ? Color.FromArgb(0x78FF0000) : Color.FromArgb(0x7800FF00);
-                                                aa.Parts.Add(points2);
+                                                aa.Parts.Add(New);
                                                 Polygons.Add(aa);
                                             }
                                         }

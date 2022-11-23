@@ -593,15 +593,16 @@
             this.lvVehicles.Name = "lvVehicles";
             this.lvVehicles.Size = new System.Drawing.Size(440, 140);
             this.lvVehicles.TabIndex = 494;
-            this.lvVehicles.TileSize = new System.Drawing.Size(300, 35);
+            this.lvVehicles.TileSize = new System.Drawing.Size(430, 35);
             this.lvVehicles.UseCompatibleStateImageBehavior = false;
             this.lvVehicles.View = System.Windows.Forms.View.Tile;
+            this.lvVehicles.SelectedIndexChanged += new System.EventHandler(this.lvVehicles_SelectedIndexChanged);
             this.lvVehicles.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.lvVehicles_HelpRequested);
             // 
             // chVehicle
             // 
             this.chVehicle.Text = "Vehicles";
-            this.chVehicle.Width = 330;
+            this.chVehicle.Width = 430;
             // 
             // label3
             // 

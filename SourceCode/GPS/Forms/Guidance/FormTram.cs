@@ -21,16 +21,17 @@ namespace AgOpenGPS
             label2.Text = ((int)(0.1 * glm.mToUser)).ToString() + glm.unitsInCm;
             lblTramWidth.Text = (mf.tram.tramWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;
 
+            nudFirstPass.Controls[0].Enabled = false;
             nudPasses.Controls[0].Enabled = false;
         }
 
         private void FormTram_Load(object sender, EventArgs e)
         {
+            nudFirstPass.Value = Properties.Settings.Default.setTram_Firstpass;
             nudPasses.Value = Properties.Settings.Default.setTram_passes;
-            nudPasses.ValueChanged += nudPasses_ValueChanged;
+            nudOuterTramPasses.Value = mf.tram.outerTramPasses;
 
             halfToolWidth = (mf.tool.toolWidth - mf.tool.toolOverlap) / 2.0;
-
 
             lblTrack.Text = (mf.vehicle.trackWidth * glm.mToUserBig).ToString("0.00") + glm.unitsFtM;;
 
@@ -136,17 +137,26 @@ namespace AgOpenGPS
             MoveBuildTramLine(halfToolWidth);
         }
 
-        private void nudPasses_ValueChanged(object sender, EventArgs e)
+        private void nudLastPass_Click(object sender, EventArgs e)
         {
-            mf.tram.passes = (int)nudPasses.Value;
-            Properties.Settings.Default.setTram_passes = mf.tram.passes;
-            Properties.Settings.Default.Save();
-            MoveBuildTramLine(0);
+            if (nudPasses.KeypadToNUD())
+            {
+                mf.tram.passes = (int)nudPasses.Value;
+                Properties.Settings.Default.setTram_passes = mf.tram.passes;
+                Properties.Settings.Default.Save();
+                MoveBuildTramLine(0);
+            }
         }
 
-        private void nudPasses_Click(object sender, EventArgs e)
+        private void nudFirstPass_Click(object sender, EventArgs e)
         {
-            nudPasses.KeypadToNUD();
+            if (nudFirstPass.KeypadToNUD())
+            {
+                mf.tram.firstPass = (int)nudFirstPass.Value;
+                Properties.Settings.Default.setTram_Firstpass = mf.tram.firstPass;
+                Properties.Settings.Default.Save();
+                MoveBuildTramLine(0);
+            }
         }
 
         private void btnSwapAB_Click(object sender, EventArgs e)
@@ -157,16 +167,6 @@ namespace AgOpenGPS
                 mf.gyd.ReverseGuidanceLine(mf.gyd.currentGuidanceLine);
             }
             MoveBuildTramLine(0);
-        }
-
-        private void btnTriggerDistanceUp_MouseDown(object sender, MouseEventArgs e)
-        {
-            nudPasses.UpButton();
-        }
-
-        private void btnTriggerDistanceDn_MouseDown(object sender, MouseEventArgs e)
-        {
-            nudPasses.DownButton();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -196,6 +196,17 @@ namespace AgOpenGPS
 
                 default:
                     break;
+            }
+        }
+
+        private void nudOuterTramPasses_Click(object sender, EventArgs e)
+        {
+            if (nudOuterTramPasses.KeypadToNUD())
+            {
+                mf.tram.outerTramPasses = (int)nudOuterTramPasses.Value;
+                Properties.Settings.Default.setTram_OuterTramPasses = mf.tram.outerTramPasses;
+                Properties.Settings.Default.Save();
+                MoveBuildTramLine(0);
             }
         }
 

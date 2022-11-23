@@ -29,9 +29,11 @@
         private void InitializeComponent()
         {
             this.nudTrailingHitchLength = new System.Windows.Forms.Button();
-            this.nudDrawbarLength = new System.Windows.Forms.Button();
-            this.nudTankHitch = new System.Windows.Forms.Button();
+            this.nudHitchLength = new System.Windows.Forms.Button();
+            this.nudTankHitchLength = new System.Windows.Forms.Button();
             this.picboxToolHitch = new System.Windows.Forms.PictureBox();
+            this.nudTankAxleLength = new System.Windows.Forms.Button();
+            this.nudTrailingAxleLength = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picboxToolHitch)).BeginInit();
             this.SuspendLayout();
             // 
@@ -39,52 +41,79 @@
             // 
             this.nudTrailingHitchLength.BackColor = System.Drawing.Color.AliceBlue;
             this.nudTrailingHitchLength.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.nudTrailingHitchLength.Location = new System.Drawing.Point(169, 84);
+            this.nudTrailingHitchLength.Location = new System.Drawing.Point(50, 80);
             this.nudTrailingHitchLength.Name = "nudTrailingHitchLength";
             this.nudTrailingHitchLength.Size = new System.Drawing.Size(124, 52);
             this.nudTrailingHitchLength.TabIndex = 7;
-            this.nudTrailingHitchLength.Text = "3000";
+            this.nudTrailingHitchLength.Text = "75";
+            this.nudTrailingHitchLength.UseVisualStyleBackColor = false;
             this.nudTrailingHitchLength.Click += new System.EventHandler(this.nudTrailingHitchLength_Click);
             // 
-            // nudDrawbarLength
+            // nudHitchLength
             // 
-            this.nudDrawbarLength.BackColor = System.Drawing.Color.AliceBlue;
-            this.nudDrawbarLength.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.nudDrawbarLength.Location = new System.Drawing.Point(359, 84);
-            this.nudDrawbarLength.Name = "nudDrawbarLength";
-            this.nudDrawbarLength.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.nudDrawbarLength.Size = new System.Drawing.Size(124, 52);
-            this.nudDrawbarLength.TabIndex = 5;
-            this.nudDrawbarLength.Text = "51";
-            this.nudDrawbarLength.Click += new System.EventHandler(this.nudDrawbarLength_Click);
+            this.nudHitchLength.BackColor = System.Drawing.Color.AliceBlue;
+            this.nudHitchLength.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudHitchLength.Location = new System.Drawing.Point(650, 80);
+            this.nudHitchLength.Name = "nudHitchLength";
+            this.nudHitchLength.Size = new System.Drawing.Size(124, 52);
+            this.nudHitchLength.TabIndex = 5;
+            this.nudHitchLength.Text = "75";
+            this.nudHitchLength.UseVisualStyleBackColor = false;
+            this.nudHitchLength.Click += new System.EventHandler(this.nudHitchLength_Click);
             // 
-            // nudTankHitch
+            // nudTankHitchLength
             // 
-            this.nudTankHitch.BackColor = System.Drawing.Color.AliceBlue;
-            this.nudTankHitch.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.nudTankHitch.Location = new System.Drawing.Point(450, 84);
-            this.nudTankHitch.Name = "nudTankHitch";
-            this.nudTankHitch.Size = new System.Drawing.Size(124, 52);
-            this.nudTankHitch.TabIndex = 6;
-            this.nudTankHitch.Text = "75";
-            this.nudTankHitch.Click += new System.EventHandler(this.nudTankHitch_Click);
+            this.nudTankHitchLength.BackColor = System.Drawing.Color.AliceBlue;
+            this.nudTankHitchLength.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudTankHitchLength.Location = new System.Drawing.Point(350, 80);
+            this.nudTankHitchLength.Name = "nudTankHitchLength";
+            this.nudTankHitchLength.Size = new System.Drawing.Size(124, 52);
+            this.nudTankHitchLength.TabIndex = 6;
+            this.nudTankHitchLength.Text = "75";
+            this.nudTankHitchLength.UseVisualStyleBackColor = false;
+            this.nudTankHitchLength.Click += new System.EventHandler(this.nudTankHitch_Click);
             // 
             // picboxToolHitch
             // 
-            this.picboxToolHitch.BackgroundImage = global::AgOpenGPS.Properties.Resources.ToolHitchPageTrailing;
-            this.picboxToolHitch.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.picboxToolHitch.Location = new System.Drawing.Point(15, 142);
+            this.picboxToolHitch.BackgroundImage = global::AgOpenGPS.Properties.Resources.ToolHitchPageTBT;
+            this.picboxToolHitch.Location = new System.Drawing.Point(45, 150);
             this.picboxToolHitch.Name = "picboxToolHitch";
-            this.picboxToolHitch.Size = new System.Drawing.Size(857, 407);
+            this.picboxToolHitch.Size = new System.Drawing.Size(800, 400);
             this.picboxToolHitch.TabIndex = 4;
             this.picboxToolHitch.TabStop = false;
+            // 
+            // nudTankAxleLength
+            // 
+            this.nudTankAxleLength.BackColor = System.Drawing.Color.AliceBlue;
+            this.nudTankAxleLength.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudTankAxleLength.Location = new System.Drawing.Point(500, 80);
+            this.nudTankAxleLength.Name = "nudTankAxleLength";
+            this.nudTankAxleLength.Size = new System.Drawing.Size(124, 52);
+            this.nudTankAxleLength.TabIndex = 8;
+            this.nudTankAxleLength.Text = "3000";
+            this.nudTankAxleLength.UseVisualStyleBackColor = false;
+            this.nudTankAxleLength.Click += new System.EventHandler(this.nudTankAxleLength_Click);
+            // 
+            // nudTrailingAxleLength
+            // 
+            this.nudTrailingAxleLength.BackColor = System.Drawing.Color.AliceBlue;
+            this.nudTrailingAxleLength.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nudTrailingAxleLength.Location = new System.Drawing.Point(200, 80);
+            this.nudTrailingAxleLength.Name = "nudTrailingAxleLength";
+            this.nudTrailingAxleLength.Size = new System.Drawing.Size(124, 52);
+            this.nudTrailingAxleLength.TabIndex = 9;
+            this.nudTrailingAxleLength.Text = "3000";
+            this.nudTrailingAxleLength.UseVisualStyleBackColor = false;
+            this.nudTrailingAxleLength.Click += new System.EventHandler(this.nudTrailingAxleLength_Click);
             // 
             // ConfigHitch
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
+            this.Controls.Add(this.nudTrailingAxleLength);
+            this.Controls.Add(this.nudTankAxleLength);
             this.Controls.Add(this.nudTrailingHitchLength);
-            this.Controls.Add(this.nudDrawbarLength);
-            this.Controls.Add(this.nudTankHitch);
+            this.Controls.Add(this.nudHitchLength);
+            this.Controls.Add(this.nudTankHitchLength);
             this.Controls.Add(this.picboxToolHitch);
             this.Name = "ConfigHitch";
             this.Size = new System.Drawing.Size(890, 580);
@@ -97,8 +126,10 @@
         #endregion
 
         private System.Windows.Forms.Button nudTrailingHitchLength;
-        private System.Windows.Forms.Button nudDrawbarLength;
-        private System.Windows.Forms.Button nudTankHitch;
+        private System.Windows.Forms.Button nudHitchLength;
+        private System.Windows.Forms.Button nudTankHitchLength;
         private System.Windows.Forms.PictureBox picboxToolHitch;
+        private System.Windows.Forms.Button nudTankAxleLength;
+        private System.Windows.Forms.Button nudTrailingAxleLength;
     }
 }

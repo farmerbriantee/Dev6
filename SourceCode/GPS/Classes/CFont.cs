@@ -30,7 +30,7 @@ namespace AgOpenGPS
         {
             GL.PushMatrix();
             {
-                size *= -mf.worldManager.camSetDistance;
+                size *= mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.8) / 800;
 
                 //2d
@@ -117,7 +117,7 @@ namespace AgOpenGPS
             {
                 GL.Rotate(90, 1, 0, 0);
                 if (mf.worldManager.camFollowing) GL.Rotate(-mf.worldManager.camHeading, 0, 1, 0);
-                size = -mf.worldManager.camSetDistance;
+                size = mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.8);
                 size /= 800;
             }
@@ -125,7 +125,7 @@ namespace AgOpenGPS
             else
             {
                 if (mf.worldManager.camFollowing) GL.Rotate(-mf.worldManager.camHeading, 0, 0, 1);
-                size = -mf.worldManager.camSetDistance;
+                size = mf.worldManager.camSetDistance;
                 size = Math.Pow(size, 0.85);
                 size /= 1000;
             }

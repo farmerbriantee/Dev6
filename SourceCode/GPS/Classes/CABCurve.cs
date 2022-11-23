@@ -9,7 +9,7 @@ namespace AgOpenGPS
         public void GetCurrentGuidanceLine(vec2 pivot, vec2 steer, double heading)
         {
             if (CurrentGMode == Mode.Contour)
-                FindCurrentContourLine(pivot, heading);
+                FindCurrentContourLine(pivot);
 
             if (currentGuidanceLine != null)
             {
@@ -30,20 +30,19 @@ namespace AgOpenGPS
             CalculateSteerAngle(pivot, steer, heading, isYouTurnTriggered ? ytList : curList);
         }
 
-        public void FindCurrentContourLine(vec2 pivot, double heading)
+        public void FindCurrentContourLine(vec2 pivot)
         {
             if ((mf.secondsSinceStart - lastSecondSearch) < (curList.points.Count < 2 ? 0.3 : 2.0)) return;
 
             lastSecondSearch = mf.secondsSinceStart;
             double minDistA = double.MaxValue;
+            double toolWidthA = mf.tool.toolWidth * 2.0 - mf.tool.toolOffset;
+            double toolWidthB = mf.tool.toolWidth * 2.0 + mf.tool.toolOffset;
 
-            double sinH = Math.Sin(heading);
-            double cosH = Math.Cos(heading);
-
-            vec2 Start = new vec2(pivot.easting - cosH * (mf.tool.toolWidth * 2 - mf.tool.toolOffset) + sinH,
-                                pivot.northing + sinH * (mf.tool.toolWidth * 2 - mf.tool.toolOffset) + cosH);
-            vec2 End = new vec2(pivot.easting + cosH * (mf.tool.toolWidth * 2 + mf.tool.toolOffset) + sinH,
-                                pivot.northing - sinH * (mf.tool.toolWidth * 2 + mf.tool.toolOffset) + cosH);
+            vec2 Start = new vec2(pivot.easting - mf.cosH * toolWidthA + mf.sinH,
+                                pivot.northing + mf.sinH * toolWidthA + mf.cosH);
+            vec2 End = new vec2(pivot.easting + mf.cosH * toolWidthB + mf.sinH,
+                                pivot.northing - mf.sinH * toolWidthB + mf.cosH);
 
             int stripNum = -1;
 
@@ -113,8 +112,8 @@ namespace AgOpenGPS
                 {
                     //guidance look ahead distance based on time or tool width at least 
                     double guidanceLookDist = Math.Max(mf.tool.toolWidth * 0.5, mf.mc.avgSpeed * 0.277777 * mf.guidanceLookAheadTime);
-                    pivot = new vec2(pivot.easting + (Math.Sin(heading) * guidanceLookDist),
-                                                    pivot.northing + (Math.Cos(heading) * guidanceLookDist));
+                    pivot = new vec2(pivot.easting + (mf.sinH * guidanceLookDist),
+                                                    pivot.northing + (mf.cosH * guidanceLookDist));
                     int refCount = refList.points.Count;
 
                     pivot.GetCurrentSegment(refList, out rA, out rB, 0, refCount);
@@ -164,11 +163,11 @@ namespace AgOpenGPS
                 double distAway = widthMinusOverlap * howManyPathsAway + (isHeadingSameWay ? -mf.tool.toolOffset : mf.tool.toolOffset);
 
                 curList = BuildOffsetList(refList, distAway);
-                isValid = true;
 
                 if (mf.isSideGuideLines && (refList.mode.HasFlag(Mode.AB) || refList.loop) && howManyPathsAway != oldHowManyPathsAway)
                 {
                     int Move = howManyPathsAway - oldHowManyPathsAway;
+                    if (sideGuideLines.Count != 6) Move = 0;
 
                     if (!isValid || Move < -5 || Move > 5 || Move == 0)
                     {
@@ -197,23 +196,24 @@ namespace AgOpenGPS
                     }
                 }
                 else if (!mf.isSideGuideLines) sideGuideLines.Clear();
-                
+
+                isValid = true;
                 oldHowManyPathsAway = howManyPathsAway;
                 oldIsHeadingSameWay = isHeadingSameWay;
             }
         }
 
-        public Polyline BuildOffsetList(CGuidanceLine refList, double distAway)
+        public Polyline BuildOffsetList(CGuidanceLine refList, double offsetDist)
         {
             //move the ABLine over based on the overlap amount set in vehicle
-            double distSqAway = (distAway * distAway) - 0.01;
+            double distSqAway = (offsetDist * offsetDist) - 0.01;
 
             Polyline buildList = new Polyline();
 
             int ptCount = refList.points.Count - (refList == creatingContour ? backSpacing : 1);
 
-            int start = (refList.mode.HasFlag(Mode.Contour)) ? (rA - 50) : 0;
-            if (start < 0)
+            int start = (refList.mode.HasFlag(Mode.Contour)) ? (rA - 50) : -1;
+            if (start < -1)
             {
                 if (refList.loop)
                 {
@@ -221,19 +221,19 @@ namespace AgOpenGPS
                     start %= ptCount;
                 }
                 else
-                    start = 0;
+                    start = -1;
             }
 
-            int end = (refList.mode.HasFlag(Mode.Contour)) ? (rB + 50) : ptCount;
+            int end = (refList.mode.HasFlag(Mode.Contour)) ? (rB + 50) : -1;
             if (end > ptCount)
             {
                 if (refList.loop)
                     end %= ptCount;
                 else
-                    end = ptCount;
+                    end = -1;
             }
 
-            buildList = refList.OffsetAndDissolvePolyline<Polyline>(distAway, refList.mode.HasFlag(Mode.Contour) ? 0 : abLength, start, end, !refList.mode.HasFlag(Mode.Contour), mf.vehicle.minTurningRadius);
+            buildList = refList.OffsetAndDissolvePolyline<Polyline>(offsetDist, refList.mode.HasFlag(Mode.Contour) ? 0 : abLength, start, end, !refList.mode.HasFlag(Mode.Contour))[0];
 
 
             if (false && refList.mode.HasFlag(Mode.Curve) && !refList.loop)
@@ -256,12 +256,12 @@ namespace AgOpenGPS
                     {
                         //depending on hitch is different profile of draft
                         double hitch;
-                        if (mf.tool.isToolTBT && mf.tool.toolTankTrailingHitchLength < 0)
+                        if (mf.tool.isToolTBT && mf.tool.TankHitchLength < 0)
                         {
-                            hitch = mf.tool.toolTankTrailingHitchLength * 0.85;
-                            hitch += mf.tool.toolTrailingHitchLength * 0.65;
+                            hitch = mf.tool.TankHitchLength * 0.85;
+                            hitch += mf.tool.TrailingHitchLength * 0.65;
                         }
-                        else hitch = mf.tool.toolTrailingHitchLength * 1.0;// - mf.vehicle.wheelbase;
+                        else hitch = mf.tool.TrailingHitchLength * 1.0;// - mf.vehicle.wheelbase;
 
                         //move the line forward based on hitch length ratio
                         for (int i = 0; i + 1 < arr.Length; i++)
@@ -409,7 +409,7 @@ namespace AgOpenGPS
 
                 if (curList.points.Count > 1)
                 {
-                    if (mf.isSideGuideLines && mf.worldManager.camSetDistance > mf.tool.toolWidth * -120)
+                    if (mf.isSideGuideLines && mf.worldManager.camSetDistance < mf.tool.toolWidth * 120)
                     {
                         GL.Color3(0.756f, 0.7650f, 0.7650f);
                         GL.Enable(EnableCap.LineStipple);
@@ -460,7 +460,7 @@ namespace AgOpenGPS
                         }
                     }
 
-                    if (!mf.isStanleyUsed && mf.worldManager.camSetDistance > -200)
+                    if (!mf.isStanleyUsed && mf.worldManager.camSetDistance < 200)
                     {
                         //Draw lookahead Point
                         GL.PointSize(8.0f);
@@ -472,7 +472,6 @@ namespace AgOpenGPS
 
                     if (OffsetList.points.Count > 1)
                     {
-                        GL.LineWidth(5);
                         GL.Enable(EnableCap.LineStipple);
                         GL.LineStipple(1, 0xFC00);
                         GL.Color3(0.95f, 0.5f, 0.95f);
@@ -508,15 +507,16 @@ namespace AgOpenGPS
             GL.PointSize(lineWidth);
         }
 
-        public void MoveGuidanceLine(CGuidanceLine GuidanceLine, double dist)
+        public void MoveGuidanceLine(CGuidanceLine GuidanceLine, double offsetDist)
         {
             isValid = false;
 
             if (GuidanceLine != null)
             {
-                moveDistance += isHeadingSameWay ? dist : -dist;
-
-                GuidanceLine.points = GuidanceLine.OffsetPolyline<Polyline>(isHeadingSameWay ? dist : -dist);
+                moveDistance += isHeadingSameWay ? offsetDist : -offsetDist;
+                Polyline New = GuidanceLine.OffsetAndDissolvePolyline<Polyline>(isHeadingSameWay ? offsetDist : -offsetDist)[0];
+                GuidanceLine.points = New.points;
+                GuidanceLine.loop = New.loop;
             }
         }
 

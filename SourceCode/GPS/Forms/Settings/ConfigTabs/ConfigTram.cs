@@ -19,11 +19,11 @@ namespace AgOpenGPS
         private void ConfigTram_Load(object sender, EventArgs e)
         {
             lblTramWidthUnits.Text = glm.unitsFtM;
-            tramWidth = Properties.Settings.Default.setTram_tramWidth;
+            tramWidth = mf.tram.tramWidth;
 
             nudTramWidth.Text = (tramWidth * glm.mToUserBig).ToString("0.00");
 
-            cboxTramOnBackBuffer.Checked = Properties.Settings.Default.setTram_isTramOnBackBuffer;
+            cboxTramOnBackBuffer.Checked = mf.tram.isTramOnBackBuffer;
         }
 
         public override void Close()
@@ -32,6 +32,7 @@ namespace AgOpenGPS
 
             Properties.Settings.Default.setTram_tramWidth = mf.tram.tramWidth = tramWidth;
             mf.tram.isOuter = ((int)(tramWidth / mf.tool.toolWidth + 0.5)) % 2 == 0;
+            mf.tool.updateVBO = true;
 
             Properties.Settings.Default.Save();
         }

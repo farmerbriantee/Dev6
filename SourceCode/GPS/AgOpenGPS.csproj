@@ -168,6 +168,7 @@
       <DependentUpon>FormFieldKML.cs</DependentUpon>
     </Compile>
     <Compile Include="Resources\Components.cs" />
+    <Compile Include="Settings.cs" />
     <EmbeddedResource Include="..\References\Inputs\FormKeyboard.resx">
       <Link>Forms\Inputs\FormKeyboard.resx</Link>
       <DependentUpon>FormKeyboard.cs</DependentUpon>
@@ -254,9 +255,6 @@
     </Compile>
     <Compile Include="Forms\Guidance\FormMakeBndCon.Designer.cs">
       <DependentUpon>FormMakeBndCon.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings\ConfigTabs\Class1.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Forms\Settings\ConfigTabs\ConfigAntenna.cs">
       <SubType>UserControl</SubType>
@@ -882,6 +880,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AOG.ico" />
+    <None Include="btnImages\Images\z_NoGPS.png" />
     <None Include="btnImages\RecPathDelete.png" />
     <None Include="btnImages\CurveDelete.png" />
     <None Include="btnImages\ContourDelete.png" />

@@ -4,7 +4,6 @@ using System.IO;
 using System.Globalization;
 using System.Xml;
 using System.Text;
-using OpenTK.Graphics.OpenGL;
 
 namespace AgOpenGPS
 {
@@ -12,6 +11,8 @@ namespace AgOpenGPS
     {
         //list of the list of patch data individual triangles for that entire section activity
         public List<Polyline2> patchList = new List<Polyline2>();
+
+        public List<CAutoLoadField> Fields = new List<CAutoLoadField>();
 
         //list of the list of patch data individual triangles for field sections
         public List<List<vec2>> patchSaveList = new List<List<vec2>>();
@@ -394,7 +395,8 @@ namespace AgOpenGPS
                                     bnd.workedAreaTotal += Math.Abs((temp * 0.5));
                                 }
                             }
-                            patchList.Add(New);
+                            if (New.points.Count > 4)
+                                patchList.Add(New);
                         }
                     }
                     catch (Exception e)
@@ -729,25 +731,7 @@ namespace AgOpenGPS
                                                 tramArr.points.Add(vecPt);
                                             }
 
-                                            List<vec2> Left = tramArr.OffsetPolyline(tram.halfWheelTrack);
-                                            List<vec2> Right = tramArr.OffsetPolyline(-tram.halfWheelTrack);
-
-                                            if (Left.Count > 1)
-                                            {
-                                                if (tramArr.BufferPoints == int.MinValue) GL.GenBuffers(1, out tramArr.BufferPoints);
-                                                GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferPoints);
-                                                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Left.Count * 16), Left.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                                tramArr.BufferPointsCnt = Left.Count;
-                                            }
-                                            if (Right.Count > 1)
-                                            {
-                                                if (tramArr.BufferIndex == int.MinValue) GL.GenBuffers(1, out tramArr.BufferIndex);
-                                                GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferIndex);
-                                                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Right.Count * 16), Right.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                                tramArr.BufferIndexCnt = Right.Count;
-                                            }
+                                            tram.BuildTramLeftRightOffset(tramArr);
                                             BoundaryArr.Add(tramArr);
                                         }
                                     }
@@ -782,26 +766,7 @@ namespace AgOpenGPS
                                         tramArr.points.Add(vecPt);
                                     }
 
-                                    List<vec2> Left = tramArr.OffsetPolyline(tram.halfWheelTrack);
-                                    List<vec2> Right = tramArr.OffsetPolyline(-tram.halfWheelTrack);
-
-                                    if (Left.Count > 1)
-                                    {
-                                        if (tramArr.BufferPoints == int.MinValue) GL.GenBuffers(1, out tramArr.BufferPoints);
-                                        GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferPoints);
-                                        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Left.Count * 16), Left.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                        tramArr.BufferPointsCnt = Left.Count;
-                                    }
-                                    if (Right.Count > 1)
-                                    {
-                                        if (tramArr.BufferIndex == int.MinValue) GL.GenBuffers(1, out tramArr.BufferIndex);
-                                        GL.BindBuffer(BufferTarget.ArrayBuffer, tramArr.BufferIndex);
-                                        GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Right.Count * 16), Right.ToArray(), BufferUsageHint.DynamicDraw);
-
-                                        tramArr.BufferIndexCnt = Right.Count;
-                                    }
-
+                                    tram.BuildTramLeftRightOffset(tramArr);
                                     tram.tramList.Add(tramArr);
                                 }
                             }
@@ -1678,7 +1643,7 @@ namespace AgOpenGPS
             int cntr = 0;
 
             //for every new chunk of patch
-            foreach (Polyline triList in patchList)
+            foreach (Polyline2 triList in patchList)
             {
                 if (triList.points.Count > 4)
                 {

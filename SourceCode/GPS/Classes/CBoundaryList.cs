@@ -68,7 +68,7 @@ namespace AgOpenGPS
             fenceLine.RemoveHandle();
             fenceLine.loop = true;
             //no idea why this fixes some strange bugs
-            fenceLine = fenceLine.OffsetAndDissolvePolyline(0.0, 0, -1, -1, true);
+            fenceLine = fenceLine.OffsetAndDissolvePolyline<Polyline2>(0.0)[0];
             
             return isClockwise;
         }

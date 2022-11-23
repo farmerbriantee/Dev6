@@ -133,6 +133,7 @@ namespace AgOpenGPS
                     mf.FileCreateContour();
                     mf.FileCreateElevation();
                     mf.FileSaveFlags();
+                    mf.FileSaveBoundary();
 
                     //Load the boundary
                     if (basedOnKML)

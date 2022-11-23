@@ -241,27 +241,20 @@ namespace AgOpenGPS
                                     }
 
                                     //from single antenna sentences (VTG,RMC)
-                                    temp = BitConverter.ToSingle(data, 25);
-                                    if (temp != float.MaxValue)
-                                        mc.headingTrue = temp;
+                                    mc.headingTrue = BitConverter.ToSingle(data, 25);
 
                                     temp = BitConverter.ToSingle(data, 29);
-                                    if (temp != float.MaxValue)
-                                    {
-                                        //pn.speed = temp;
-                                        //if (temp < 0) pn.speed *= -1;
-                                        //pn.AverageTheSpeed();
-                                    }
+                                    mc.speed = temp == float.MaxValue ? double.MaxValue : temp;
 
                                     //roll in degrees
                                     temp = BitConverter.ToSingle(data, 33);
-                                    if (temp != float.MaxValue)
+                                    if (temp == float.MinValue)
+                                        mc.imuRoll = 0;
+                                    else if (temp != float.MaxValue)
                                     {
                                         if (mc.isRollInvert) temp *= -1;
                                         mc.imuRoll = temp - mc.rollZero;
                                     }
-                                    if (temp == float.MinValue)
-                                        mc.imuRoll = 0;
 
                                     //altitude in meters
                                     temp = BitConverter.ToSingle(data, 37);
@@ -484,7 +477,7 @@ namespace AgOpenGPS
                                     int idx2 = mc.swOffGr0;
                                     int idx3 = 1;
 
-                                    for (int j = 0; j < tool.sections.Count - 1; j++)
+                                    for (int j = 0; j < tool.numOfSections; j++)
                                     {
                                         if (j == 8)
                                         {

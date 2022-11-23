@@ -15,9 +15,9 @@ namespace AgOpenGPS
 
         private void ConfigRoll_Load(object sender, EventArgs e)
         {
-            lblRollZeroOffset.Text = Properties.Settings.Default.setIMU_rollZero.ToString("0.00");
-            hsbarRollFilter.Value = (int)(Properties.Settings.Default.setIMU_rollFilter * 100);
-            cboxDataInvertRoll.Checked = Properties.Settings.Default.setIMU_invertRoll;
+            lblRollZeroOffset.Text = mf.mc.rollZero.ToString("0.00");
+            hsbarRollFilter.Value = (int)(mf.mc.rollFilter * 100);
+            cboxDataInvertRoll.Checked = mf.mc.isRollInvert;
         }
 
         public override void Close()

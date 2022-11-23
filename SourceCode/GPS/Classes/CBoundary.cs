@@ -13,7 +13,7 @@ namespace AgOpenGPS
 
         public bool isHeadlandOn, isSectionControlledByHeadland;
 
-        public List<vec2> bndBeingMadePts = new List<vec2>(128);
+        public Polyline2 bndBeingMadePts = new Polyline2();
 
         public double createBndOffset;
         public bool isBndBeingMade;
@@ -59,7 +59,7 @@ namespace AgOpenGPS
 
             bndList[idx].fenceLine.RemoveHandle();
             bndList[idx].turnLine.RemoveHandle();
-            mf.bnd.bndList.RemoveAt(idx);
+            bndList.RemoveAt(idx);
         }
 
         public void DrawFenceLines()
@@ -123,7 +123,7 @@ namespace AgOpenGPS
             for (int j = 0; j < bndList.Count; j++)
             {
                 bndList[j].turnLine.RemoveHandle();
-                bndList[j].turnLine = bndList[j].fenceLine.OffsetAndDissolvePolyline(j == 0 ? mf.gyd.uturnDistanceFromBoundary : -mf.gyd.uturnDistanceFromBoundary, 0, -1, -1, true);
+                bndList[j].turnLine = bndList[j].fenceLine.OffsetAndDissolvePolyline<Polyline2>(j == 0 ? mf.gyd.uturnDistanceFromBoundary : -mf.gyd.uturnDistanceFromBoundary)[0];
             }
         }
 
@@ -185,14 +185,14 @@ namespace AgOpenGPS
 
         public void UpdateFieldBoundaryGUIAreas()
         {
-            if (mf.bnd.bndList.Count > 0)
+            if (bndList.Count > 0)
             {
-                areaOuterBoundary = mf.bnd.bndList[0].area;
+                areaOuterBoundary = bndList[0].area;
                 areaBoundaryOuterLessInner = areaOuterBoundary;
 
-                for (int i = 1; i < mf.bnd.bndList.Count; i++)
+                for (int i = 1; i < bndList.Count; i++)
                 {
-                    areaBoundaryOuterLessInner -= mf.bnd.bndList[i].area;
+                    areaBoundaryOuterLessInner -= bndList[i].area;
                 }
             }
             else

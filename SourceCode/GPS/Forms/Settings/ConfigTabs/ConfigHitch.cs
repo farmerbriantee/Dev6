@@ -7,7 +7,7 @@ namespace AgOpenGPS
     {
         private readonly FormGPS mf;
 
-        double trailingHitchLength, drawbarLength, tankHitch;
+        double tankHitchLength, trailingAxleLength, trailingHitchLength, tankAxleLength, hitchLength;
 
         public ConfigHitch(Form callingForm)
         {
@@ -17,58 +17,72 @@ namespace AgOpenGPS
 
         private void ConfigHitch_Load(object sender, EventArgs e)
         {
-            drawbarLength = Math.Abs(mf.tool.hitchLength);
-            nudDrawbarLength.Text = (drawbarLength * glm.mToUser).ToString("0");
-            trailingHitchLength = Math.Abs(mf.tool.toolTrailingHitchLength);
+            hitchLength = Math.Abs(mf.tool.hitchLength);
+            nudHitchLength.Text = (hitchLength * glm.mToUser).ToString("0");
+
+            tankAxleLength = Math.Abs(mf.tool.TankAxleLength);
+            nudTankAxleLength.Text = (tankAxleLength * glm.mToUser).ToString("0");
+
+            tankHitchLength = Math.Abs(mf.tool.TankHitchLength);
+            nudTankHitchLength.Text = (tankHitchLength * glm.mToUser).ToString("0");
+
+            trailingAxleLength = Math.Abs(mf.tool.TrailingAxleLength);
+            nudTrailingAxleLength.Text = (trailingAxleLength * glm.mToUser).ToString("0");
+
+            trailingHitchLength = Math.Abs(mf.tool.TrailingHitchLength);
             nudTrailingHitchLength.Text = (trailingHitchLength * glm.mToUser).ToString("0");
-            tankHitch = Math.Abs(mf.tool.toolTankTrailingHitchLength);
-            nudTankHitch.Text = (tankHitch * glm.mToUser).ToString("0");
 
             if (mf.tool.isToolFrontFixed)
             {
                 nudTrailingHitchLength.Visible = false;
-                nudDrawbarLength.Visible = true;
-                nudTankHitch.Visible = false;
+                nudTrailingAxleLength.Visible = false;
+                nudTankHitchLength.Visible = false;
+                nudTankAxleLength.Visible = false;
+                nudHitchLength.Visible = true;
 
-                nudTrailingHitchLength.Left = 0;
-                nudDrawbarLength.Left = 342;
-                nudTankHitch.Left = 0;
+                nudHitchLength.Left = 350;
 
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageFront;
             }
             else if (mf.tool.isToolTBT)
             {
                 nudTrailingHitchLength.Visible = true;
-                nudDrawbarLength.Visible = true;
-                nudTankHitch.Visible = true;
+                nudTrailingAxleLength.Visible = true;
+                nudTankHitchLength.Visible = true;
+                nudTankAxleLength.Visible = true;
+                nudHitchLength.Visible = true;
 
-                nudTrailingHitchLength.Left = 152;
-                nudDrawbarLength.Left = 644;
-                nudTankHitch.Left = 433;
+                nudTrailingHitchLength.Left = 50;
+                nudTrailingAxleLength.Left = 200;
+                nudTankHitchLength.Left = 350;
+                nudTankAxleLength.Left = 500;
+                nudHitchLength.Left = 650;
 
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageTBT;
             }
             else if (mf.tool.isToolRearFixed)
             {
                 nudTrailingHitchLength.Visible = false;
-                nudDrawbarLength.Visible = true;
-                nudTankHitch.Visible = false;
+                nudTrailingAxleLength.Visible = false;
+                nudTankHitchLength.Visible = false;
+                nudTankAxleLength.Visible = false;
+                nudHitchLength.Visible = true;
 
-                nudTrailingHitchLength.Left = 0;
-                nudDrawbarLength.Left = 220;
-                nudTankHitch.Left = 0;
+                nudHitchLength.Left = 250;
 
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageRear;
             }
             else if (mf.tool.isToolTrailing)
             {
                 nudTrailingHitchLength.Visible = true;
-                nudDrawbarLength.Visible = true;
-                nudTankHitch.Visible = false;
+                nudTrailingAxleLength.Visible = true;
+                nudTankHitchLength.Visible = false;
+                nudTankAxleLength.Visible = false;
+                nudHitchLength.Visible = true;
 
-                nudTrailingHitchLength.Left = 290;
-                nudDrawbarLength.Left = 575;
-                nudTankHitch.Left = 0;
+                nudTrailingHitchLength.Left = 70;
+                nudTrailingAxleLength.Left = 320;
+                nudHitchLength.Left = 580;
 
                 picboxToolHitch.BackgroundImage = Properties.Resources.ToolHitchPageTrailing;
             }
@@ -76,33 +90,46 @@ namespace AgOpenGPS
 
         public override void Close()
         {
-            Properties.Vehicle.Default.Tool_TrailingHitchLength = mf.tool.toolTrailingHitchLength = -trailingHitchLength;
-            Properties.Vehicle.Default.Tool_TankTrailingHitchLength = mf.tool.toolTankTrailingHitchLength = -tankHitch;
-
-            mf.tool.hitchLength = drawbarLength;
+            mf.tool.hitchLength = hitchLength;
             if (!Properties.Vehicle.Default.Tool_isToolFront)
             {
                 mf.tool.hitchLength *= -1;
             }
             Properties.Vehicle.Default.setVehicle_hitchLength = mf.tool.hitchLength;
 
+            Properties.Vehicle.Default.Tool_TankTrailingAxleLength = mf.tool.TankAxleLength = -tankAxleLength;
+            Properties.Vehicle.Default.Tool_TankTrailingHitchLength = mf.tool.TankHitchLength = -tankHitchLength;
 
+            Properties.Vehicle.Default.Tool_TrailingAxleLength = mf.tool.TrailingAxleLength = -trailingAxleLength;
+            Properties.Vehicle.Default.Tool_TrailingHitchLength = mf.tool.TrailingHitchLength = -trailingHitchLength;
+            mf.vehicle.updateVBO = true;
+            mf.tool.updateVBO = true;
             Properties.Vehicle.Default.Save();
         }
 
-        private void nudTrailingHitchLength_Click(object sender, EventArgs e)
+        private void nudHitchLength_Click(object sender, EventArgs e)
         {
-            nudTrailingHitchLength.KeypadToButton(ref trailingHitchLength, 0.01, 30, 0, glm.mToUser, glm.userToM);
+            nudHitchLength.KeypadToButton(ref hitchLength, 0, 30, 0, glm.mToUser, glm.userToM);
         }
 
-        private void nudDrawbarLength_Click(object sender, EventArgs e)
+        private void nudTankAxleLength_Click(object sender, EventArgs e)
         {
-            nudDrawbarLength.KeypadToButton(ref drawbarLength, 0.0, 30, 0, glm.mToUser, glm.userToM);
+            nudTankAxleLength.KeypadToButton(ref tankAxleLength, 0, 30, 0, glm.mToUser, glm.userToM);
         }
 
         private void nudTankHitch_Click(object sender, EventArgs e)
         {
-            nudTankHitch.KeypadToButton(ref tankHitch, 0.01, 30, 0, glm.mToUser, glm.userToM);
+            nudTankHitchLength.KeypadToButton(ref tankHitchLength, -tankAxleLength, 30, 0, glm.mToUser, glm.userToM);
+        }
+
+        private void nudTrailingAxleLength_Click(object sender, EventArgs e)
+        {
+            nudTrailingAxleLength.KeypadToButton(ref trailingAxleLength, 0, 30, 0, glm.mToUser, glm.userToM);
+        }
+
+        private void nudTrailingHitchLength_Click(object sender, EventArgs e)
+        {
+            nudTrailingHitchLength.KeypadToButton(ref trailingHitchLength, -trailingAxleLength, 30, 0, glm.mToUser, glm.userToM);
         }
     }
 }

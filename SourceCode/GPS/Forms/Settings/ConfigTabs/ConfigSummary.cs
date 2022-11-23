@@ -31,6 +31,9 @@ namespace AgOpenGPS
 
             if (glm.isMetric) rbtnDisplayMetric.Checked = true;
             else rbtnDisplayImperial.Checked = true;
+
+            UpdateVehicleListView();
+            btnVehicleDelete.Enabled = btnVehicleLoad.Enabled = btnVehicleSaveAs.Enabled = lvVehicles.SelectedItems.Count > 0;
         }
 
         public override void Close()
@@ -341,6 +344,11 @@ namespace AgOpenGPS
         private void btnVehicleSave_HelpRequested(object sender, HelpEventArgs hlpevent)
         {
             new FormHelp(gStr.hc_btnVehicleSave, gStr.gsHelp).ShowDialog(this);
+        }
+
+        private void lvVehicles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnVehicleDelete.Enabled = btnVehicleLoad.Enabled = btnVehicleSaveAs.Enabled = lvVehicles.SelectedItems.Count > 0;
         }
     }
 }

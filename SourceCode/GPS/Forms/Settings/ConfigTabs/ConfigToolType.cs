@@ -32,6 +32,7 @@ namespace AgOpenGPS
                 mf.tool.hitchLength *= -1;
             Properties.Vehicle.Default.setVehicle_hitchLength = mf.tool.hitchLength;
 
+            mf.vehicle.updateVBO = true;
             Properties.Vehicle.Default.Save();
         }
     }

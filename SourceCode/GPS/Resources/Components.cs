@@ -131,4 +131,11 @@ namespace AgOpenGPS
             }
         }
     }
+
+    public class UserControl2 : UserControl
+    {
+        public virtual void Close()
+        {
+        }
+    }
 }

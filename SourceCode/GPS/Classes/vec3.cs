@@ -14,6 +14,11 @@ namespace AgOpenGPS
             this.northing = northing;
             this.heading = heading;
         }
+
+        public override string ToString()
+        {
+            return "easting = " + easting.ToString() + ", northing = " + northing.ToString() + ", heading = " + heading.ToString();
+        }
     }
 
     public struct vecCrossing
@@ -150,6 +155,28 @@ namespace AgOpenGPS
         {
             return new vec2(lhs.easting + rhs.easting, lhs.northing + rhs.northing);
         }
+
+        public override string ToString()
+        {
+            return "easting = " + easting.ToString() + ", northing = " + northing.ToString();
+        }
+    }
+
+    public struct vec2Short
+    {
+        public short easting;
+        public short northing;
+
+        public vec2Short(double easting, double northing)
+        {
+            this.easting = (short)(easting * 100);
+            this.northing = (short)(northing * 100);
+        }
+
+        public override string ToString()
+        {
+            return "easting = " + easting.ToString() + ", northing = " + northing.ToString();
+        }
     }
 
     public class CFlag
@@ -180,5 +207,11 @@ namespace AgOpenGPS
             color = _color;
             notes = _notes;
         }
+    }
+
+    public class CAutoLoadField : Polyline2
+    {
+        public double LatStart, LonStart, Area;
+        public string Dir = "";
     }
 }

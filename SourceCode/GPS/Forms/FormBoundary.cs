@@ -405,8 +405,7 @@ namespace AgOpenGPS
             mf.bnd.createBndOffset = (double)nudOffset.Value;
             mf.bnd.isBndBeingMade = true;
 
-
-            //isClosing = true;
+            mf.vehicle.updateVBO = true;
         }
 
         private void btnGetKML_Click(object sender, EventArgs e)
@@ -420,8 +419,10 @@ namespace AgOpenGPS
         {
             if (new FormHelp(gStr.gsCompletelyDeleteBoundary, gStr.gsDeleteForSure, true).ShowDialog(this) == DialogResult.Yes)
             {
-                mf.bnd.bndBeingMadePts.Clear();
-                lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
+                mf.bnd.bndBeingMadePts.points.Clear();
+                mf.bnd.bndBeingMadePts.ResetPoints = true;
+
+                lblPoints.Text = mf.bnd.bndBeingMadePts.points.Count.ToString();
             }
             mf.Focus();
         }
@@ -440,14 +441,13 @@ namespace AgOpenGPS
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-            if (mf.bnd.bndBeingMadePts.Count > 2)
+            if (mf.bnd.bndBeingMadePts.points.Count > 2)
             {
                 CBoundaryList New = new CBoundaryList();
 
-                for (int i = 0; i < mf.bnd.bndBeingMadePts.Count; i++)
-                {
-                    New.fenceLine.points.Add(mf.bnd.bndBeingMadePts[i]);
-                }
+                New.fenceLine = mf.bnd.bndBeingMadePts;
+
+                mf.bnd.bndBeingMadePts = new Polyline2();
 
                 New.CalculateFenceArea();
 
@@ -458,11 +458,15 @@ namespace AgOpenGPS
                 mf.FileSaveBoundary();
                 mf.bnd.BuildTurnLines();
             }
+            else
+            {
+                mf.bnd.bndBeingMadePts.points.Clear();
+                mf.bnd.bndBeingMadePts.ResetPoints = true;
+            }
 
             //stop it all for adding
             mf.bnd.isOkToAddPoints = false;
             mf.bnd.isBndBeingMade = false;
-            mf.bnd.bndBeingMadePts.Clear();
 
             //close window
             isClosing = true;
@@ -474,18 +478,24 @@ namespace AgOpenGPS
             nudOffset.KeypadToNUD();
             btnPausePlay.Focus();
             mf.bnd.createBndOffset = (double)nudOffset.Value;
+            mf.vehicle.updateVBO = true;
         }
 
         private void btnLeftRight_Click(object sender, EventArgs e)
         {
             mf.bnd.isDrawRightSide = !mf.bnd.isDrawRightSide;
             btnLeftRight.Image = mf.bnd.isDrawRightSide ? Properties.Resources.BoundaryRight : Properties.Resources.BoundaryLeft;
+
+            mf.vehicle.updateVBO = true;
         }
 
         private void btnDeleteLast_Click(object sender, EventArgs e)
         {
-            if (mf.bnd.bndBeingMadePts.Count > 0)
-                mf.bnd.bndBeingMadePts.RemoveAt(mf.bnd.bndBeingMadePts.Count - 1);
+            if (mf.bnd.bndBeingMadePts.points.Count > 0)
+            {
+                mf.bnd.bndBeingMadePts.points.RemoveAt(mf.bnd.bndBeingMadePts.points.Count - 1);
+                mf.bnd.bndBeingMadePts.ResetPoints = true;
+            }
 
             timer1_Tick(null, null);
         }
@@ -498,7 +508,7 @@ namespace AgOpenGPS
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            int ptCount = mf.bnd.bndBeingMadePts.Count;
+            int ptCount = mf.bnd.bndBeingMadePts.points.Count;
             double area = 0;
 
             if (ptCount > 0)
@@ -507,13 +517,13 @@ namespace AgOpenGPS
 
                 for (int i = 0; i < ptCount; j = i++)
                 {
-                    area += (mf.bnd.bndBeingMadePts[j].easting + mf.bnd.bndBeingMadePts[i].easting) * (mf.bnd.bndBeingMadePts[j].northing - mf.bnd.bndBeingMadePts[i].northing);
+                    area += (mf.bnd.bndBeingMadePts.points[j].easting + mf.bnd.bndBeingMadePts.points[i].easting) * (mf.bnd.bndBeingMadePts.points[j].northing - mf.bnd.bndBeingMadePts.points[i].northing);
                 }
                 area = Math.Abs(area / 2);
             }
 
             lblArea.Text = Math.Round(area * glm.m2ToUser, 2) + glm.unitsHaAc;
-            lblPoints.Text = mf.bnd.bndBeingMadePts.Count.ToString();
+            lblPoints.Text = mf.bnd.bndBeingMadePts.points.Count.ToString();
         }
 
 

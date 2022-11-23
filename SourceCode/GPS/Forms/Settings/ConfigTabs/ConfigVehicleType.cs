@@ -37,7 +37,7 @@ namespace AgOpenGPS
 
             Properties.Vehicle.Default.setVehicle_isPivotBehindAntenna = mf.vehicle.isPivotBehindAntenna = mf.vehicle.vehicleType != 2;
             Properties.Vehicle.Default.setVehicle_isSteerAxleAhead = mf.vehicle.isSteerAxleAhead = mf.vehicle.vehicleType != 1;
-
+            mf.vehicle.updateVBO = true;
             Properties.Vehicle.Default.Save();
         }
     }

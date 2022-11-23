@@ -159,7 +159,7 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="Tool_TrailingHitchLength" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">-2.5</Value>
+      <Value Profile="(Default)">-0.5</Value>
     </Setting>
     <Setting Name="Tool_numSections" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3</Value>
@@ -222,7 +222,7 @@
       <Value Profile="(Default)">0.5</Value>
     </Setting>
     <Setting Name="Tool_TankTrailingHitchLength" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">-3</Value>
+      <Value Profile="(Default)">-0.5</Value>
     </Setting>
     <Setting Name="Tool_minCoverage" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">100</Value>
@@ -235,6 +235,12 @@
     </Setting>
     <Setting Name="Tool_slowSpeedCutoff" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0.5</Value>
+    </Setting>
+    <Setting Name="Tool_TrailingAxleLength" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">-2</Value>
+    </Setting>
+    <Setting Name="Tool_TankTrailingAxleLength" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">-2.5</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -21,19 +21,19 @@ namespace AgOpenGPS
             snapDistance = Properties.Settings.Default.setAS_snapDistance;
             nudSnapDistance.Text = (snapDistance * glm.mToUser).ToString(glm.isMetric ? "0" : "0.0");
 
-            lineLength = Properties.Settings.Default.setAB_lineLength;
+            lineLength = mf.gyd.abLength;
             nudABLength.Text = (lineLength * glm.mToUserBig).ToString("0");
 
-            lookAheadTime = Properties.Settings.Default.setAS_guidanceLookAheadTime;
+            lookAheadTime = mf.guidanceLookAheadTime;
             nudGuidanceLookAhead.Text = lookAheadTime.ToString("0.0");
 
-            lightbarCmPerPixel = Properties.Settings.Default.setDisplay_lightbarCmPerPixel;
+            lightbarCmPerPixel = mf.lightbarCmPerPixel;
             nudLightbarCmPerPixel.Text = lightbarCmPerPixel.ToString("0");
 
-            lineWidth = Properties.Settings.Default.setDisplay_lineWidth;
+            lineWidth = mf.gyd.lineWidth;
             nudLineWidth.Text = lineWidth.ToString();
 
-            PanicStopSpeed = Properties.Settings.Default.setVehicle_panicStopSpeed;
+            PanicStopSpeed = mf.mc.panicStopSpeed;
             nudPanicStopSpeed.Text = (PanicStopSpeed * glm.KMHToUser).ToString("0.0");
 
             label20.Text = glm.unitsInCm;

@@ -174,6 +174,10 @@ namespace AgOpenGPS
 
         private void BuildHeadLineTemplateFromBoundary(bool fromHd = false)
         {
+            for (int j = 0; j < headLineTemplate.Count; j++)
+            {
+                headLineTemplate[j].RemoveHandle();
+            }
             headLineTemplate.Clear();
             if (fromHd)
             {
@@ -208,9 +212,9 @@ namespace AgOpenGPS
 
         private void btnSetDistance_Click(object sender, EventArgs e)
         {
-            double width = (double)nudSetDistance.Value * glm.userBigToM;
+            double offsetDist = (double)nudSetDistance.Value * glm.userBigToM;
 
-            Polyline2 New = headLineTemplate[index].OffsetAndDissolvePolyline(width, 10, start, end, false);
+            Polyline2 New = headLineTemplate[index].OffsetAndDissolvePolyline<Polyline2>(offsetDist, 0, start, end, true)[0];
 
             if (New.points.Count < 3) return;
 
@@ -221,7 +225,7 @@ namespace AgOpenGPS
                 //    Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time2, 0, 0, 1);
                 //else
                 //if (dist < Math.Sqrt(width * width + width * width))
-                if (Time2 < 2.0 && Time2 > -2.0 && dist < width * 2)
+                if (Time2 < 2.0 && Time2 > -2.0 && dist < offsetDist * 2)
                     Crossing = new vecCrossing(_Crossing.easting, _Crossing.northing, Time2, 0, 0, 1);
             }
 
@@ -273,8 +277,9 @@ namespace AgOpenGPS
                 headLineTemplate[index].points.Insert(start, new vec2(Crossing2.easting, Crossing2.northing));
             else
                 headLineTemplate[index].points.Insert(start++, New.points[New.points.Count - 1]);
+            headLineTemplate[index].ResetPoints = true;
 
-            headLineTemplate[index] = headLineTemplate[index].OffsetAndDissolvePolyline(0, 0);
+            headLineTemplate[index] = headLineTemplate[index].OffsetAndDissolvePolyline<Polyline2>(0.0)[0];
 
             isSet = false;
             index = start = end = -1;
@@ -286,22 +291,24 @@ namespace AgOpenGPS
 
         private void btnMakeFixedHeadland_Click(object sender, EventArgs e)
         {
-            double width = (double)nudDistance.Value * glm.userBigToM;
+            double offsetDist = (double)nudDistance.Value * glm.userBigToM;
             if (index < 0)
             {
                 List<Polyline2> New = new List<Polyline2>();
                 for (int i = 0; i < headLineTemplate.Count; i++)
                 {
-                    New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, 0, -1, -1, true));
+                    New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline<Polyline2>(offsetDist));
+                    headLineTemplate[i].RemoveHandle();
                 }
                 headLineTemplate = New;
 
-                totalHeadlandWidth += width;
+                totalHeadlandWidth += offsetDist;
                 lblHeadlandWidth.Text = (totalHeadlandWidth * glm.mToUserBig).ToString("0.00");
             }
             else
             {
-                headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline(true, width, 0, -1, -1, true));
+                headLineTemplate.AddRange(headLineTemplate[index].OffsetAndDissolvePolyline<Polyline2>(offsetDist));
+                headLineTemplate[index].RemoveHandle();
                 headLineTemplate.Remove(headLineTemplate[index]);
             }
 
@@ -315,17 +322,18 @@ namespace AgOpenGPS
         {
             BuildHeadLineTemplateFromBoundary();
 
-            double width = mf.tool.toolWidth * cboxToolWidths.SelectedIndex;
+            double offsetDist = mf.tool.toolWidth * cboxToolWidths.SelectedIndex;
 
             List<Polyline2> New = new List<Polyline2>();
             for (int i = 0; i < headLineTemplate.Count; i++)
             {
-                New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline(true, width, 0, -1, -1, true));
+                New.AddRange(headLineTemplate[i].OffsetAndDissolvePolyline<Polyline2>(offsetDist));
+                headLineTemplate[i].RemoveHandle();
             }
             headLineTemplate = New;
 
-            lblHeadlandWidth.Text = (width * glm.mToUserBig).ToString("0.00");
-            totalHeadlandWidth = width;
+            lblHeadlandWidth.Text = (offsetDist * glm.mToUserBig).ToString("0.00");
+            totalHeadlandWidth = offsetDist;
 
             oglSelf.Refresh();
         }
@@ -350,15 +358,8 @@ namespace AgOpenGPS
             GL.PointSize(2);
             for (int i = 0; i < headLineTemplate.Count; i++)
             {
-                if (headLineTemplate[i].points.Count > 1)
-                {
-                    GL.Begin(PrimitiveType.LineLoop);
-                    for (int h = 0; h < headLineTemplate[i].points.Count; h++)
-                    {
-                        GL.Vertex3(headLineTemplate[i].points[h].easting, headLineTemplate[i].points[h].northing, 0);
-                    }
-                    GL.End();
-                }
+
+                headLineTemplate[i].DrawPolyLine(DrawType.LineLoop);
             }
 
             GL.PointSize(8.0f);
@@ -437,37 +438,36 @@ namespace AgOpenGPS
 
         private void DrawABTouchLine()
         {
+            if (headLineTemplate[index].VBO == 0) return;
+
             GL.PointSize(6);
-            GL.Begin(PrimitiveType.Points);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, headLineTemplate[index].VBO);
+            GL.VertexPointer(2, VertexPointerType.Double, 0, 0);
 
             GL.Color3(0.990, 0.00, 0.250);
-            if (start != -1) GL.Vertex3(headLineTemplate[index].points[start].easting, headLineTemplate[index].points[start].northing, 0);
+            if (start != -1)
+                GL.DrawArrays(PrimitiveType.Points, start, 1);
 
             GL.Color3(0.990, 0.960, 0.250);
-            if (end != -1) GL.Vertex3(headLineTemplate[index].points[end].easting, headLineTemplate[index].points[end].northing, 0);
-            GL.End();
+            if (end != -1)
+                GL.DrawArrays(PrimitiveType.Points, end, 1);
 
             if (start != -1 && end != -1)
             {
                 GL.Color3(0.965, 0.250, 0.950);
                 //draw the turn line oject
                 GL.LineWidth(2.0f);
-                GL.Begin(PrimitiveType.LineStrip);
                 if (headLineTemplate[index].points.Count < 1) return;
 
                 if (start > end)
                 {
-                    for (int c = start; c < headLineTemplate[index].points.Count; c++)
-                        GL.Vertex3(headLineTemplate[index].points[c].easting, headLineTemplate[index].points[c].northing, 0);
-                    for (int c = 0; c <= end; c++)
-                        GL.Vertex3(headLineTemplate[index].points[c].easting, headLineTemplate[index].points[c].northing, 0);
+                    GL.DrawArrays(PrimitiveType.LineStrip, start, headLineTemplate[index].points.Count - start + 1);
+                    GL.DrawArrays(PrimitiveType.LineStrip, 0, end + 1);
                 }
                 else
                 {
-                    for (int c = start; c <= end; c++)
-                        GL.Vertex3(headLineTemplate[index].points[c].easting, headLineTemplate[index].points[c].northing, 0);
+                    GL.DrawArrays(PrimitiveType.LineStrip, start, end - start + 1);
                 }
-                GL.End();
             }
         }
 
@@ -522,6 +522,7 @@ namespace AgOpenGPS
                     headLineTemplate[index].points.Insert(start, new vec2(_Crossing.easting, _Crossing.northing));
                 }
             }
+            headLineTemplate[index].ResetPoints = true;
             isSet = false;
             index = start = end = -1;
             nudSetDistance.Enabled = btnSetDistance.Enabled = btnDeletePoints.Enabled = isSet;
@@ -543,6 +544,7 @@ namespace AgOpenGPS
             GL.LoadMatrix(ref mat);
             GL.MatrixMode(MatrixMode.Modelview);
             oglSelf.Refresh();
+            GL.EnableClientState(ArrayCap.VertexArray);
         }
 
         #region Help

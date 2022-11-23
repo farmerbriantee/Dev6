@@ -19,43 +19,43 @@ namespace AgOpenGPS
 
         private void ConfigHeading_Load(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.setIMU_fusionWeight > 0.2)
+            if ( mf.mc.fusionWeight > 0.2)
             {
                 Properties.Settings.Default.setIMU_fusionWeight = 0.2;
                 Properties.Settings.Default.Save();
                 mf.mc.fusionWeight = 0.2;
             }
 
-            dualHeadingOffset = Properties.Settings.Default.setGPS_dualHeadingOffset;
+            dualHeadingOffset = mf.mc.headingTrueDualOffset;
             nudDualHeadingOffset.Text = dualHeadingOffset.ToString("0.0");
 
-            hsbarFusion.Value = (int)(Properties.Settings.Default.setIMU_fusionWeight * 500);
+            hsbarFusion.Value = (int)(mf.mc.fusionWeight * 500);
 
             lblFusion.Text = hsbarFusion.Value.ToString();
             lblFusionIMU.Text = (100 - hsbarFusion.Value).ToString();
             label8.Text = "distance (" + glm.unitsInCm + " )";
 
-            cboxIsRTK.Checked = Properties.Settings.Default.setGPS_isRTK;
-            cboxIsRTK_KillAutoSteer.Checked = Properties.Settings.Default.setGPS_isRTK_KillAutoSteer;
-            cboxIsReverseOn.Checked = Properties.Settings.Default.setIMU_isReverseOn;
-            cboxIsDualAsIMU.Checked = Properties.Settings.Default.setIMU_isDualAsIMU;
+            cboxIsRTK.Checked = mf.isRTK;
+            cboxIsRTK_KillAutoSteer.Checked = mf.isRTK_KillAutosteer;
+            cboxIsReverseOn.Checked = mf.mc.isReverseOn;
+            cboxIsDualAsIMU.Checked = mf.mc.isDualAsIMU;
 
-            stepDistance = Properties.Settings.Default.setF_minFixStep;
+            stepDistance = mf.minFixStepDist;
             nudMinFixStepDistance.Text = (stepDistance * glm.mToUser).ToString("0");
 
-            startSpeed = Properties.Vehicle.Default.setVehicle_startSpeed;
+            startSpeed = mf.startSpeed;
             nudStartSpeed.Text = (startSpeed * glm.KMHToUser).ToString("0.0");
 
-            frameTime = Properties.Settings.Default.SetGPS_udpWatchMsec;
+            frameTime = mf.udpWatchLimit;
             nudMinimumFrameTime.Text = frameTime.ToString();
 
-            forwardComp = Properties.Settings.Default.setGPS_forwardComp;
+            forwardComp = mf.mc.forwardComp;
             nudForwardComp.Text = forwardComp.ToString("0.00");
 
-            reverseComp = Properties.Settings.Default.setGPS_reverseComp;
+            reverseComp = mf.mc.reverseComp;
             nudReverseComp.Text = reverseComp.ToString("0.00");
 
-            ageAlarm = Properties.Settings.Default.setGPS_ageAlarm;
+            ageAlarm = mf.mc.ageAlarm;
             nudAgeAlarm.Text = ageAlarm.ToString();
         }
 

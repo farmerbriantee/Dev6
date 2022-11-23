@@ -244,8 +244,6 @@ namespace AgOpenGPS
             vehicleOpacityByte = (byte)(255 * ((double)(Properties.Settings.Default.setDisplay_vehicleOpacity) * 0.01));
             isVehicleImage = Properties.Settings.Default.setDisplay_isVehicleImage;
 
-            string directoryName = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-
             //grab the current vehicle filename - make sure it exists
             vehicleFileName = Vehicle.Default.setVehicle_vehicleName;
 
@@ -270,10 +268,12 @@ namespace AgOpenGPS
 
             guidanceLookAheadTime = Properties.Settings.Default.setAS_guidanceLookAheadTime;
 
-            mc.LoadSettings();
             vehicle.LoadSettings();
             tool.LoadSettings();
             mc.LoadSettings();
+
+            vehicle.updateVBO = true;
+            tool.updateVBO = true;
 
             LineUpManualBtns();
 
@@ -302,9 +302,10 @@ namespace AgOpenGPS
 
         public void SetFeaturesOnOff()
         {
+            topFieldViewToolStripMenuItem.Checked = Properties.Settings.Default.setMenu_isOGLZoomOn == 1;
+
             tramLinesMenuField.Visible = Properties.Settings.Default.setDisplayFeature_Tram;
             headlandToolStripMenuItem.Visible = Properties.Settings.Default.setDisplayFeature_Headland;
-            topFieldViewToolStripMenuItem.Checked = Properties.Settings.Default.setMenu_isOGLZoomOn == 1;
             boundariesToolStripMenuItem.Visible = Properties.Settings.Default.setDisplayFeature_Boundary;
             toolStripBtnMakeBndContour.Visible = Properties.Settings.Default.setDisplayFeature_BoundaryContour;
 
@@ -315,11 +316,11 @@ namespace AgOpenGPS
             webcamToolStrip.Visible = Properties.Settings.Default.setDisplayFeature_Webcam;
             offsetFixToolStrip.Visible = Properties.Settings.Default.setDisplayFeature_OffsetFix;
 
-            btnContour.Visible = Properties.Settings.Default.setDisplayFeature_Contour;
-            btnAutoYouTurn.Visible = Properties.Settings.Default.setDisplayFeature_YouTurn;
             btnStanleyPure.Visible = Properties.Settings.Default.setDisplayFeature_SteerMode;
             btnStartAgIO.Visible = Properties.Settings.Default.setDisplayFeature_AgIO;
 
+            btnContour.Visible = Properties.Settings.Default.setDisplayFeature_Contour;
+            btnAutoYouTurn.Visible = Properties.Settings.Default.setDisplayFeature_YouTurn;
             btnSectionOffAutoOn.Visible = Properties.Settings.Default.setDisplayFeature_AutoSection;
             btnManualOffOn.Visible = Properties.Settings.Default.setDisplayFeature_ManualSection;
             btnCycleLines.Visible = Properties.Settings.Default.setDisplayFeature_CycleLines;
@@ -387,7 +388,7 @@ namespace AgOpenGPS
             if (glm.isSimEnabled)
             {
                 panelSim.Top = oglMain.Height - 40;
-                panelSim.Left = 60 + oglMain.Width / 2 - 300;
+                panelSim.Left = 60 + oglMain.Width / 2 - 275;
             }
 
             //turn section buttons all On
@@ -512,7 +513,6 @@ namespace AgOpenGPS
                             }
                             else
                             {
-                                gyd.isYouTurnTriggered = true;
                                 gyd.BuildManualYouTurn(false);
                                 return;
                             }
@@ -533,7 +533,6 @@ namespace AgOpenGPS
                             }
                             else
                             {
-                                gyd.isYouTurnTriggered = true;
                                 gyd.BuildManualYouTurn(true);
                                 return;
                             }
@@ -575,7 +574,7 @@ namespace AgOpenGPS
                 int centerLeft = oglMain.Width / 2;
                 int centerUp = oglMain.Height / 2;
 
-                if (point.X > centerLeft - 40 && point.X < centerLeft + 40 && point.Y > centerUp - 60 && point.Y < centerUp + 60)
+                if (mc.headingTrueDual == double.MaxValue && point.X > centerLeft - 40 && point.X < centerLeft + 40 && point.Y > centerUp - 60 && point.Y < centerUp + 60)
                 {
                     if (isTT)
                     {
@@ -583,7 +582,6 @@ namespace AgOpenGPS
                         ResetHelpBtn();
                         return;
                     }
-
 
                     Array.Clear(stepFixPts, 0, stepFixPts.Length);
                     isFirstHeadingSet = false;

@@ -62,7 +62,7 @@ namespace AgOpenGPS
 
         public string currentVersionStr = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-        public double secondsSinceStart;
+        public double secondsSinceStart, lastSecondInField;
 
         //create instance of a stopwatch for timing of frames and NMEA hz determination
         private readonly Stopwatch swHz = new Stopwatch();
@@ -131,7 +131,7 @@ namespace AgOpenGPS
         /// </summary>
         public CGuidance gyd;
 
-        public ShapeFile shape;
+        //public ShapeFile shape;
 
         #endregion // Class Props and instances
 
@@ -186,7 +186,7 @@ namespace AgOpenGPS
             //sounds class
             sounds = new CSound();
 
-            shape = new ShapeFile(this);
+            //shape = new ShapeFile(this);
         }
 
         //Initialize items before the form Loads or is visible
@@ -207,6 +207,7 @@ namespace AgOpenGPS
             FormBorderStyle = FormBorderStyle.Sizable;
             MouseWheel += ZoomByMouseWheel;
 
+            SetZoom(0);
             //start udp server is required
             StartLoopbackServer();
 
@@ -223,11 +224,14 @@ namespace AgOpenGPS
             // load all the gui elements in gui.designer.cs
             LoadSettings();
 
-            LineUpManualBtns();
-
             SetGuidanceMode(Mode.None);
 
             this.Resize += new System.EventHandler(this.FormGPS_Resize);
+
+            if (!glm.isSimEnabled && !Debugger.IsAttached)
+            {
+                btnStartAgIO_Click(null, EventArgs.Empty);
+            }
         }
 
         private void SetGuiText()
@@ -292,18 +296,6 @@ namespace AgOpenGPS
         }
 
         // Load Bitmaps And Convert To Textures
-
-        public enum textures : uint
-        {
-            SkyDay, Floor, Font,
-            Turn, TurnCancel, TurnManual,
-            Compass, Speedo, SpeedoNeedle,
-            Lift, SkyNight, SteerPointer,
-            SteerDot, Tractor, QuestionMark,
-            FrontWheels, FourWDFront, FourWDRear,
-            Harvester, Lateral
-        }
-
         public void LoadGLTextures()
         {
             GL.Enable(EnableCap.Texture2D);
@@ -316,7 +308,7 @@ namespace AgOpenGPS
                 Properties.Resources.z_Lift,Properties.Resources.z_SkyNight,Properties.Resources.z_SteerPointer,
                 Properties.Resources.z_SteerDot,GetTractorBrand(Properties.Settings.Default.setBrand_TBrand),Properties.Resources.z_QuestionMark,
                 Properties.Resources.z_FrontWheels,Get4WDBrandFront(Properties.Settings.Default.setBrand_WDBrand), Get4WDBrandRear(Properties.Settings.Default.setBrand_WDBrand),
-                GetHarvesterBrand(Properties.Settings.Default.setBrand_HBrand), Properties.Resources.z_LateralManual, Properties.Resources.z_bingMap
+                GetHarvesterBrand(Properties.Settings.Default.setBrand_HBrand), Properties.Resources.z_LateralManual, Properties.Resources.z_bingMap, Properties.Resources.z_NoGPS
             };
 
             texture = new uint[oglTextures.Length];
@@ -335,7 +327,6 @@ namespace AgOpenGPS
                 }
             }
         }
-
 
         //Load Bitmaps brand
         public Bitmap GetTractorBrand(TBrand brand)
@@ -431,10 +422,10 @@ namespace AgOpenGPS
             int machine = 0;
 
             //check if super section is on
-            for (int j = 0; j < tool.sections.Count - 1; j++)
+            for (int j = 0; j < tool.numOfSections; j++)
             {
                 //set if on, reset bit if off
-                if (tool.sections[tool.sections.Count - 1].isSectionOn || tool.sections[j].isSectionOn)
+                if (tool.sections[tool.numOfSections].isSectionOn || tool.sections[j].isSectionOn)
                     machine |= set;
 
                 //move set and reset over 1 bit left
@@ -466,16 +457,7 @@ namespace AgOpenGPS
 
             isJobStarted = true;
 
-
             FieldMenuButtonEnableDisable(true);
-
-            if (Debugger.IsAttached && Directory.Exists(fieldsDirectory + currentFieldDirectory))
-            {
-                foreach (string file in Directory.GetFiles(fieldsDirectory + currentFieldDirectory, "*.shp", SearchOption.AllDirectories))
-                {
-                    shape.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
-                }
-            }
         }
 
         public void FieldMenuButtonEnableDisable(bool isOn)
@@ -488,7 +470,7 @@ namespace AgOpenGPS
 
             lblFieldStatus.Visible = isOn;
 
-            for (int j = 0; j < tool.sections.Count - 1; j++)
+            for (int j = 0; j < tool.numOfSections; j++)
             {
                 if (!isOn)
                 {
@@ -511,7 +493,132 @@ namespace AgOpenGPS
             panelRight.Enabled = status;
         }
 
-        //close the current job
+        /*
+        if (Debugger.IsAttached && Directory.Exists(fieldsDirectory + currentFieldDirectory))
+        {
+            foreach (string file in Directory.GetFiles(fieldsDirectory + currentFieldDirectory, "*.shp", SearchOption.AllDirectories))
+            {
+                shape.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
+            }
+        }
+        */
+
+        public void LoadDriveInFields()
+        {
+            string[] dirs = Directory.GetDirectories(fieldsDirectory);
+
+            Fields.Clear();
+
+            foreach (string dir in dirs)
+            {
+                string fieldDirectory = Path.GetFileName(dir);
+                string filename = dir + "\\Field.txt";
+                string line;
+
+                //make sure directory has a field.txt in it
+                if (File.Exists(filename))
+                {
+                    CAutoLoadField New = new CAutoLoadField();
+                    double mPerDegreeLat = 0;
+                    using (StreamReader reader = new StreamReader(filename))
+                    {
+                        try
+                        {
+                            //Date time line
+                            for (int i = 0; i < 8; i++)
+                            {
+                                line = reader.ReadLine();
+                            }
+
+                            //start positions
+                            if (!reader.EndOfStream)
+                            {
+                                line = reader.ReadLine();
+                                string[] offs = line.Split(',');
+
+                                New.LatStart = (double.Parse(offs[0], CultureInfo.InvariantCulture));
+                                New.LonStart = (double.Parse(offs[1], CultureInfo.InvariantCulture));
+                                New.Dir = fieldDirectory;
+
+
+                                double LatRad = New.LatStart * 0.01745329251994329576923690766743;
+
+                                mPerDegreeLat = 111132.92 - 559.82 * Math.Cos(2.0 * LatRad) + 1.175 * Math.Cos(4.0 * LatRad) - 0.0023 * Math.Cos(6.0 * LatRad);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+
+                    //grab the boundary area
+                    filename = dir + "\\Boundary.txt";
+                    if (File.Exists(filename))
+                    {
+                        using (StreamReader reader = new StreamReader(filename))
+                        {
+                            try
+                            {
+                                //read header
+                                line = reader.ReadLine();//Boundary
+
+                                if (!reader.EndOfStream)
+                                {
+                                    //True or False OR points from older boundary files
+                                    line = reader.ReadLine();
+
+                                    //Check for older boundary files, then above line string is num of points
+                                    if (line == "True" || line == "False")
+                                    {
+                                        line = reader.ReadLine(); //number of points
+                                    }
+
+                                    //Check for latest boundary files, then above line string is num of points
+                                    if (line == "True" || line == "False")
+                                    {
+                                        line = reader.ReadLine(); //number of points
+                                    }
+
+                                    int numPoints = int.Parse(line);
+
+                                    if (numPoints > 0)
+                                    {
+                                        //load the line
+                                        for (int i = 0; i < numPoints; i++)
+                                        {
+                                            line = reader.ReadLine();
+                                            string[] words = line.Split(',');
+
+                                            double east = double.Parse(words[0], CultureInfo.InvariantCulture);
+                                            double nort = double.Parse(words[1], CultureInfo.InvariantCulture);
+
+                                            worldManager.ConvertLocalToLocal(nort, east, New.LatStart, New.LonStart, mPerDegreeLat, out double northing, out double easting);
+
+                                            New.points.Add(new vec2(easting, northing));
+                                        }
+
+                                        int j = New.points.Count - 1;  // The last vertex is the 'previous' one to the first
+                                        double Area = 0;
+                                        for (int i = 0; i < New.points.Count; j = i++)
+                                        {
+                                            Area += (New.points[j].easting + New.points[i].easting) * (New.points[j].northing - New.points[i].northing);
+                                        }
+
+                                        New.Area = Math.Abs(Area / 2);
+
+                                        Fields.Add(New);
+                                    }
+                                }
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public void JobClose()
         {
             //reset field offsets
@@ -595,7 +702,7 @@ namespace AgOpenGPS
 
             worldManager.isGeoMap = false;
 
-            shape.Polygons.Clear();
+            //shape.Polygons.Clear();
         }
 
         //take the distance from object and convert to camera data
@@ -606,18 +713,18 @@ namespace AgOpenGPS
             if (worldManager.zoomValue > 220) worldManager.zoomValue = 220;
             if (worldManager.zoomValue < 6.0) worldManager.zoomValue = 6.0;
 
-            worldManager.camSetDistance = worldManager.zoomValue * worldManager.zoomValue * -1;
+            worldManager.camSetDistance = worldManager.zoomValue * worldManager.zoomValue;
 
             //match grid to cam distance and redo perspective
-            if (worldManager.camSetDistance > -50) worldManager.gridZoom = 10;
-            else if (worldManager.camSetDistance > -150) worldManager.gridZoom = 20;
-            else if (worldManager.camSetDistance > -250) worldManager.gridZoom = 40;
-            else if (worldManager.camSetDistance > -500) worldManager.gridZoom = 80;
-            else if (worldManager.camSetDistance > -1000) worldManager.gridZoom = 160;
-            else if (worldManager.camSetDistance > -2000) worldManager.gridZoom = 320;
-            else if (worldManager.camSetDistance > -5000) worldManager.gridZoom = 640;
-            else if (worldManager.camSetDistance > -10000) worldManager.gridZoom = 1280;
-            else if (worldManager.camSetDistance > -20000) worldManager.gridZoom = 2560;
+            if (worldManager.camSetDistance < 50) worldManager.gridZoom = 5;
+            else if (worldManager.camSetDistance < 150) worldManager.gridZoom = 10;
+            else if (worldManager.camSetDistance < 250) worldManager.gridZoom = 20;
+            else if (worldManager.camSetDistance < 500) worldManager.gridZoom = 40;
+            else if (worldManager.camSetDistance < 1000) worldManager.gridZoom = 80;
+            else if (worldManager.camSetDistance < 2000) worldManager.gridZoom = 160;
+            else if (worldManager.camSetDistance < 5000) worldManager.gridZoom = 320;
+            else if (worldManager.camSetDistance < 10000) worldManager.gridZoom = 640;
+            else if (worldManager.camSetDistance < 20000) worldManager.gridZoom = 1280;
 
             oglMain_Resize(null, null);
         }

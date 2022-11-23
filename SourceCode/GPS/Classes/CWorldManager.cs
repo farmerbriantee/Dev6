@@ -17,7 +17,7 @@ namespace AgOpenGPS
         public vec2 fixOffset = new vec2(0, 0);
 
         public double camPitch;
-        public double camSetDistance = -75;
+        public double camSetDistance = 75;
         public double gridZoom;
         public double zoomValue = 15;
         public bool camFollowing;
@@ -56,28 +56,52 @@ namespace AgOpenGPS
 
         public void SetLocalMetersPerDegree()
         {
-            double LatRad = latStart * 0.01745329251994329576923690766743;
+            double LatRad = glm.toRadians(latStart);
 
             mPerDegreeLat = 111132.92 - 559.82 * Math.Cos(2.0 * LatRad) + 1.175 * Math.Cos(4.0 * LatRad) - 0.0023 * Math.Cos(6.0 * LatRad);
             mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
 
             ConvertWGS84ToLocal(mf.mc.latitude, mf.mc.longitude, out double northing, out double easting);
             mf.worldManager.checkZoomWorldGrid(northing, easting);
-        }
 
+            if (mf.isDriveIn && mf.isJobStarted)
+            {
+                // if (Directory.Exists(mf.fieldsDirectory + mf.currentFieldDirectory))
+                //{
+                //     foreach (string file in Directory.GetFiles(mf.fieldsDirectory + mf.currentFieldDirectory, "*.shp", SearchOption.TopDirectoryOnly))
+                //    {
+                //        mf.shape.Main(mf.fieldsDirectory + mf.currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
+                //    }
+                //}
+                mf.LoadDriveInFields();
+            }
+        }
+        
         public void ConvertWGS84ToLocal(double Lat, double Lon, out double Northing, out double Easting)
         {
-            double LatRad = Lat * 0.01745329251994329576923690766743;
+            double LatRad = glm.toRadians(Lat);
             mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
 
             Northing = (Lat - latStart) * mPerDegreeLat;
             Easting = (Lon - lonStart) * mPerDegreeLon;
         }
 
+        public void ConvertLocalToLocal(double Northing, double Easting, double latStart2, double lonStart2, double mPerDegreeLat1, out double Northing2, out double Easting2)
+        {
+            double Lat = (Northing / mPerDegreeLat1) + latStart2;
+            double LatRad = Lat * 0.01745329251994329576923690766743;
+
+            mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
+            double Lon = (Easting / mPerDegreeLon) + lonStart2;
+
+            Northing2 = (Lat - latStart) * mPerDegreeLat;
+            Easting2 = (Lon - lonStart) * mPerDegreeLon;
+        }
+
         public void ConvertLocalToWGS84(double Northing, double Easting, out double Lat, out double Lon)
         {
             Lat = ((Northing + fixOffset.northing) / mPerDegreeLat) + latStart;
-            double LatRad = Lat * 0.01745329251994329576923690766743;
+            double LatRad = glm.toRadians(Lat);
 
             mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
             Lon = ((Easting + fixOffset.easting) / mPerDegreeLon) + lonStart;
@@ -86,7 +110,7 @@ namespace AgOpenGPS
         public string GetLocalToWSG84_KML(double Easting, double Northing)
         {
             double Lat = (Northing / mPerDegreeLat) + latStart;
-            double LatRad = Lat * 0.01745329251994329576923690766743;
+            double LatRad = glm.toRadians(Lat);
 
             mPerDegreeLon = 111412.84 * Math.Cos(LatRad) - 93.5 * Math.Cos(3.0 * LatRad) + 0.118 * Math.Cos(5.0 * LatRad);
             double Lon = (Easting / mPerDegreeLon) + lonStart;
@@ -97,7 +121,7 @@ namespace AgOpenGPS
         public void SetWorldPerspective(double camPosX, double camPosY)
         {
             //back the camera up
-            GL.Translate(0.0, 0.0, camSetDistance * 0.5);
+            GL.Translate(0.0, 0.0, camSetDistance * -0.5);
 
             //rotate the camera down to look at fix
             GL.Rotate(camPitch, 1.0, 0.0, 0.0);
@@ -133,17 +157,13 @@ namespace AgOpenGPS
             {
                 GL.Enable(EnableCap.Texture2D);
                 //adjust bitmap zoom based on cam zoom
-                if (zoomValue > 100) Count = 4;
-                else if (zoomValue > 80) Count = 8;
-                else if (zoomValue > 50) Count = 16;
-                else if (zoomValue > 20) Count = 32;
-                else if (zoomValue > 10) Count = 64;
-                else Count = 128;
+
+                Count = 5120 / gridZoom;
 
                 GL.Color3(field.R, field.G, field.B);
                 GL.BindTexture(TextureTarget.Texture2D, mf.texture[1]);
                 GL.Begin(PrimitiveType.TriangleStrip);
-
+                
                 GL.TexCoord2(0, 0);
                 GL.Vertex3(eastingMin, northingMax, 0.0);
                 GL.TexCoord2(Count, 0.0);
@@ -186,13 +206,11 @@ namespace AgOpenGPS
             }
 
             ////if grid is on draw it
-            if (isGridOn) DrawWorldGrid(gridZoom);
+            if (isGridOn) DrawWorldGrid();
         }
 
-        public void DrawWorldGrid(double _gridZoom)
+        public void DrawWorldGrid()
         {
-            _gridZoom *= 0.5;
-
             if (mf.isDay)
             {
                 GL.Color3(0.5, 0.5, 0.5);
@@ -203,16 +221,24 @@ namespace AgOpenGPS
             }
             GL.LineWidth(1);
             GL.Begin(PrimitiveType.Lines);
-            for (double num = Math.Round(eastingMin / _gridZoom, MidpointRounding.AwayFromZero) * _gridZoom; num < eastingMax; num += _gridZoom)
+            for (double num = Math.Round(eastingMin / gridZoom, MidpointRounding.AwayFromZero) * gridZoom; num < eastingMax; num += gridZoom)
             {
                 if (num < eastingMin) continue;
+                else if (mf.eastMin > num)
+                    continue;
+                else if (mf.eastMax < num)
+                    break;
 
                 GL.Vertex3(num, northingMax, 0.0);
                 GL.Vertex3(num, northingMin, 0.0);
             }
-            for (double num2 = Math.Round(northingMin / _gridZoom, MidpointRounding.AwayFromZero) * _gridZoom; num2 < northingMax; num2 += _gridZoom)
+            for (double num2 = Math.Round(northingMin / gridZoom, MidpointRounding.AwayFromZero) * gridZoom; num2 < northingMax; num2 += gridZoom)
             {
                 if (num2 < northingMin) continue;
+                else if (mf.northMin > num2)
+                    continue;
+                else if (mf.northMax < num2)
+                    break;
 
                 GL.Vertex3(eastingMax, num2, 0.0);
                 GL.Vertex3(eastingMin, num2, 0.0);
@@ -222,8 +248,10 @@ namespace AgOpenGPS
 
         public void checkZoomWorldGrid(double northing, double easting)
         {
-            double n = Math.Round(northing / (GridSize / Count * 2), MidpointRounding.AwayFromZero) * (GridSize / Count * 2);
-            double e = Math.Round(easting / (GridSize / Count * 2), MidpointRounding.AwayFromZero) * (GridSize / Count * 2);
+            double multiply = GridSize / Count * 2;
+
+            double n = Math.Round(northing / multiply, MidpointRounding.AwayFromZero) * multiply;
+            double e = Math.Round(easting / multiply, MidpointRounding.AwayFromZero) * multiply;
 
             northingMax = n + GridSize;
             northingMin = n - GridSize;
