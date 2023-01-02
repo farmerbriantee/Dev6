@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -29,7 +30,6 @@ namespace AgOpenGPS
         public double BndBoxTop;
         public double BndBoxBottom;
         public List<Polyline2> Parts = new List<Polyline2>();
-        public bool InsideLargeView = false;
         public int[] BufferID, NumElements, BufferIndex;
         public Color color = Color.FromArgb(0x78000000);
     }
@@ -39,26 +39,11 @@ namespace AgOpenGPS
     {
         private const int HeaderLength = 100;
 
-        public List<ShapePolygon2> Polygons = new List<ShapePolygon2>();
-
         private readonly FormGPS mf;
 
         public ShapeFile(FormGPS _f)
         {
             mf = _f;
-        }
-
-        public void Draw()
-        {
-            GL.LineWidth(2);
-            for (int i = 0; i < Polygons.Count; i++)
-            {
-                for (int j = 0; j < Polygons[i].Parts.Count; j++)
-                {
-                    GL.Color4(Color.FromArgb(0x78000000));
-                    Polygons[i].Parts[j].DrawPolyLine(DrawType.LineLoop);
-                }
-            }
         }
 
         public void Main(string FilePath)
@@ -277,43 +262,23 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    CBoundaryList New = new CBoundaryList();
+                                    Polyline2 New = new Polyline2();
 
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + 0 + (16 * point), true));
 
                                         mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        New.fenceLine.points.Add(new vec2(Easting, Northing));
+                                        New.points.Add(new vec2(Easting, Northing));
                                     }
 
-                                    if (New.fenceLine.points[0].easting == New.fenceLine.points[New.fenceLine.points.Count - 1].easting && New.fenceLine.points[0].northing == New.fenceLine.points[New.fenceLine.points.Count - 1].northing)
+                                    if (New.points[0].easting == New.points[New.points.Count - 1].easting && New.points[0].northing == New.points[New.points.Count - 1].northing)
                                     {
-                                        New.fenceLine.points.RemoveAt(0);
+                                        New.points.RemoveAt(0);
                                     }
+                                    New.points.IsClockwise(true, out _);
 
-                                    New.CalculateFenceArea();
-
-                                    mf.bnd.bndList.Add(New);
-                                    /*
-                                    ShapePolygon2 aa = new ShapePolygon2
-                                    {
-                                        BndBoxLeft = ParseDouble(ByteArray, 12, true),
-                                        BndBoxTop = ParseDouble(ByteArray, 20, true),
-                                        BndBoxRight = ParseDouble(ByteArray, 28, true),
-                                        BndBoxBottom = ParseDouble(ByteArray, 36, true)
-                                    };
-
-                                    if (aa.BndBoxLeft - 0.1 <= mf.mc.longitude && aa.BndBoxRight + 0.1 >= mf.mc.longitude)
-                                    {
-                                        if (aa.BndBoxTop - 0.1 <= mf.mc.latitude && aa.BndBoxBottom + 0.1 >= mf.mc.latitude)
-                                        {
-                                            aa.InsideLargeView = true;
-                                            aa.Parts.Add(Fence);
-                                            Polygons.Add(aa);
-                                        }
-                                    }
-                                    */
+                                    mf.bnd.Rate.Add(New);
                                 }
                             }
                         }
@@ -335,7 +300,7 @@ namespace AgOpenGPS
                                 }
                             }
                         }
-                        else if (ShapeType == 31 && ShapeLength >= 48)
+                        else if (Debugger.IsAttached && ShapeType == 31 && ShapeLength >= 48)
                         {
                             //aa.BndBoxLeft = ParseDouble(ByteArray, 12, true);
                             //aa.BndBoxTop = ParseDouble(ByteArray, 20, true);
@@ -382,17 +347,12 @@ namespace AgOpenGPS
                                             BndBoxBottom = ParseDouble(ByteArray, 36, true)
                                         };
 
-                                        if (aa.BndBoxLeft - 0.1 <= mf.mc.longitude && aa.BndBoxRight + 0.1 >= mf.mc.longitude)
-                                        {
-                                            if (aa.BndBoxTop - 0.1 <= mf.mc.latitude && aa.BndBoxBottom + 0.1 >= mf.mc.latitude)
-                                            {
-                                                aa.InsideLargeView = true;
-                                                if (table.Rows.Count > Polygons.Count && table.Columns.Count > 3)
-                                                    aa.color = table.Rows[Polygons.Count][4].ToString() == "100" ? Color.FromArgb(0x78FF0000) : Color.FromArgb(0x7800FF00);
-                                                aa.Parts.Add(New);
-                                                Polygons.Add(aa);
-                                            }
-                                        }
+                                        //if (table.Rows.Count > Polygons.Count && table.Columns.Count > 3)
+                                        //    aa.color = table.Rows[Polygons.Count][4].ToString() == "100" ? Color.FromArgb(0x78FF0000) : Color.FromArgb(0x7800FF00);
+                                        aa.Parts.Add(New);
+                                        //Polygons.Add(aa);
+
+
                                     }
                                 }
                             }

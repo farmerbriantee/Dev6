@@ -131,7 +131,7 @@ namespace AgOpenGPS
         /// </summary>
         public CGuidance gyd;
 
-        //public ShapeFile shape;
+        public ShapeFile shape;
 
         #endregion // Class Props and instances
 
@@ -186,7 +186,7 @@ namespace AgOpenGPS
             //sounds class
             sounds = new CSound();
 
-            //shape = new ShapeFile(this);
+            shape = new ShapeFile(this);
         }
 
         //Initialize items before the form Loads or is visible
@@ -493,16 +493,6 @@ namespace AgOpenGPS
             panelRight.Enabled = status;
         }
 
-        /*
-        if (Debugger.IsAttached && Directory.Exists(fieldsDirectory + currentFieldDirectory))
-        {
-            foreach (string file in Directory.GetFiles(fieldsDirectory + currentFieldDirectory, "*.shp", SearchOption.AllDirectories))
-            {
-                shape.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
-            }
-        }
-        */
-
         public void LoadDriveInFields()
         {
             string[] dirs = Directory.GetDirectories(fieldsDirectory);
@@ -694,6 +684,10 @@ namespace AgOpenGPS
             //reset acre and distance counters
             bnd.workedAreaTotal = 0;
 
+            for (int i = 0; i < bnd.Rate.Count; i++)
+                bnd.Rate[i].RemoveHandle();
+            bnd.Rate.Clear();
+
             //reset GUI areas
             CalculateMinMax();
 
@@ -701,8 +695,6 @@ namespace AgOpenGPS
             FixTramModeButton();
 
             worldManager.isGeoMap = false;
-
-            //shape.Polygons.Clear();
         }
 
         //take the distance from object and convert to camera data

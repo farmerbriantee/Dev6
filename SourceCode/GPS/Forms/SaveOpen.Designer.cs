@@ -4,6 +4,7 @@ using System.IO;
 using System.Globalization;
 using System.Xml;
 using System.Text;
+using System.Diagnostics;
 
 namespace AgOpenGPS
 {
@@ -780,6 +781,14 @@ namespace AgOpenGPS
                         this.TimedMessageBox(2000, "Tram is corrupt", gStr.gsButFieldIsLoaded);
                         WriteErrorLog("Load Boundary Line" + e.ToString());
                     }
+                }
+            }
+
+            if (Directory.Exists(fieldsDirectory + currentFieldDirectory))
+            {
+                foreach (string file in Directory.GetFiles(fieldsDirectory + currentFieldDirectory, "*.shp", SearchOption.TopDirectoryOnly))
+                {
+                    shape.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
                 }
             }
 

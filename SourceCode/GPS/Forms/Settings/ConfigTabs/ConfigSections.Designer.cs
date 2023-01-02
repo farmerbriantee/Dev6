@@ -137,7 +137,7 @@
             // 
             this.nudMinCoverage.BackColor = System.Drawing.Color.AliceBlue;
             this.nudMinCoverage.Font = new System.Drawing.Font("Tahoma", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.nudMinCoverage.Location = new System.Drawing.Point(258, 500);
+            this.nudMinCoverage.Location = new System.Drawing.Point(292, 503);
             this.nudMinCoverage.Name = "nudMinCoverage";
             this.nudMinCoverage.Size = new System.Drawing.Size(125, 50);
             this.nudMinCoverage.TabIndex = 487;

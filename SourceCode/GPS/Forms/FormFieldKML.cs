@@ -249,7 +249,7 @@ namespace AgOpenGPS
                                     New.fenceLine.points.Add(new vec2(easting, northing));
                                 }
 
-                                //build the boundary, make sure is clockwise for outer counter clockwise for inner
+                                //build the boundary
                                 New.CalculateFenceArea();
 
                                 mf.bnd.bndList.Add(New);

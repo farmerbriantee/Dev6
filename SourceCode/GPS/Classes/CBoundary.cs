@@ -11,6 +11,8 @@ namespace AgOpenGPS
 
         public List<CBoundaryList> bndList = new List<CBoundaryList>();
 
+        public List<Polyline2> Rate = new List<Polyline2>();
+
         public bool isHeadlandOn, isSectionControlledByHeadland;
 
         public Polyline2 bndBeingMadePts = new Polyline2();
@@ -79,6 +81,18 @@ namespace AgOpenGPS
             {
                 bndList[i].fenceLine.DrawPolyLine(DrawType.LineLoop);
             }
+        }
+
+        public int IsPointInsideRateArea(vec2 testPoint)
+        {
+            for (int i = 0; i < Rate.Count; i++)
+            {
+                if (Rate[i].points.IsPointInPolygon(testPoint))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         public bool IsPointInsideFenceArea(vec2 testPoint)

@@ -3,6 +3,7 @@
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Drawing;
+using System.IO;
 
 namespace AgOpenGPS
 {
@@ -66,13 +67,6 @@ namespace AgOpenGPS
 
             if (mf.isDriveIn && mf.isJobStarted)
             {
-                // if (Directory.Exists(mf.fieldsDirectory + mf.currentFieldDirectory))
-                //{
-                //     foreach (string file in Directory.GetFiles(mf.fieldsDirectory + mf.currentFieldDirectory, "*.shp", SearchOption.TopDirectoryOnly))
-                //    {
-                //        mf.shape.Main(mf.fieldsDirectory + mf.currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
-                //    }
-                //}
                 mf.LoadDriveInFields();
             }
         }

@@ -310,22 +310,16 @@ namespace AgOpenGPS
                         }
                     }
 
-                    int j2 = StartPoints.Count - 1;  // The last vertex is the 'previous' one to the first
-                    for (int i = 0; i < StartPoints.Count; j2 = i++)
-                    {
-                        area += (StartPoints[j2].easting + StartPoints[i].easting) * (StartPoints[j2].northing - StartPoints[i].northing);
-                    }
-
+                    bool clockwise = StartPoints.IsClockwise(false, out area);
+                    
                     //make sure boundary is clockwise
-                    if (area < 0)
+                    if (!clockwise)
                     {
                         pointsAtEnd = true;
                         offset = -offset;
                         StartPoints.Reverse();
                         dddd = -dddd;
                     }
-                    //Poly.loop = true;
-
                 }
                 else
                     StartPoints = Poly.points;
@@ -1290,6 +1284,29 @@ namespace AgOpenGPS
                 arr[i].northing /= smPts;
             }
             return arr;
+        }
+
+        public static bool IsClockwise(this List<vec2> points, bool force, out double area)
+        {
+            area = 0;         // Accumulates area in the loop
+            int ptCount = points.Count;
+            if (ptCount < 1) return false;
+
+            int j = ptCount - 1;  // The last vertex is the 'previous' one to the first
+
+            for (int i = 0; i < ptCount; j = i++)
+            {
+                area += (points[j].easting + points[i].easting) * (points[j].northing - points[i].northing);
+            }
+
+            bool isClockwise = area >= 0;
+
+            area = Math.Abs(area / 2);
+
+            //make sure boundary is clockwise
+            if (force && !isClockwise)
+                points.Reverse();
+            return isClockwise;
         }
 
         public static void AddFirstLastPoints(this List<vec2> points, double length, double lineHeading, bool StraightLine = true)
