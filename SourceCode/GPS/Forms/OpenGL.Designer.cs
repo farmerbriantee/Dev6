@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL;
 using System.Windows.Forms;
 using System.Text;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace AgOpenGPS
 {
@@ -128,6 +129,7 @@ namespace AgOpenGPS
             {
                 oglMain.MakeCurrent();
 
+                //shape.Draw();
                 if (isDay) GL.ClearColor(0.27f, 0.4f, 0.7f, 1.0f);
                 else GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -149,7 +151,23 @@ namespace AgOpenGPS
                     if (test == i)
                         GL.Color3(0.0f, 1.0f, 0.0f);
                     else
-                        GL.Color3(1.0 / bnd.Rate.Count * i, 0.0f, 1.0 / bnd.Rate.Count * (bnd.Rate.Count - i));
+                    {
+                        if (shape.rgbIndex > -1)
+                        {
+                            string[] splut = ((string)shape.table.Rows[i].ItemArray[shape.rgbIndex]).Split(',');
+                            int red = int.Parse(splut[0].Trim());
+                            int green = int.Parse(splut[1].Trim());
+                            int blue = int.Parse(splut[2].Trim());
+                            //GL.Color3(65536, 0, 0);
+                            GL.Color3(Color.FromArgb(1,red,green,blue));
+                            //GL.Color3(1.0 / red, 1.0 / green, 1.0 / blue);
+                        }
+                        else
+                        {
+                            GL.Color3(1.0 / bnd.Rate.Count * i, 0.0f, 1.0 / bnd.Rate.Count * (bnd.Rate.Count - i)); //pseudo-random if not
+                        }
+                    }
+
                     bnd.Rate[i].DrawPolyLine(DrawType.Triangles);
                 }
 
@@ -236,8 +254,6 @@ namespace AgOpenGPS
 
                 GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
                 GL.Color3(1, 1, 1);
-
-                //shape.Draw();
 
                 if (bnd.bndList.Count > 0)
                 {
@@ -1743,7 +1759,7 @@ namespace AgOpenGPS
             float sinPitch = (float)Math.Sin(glm.toRadians(worldManager.camPitch));
             float eastsinhead = (float)pivotAxlePos.easting * sinhead;
             float northcoshead = (float)pivotAxlePos.northing * coshead;
-            
+
             inv_proj = new Matrix4(
                 new Vector4(coshead, sinhead * cosPitch, sinhead * sinPitch, 0),
                 new Vector4(-sinhead, cosPitch * coshead, sinPitch * coshead, 0),

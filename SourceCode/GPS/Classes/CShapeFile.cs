@@ -10,7 +10,7 @@ using System.Text;
 
 namespace AgOpenGPS
 {
-    
+
     public class WGS84
     {
         public double Lat;
@@ -38,9 +38,10 @@ namespace AgOpenGPS
     public class ShapeFile
     {
         private const int HeaderLength = 100;
-
         private readonly FormGPS mf;
-
+        public int rgbIndex = -1;
+        public int rateIndex = -1;
+        public DataTable table = new DataTable();
         public ShapeFile(FormGPS _f)
         {
             mf = _f;
@@ -50,7 +51,7 @@ namespace AgOpenGPS
         {
             FileStream MainStream = File.Open(FilePath + ".shp", FileMode.Open, FileAccess.Read, FileShare.Read);
 
-            DataTable table = new DataTable();
+            table = new DataTable();
 
             if (File.Exists(FilePath + ".dbf"))
             {
@@ -156,7 +157,7 @@ namespace AgOpenGPS
 
                         Index += FieldSize[col];
 
-                        if (string.IsNullOrEmpty(value) || value  == "******************")
+                        if (string.IsNullOrEmpty(value) || value == "******************")
                         {
                             R[col] = DBNull.Value;
                         }
@@ -197,6 +198,17 @@ namespace AgOpenGPS
                     //Application.DoEvents();
                 }
                 DBFStream.Close();
+            }
+            // store the indexes
+            try
+            {
+                rgbIndex = table.Columns.IndexOf("rgb");
+                rateIndex = table.Columns.IndexOf("rate");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("couldn't find rgb/rate");
+                Debug.WriteLine(e.Message);
             }
 
             if (MainStream.Length > HeaderLength)
@@ -262,23 +274,22 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    Polyline2 New = new Polyline2();
+                                    Polyline2 NewPline2 = new Polyline2();
 
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + 0 + (16 * point), true));
 
                                         mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        New.points.Add(new vec2(Easting, Northing));
+                                        NewPline2.points.Add(new vec2(Easting, Northing));
                                     }
 
-                                    if (New.points[0].easting == New.points[New.points.Count - 1].easting && New.points[0].northing == New.points[New.points.Count - 1].northing)
+                                    if (NewPline2.points[0].easting == NewPline2.points[NewPline2.points.Count - 1].easting && NewPline2.points[0].northing == NewPline2.points[NewPline2.points.Count - 1].northing)
                                     {
-                                        New.points.RemoveAt(0);
+                                        NewPline2.points.RemoveAt(0);
                                     }
-                                    New.points.IsClockwise(true, out _);
-
-                                    mf.bnd.Rate.Add(New);
+                                    NewPline2.points.IsClockwise(true, out _);
+                                    mf.bnd.Rate.Add(NewPline2);
                                 }
                             }
                         }
@@ -325,17 +336,17 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    Polyline2 New = new Polyline2();
+                                    Polyline2 NewPline2 = new Polyline2();
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + (16 * point), true));
                                         mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        New.points.Add(new vec2(Easting, Northing));
+                                        NewPline2.points.Add(new vec2(Easting, Northing));
                                     }
 
                                     if (type == 0)
                                     {
-                                        mf.patchList.Add(New);
+                                        mf.patchList.Add(NewPline2);
                                     }
                                     else if (type > 1)
                                     {
@@ -349,7 +360,7 @@ namespace AgOpenGPS
 
                                         //if (table.Rows.Count > Polygons.Count && table.Columns.Count > 3)
                                         //    aa.color = table.Rows[Polygons.Count][4].ToString() == "100" ? Color.FromArgb(0x78FF0000) : Color.FromArgb(0x7800FF00);
-                                        aa.Parts.Add(New);
+                                        aa.Parts.Add(NewPline2);
                                         //Polygons.Add(aa);
 
 
