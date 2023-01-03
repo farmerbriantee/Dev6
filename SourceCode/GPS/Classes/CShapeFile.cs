@@ -42,6 +42,9 @@ namespace AgOpenGPS
         public int rgbIndex = -1;
         public int rateIndex = -1;
         public DataTable table = new DataTable();
+        //public List<Color> colorRamp;
+        public List<double> colorRamp;
+
         public ShapeFile(FormGPS _f)
         {
             mf = _f;
@@ -199,17 +202,31 @@ namespace AgOpenGPS
                 }
                 DBFStream.Close();
             }
-            // store the indexes
+
             try
             {
                 rgbIndex = table.Columns.IndexOf("rgb");
                 rateIndex = table.Columns.IndexOf("rate");
+                decimal[] tmpRate = new decimal[table.Rows.Count];
+                decimal maxRate = 0;
+                int upperRamp = 250;
+                //TODO harden this check, don't assume convertable in case rate is wrong
+                // this is changing RATE, not colour...
+                // change the colour based on the rate, not on the RGB
+                // put the RGBs in a Dictionary based on rate
+                for (int i = 0; i < table.Rows.Count; i++)
+                {
+                    decimal v = (decimal)table.Rows[i].ItemArray[rateIndex];
+                    if (v > maxRate)
+                        maxRate = v;
+                }
             }
             catch (Exception e)
             {
                 Debug.WriteLine("couldn't find rgb/rate");
                 Debug.WriteLine(e.Message);
             }
+            // generate a color ramp
 
             if (MainStream.Length > HeaderLength)
             {

@@ -148,29 +148,34 @@ namespace AgOpenGPS
 
 
                 //TODOAW
-                for (int i = 0; i < bnd.Rate.Count; i++)
+                if (autoBtnState is btnStates.Auto)
                 {
-                    for (int j = 1; j < tool.sections.Count; j++) // aye, we Name the control that way
+                    var watch = System.Diagnostics.Stopwatch.StartNew();
+                    for (int i = 0; i < bnd.Rate.Count; i++)
                     {
-                        if (tool.sections[j].isMappingOn)
+                        for (int j = 1; j < tool.sections.Count; j++) // aye, we Name the control that way
                         {
-                            centreSectionPoint = new vec2();
-                            centreSectionPoint.northing = tool.sections[j].leftPoint.northing; // close enough
-                            centreSectionPoint.easting = (tool.sections[j].rightPoint.easting - tool.sections[j].leftPoint.easting) + tool.sections[j].leftPoint.easting;
-                            int bndIndex = bnd.IsPointInsideRateArea(centreSectionPoint);
-                            if (bndIndex > -1)
+                            if (tool.sections[j].isMappingOn)
                             {
-                                Control c = ((this.Controls.Find("section" + j, false)[0]));
-                                c.Text = shape.table.Rows[bndIndex]["rate"].ToString();
-                                //Debug.WriteLine($"Updating section {j} with rate {shape.table.Rows[bndIndex]["rate"].ToString()}");
+                                centreSectionPoint = new vec2();
+                                centreSectionPoint.northing = tool.sections[j].leftPoint.northing; // close enough, not overly concerned with tool height
+                                centreSectionPoint.easting = (tool.sections[j].rightPoint.easting - tool.sections[j].leftPoint.easting) + tool.sections[j].leftPoint.easting;
+                                int bndIndex = bnd.IsPointInsideRateArea(centreSectionPoint);
+                                if (bndIndex > -1)
+                                {
+                                    Control c = ((this.Controls.Find("section" + j, false)[0]));
+                                    c.Text = shape.table.Rows[bndIndex]["rate"].ToString();
+                                    //Debug.WriteLine($"Updating section {j} with rate {shape.table.Rows[bndIndex]["rate"].ToString()}");
+                                }
                             }
                         }
                     }
+                    watch.Stop();
+                    if (bnd.Rate.Count > 0)
+                        Debug.WriteLine($"Processing sections took { watch.ElapsedMilliseconds} ms ");
                 }
 
-
-
-
+                // this was highlighting the active polygon - don't need that for section control
                 //int test = bnd.IsPointInsideRateArea(pivotAxlePos);
                 for (int i = 0; i < bnd.Rate.Count; i++)
                 {

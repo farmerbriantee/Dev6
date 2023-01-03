@@ -494,6 +494,7 @@ namespace AgOpenGPS
                 if (j + 1 >= sections.Count)
                 {
                     sections.Insert(sections.Count - 1, new CSection(mf, j));
+                    // using this to name the controls we add - makes finding them for Update with rate later a lot easier.
                     sections[j].button.Name = "section" + (j+1);
                     mf.Controls.Add(sections[j].button);
                     sections[j].button.BringToFront();
