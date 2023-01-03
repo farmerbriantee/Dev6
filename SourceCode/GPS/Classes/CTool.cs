@@ -494,6 +494,7 @@ namespace AgOpenGPS
                 if (j + 1 >= sections.Count)
                 {
                     sections.Insert(sections.Count - 1, new CSection(mf, j));
+                    sections[j].button.Name = "section" + (j+1);
                     mf.Controls.Add(sections[j].button);
                     sections[j].button.BringToFront();
                     if (glm.isSimEnabled)

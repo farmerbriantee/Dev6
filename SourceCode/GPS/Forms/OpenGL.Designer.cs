@@ -53,9 +53,9 @@ namespace AgOpenGPS
 
         private void oglMain_Paint(object sender, PaintEventArgs e)
         {
+            vec2 centreSectionPoint;
             if (sentenceCounter > 299)
             {
-
                 //sentenceCounter = 0;
                 GL.Enable(EnableCap.Blend);
                 GL.ClearColor(0.122f, 0.1258f, 0.1275f, 1.0f);
@@ -145,12 +145,38 @@ namespace AgOpenGPS
                 //position the camera
                 worldManager.SetWorldPerspective(pivotAxlePos.easting, pivotAxlePos.northing);
 
-                int test = bnd.IsPointInsideRateArea(pivotAxlePos);
+
+
+                //TODOAW
                 for (int i = 0; i < bnd.Rate.Count; i++)
                 {
-                    if (test == i)
-                        GL.Color3(0.0f, 1.0f, 0.0f);
-                    else
+                    for (int j = 1; j < tool.sections.Count; j++) // aye, we Name the control that way
+                    {
+                        if (tool.sections[j].isMappingOn)
+                        {
+                            centreSectionPoint = new vec2();
+                            centreSectionPoint.northing = tool.sections[j].leftPoint.northing; // close enough
+                            centreSectionPoint.easting = (tool.sections[j].rightPoint.easting - tool.sections[j].leftPoint.easting) + tool.sections[j].leftPoint.easting;
+                            int bndIndex = bnd.IsPointInsideRateArea(centreSectionPoint);
+                            if (bndIndex > -1)
+                            {
+                                Control c = ((this.Controls.Find("section" + j, false)[0]));
+                                c.Text = shape.table.Rows[bndIndex]["rate"].ToString();
+                                //Debug.WriteLine($"Updating section {j} with rate {shape.table.Rows[bndIndex]["rate"].ToString()}");
+                            }
+                        }
+                    }
+                }
+
+
+
+
+                //int test = bnd.IsPointInsideRateArea(pivotAxlePos);
+                for (int i = 0; i < bnd.Rate.Count; i++)
+                {
+                    //if (test == i)
+                    //    GL.Color3(0.0f, 1.0f, 0.0f);
+                    //else
                     {
                         if (shape.rgbIndex > -1)
                         {
@@ -159,7 +185,7 @@ namespace AgOpenGPS
                             int green = int.Parse(splut[1].Trim());
                             int blue = int.Parse(splut[2].Trim());
                             //GL.Color3(65536, 0, 0);
-                            GL.Color3(Color.FromArgb(1,red,green,blue));
+                            GL.Color3(Color.FromArgb(1, red, green, blue));
                             //GL.Color3(1.0 / red, 1.0 / green, 1.0 / blue);
                         }
                         else

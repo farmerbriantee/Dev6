@@ -277,7 +277,10 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
+            // surely if auto, we should update each sections isMappingOn?
 
+            for (int j = 0; j < tool.sections.Count; j++) // aye, we Name the control that way
+                tool.sections[j].isMappingOn = true;
             setSectionBtnState(autoBtnState == btnStates.Auto ? btnStates.Off : btnStates.Auto);
         }
 
