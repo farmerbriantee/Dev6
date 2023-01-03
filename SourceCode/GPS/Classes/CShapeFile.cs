@@ -214,6 +214,7 @@ namespace AgOpenGPS
                 // this is changing RATE, not colour...
                 // change the colour based on the rate, not on the RGB
                 // put the RGBs in a Dictionary based on rate
+                // formula should be (rate / maxRate) * upperRamp
                 for (int i = 0; i < table.Rows.Count; i++)
                 {
                     decimal v = (decimal)table.Rows[i].ItemArray[rateIndex];
