@@ -365,6 +365,12 @@ namespace AgOpenGPS
             {
                 sections[j].leftPoint = leftPoint + tt * (sections[j].positionLeft - toolFarLeftPosition);
                 sections[j].rightPoint = leftPoint + tt * (sections[j].positionRight - toolFarLeftPosition);
+                
+                int idx = mf.bnd.IsPointInsideRateArea(((sections[j].leftPoint + sections[j].rightPoint) * 0.5));
+                double rate = 0;
+                if (idx >=0)
+                    rate = mf.bnd.Rate[idx].rate;
+                sections[j].button.Text = rate.ToString("0.00");
             }
 
             double oneFrameLeft = toolFarLeftSpeed / mf.HzTime * 10;

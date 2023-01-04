@@ -146,10 +146,7 @@ namespace AgOpenGPS
                 int test = bnd.IsPointInsideRateArea(pivotAxlePos);
                 for (int i = 0; i < bnd.Rate.Count; i++)
                 {
-                    if (test == i)
-                        GL.Color3(0.0f, 1.0f, 0.0f);
-                    else
-                        GL.Color3(1.0 / bnd.Rate.Count * i, 0.0f, 1.0 / bnd.Rate.Count * (bnd.Rate.Count - i));
+                    GL.Color3(bnd.Rate[i].color.R, bnd.Rate[i].color.G, bnd.Rate[i].color.B);
                     bnd.Rate[i].DrawPolyLine(DrawType.Triangles);
                 }
 

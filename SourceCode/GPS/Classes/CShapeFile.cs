@@ -262,7 +262,7 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    Polyline2 New = new Polyline2();
+                                    RatePolyline New = new RatePolyline();
 
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
@@ -277,6 +277,17 @@ namespace AgOpenGPS
                                         New.points.RemoveAt(0);
                                     }
                                     New.points.IsClockwise(true, out _);
+
+                                    int dd;
+                                    if ((dd = table.Columns.IndexOf("rate")) >=0)
+                                    {
+                                        New.rate = double.Parse(table.Rows[mf.bnd.Rate.Count][dd].ToString(), CultureInfo.InvariantCulture);
+                                    }
+                                    if ((dd = table.Columns.IndexOf("rgb")) >= 0)
+                                    {
+                                        string[] ddd = table.Rows[mf.bnd.Rate.Count][dd].ToString().Split(',');
+                                        New.color = Color.FromArgb(int.Parse(ddd[0], CultureInfo.InvariantCulture), int.Parse(ddd[1], CultureInfo.InvariantCulture), int.Parse(ddd[2], CultureInfo.InvariantCulture));
+                                    }
 
                                     mf.bnd.Rate.Add(New);
                                 }
