@@ -207,9 +207,9 @@ namespace AgOpenGPS
             {
                 rgbIndex = table.Columns.IndexOf("rgb");
                 rateIndex = table.Columns.IndexOf("rate");
-                decimal[] tmpRate = new decimal[table.Rows.Count];
-                decimal maxRate = 0;
-                int upperRamp = 250;
+                Type rateType = table.Rows[0].ItemArray[rateIndex].GetType();
+                //Dictionary< Type.GetType("System.String"), decimal> rateDictionary = new Dictionary<Type.GetType("System.String"), decimal>();
+                dynamic maxRate = 0;
                 //TODO harden this check, don't assume convertable in case rate is wrong
                 // this is changing RATE, not colour...
                 // change the colour based on the rate, not on the RGB
@@ -217,9 +217,10 @@ namespace AgOpenGPS
                 // formula should be (rate / maxRate) * upperRamp
                 for (int i = 0; i < table.Rows.Count; i++)
                 {
-                    decimal v = (decimal)table.Rows[i].ItemArray[rateIndex];
-                    if (v > maxRate)
-                        maxRate = v;
+                    dynamic v = (dynamic)table.Rows[i].ItemArray[rateIndex];
+                    //rateDictionary.Add(0, "1");
+                    //if (Decimal.Parse(v) > maxRate)
+                    //    maxRate = Decimal.Parse(v);
                 }
             }
             catch (Exception e)
@@ -227,7 +228,6 @@ namespace AgOpenGPS
                 Debug.WriteLine("couldn't find rgb/rate");
                 Debug.WriteLine(e.Message);
             }
-            // generate a color ramp
 
             if (MainStream.Length > HeaderLength)
             {

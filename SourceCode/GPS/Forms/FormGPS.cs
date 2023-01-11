@@ -131,7 +131,7 @@ namespace AgOpenGPS
         /// </summary>
         public CGuidance gyd;
 
-        public ShapeFile shape;
+        public ShapeFile shapefile;
 
         #endregion // Class Props and instances
 
@@ -186,7 +186,7 @@ namespace AgOpenGPS
             //sounds class
             sounds = new CSound();
 
-            shape = new ShapeFile(this);
+            shapefile = new ShapeFile(this);
         }
 
         //Initialize items before the form Loads or is visible
@@ -499,6 +499,7 @@ namespace AgOpenGPS
 
             Fields.Clear();
 
+            // TODO pick up any shapefiles in here too
             foreach (string dir in dirs)
             {
                 string fieldDirectory = Path.GetFileName(dir);

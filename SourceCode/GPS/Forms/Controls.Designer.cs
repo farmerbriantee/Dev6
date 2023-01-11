@@ -278,8 +278,8 @@ namespace AgOpenGPS
                 return;
             }
             // just a hack until we know how all this works
-            for (int j = 0; j < tool.sections.Count; j++) // aye, we Name the control that way TODOAW
-                tool.sections[j].isMappingOn = true;
+//            for (int j = 0; j < tool.sections.Count; j++) // aye, we Name the control that way TODOAW
+                //tool.sections[j].isMappingOn = true;
             setSectionBtnState(autoBtnState == btnStates.Auto ? btnStates.Off : btnStates.Auto);
         }
 
@@ -1429,6 +1429,7 @@ namespace AgOpenGPS
 
                 if (choice > 0)
                 {
+                    shapefile = null;
                     Settings.Default.setF_CurrentDir = currentFieldDirectory;
                     Settings.Default.Save();
 

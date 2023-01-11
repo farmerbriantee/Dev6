@@ -148,29 +148,42 @@ namespace AgOpenGPS
 
 
                 //TODOAW
-                if (autoBtnState is btnStates.Auto)
+                if (autoBtnState is btnStates.Auto && shapefile.rateIndex > -1)
                 {
                     var watch = System.Diagnostics.Stopwatch.StartNew();
                     for (int i = 0; i < bnd.Rate.Count; i++)
                     {
                         for (int j = 1; j < tool.sections.Count; j++) // aye, we Name the control that way
                         {
+                            Debug.Write($"{tool.sections[j].isMappingOn}  ");
+//                            Debug.WriteLine($"Section state - isSectionOn {tool.sections[j].isSectionOn} - isMappingOn {tool.sections[j].isMappingOn}");
                             if (tool.sections[j].isMappingOn)
                             {
                                 centreSectionPoint = new vec2();
                                 centreSectionPoint.northing = tool.sections[j].leftPoint.northing; // close enough, not overly concerned with tool height
-                                centreSectionPoint.easting = (tool.sections[j].rightPoint.easting - tool.sections[j].leftPoint.easting) + tool.sections[j].leftPoint.easting;
+                                // tool will flip in other direction
+                                if (tool.sections[j].leftPoint.easting < tool.sections[j].rightPoint.easting)
+                                {
+                                    //Debug.WriteLine("Northerly");
+                                    centreSectionPoint.easting = (tool.sections[j].rightPoint.easting - tool.sections[j].leftPoint.easting) + tool.sections[j].leftPoint.easting;
+                                }
+                                else
+                                {
+                                    //Debug.WriteLine("Southerly");
+                                    centreSectionPoint.easting = (tool.sections[j].leftPoint.easting - tool.sections[j].rightPoint.easting) + tool.sections[j].rightPoint.easting;
+                                }
                                 int bndIndex = bnd.IsPointInsideRateArea(centreSectionPoint);
                                 if (bndIndex > -1)
                                 {
                                     Control c = ((this.Controls.Find("section" + j, false)[0]));
-                                    c.Text = shape.table.Rows[bndIndex]["rate"].ToString();
+                                    c.Text = shapefile.table.Rows[bndIndex]["rate"].ToString();
                                     //Debug.WriteLine($"Updating section {j} with rate {shape.table.Rows[bndIndex]["rate"].ToString()}");
                                 }
                             }
                         }
                     }
                     watch.Stop();
+                    Debug.WriteLine("");
                     if (bnd.Rate.Count > 0)
                         Debug.WriteLine($"Processing sections took { watch.ElapsedMilliseconds} ms ");
                 }
@@ -183,9 +196,9 @@ namespace AgOpenGPS
                     //    GL.Color3(0.0f, 1.0f, 0.0f);
                     //else
                     {
-                        if (shape.rgbIndex > -1)
+                        if (shapefile.rgbIndex > -1)
                         {
-                            string[] splut = ((string)shape.table.Rows[i].ItemArray[shape.rgbIndex]).Split(',');
+                            string[] splut = ((string)shapefile.table.Rows[i].ItemArray[shapefile.rgbIndex]).Split(',');
                             int red = int.Parse(splut[0].Trim());
                             int green = int.Parse(splut[1].Trim());
                             int blue = int.Parse(splut[2].Trim());
