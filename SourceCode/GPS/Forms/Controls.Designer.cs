@@ -117,6 +117,30 @@ namespace AgOpenGPS
             form.Show(this);
         }
 
+        private void btnBrightnessUp_Click(object sender, EventArgs e)
+        {
+            if (displayBrightness.isWmiMonitor)
+            {
+                displayBrightness.BrightnessIncrease();
+                btnBrightnessDn.Text = displayBrightness.GetBrightness().ToString() + "%";
+                Settings.Default.setDisplay_brightness = displayBrightness.GetBrightness();
+                Settings.Default.Save();
+            }
+            navPanelCounter = 2;
+        }
+
+        private void btnBrightnessDn_Click(object sender, EventArgs e)
+        {
+            if (displayBrightness.isWmiMonitor)
+            {
+                displayBrightness.BrightnessDecrease();
+                btnBrightnessDn.Text = displayBrightness.GetBrightness().ToString() + "%";
+                Settings.Default.setDisplay_brightness = displayBrightness.GetBrightness();
+                Settings.Default.Save();
+            }
+            navPanelCounter = 2;
+        }
+
         public void SetGuidanceMode(Mode newmode)
         {
             gyd.isValid = false;
@@ -277,7 +301,9 @@ namespace AgOpenGPS
                 ResetHelpBtn();
                 return;
             }
-
+            // just a hack until we know how all this works
+//            for (int j = 0; j < tool.sections.Count; j++) // aye, we Name the control that way TODOAW
+                //tool.sections[j].isMappingOn = true;
             setSectionBtnState(autoBtnState == btnStates.Auto ? btnStates.Off : btnStates.Auto);
         }
 
@@ -1427,6 +1453,7 @@ namespace AgOpenGPS
 
                 if (choice > 0)
                 {
+                    shapefile = null;
                     Settings.Default.setF_CurrentDir = currentFieldDirectory;
                     Settings.Default.Save();
 

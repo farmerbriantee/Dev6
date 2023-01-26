@@ -11,7 +11,7 @@ namespace AgOpenGPS
 
         public List<CBoundaryList> bndList = new List<CBoundaryList>();
 
-        public List<RatePolyline> Rate = new List<RatePolyline>();
+        public List<Polyline2> Rate = new List<Polyline2>();
 
         public bool isHeadlandOn, isSectionControlledByHeadland;
 

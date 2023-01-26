@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL;
 using System.Windows.Forms;
 using System.Text;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace AgOpenGPS
 {
@@ -52,9 +53,9 @@ namespace AgOpenGPS
 
         private void oglMain_Paint(object sender, PaintEventArgs e)
         {
+            vec2 centreSectionPoint;
             if (sentenceCounter > 299)
             {
-
                 //sentenceCounter = 0;
                 GL.Enable(EnableCap.Blend);
                 GL.ClearColor(0.122f, 0.1258f, 0.1275f, 1.0f);
@@ -128,6 +129,7 @@ namespace AgOpenGPS
             {
                 oglMain.MakeCurrent();
 
+                //shape.Draw();
                 if (isDay) GL.ClearColor(0.27f, 0.4f, 0.7f, 1.0f);
                 else GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -143,10 +145,73 @@ namespace AgOpenGPS
                 //position the camera
                 worldManager.SetWorldPerspective(pivotAxlePos.easting, pivotAxlePos.northing);
 
-                int test = bnd.IsPointInsideRateArea(pivotAxlePos);
+
+
+                //TODOAW
+                if (autoBtnState is btnStates.Auto && shapefile.rateIndex > -1)
+                {
+                    var watch = System.Diagnostics.Stopwatch.StartNew();
+                    for (int i = 0; i < bnd.Rate.Count; i++)
+                    {
+                        for (int j = 1; j < tool.sections.Count; j++) // aye, we Name the control that way
+                        {
+                            Debug.Write($"{tool.sections[j].isMappingOn}  ");
+//                            Debug.WriteLine($"Section state - isSectionOn {tool.sections[j].isSectionOn} - isMappingOn {tool.sections[j].isMappingOn}");
+                            if (tool.sections[j].isMappingOn)
+                            {
+                                centreSectionPoint = new vec2();
+                                centreSectionPoint.northing = tool.sections[j].leftPoint.northing; // close enough, not overly concerned with tool height
+                                // tool will flip in other direction
+                                if (tool.sections[j].leftPoint.easting < tool.sections[j].rightPoint.easting)
+                                {
+                                    //Debug.WriteLine("Northerly");
+                                    centreSectionPoint.easting = (tool.sections[j].rightPoint.easting - tool.sections[j].leftPoint.easting) + tool.sections[j].leftPoint.easting;
+                                }
+                                else
+                                {
+                                    //Debug.WriteLine("Southerly");
+                                    centreSectionPoint.easting = (tool.sections[j].leftPoint.easting - tool.sections[j].rightPoint.easting) + tool.sections[j].rightPoint.easting;
+                                }
+                                int bndIndex = bnd.IsPointInsideRateArea(centreSectionPoint);
+                                if (bndIndex > -1)
+                                {
+                                    Control c = ((this.Controls.Find("section" + j, false)[0]));
+                                    c.Text = shapefile.table.Rows[bndIndex]["rate"].ToString();
+                                    //Debug.WriteLine($"Updating section {j} with rate {shape.table.Rows[bndIndex]["rate"].ToString()}");
+                                }
+                            }
+                        }
+                    }
+                    watch.Stop();
+                    Debug.WriteLine("");
+                    if (bnd.Rate.Count > 0)
+                        Debug.WriteLine($"Processing sections took { watch.ElapsedMilliseconds} ms ");
+                }
+
+                // this was highlighting the active polygon - don't need that for section control
+                //int test = bnd.IsPointInsideRateArea(pivotAxlePos);
                 for (int i = 0; i < bnd.Rate.Count; i++)
                 {
-                    GL.Color3(bnd.Rate[i].color.R, bnd.Rate[i].color.G, bnd.Rate[i].color.B);
+                    //if (test == i)
+                    //    GL.Color3(0.0f, 1.0f, 0.0f);
+                    //else
+                    {
+                        if (shapefile.rgbIndex > -1)
+                        {
+                            string[] splut = ((string)shapefile.table.Rows[i].ItemArray[shapefile.rgbIndex]).Split(',');
+                            int red = int.Parse(splut[0].Trim());
+                            int green = int.Parse(splut[1].Trim());
+                            int blue = int.Parse(splut[2].Trim());
+                            //GL.Color3(65536, 0, 0);
+                            GL.Color3(Color.FromArgb(1, red, green, blue));
+                            //GL.Color3(1.0 / red, 1.0 / green, 1.0 / blue);
+                        }
+                        else
+                        {
+                            GL.Color3(1.0 / bnd.Rate.Count * i, 0.0f, 1.0 / bnd.Rate.Count * (bnd.Rate.Count - i)); //pseudo-random if not
+                        }
+                    }
+
                     bnd.Rate[i].DrawPolyLine(DrawType.Triangles);
                 }
 
@@ -233,8 +298,6 @@ namespace AgOpenGPS
 
                 GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
                 GL.Color3(1, 1, 1);
-
-                //shape.Draw();
 
                 if (bnd.bndList.Count > 0)
                 {
@@ -1740,7 +1803,7 @@ namespace AgOpenGPS
             float sinPitch = (float)Math.Sin(glm.toRadians(worldManager.camPitch));
             float eastsinhead = (float)pivotAxlePos.easting * sinhead;
             float northcoshead = (float)pivotAxlePos.northing * coshead;
-            
+
             inv_proj = new Matrix4(
                 new Vector4(coshead, sinhead * cosPitch, sinhead * sinPitch, 0),
                 new Vector4(-sinhead, cosPitch * coshead, sinPitch * coshead, 0),

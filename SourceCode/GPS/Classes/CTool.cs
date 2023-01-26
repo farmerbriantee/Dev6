@@ -365,12 +365,6 @@ namespace AgOpenGPS
             {
                 sections[j].leftPoint = leftPoint + tt * (sections[j].positionLeft - toolFarLeftPosition);
                 sections[j].rightPoint = leftPoint + tt * (sections[j].positionRight - toolFarLeftPosition);
-                
-                int idx = mf.bnd.IsPointInsideRateArea(((sections[j].leftPoint + sections[j].rightPoint) * 0.5));
-                double rate = 0;
-                if (idx >=0)
-                    rate = mf.bnd.Rate[idx].rate;
-                sections[j].button.Text = rate.ToString("0.00");
             }
 
             double oneFrameLeft = toolFarLeftSpeed / mf.HzTime * 10;
@@ -500,6 +494,8 @@ namespace AgOpenGPS
                 if (j + 1 >= sections.Count)
                 {
                     sections.Insert(sections.Count - 1, new CSection(mf, j));
+                    // using this to name the controls we add - makes finding them for Update with rate later a lot easier.
+                    sections[j].button.Name = "section" + (j+1);
                     mf.Controls.Add(sections[j].button);
                     sections[j].button.BringToFront();
                     if (glm.isSimEnabled)

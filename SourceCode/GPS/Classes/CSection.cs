@@ -170,7 +170,7 @@ namespace AgOpenGPS
         {
             AddMappingPoint();
 
-            isMappingOn = false;
+            //isMappingOn = false; // TODO ANDREW THIS IS BADDDDDD (temporary till I understand this)
             numTriangles = 0;
 
             if (triangleList.Count > 4)
