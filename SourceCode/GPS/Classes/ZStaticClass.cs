@@ -1,6 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace AgOpenGPS
 {
@@ -15,6 +16,11 @@ namespace AgOpenGPS
         {
             return "points = " + points.Count.ToString() + ", loop = " + loop.ToString();
         }
+    }
+    public class RatePolyline : Polyline2
+    {
+        public Color color = Color.Transparent;
+        public double rate = 100;
     }
 
     public class Polyline2 : Polyline

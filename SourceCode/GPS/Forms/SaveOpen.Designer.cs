@@ -329,7 +329,7 @@ namespace AgOpenGPS
                     return;
                 }
             }
-
+            
             FileLoadABLines();
             FileLoadCurveLines();
 
@@ -418,7 +418,7 @@ namespace AgOpenGPS
                 this.TimedMessageBox(2000, gStr.gsMissingContourFile, gStr.gsButFieldIsLoaded);
                 //return;
             }
-
+            
             //Points in Patch followed by easting, heading, northing, altitude
             else
             {
@@ -788,9 +788,10 @@ namespace AgOpenGPS
             {
                 foreach (string file in Directory.GetFiles(fieldsDirectory + currentFieldDirectory, "*.shp", SearchOption.TopDirectoryOnly))
                 {
-                    shapefile.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
+                    shape.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
                 }
             }
+
             //Recorded Path
             fileAndDirectory = fieldsDirectory + currentFieldDirectory + "\\RecPath.txt";
             if (File.Exists(fileAndDirectory))
@@ -1037,7 +1038,7 @@ namespace AgOpenGPS
                         for (int i = 0; i < count2; i++)
                         {
                             writer.WriteLine(Math.Round((triList[i].easting), 3).ToString(CultureInfo.InvariantCulture) + "," +
-                                Math.Round(triList[i].northing, 3).ToString(CultureInfo.InvariantCulture) + ",0");
+                                Math.Round(triList[i].northing, 3).ToString(CultureInfo.InvariantCulture)+ ",0");
                         }
                     }
                 }
@@ -1070,7 +1071,7 @@ namespace AgOpenGPS
                     if (bnd.bndList[i].fenceLine.points.Count > 0)
                     {
                         for (int j = 0; j < bnd.bndList[i].fenceLine.points.Count; j++)
-                            writer.WriteLine(Math.Round(bnd.bndList[i].fenceLine.points[j].easting, 3).ToString(CultureInfo.InvariantCulture) + "," +
+                            writer.WriteLine(Math.Round(bnd.bndList[i].fenceLine.points[j].easting,3).ToString(CultureInfo.InvariantCulture) + "," +
                                                 Math.Round(bnd.bndList[i].fenceLine.points[j].northing, 3).ToString(CultureInfo.InvariantCulture) + ",0");
                     }
                 }
@@ -1321,7 +1322,7 @@ namespace AgOpenGPS
 
             }
         }
-
+                                   
         //generate KML file from flag
         public void FileSaveSingleFlagKML(int flagNumber)
         {
@@ -1347,20 +1348,20 @@ namespace AgOpenGPS
 
                 writer.WriteLine(@"<Document>");
 
-                writer.WriteLine(@"  <Placemark>                                  ");
-                writer.WriteLine(@"<Style> <IconStyle>");
-                if (flagPts[flagNumber - 1].color == 0)  //red - xbgr
-                    writer.WriteLine(@"<color>ff4400ff</color>");
-                if (flagPts[flagNumber - 1].color == 1)  //grn - xbgr
-                    writer.WriteLine(@"<color>ff44ff00</color>");
-                if (flagPts[flagNumber - 1].color == 2)  //yel - xbgr
-                    writer.WriteLine(@"<color>ff44ffff</color>");
-                writer.WriteLine(@"</IconStyle> </Style>");
-                writer.WriteLine(@" <name> " + flagNumber.ToString(CultureInfo.InvariantCulture) + @"</name>");
-                writer.WriteLine(@"<Point><coordinates> " +
-                                flagPts[flagNumber - 1].longitude.ToString(CultureInfo.InvariantCulture) + "," + flagPts[flagNumber - 1].latitude.ToString(CultureInfo.InvariantCulture) + ",0" +
-                                @"</coordinates> </Point> ");
-                writer.WriteLine(@"  </Placemark>                                 ");
+                    writer.WriteLine(@"  <Placemark>                                  ");
+                    writer.WriteLine(@"<Style> <IconStyle>");
+                    if (flagPts[flagNumber - 1].color == 0)  //red - xbgr
+                        writer.WriteLine(@"<color>ff4400ff</color>");
+                    if (flagPts[flagNumber - 1].color == 1)  //grn - xbgr
+                        writer.WriteLine(@"<color>ff44ff00</color>");
+                    if (flagPts[flagNumber - 1].color == 2)  //yel - xbgr
+                        writer.WriteLine(@"<color>ff44ffff</color>");
+                    writer.WriteLine(@"</IconStyle> </Style>");
+                    writer.WriteLine(@" <name> " + flagNumber.ToString(CultureInfo.InvariantCulture) + @"</name>");
+                    writer.WriteLine(@"<Point><coordinates> " +
+                                    flagPts[flagNumber-1].longitude.ToString(CultureInfo.InvariantCulture) + "," + flagPts[flagNumber-1].latitude.ToString(CultureInfo.InvariantCulture) + ",0" +
+                                    @"</coordinates> </Point> ");
+                    writer.WriteLine(@"  </Placemark>                                 ");
                 writer.WriteLine(@"</Document>");
                 writer.WriteLine(@"</kml>                                         ");
 
@@ -1618,7 +1619,7 @@ namespace AgOpenGPS
             for (int i = 0; i < flagPts.Count; i++)
             {
                 kml.WriteStartElement("Placemark");
-                kml.WriteElementString("name", "Flag_" + i.ToString());
+                kml.WriteElementString("name", "Flag_"+ i.ToString());
 
                 kml.WriteStartElement("Style");
                 kml.WriteStartElement("IconStyle");
@@ -1658,7 +1659,7 @@ namespace AgOpenGPS
                     kml.WriteStartElement("Placemark");
                     kml.WriteElementString("name", "Sections_" + cntr.ToString());
                     cntr++;
-
+                    
                     string collor = "F0" + ((byte)(triList.points[1].easting)).ToString("X2") +
                         ((byte)(triList.points[0].northing)).ToString("X2") + ((byte)(triList.points[0].easting)).ToString("X2");
 

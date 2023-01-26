@@ -10,7 +10,7 @@ using System.Text;
 
 namespace AgOpenGPS
 {
-
+    
     public class WGS84
     {
         public double Lat;
@@ -38,12 +38,8 @@ namespace AgOpenGPS
     public class ShapeFile
     {
         private const int HeaderLength = 100;
+
         private readonly FormGPS mf;
-        public int rgbIndex = -1;
-        public int rateIndex = -1;
-        public DataTable table = new DataTable();
-        //public List<Color> colorRamp;
-        public List<double> colorRamp;
 
         public ShapeFile(FormGPS _f)
         {
@@ -54,7 +50,7 @@ namespace AgOpenGPS
         {
             FileStream MainStream = File.Open(FilePath + ".shp", FileMode.Open, FileAccess.Read, FileShare.Read);
 
-            table = new DataTable();
+            DataTable table = new DataTable();
 
             if (File.Exists(FilePath + ".dbf"))
             {
@@ -160,7 +156,7 @@ namespace AgOpenGPS
 
                         Index += FieldSize[col];
 
-                        if (string.IsNullOrEmpty(value) || value == "******************")
+                        if (string.IsNullOrEmpty(value) || value  == "******************")
                         {
                             R[col] = DBNull.Value;
                         }
@@ -201,32 +197,6 @@ namespace AgOpenGPS
                     //Application.DoEvents();
                 }
                 DBFStream.Close();
-            }
-
-            try
-            {
-                rgbIndex = table.Columns.IndexOf("rgb");
-                rateIndex = table.Columns.IndexOf("rate");
-                Type rateType = table.Rows[0].ItemArray[rateIndex].GetType();
-                //Dictionary< Type.GetType("System.String"), decimal> rateDictionary = new Dictionary<Type.GetType("System.String"), decimal>();
-                dynamic maxRate = 0;
-                //TODO harden this check, don't assume convertable in case rate is wrong
-                // this is changing RATE, not colour...
-                // change the colour based on the rate, not on the RGB
-                // put the RGBs in a Dictionary based on rate
-                // formula should be (rate / maxRate) * upperRamp
-                for (int i = 0; i < table.Rows.Count; i++)
-                {
-                    dynamic v = (dynamic)table.Rows[i].ItemArray[rateIndex];
-                    //rateDictionary.Add(0, "1");
-                    //if (Decimal.Parse(v) > maxRate)
-                    //    maxRate = Decimal.Parse(v);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine("couldn't find rgb/rate");
-                Debug.WriteLine(e.Message);
             }
 
             if (MainStream.Length > HeaderLength)
@@ -292,22 +262,34 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    Polyline2 NewPline2 = new Polyline2();
+                                    RatePolyline New = new RatePolyline();
 
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + 0 + (16 * point), true));
 
                                         mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        NewPline2.points.Add(new vec2(Easting, Northing));
+                                        New.points.Add(new vec2(Easting, Northing));
                                     }
 
-                                    if (NewPline2.points[0].easting == NewPline2.points[NewPline2.points.Count - 1].easting && NewPline2.points[0].northing == NewPline2.points[NewPline2.points.Count - 1].northing)
+                                    if (New.points[0].easting == New.points[New.points.Count - 1].easting && New.points[0].northing == New.points[New.points.Count - 1].northing)
                                     {
-                                        NewPline2.points.RemoveAt(0);
+                                        New.points.RemoveAt(0);
                                     }
-                                    NewPline2.points.IsClockwise(true, out _);
-                                    mf.bnd.Rate.Add(NewPline2);
+                                    New.points.IsClockwise(true, out _);
+
+                                    int dd;
+                                    if ((dd = table.Columns.IndexOf("rate")) >=0)
+                                    {
+                                        New.rate = double.Parse(table.Rows[mf.bnd.Rate.Count][dd].ToString(), CultureInfo.InvariantCulture);
+                                    }
+                                    if ((dd = table.Columns.IndexOf("rgb")) >= 0)
+                                    {
+                                        string[] ddd = table.Rows[mf.bnd.Rate.Count][dd].ToString().Split(',');
+                                        New.color = Color.FromArgb(int.Parse(ddd[0], CultureInfo.InvariantCulture), int.Parse(ddd[1], CultureInfo.InvariantCulture), int.Parse(ddd[2], CultureInfo.InvariantCulture));
+                                    }
+
+                                    mf.bnd.Rate.Add(New);
                                 }
                             }
                         }
@@ -354,17 +336,17 @@ namespace AgOpenGPS
                                     // the number of 16-byte points to read for this segment
                                     int numPointsInPart = numBytes / 16;
 
-                                    Polyline2 NewPline2 = new Polyline2();
+                                    Polyline2 New = new Polyline2();
                                     for (int point = 0; point < numPointsInPart; point++)
                                     {
                                         WGS84 tt = new WGS84(ParseDouble(ByteArray, startPart + 8 + (16 * point), true), ParseDouble(ByteArray, startPart + (16 * point), true));
                                         mf.worldManager.ConvertWGS84ToLocal(tt.Lat, tt.Lon, out double Northing, out double Easting);
-                                        NewPline2.points.Add(new vec2(Easting, Northing));
+                                        New.points.Add(new vec2(Easting, Northing));
                                     }
 
                                     if (type == 0)
                                     {
-                                        mf.patchList.Add(NewPline2);
+                                        mf.patchList.Add(New);
                                     }
                                     else if (type > 1)
                                     {
@@ -378,7 +360,7 @@ namespace AgOpenGPS
 
                                         //if (table.Rows.Count > Polygons.Count && table.Columns.Count > 3)
                                         //    aa.color = table.Rows[Polygons.Count][4].ToString() == "100" ? Color.FromArgb(0x78FF0000) : Color.FromArgb(0x7800FF00);
-                                        aa.Parts.Add(NewPline2);
+                                        aa.Parts.Add(New);
                                         //Polygons.Add(aa);
 
 

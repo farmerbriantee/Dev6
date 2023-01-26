@@ -12,7 +12,7 @@ namespace AgOpenGPS.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.3.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -277,7 +277,7 @@ namespace AgOpenGPS.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("57.754752942088764")]
+        [global::System.Configuration.DefaultSettingValueAttribute("53.4360564")]
         public double setGPS_SimLatitude {
             get {
                 return ((double)(this["setGPS_SimLatitude"]));
@@ -289,7 +289,7 @@ namespace AgOpenGPS.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-4.0254264392412713")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-111.160047")]
         public double setGPS_SimLongitude {
             get {
                 return ((double)(this["setGPS_SimLongitude"]));
@@ -1524,53 +1524,5 @@ namespace AgOpenGPS.Properties {
                 this["setTram_OuterTramPasses"] = value;
             }
         }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("40")]
-        public int setDisplay_brightness
-        {
-            get
-            {
-                return ((int)(this["setDisplay_brightness"]));
-            }
-            set
-            {
-                this["setDisplay_brightness"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("30")]
-        public int setDisplay_brightnessSystem
-        {
-            get
-            {
-                return ((int)(this["setDisplay_brightnessSystem"]));
-            }
-            set
-            {
-                this["setDisplay_brightnessSystem"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool setDisplay_isBrightnessOn
-        {
-            get
-            {
-                return ((bool)(this["setDisplay_isBrightnessOn"]));
-            }
-            set
-            {
-                this["setDisplay_isBrightnessOn"] = value;
-            }
-        }
-
-
-
     }
 }

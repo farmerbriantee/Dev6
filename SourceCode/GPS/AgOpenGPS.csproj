@@ -95,7 +95,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Windows.Forms.MapControl">
@@ -129,7 +128,6 @@
       <DependentUpon>FormNumeric.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\CBoundary.cs" />
-    <Compile Include="Classes\CBrightness.cs" />
     <Compile Include="Classes\CGuidance.cs" />
     <Compile Include="Classes\CShapeFile.cs" />
     <Compile Include="Classes\ZStaticClass.cs" />
@@ -842,7 +840,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Diagrams\Diagrams.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -883,8 +880,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AOG.ico" />
-    <None Include="btnImages\BrightnessUp.png" />
-    <None Include="btnImages\BrightnessDn.png" />
     <None Include="btnImages\Images\z_NoGPS.png" />
     <None Include="btnImages\RecPathDelete.png" />
     <None Include="btnImages\CurveDelete.png" />
