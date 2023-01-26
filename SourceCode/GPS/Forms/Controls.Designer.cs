@@ -117,6 +117,30 @@ namespace AgOpenGPS
             form.Show(this);
         }
 
+        private void btnBrightnessUp_Click(object sender, EventArgs e)
+        {
+            if (displayBrightness.isWmiMonitor)
+            {
+                displayBrightness.BrightnessIncrease();
+                btnBrightnessDn.Text = displayBrightness.GetBrightness().ToString() + "%";
+                Settings.Default.setDisplay_brightness = displayBrightness.GetBrightness();
+                Settings.Default.Save();
+            }
+            navPanelCounter = 2;
+        }
+
+        private void btnBrightnessDn_Click(object sender, EventArgs e)
+        {
+            if (displayBrightness.isWmiMonitor)
+            {
+                displayBrightness.BrightnessDecrease();
+                btnBrightnessDn.Text = displayBrightness.GetBrightness().ToString() + "%";
+                Settings.Default.setDisplay_brightness = displayBrightness.GetBrightness();
+                Settings.Default.Save();
+            }
+            navPanelCounter = 2;
+        }
+
         public void SetGuidanceMode(Mode newmode)
         {
             gyd.isValid = false;

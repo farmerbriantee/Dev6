@@ -1524,5 +1524,53 @@ namespace AgOpenGPS.Properties {
                 this["setTram_OuterTramPasses"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int setDisplay_brightness
+        {
+            get
+            {
+                return ((int)(this["setDisplay_brightness"]));
+            }
+            set
+            {
+                this["setDisplay_brightness"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int setDisplay_brightnessSystem
+        {
+            get
+            {
+                return ((int)(this["setDisplay_brightnessSystem"]));
+            }
+            set
+            {
+                this["setDisplay_brightnessSystem"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool setDisplay_isBrightnessOn
+        {
+            get
+            {
+                return ((bool)(this["setDisplay_isBrightnessOn"]));
+            }
+            set
+            {
+                this["setDisplay_isBrightnessOn"] = value;
+            }
+        }
+
+
+
     }
 }
