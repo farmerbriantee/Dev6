@@ -38,7 +38,7 @@ namespace AgOpenGPS
         //Is it in 2D or 3D, metric or imperial, display lightbar, display grid etc
         public bool isSpeedoOn, isAutoDayNight, isSideGuideLines = true;
         public bool isSkyOn = true, isTextureOn = true, isLightbarOn = true;
-        public bool isDay = true, isDayTime = true;
+        public bool isDay = true, isDayTime = true, isBrightnessOn = true;
 
         public bool isUTurnOn = true, isLateralOn = true;
 
@@ -232,6 +232,7 @@ namespace AgOpenGPS
             isSkyOn = Settings.Default.setMenu_isSkyOn;
             isTextureOn = Settings.Default.setDisplay_isTextureOn;
             worldManager.isGridOn = Settings.Default.setMenu_isGridOn;
+            isBrightnessOn = Settings.Default.setDisplay_isBrightnessOn;
             isSpeedoOn = Settings.Default.setMenu_isSpeedoOn;
             isAutoDayNight = Settings.Default.setDisplay_isAutoDayNight;
             isSideGuideLines = Settings.Default.setMenu_isSideGuideLines;
@@ -336,6 +337,15 @@ namespace AgOpenGPS
         {
             if (Properties.Settings.Default.setAS_isAutoSteerAutoOn) btnAutoSteer.Text = "R";
             else btnAutoSteer.Text = "M";
+            
+            //display brightness
+            if (displayBrightness.isWmiMonitor) 
+                displayBrightness.SetBrightness(Settings.Default.setDisplay_brightness);
+            else
+            {
+                btnBrightnessDn.Enabled = false;    
+                btnBrightnessUp.Enabled = false;
+            }
         }
 
         private void ZoomByMouseWheel(object sender, MouseEventArgs e)

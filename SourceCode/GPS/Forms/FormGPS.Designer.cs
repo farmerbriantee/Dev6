@@ -100,6 +100,8 @@
             this.correctionToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.panelNavigation = new System.Windows.Forms.TableLayoutPanel();
             this.btnN3D = new System.Windows.Forms.Button();
+            this.btnBrightnessDn = new System.Windows.Forms.Button();
+            this.btnBrightnessUp = new System.Windows.Forms.Button();
             this.btn2D = new System.Windows.Forms.Button();
             this.btnDayNightMode = new System.Windows.Forms.Button();
             this.btnZoomIn = new ProXoft.WinForms.RepeatButton();
@@ -932,6 +934,8 @@
             this.panelNavigation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.panelNavigation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 79F));
             this.panelNavigation.Controls.Add(this.btnN3D, 0, 3);
+            this.panelNavigation.Controls.Add(this.btnBrightnessDn, 0, 5);
+            this.panelNavigation.Controls.Add(this.btnBrightnessUp, 0, 5);
             this.panelNavigation.Controls.Add(this.btn2D, 0, 0);
             this.panelNavigation.Controls.Add(this.btnDayNightMode, 0, 4);
             this.panelNavigation.Controls.Add(this.btnZoomIn, 1, 3);
@@ -970,6 +974,44 @@
             this.btnN3D.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnN3D.UseVisualStyleBackColor = false;
             this.btnN3D.Click += new System.EventHandler(this.btnN3D_Click);
+            // 
+            // btnBrightnessDn
+            // 
+            this.btnBrightnessDn.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnBrightnessDn.BackColor = System.Drawing.Color.Transparent;
+            this.btnBrightnessDn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnBrightnessDn.FlatAppearance.BorderSize = 0;
+            this.btnBrightnessDn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBrightnessDn.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBrightnessDn.Image = global::AgOpenGPS.Properties.Resources.BrightnessDn;
+            this.btnBrightnessDn.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnBrightnessDn.Location = new System.Drawing.Point(102, 486);
+            this.btnBrightnessDn.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBrightnessDn.Name = "btnBrightnessDn";
+            this.btnBrightnessDn.Size = new System.Drawing.Size(75, 75);
+            this.btnBrightnessDn.TabIndex = 474;
+            this.btnBrightnessDn.Text = "20%";
+            this.btnBrightnessDn.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnBrightnessDn.UseVisualStyleBackColor = false;
+            this.btnBrightnessDn.Click += new System.EventHandler(this.btnBrightnessDn_Click);
+            // 
+            // btnBrightnessUp
+            // 
+            this.btnBrightnessUp.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnBrightnessUp.BackColor = System.Drawing.Color.Transparent;
+            this.btnBrightnessUp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnBrightnessUp.FlatAppearance.BorderSize = 0;
+            this.btnBrightnessUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBrightnessUp.Image = global::AgOpenGPS.Properties.Resources.BrightnessUp;
+            this.btnBrightnessUp.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.btnBrightnessUp.Location = new System.Drawing.Point(7, 486);
+            this.btnBrightnessUp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBrightnessUp.Name = "btnBrightnessUp";
+            this.btnBrightnessUp.Size = new System.Drawing.Size(75, 75);
+            this.btnBrightnessUp.TabIndex = 473;
+            this.btnBrightnessUp.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.btnBrightnessUp.UseVisualStyleBackColor = false;
+            this.btnBrightnessUp.Click += new System.EventHandler(this.btnBrightnessUp_Click);
             // 
             // btn2D
             // 
@@ -1925,6 +1967,9 @@
         private System.Windows.Forms.Button btn3D;
         private System.Windows.Forms.Button btnN2D;
         private System.Windows.Forms.Button btnAutoSteerConfig;
+		public System.Windows.Forms.Button btnBrightnessDn;
+        public System.Windows.Forms.Button btnBrightnessUp;
+
         private System.Windows.Forms.TableLayoutPanel panelRight;
         private System.Windows.Forms.ToolStripMenuItem menuLanguageTurkish;
         private Panel1 panelMain;

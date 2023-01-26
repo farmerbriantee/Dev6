@@ -132,6 +132,10 @@ namespace AgOpenGPS
         public CGuidance gyd;
 
         public ShapeFile shape;
+		/// <summary>
+        /// The new brightness code
+        /// </summary>
+        public CWindowsSettingsBrightnessController displayBrightness;
 
         #endregion // Class Props and instances
 
@@ -187,6 +191,7 @@ namespace AgOpenGPS
             sounds = new CSound();
 
             shape = new ShapeFile(this);
+            displayBrightness = new CWindowsSettingsBrightnessController(Properties.Settings.Default.setDisplay_isBrightnessOn);
         }
 
         //Initialize items before the form Loads or is visible
@@ -287,6 +292,9 @@ namespace AgOpenGPS
 
             //save current vehicle
             SettingsIO.ExportAll(vehiclesDirectory + vehicleFileName + ".XML");
+
+			if (displayBrightness.isWmiMonitor)
+                displayBrightness.SetBrightness(Properties.Settings.Default.setDisplay_brightnessSystem);
         }
 
         //called everytime window is resized, clean up button positions

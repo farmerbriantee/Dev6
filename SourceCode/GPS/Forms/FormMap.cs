@@ -225,15 +225,15 @@ namespace AgOpenGPS
         {
             if (bingLine.Count > 2)
             {
-                CBoundaryList New = new CBoundaryList();
+                CBoundaryList NewCBL = new CBoundaryList();
                 for (int i = 0; i < bingLine.Count; i++)
                 {
                     mf.worldManager.ConvertWGS84ToLocal(bingLine[i].Latitude, bingLine[i].Longitude, out double nort, out double east);
-                    New.fenceLine.points.Add(new vec2(east, nort));
+                    NewCBL.fenceLine.points.Add(new vec2(east, nort));
                 }
 
-                New.CalculateFenceArea();
-                mf.bnd.bndList.Add(New);
+                NewCBL.CalculateFenceArea();
+                mf.bnd.bndList.Add(NewCBL);
 
                 //turn lines made from boundaries
                 mf.FileSaveBoundary();
