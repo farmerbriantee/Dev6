@@ -1,5 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -41,17 +42,28 @@ namespace AgOpenGPS
 
         private readonly FormGPS mf;
 
+        private int _dbfFieldCount = 0;
+        private string[] _dbfFieldNames;
+        private string[] _dbfFieldType;
+        private Hashtable _dbfUniqueRates;
+        public int dbfFieldCount { get { return _dbfFieldCount; } }
+        public string[] dbfFieldNames { get { return _dbfFieldNames; } }
+        public string[] dbfFieldType { get { return _dbfFieldType; } }
+        public Hashtable dbfUniqueRates { get { return _dbfUniqueRates; } }
+
         public ShapeFile(FormGPS _f)
         {
             mf = _f;
         }
 
-        public void Main(string FilePath)
+        public void ProcessShapeFile(string FilePath)
         {
             FileStream MainStream = File.Open(FilePath + ".shp", FileMode.Open, FileAccess.Read, FileShare.Read);
 
             DataTable table = new DataTable();
+            _dbfUniqueRates = new Hashtable();
 
+            // DBF code from https://gist.github.com/diev/55b480aefa52b1262447eaa6e21d87bd
             if (File.Exists(FilePath + ".dbf"))
             {
                 FileStream DBFStream = File.Open(FilePath + ".dbf", FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -69,21 +81,20 @@ namespace AgOpenGPS
                 DBFStream.Position = 8;
                 DBFStream.Read(buffer, 0, buffer.Length);
 
-                int FieldCount = (((buffer[0] + (buffer[1] * 0x100)) - 1) / 32) - 1;
+                _dbfFieldCount = (((buffer[0] + (buffer[1] * 0x100)) - 1) / 32) - 1;
 
+                _dbfFieldNames = new string[_dbfFieldCount];
+                _dbfFieldType = new string[_dbfFieldCount];
 
-                string[] FieldName = new string[FieldCount];
-                string[] FieldType = new string[FieldCount]; // Массив типов полей
+                byte[] FieldSize = new byte[_dbfFieldCount];
+                byte[] FieldDigs = new byte[_dbfFieldCount];
 
-                byte[] FieldSize = new byte[FieldCount]; // Массив размеров полей
-                byte[] FieldDigs = new byte[FieldCount]; // Массив размеров дробной части
-
-                buffer = new byte[32 * FieldCount];
+                buffer = new byte[32 * _dbfFieldCount];
                 DBFStream.Position = 32;
                 DBFStream.Read(buffer, 0, buffer.Length);
                 int FieldsLength = 0;
 
-                // Типы полей DBF
+                
                 Type typeC = Type.GetType("System.String");
                 Type typeL = Type.GetType("System.Boolean");
                 Type typeD = Type.GetType("System.DateTime");
@@ -91,21 +102,19 @@ namespace AgOpenGPS
                 Type typeN = Type.GetType("System.Decimal");
                 Type typeF = Type.GetType("System.Double");
 
-                for (int col = 0; col < FieldCount; col++)
+                for (int col = 0; col < dbfFieldCount; col++)
                 {
-                    // Заголовки
-                    FieldName[col] = Encoding.Default
+                    _dbfFieldNames[col] = Encoding.Default
                         .GetString(buffer, col * 32, 10)
                         .TrimEnd(new char[] { (char)0x00 });
-                    FieldType[col] = "" + (char)buffer[col * 32 + 11];
+                    _dbfFieldType[col] = "" + (char)buffer[col * 32 + 11];
                     FieldSize[col] = buffer[col * 32 + 16];
                     FieldDigs[col] = buffer[col * 32 + 17];
 
                     FieldsLength += FieldSize[col];
 
-                    // Создаю колонки
                     Type type;
-                    switch (FieldType[col])
+                    switch (_dbfFieldType[col])
                     {
                         case "C":
                             type = typeC;
@@ -117,6 +126,8 @@ namespace AgOpenGPS
 
                         case "D":
                             type = typeD;
+                            mf.TimedMessageBox(5000, "Uh oh", "Bad DBF field type encountered - aborting shapefile read");
+
                             break;
 
                         case "N":
@@ -128,11 +139,14 @@ namespace AgOpenGPS
                             break;
 
                         default:
-                            throw new Exception("Неизвестный тип поля DBF");
+                            mf.TimedMessageBox(5000, "Uh oh", "Bad DBF field type encountered - aborting shapefile read");
+                            return;
+                            // throw new Exception("Unknown DBF field type");
+                            // let's not make things difficult for the users
                     }
-                    table.Columns.Add(FieldName[col], type);
+                    table.Columns.Add(_dbfFieldNames[col], type);
                 }
-                DBFStream.ReadByte(); // Пропускаю разделитель схемы и данных
+                DBFStream.ReadByte();
 
                 DateTimeFormatInfo dfi = new CultureInfo("en-US", false).DateTimeFormat;
                 NumberFormatInfo nfi = new CultureInfo("en-US", false).NumberFormat;
@@ -142,12 +156,12 @@ namespace AgOpenGPS
 
                 for (int row = 0; row < RowsCount; row++)
                 {
-                    DBFStream.ReadByte(); // Пропускаю стартовый байт элемента данных
+                    DBFStream.ReadByte();
                     DBFStream.Read(buffer, 0, buffer.Length);
                     DataRow R = table.NewRow();
                     int Index = 0;
 
-                    for (int col = 0; col < FieldCount; col++)
+                    for (int col = 0; col < _dbfFieldCount; col++)
                     {
                         string value = Encoding.GetEncoding(866)
                             .GetString(buffer, Index, FieldSize[col])
@@ -162,7 +176,7 @@ namespace AgOpenGPS
                         }
                         else
                         {
-                            switch (FieldType[col])
+                            switch (_dbfFieldType[col])
                             {
                                 case "L":
                                     R[col] = value.Equals("T"); // ? true : false;
@@ -194,7 +208,7 @@ namespace AgOpenGPS
                         }
                     }
                     table.Rows.Add(R);
-                    //Application.DoEvents();
+                    // Application.DoEvents();
                 }
                 DBFStream.Close();
             }
@@ -281,7 +295,9 @@ namespace AgOpenGPS
                                     int dd;
                                     if ((dd = table.Columns.IndexOf("rate")) >=0)
                                     {
+                                        // BUG: if >1 shapefile in folder, this will crash as it's adding rates to previous shapefile. bad if number of fields in DBF differs too
                                         New.rate = double.Parse(table.Rows[mf.bnd.Rate.Count][dd].ToString(), CultureInfo.InvariantCulture);
+                                        _dbfUniqueRates[New.rate] = 0;
                                     }
                                     if ((dd = table.Columns.IndexOf("rgb")) >= 0)
                                     {

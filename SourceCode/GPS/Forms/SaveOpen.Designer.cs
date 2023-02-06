@@ -788,7 +788,9 @@ namespace AgOpenGPS
             {
                 foreach (string file in Directory.GetFiles(fieldsDirectory + currentFieldDirectory, "*.shp", SearchOption.TopDirectoryOnly))
                 {
-                    shape.Main(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
+                    shape.ProcessShapeFile(fieldsDirectory + currentFieldDirectory + "\\" + Path.GetFileNameWithoutExtension(file));
+                    // BUG: if >1 shapefile is present, problems ensue
+                    Debug.WriteLine("!");
                 }
             }
 

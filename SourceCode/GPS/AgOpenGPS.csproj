@@ -169,6 +169,12 @@
     <Compile Include="Forms\FormFieldKML.Designer.cs">
       <DependentUpon>FormFieldKML.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Settings\FormShapeClassification.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Settings\FormShapeClassification.Designer.cs">
+      <DependentUpon>FormShapeClassification.cs</DependentUpon>
+    </Compile>
     <Compile Include="Resources\Components.cs" />
     <Compile Include="Settings.cs" />
     <EmbeddedResource Include="..\References\Inputs\FormKeyboard.resx">
@@ -744,6 +750,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\FormSaveOrNot.resx">
       <DependentUpon>FormSaveOrNot.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Settings\FormShapeClassification.resx">
+      <DependentUpon>FormShapeClassification.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Settings\FormSimCoords.resx">
       <DependentUpon>FormSimCoords.cs</DependentUpon>

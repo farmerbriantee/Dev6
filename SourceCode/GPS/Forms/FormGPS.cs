@@ -370,6 +370,12 @@ namespace AgOpenGPS
             return bitmap;
         }
 
+        private void btnShapeClassification_Click(object sender, EventArgs e)
+        {
+            Form formS = new Forms.Settings.FormShapeClassification(this);
+            formS.Show(this);
+        }
+
         public Bitmap GetHarvesterBrand(HBrand brandH)
         {
             Bitmap harvesterbitmap;
