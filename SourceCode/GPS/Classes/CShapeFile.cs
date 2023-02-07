@@ -45,11 +45,13 @@ namespace AgOpenGPS
         private int _dbfFieldCount = 0;
         private string[] _dbfFieldNames;
         private string[] _dbfFieldType;
-        private Hashtable _dbfUniqueRates;
+        private SortedDictionary<double, double> _dbfUniqueRates;
         public int dbfFieldCount { get { return _dbfFieldCount; } }
         public string[] dbfFieldNames { get { return _dbfFieldNames; } }
         public string[] dbfFieldType { get { return _dbfFieldType; } }
-        public Hashtable dbfUniqueRates { get { return _dbfUniqueRates; } }
+        public SortedDictionary<double,double> dbfUniqueRates { get { return _dbfUniqueRates; } }
+
+        public double scaleLower = 999999, scaleUpper = 0;
 
         public ShapeFile(FormGPS _f)
         {
@@ -58,10 +60,12 @@ namespace AgOpenGPS
 
         public void ProcessShapeFile(string FilePath)
         {
+             scaleLower = 0; scaleUpper = 0;
+
             FileStream MainStream = File.Open(FilePath + ".shp", FileMode.Open, FileAccess.Read, FileShare.Read);
 
             DataTable table = new DataTable();
-            _dbfUniqueRates = new Hashtable();
+            _dbfUniqueRates = new SortedDictionary<double, double>();
 
             // DBF code from https://gist.github.com/diev/55b480aefa52b1262447eaa6e21d87bd
             if (File.Exists(FilePath + ".dbf"))
@@ -94,7 +98,6 @@ namespace AgOpenGPS
                 DBFStream.Read(buffer, 0, buffer.Length);
                 int FieldsLength = 0;
 
-                
                 Type typeC = Type.GetType("System.String");
                 Type typeL = Type.GetType("System.Boolean");
                 Type typeD = Type.GetType("System.DateTime");
@@ -205,10 +208,19 @@ namespace AgOpenGPS
                                     R[col] = value;
                                     break;
                             }
+                            // we're not specifying the rate field here, careful!!
+                            // let's not classify empty rates
+                            if (_dbfFieldNames[col] == "rate" && _dbfFieldType[col].IndexOfAny("NF".ToCharArray()) != -1 && double.Parse(value,nfi) > 0)
+                            {
+                                scaleLower = Math.Min(double.Parse(value, nfi), scaleLower);
+                                scaleUpper = Math.Max(double.Parse(value, nfi), scaleUpper);
+                                Console.WriteLine(value);
+
+                            }
                         }
                     }
                     table.Rows.Add(R);
-                    // Application.DoEvents();
+                    System.Windows.Forms.Application.DoEvents();
                 }
                 DBFStream.Close();
             }

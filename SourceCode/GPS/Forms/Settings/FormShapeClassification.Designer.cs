@@ -30,10 +30,10 @@ namespace AgOpenGPS.Forms.Settings
         private void InitializeComponent()
         {
             this.lblHeading = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
             this.lblColorRange = new System.Windows.Forms.Label();
             this.lbColorRanges = new System.Windows.Forms.ListBox();
             this.lbColors = new System.Windows.Forms.ListView();
+            this.bntOK = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lblHeading
@@ -50,16 +50,6 @@ namespace AgOpenGPS.Forms.Settings
             this.lblHeading.TabIndex = 252;
             this.lblHeading.Text = "Shapefile Classification";
             this.lblHeading.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(427, 22);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 253;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // lblColorRange
             // 
@@ -87,20 +77,42 @@ namespace AgOpenGPS.Forms.Settings
             "Blue"});
             this.lbColorRanges.Location = new System.Drawing.Point(841, 8);
             this.lbColorRanges.Name = "lbColorRanges";
-            this.lbColorRanges.Size = new System.Drawing.Size(323, 184);
+            this.lbColorRanges.Size = new System.Drawing.Size(323, 112);
             this.lbColorRanges.TabIndex = 255;
+            this.lbColorRanges.SelectedIndexChanged += new System.EventHandler(this.lbColorRanges_SelectedIndexChanged);
             // 
             // lbColors
             // 
             this.lbColors.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbColors.GridLines = true;
             this.lbColors.HideSelection = false;
             this.lbColors.Location = new System.Drawing.Point(19, 105);
+            this.lbColors.MultiSelect = false;
             this.lbColors.Name = "lbColors";
             this.lbColors.Size = new System.Drawing.Size(795, 609);
             this.lbColors.TabIndex = 256;
-            this.lbColors.TileSize = new System.Drawing.Size(75, 75);
+            this.lbColors.TileSize = new System.Drawing.Size(80, 80);
             this.lbColors.UseCompatibleStateImageBehavior = false;
             this.lbColors.View = System.Windows.Forms.View.Tile;
+            this.lbColors.SelectedIndexChanged += new System.EventHandler(this.lbColors_SelectedIndexChanged);
+            // 
+            // bntOK
+            // 
+            this.bntOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.bntOK.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.bntOK.FlatAppearance.BorderSize = 0;
+            this.bntOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.bntOK.Font = new System.Drawing.Font("Tahoma", 14.25F);
+            this.bntOK.Image = global::AgOpenGPS.Properties.Resources.OK64;
+            this.bntOK.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.bntOK.Location = new System.Drawing.Point(1082, 633);
+            this.bntOK.Margin = new System.Windows.Forms.Padding(4);
+            this.bntOK.Name = "bntOK";
+            this.bntOK.Size = new System.Drawing.Size(82, 81);
+            this.bntOK.TabIndex = 257;
+            this.bntOK.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.bntOK.UseVisualStyleBackColor = true;
+            this.bntOK.Click += new System.EventHandler(this.bntOK_Click);
             // 
             // FormShapeClassification
             // 
@@ -108,13 +120,14 @@ namespace AgOpenGPS.Forms.Settings
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(1176, 738);
+            this.Controls.Add(this.bntOK);
             this.Controls.Add(this.lbColors);
             this.Controls.Add(this.lbColorRanges);
             this.Controls.Add(this.lblColorRange);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.lblHeading);
             this.Name = "FormShapeClassification";
             this.Text = "Shape Classification";
+            this.Load += new System.EventHandler(this.FormShapeClassification_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -123,9 +136,9 @@ namespace AgOpenGPS.Forms.Settings
         #endregion
 
         private System.Windows.Forms.Label lblHeading;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label lblColorRange;
         private System.Windows.Forms.ListBox lbColorRanges;
         private System.Windows.Forms.ListView lbColors;
+        private System.Windows.Forms.Button bntOK;
     }
 }
