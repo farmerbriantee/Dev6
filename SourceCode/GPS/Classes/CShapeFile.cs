@@ -51,7 +51,7 @@ namespace AgOpenGPS
         public string[] dbfFieldType { get { return _dbfFieldType; } }
         public SortedDictionary<double,double> dbfUniqueRates { get { return _dbfUniqueRates; } }
 
-        public double scaleLower = 999999, scaleUpper = 0;
+        public double scaleLower, scaleUpper;
 
         public ShapeFile(FormGPS _f)
         {
@@ -60,7 +60,7 @@ namespace AgOpenGPS
 
         public void ProcessShapeFile(string FilePath)
         {
-             scaleLower = 0; scaleUpper = 0;
+             scaleLower = 999999; scaleUpper = 0;
 
             FileStream MainStream = File.Open(FilePath + ".shp", FileMode.Open, FileAccess.Read, FileShare.Read);
 

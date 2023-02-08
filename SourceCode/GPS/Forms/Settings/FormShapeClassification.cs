@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -22,29 +23,18 @@ namespace AgOpenGPS.Forms.Settings
 
         public int MapColor(double r)
         {
-            int scaleMin = 50, scaleRange = 200;
-            double scale = r / mf.shape.scaleUpper;
+            if (r == 0)
+            {
+                return 50;
+            }
+            // more rate == darker output
+            int scaleMin = 50, scaleRange = 155;
+            // or inverted
+            //double scale = r / mf.shape.scaleUpper;
+            double scale = mf.shape.scaleLower / r;
             return (int)((scaleRange * scale) + scaleMin);
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            //for (int i = 0; i < mf.shape.dbfFieldCount; i++)
-            //{
-            //    var lvi = new ListViewItem
-            //    {
-            //        Text = mf.shape.dbfFieldNames[i],
-            //        BackColor = Color.Red
-            //    };
-            //    lbColors.Items.Add(lvi);
-            //}
-        }
-
-        private void FormShapeClassification_Load(object sender, EventArgs e)
-        {
-            lbColorRanges.SelectedIndex = 0;
-            SetColors();
-        }
 
         private void bntOK_Click(object sender, EventArgs e)
         {
@@ -54,38 +44,47 @@ namespace AgOpenGPS.Forms.Settings
         void SetColors()
         {
             lbColors.Items.Clear();
-            Color bc = Color.FromArgb(50, 50, 50, 50);
             if (lbColorRanges.SelectedIndex < 0)
             {
                 return;
             }
             string colorRanges = lbColorRanges.SelectedItem.ToString();
+            int a = 50;
+            Hashtable h = new Hashtable();
+            Color bc = Color.FromArgb(255, 0, 0, 0); // meh
             foreach (var key in mf.shape.dbfUniqueRates)
             {
                 switch (colorRanges)
                 {
                     case "Red":
-                        bc = Color.FromArgb(50, MapColor(key.Key), 0, 0);
+                        bc = Color.FromArgb(a, MapColor(key.Key), 0, 0);
                         break;
                     case "Green":
-                        bc = Color.FromArgb(50, 0, MapColor(key.Key), 0);
+                        bc = Color.FromArgb(a, 0, MapColor(key.Key), 0);
                         break;
                     case "Blue":
-                        bc = Color.FromArgb(50, 0, 0, MapColor(key.Key));
+                        bc = Color.FromArgb(a, 0, 0, MapColor(key.Key));
                         break;
                 }
+                h[key.Key] = bc;
                 var lvi = new ListViewItem
                 {
                     Text = key.Key.ToString(),
                     BackColor = bc
                 };
                 if (key.Key > 0)
-                {
                     lbColors.Items.Add(lvi);
-                }
-
             }
+            // override the zero value
+            h[0] = Color.FromArgb(255,50,50,50);
 
+            // colours drawn, let's change the polygons according to lookup value
+            foreach (RatePolyline r in mf.bnd.Rate)
+            {
+                if (r.rate > 0) 
+                    r.color = (Color)h[r.rate];
+                //Console.WriteLine($"Rate is {r.rate} and {h[r.rate]} ");
+            }
         }
         private void lbColorRanges_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -101,6 +100,11 @@ namespace AgOpenGPS.Forms.Settings
             {
                 MessageBox.Show(lbColors.SelectedItems[0].Text + lbColors.Items[lbColors.SelectedIndices[0]].BackColor);
             }
+        }
+        private void FormShapeClassification_Load(object sender, EventArgs e)
+        {
+            lbColorRanges.SelectedIndex = 0;
+            SetColors();
         }
     }
 }
