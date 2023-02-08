@@ -38,60 +38,60 @@ namespace AgOpenGPS.Forms.Settings
             // 
             // lblHeading
             // 
-            this.lblHeading.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblHeading.AutoSize = true;
             this.lblHeading.BackColor = System.Drawing.SystemColors.ControlText;
             this.lblHeading.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblHeading.ForeColor = System.Drawing.Color.Cyan;
-            this.lblHeading.Location = new System.Drawing.Point(13, 9);
+            this.lblHeading.Location = new System.Drawing.Point(13, 8);
             this.lblHeading.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblHeading.Name = "lblHeading";
-            this.lblHeading.Size = new System.Drawing.Size(363, 36);
+            this.lblHeading.Size = new System.Drawing.Size(293, 36);
             this.lblHeading.TabIndex = 252;
-            this.lblHeading.Text = "Shapefile Classification";
+            this.lblHeading.Text = "Rate Classification";
             this.lblHeading.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblColorRange
             // 
-            this.lblColorRange.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblColorRange.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.lblColorRange.AutoSize = true;
             this.lblColorRange.BackColor = System.Drawing.SystemColors.ControlText;
             this.lblColorRange.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblColorRange.ForeColor = System.Drawing.Color.Cyan;
-            this.lblColorRange.Location = new System.Drawing.Point(623, 8);
+            this.lblColorRange.Location = new System.Drawing.Point(835, 8);
             this.lblColorRange.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblColorRange.Name = "lblColorRange";
-            this.lblColorRange.Size = new System.Drawing.Size(191, 36);
+            this.lblColorRange.Size = new System.Drawing.Size(126, 36);
             this.lblColorRange.TabIndex = 254;
-            this.lblColorRange.Text = "Color range";
+            this.lblColorRange.Text = "Presets";
             this.lblColorRange.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lbColorRanges
             // 
-            this.lbColorRanges.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbColorRanges.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbColorRanges.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbColorRanges.FormattingEnabled = true;
-            this.lbColorRanges.ItemHeight = 36;
+            this.lbColorRanges.ItemHeight = 46;
             this.lbColorRanges.Items.AddRange(new object[] {
             "Red",
             "Green",
             "Blue"});
-            this.lbColorRanges.Location = new System.Drawing.Point(841, 8);
+            this.lbColorRanges.Location = new System.Drawing.Point(841, 59);
             this.lbColorRanges.Name = "lbColorRanges";
-            this.lbColorRanges.Size = new System.Drawing.Size(323, 112);
+            this.lbColorRanges.Size = new System.Drawing.Size(323, 280);
             this.lbColorRanges.TabIndex = 255;
             this.lbColorRanges.SelectedIndexChanged += new System.EventHandler(this.lbColorRanges_SelectedIndexChanged);
             // 
             // lbColors
             // 
-            this.lbColors.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbColors.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbColors.GridLines = true;
             this.lbColors.HideSelection = false;
-            this.lbColors.Location = new System.Drawing.Point(19, 105);
+            this.lbColors.Location = new System.Drawing.Point(19, 57);
             this.lbColors.MultiSelect = false;
             this.lbColors.Name = "lbColors";
-            this.lbColors.Size = new System.Drawing.Size(795, 609);
+            this.lbColors.Size = new System.Drawing.Size(795, 531);
             this.lbColors.TabIndex = 256;
-            this.lbColors.TileSize = new System.Drawing.Size(80, 80);
+            this.lbColors.TileSize = new System.Drawing.Size(100, 100);
             this.lbColors.UseCompatibleStateImageBehavior = false;
             this.lbColors.View = System.Windows.Forms.View.Tile;
             this.lbColors.SelectedIndexChanged += new System.EventHandler(this.lbColors_SelectedIndexChanged);
@@ -105,7 +105,7 @@ namespace AgOpenGPS.Forms.Settings
             this.bntOK.Font = new System.Drawing.Font("Tahoma", 14.25F);
             this.bntOK.Image = global::AgOpenGPS.Properties.Resources.OK64;
             this.bntOK.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.bntOK.Location = new System.Drawing.Point(1082, 633);
+            this.bntOK.Location = new System.Drawing.Point(1082, 503);
             this.bntOK.Margin = new System.Windows.Forms.Padding(4);
             this.bntOK.Name = "bntOK";
             this.bntOK.Size = new System.Drawing.Size(82, 81);
@@ -119,7 +119,7 @@ namespace AgOpenGPS.Forms.Settings
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.ClientSize = new System.Drawing.Size(1176, 738);
+            this.ClientSize = new System.Drawing.Size(1176, 602);
             this.Controls.Add(this.bntOK);
             this.Controls.Add(this.lbColors);
             this.Controls.Add(this.lbColorRanges);

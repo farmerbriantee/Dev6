@@ -976,7 +976,7 @@
             this.btnShapeClassification.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.btnShapeClassification.FlatAppearance.BorderSize = 0;
             this.btnShapeClassification.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnShapeClassification.Image = global::AgOpenGPS.Properties.Resources.BrightnessUp;
+            this.btnShapeClassification.Image = global::AgOpenGPS.Properties.Resources.ConS_Respnse;
             this.btnShapeClassification.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.btnShapeClassification.Location = new System.Drawing.Point(9, 497);
             this.btnShapeClassification.Margin = new System.Windows.Forms.Padding(5);

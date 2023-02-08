@@ -20,7 +20,6 @@ namespace AgOpenGPS.Forms.Settings
             mf = callingForm as FormGPS;
             InitializeComponent();
         }
-
         public int MapColor(double r)
         {
             if (r == 0)
@@ -34,13 +33,6 @@ namespace AgOpenGPS.Forms.Settings
             double scale = mf.shape.scaleLower / r;
             return (int)((scaleRange * scale) + scaleMin);
         }
-
-
-        private void bntOK_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
         void SetColors()
         {
             lbColors.Items.Clear();
@@ -49,21 +41,21 @@ namespace AgOpenGPS.Forms.Settings
                 return;
             }
             string colorRanges = lbColorRanges.SelectedItem.ToString();
-            int a = 50;
+            int alpha = 50;
             Hashtable h = new Hashtable();
-            Color bc = Color.FromArgb(255, 0, 0, 0); // meh
+            Color bc = Color.FromArgb(255, 0, 0, 0);
             foreach (var key in mf.shape.dbfUniqueRates)
             {
                 switch (colorRanges)
                 {
                     case "Red":
-                        bc = Color.FromArgb(a, MapColor(key.Key), 0, 0);
+                        bc = Color.FromArgb(alpha, MapColor(key.Key), 0, 0);
                         break;
                     case "Green":
-                        bc = Color.FromArgb(a, 0, MapColor(key.Key), 0);
+                        bc = Color.FromArgb(alpha, 0, MapColor(key.Key), 0);
                         break;
                     case "Blue":
-                        bc = Color.FromArgb(a, 0, 0, MapColor(key.Key));
+                        bc = Color.FromArgb(alpha, 0, 0, MapColor(key.Key));
                         break;
                 }
                 h[key.Key] = bc;
@@ -93,19 +85,36 @@ namespace AgOpenGPS.Forms.Settings
                 SetColors();
             }
         }
-
         private void lbColors_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lbColors.SelectedItems.Count > 0)
             {
-                MessageBox.Show(lbColors.SelectedItems[0].Text + lbColors.Items[lbColors.SelectedIndices[0]].BackColor);
+                ColorDialog dlg = new ColorDialog();
+                if (dlg.ShowDialog() == DialogResult.OK) {
+                    foreach (ListViewItem item in lbColors.Items)
+                    {
+                        if (item.Text == lbColors.SelectedItems[0].Text)
+                            item.BackColor = dlg.Color;
+                    }
+                    foreach (RatePolyline r in mf.bnd.Rate)
+                    {
+                        if (r.rate == Double.Parse(lbColors.SelectedItems[0].Text))
+                            r.color = dlg.Color;
+                    }
+                };
             }
         }
         private void FormShapeClassification_Load(object sender, EventArgs e)
         {
             lbColorRanges.SelectedIndex = 0;
-            SetColors();
+            Left = mf.Left + 100;
+            Top = mf.Top + 100;
         }
+        private void bntOK_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
     }
 }
 
