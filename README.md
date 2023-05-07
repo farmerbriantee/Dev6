@@ -1,9 +1,5 @@
+*Development for V6.00
 
-# AgOpenGPS  ****  Guidance software
-
-Most stable release here: https://github.com/farmerbriantee/AgOpenGPS/releases
-
-Discussed in detail: https://discourse.agopengps.com/
 
 *** Important ****
 
